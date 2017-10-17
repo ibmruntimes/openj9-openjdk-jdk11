@@ -4,7 +4,9 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -21,21 +23,32 @@
  * questions.
  */
 
-import p.Tests.*;
+/*
+ * @test
+ * @bug 8169345
+ * @summary javac crash when local from enclosing context is captured multiple times
+ * @compile T8169345c.java
+ */
 
-module test {
-    uses S1;
-    uses S2;
-    uses S3;
-    uses S4;
-    uses S5;
-    uses S6;
-    provides S1 with P1;
-    provides S2 with P2;
-    provides S3 with P3;
-    provides S4 with P4;
-    provides S5 with P5;
-    provides S6 with P6;
-    requires testng;
-    exports p to testng;
+class T8169345c {
+    void test() {
+        final int b;
+        b = 10;
+        class Local1 {
+            public String toString() {
+                return "" + b;
+            }
+        }
+        class Local2 {
+            void test() {
+                final int b;
+                b = 20;
+                class DeepLocal extends Local1 {
+                    public String toString() {
+                        return "" + b;
+                    }
+                }
+            }
+        }
+    }
 }
