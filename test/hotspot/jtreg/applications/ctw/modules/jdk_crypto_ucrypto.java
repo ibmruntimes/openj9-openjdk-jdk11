@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,20 +21,18 @@
  * questions.
  */
 
-#ifndef _JAVASOFT_JNI_MD_H_
-#define _JAVASOFT_JNI_MD_H_
-
-#define JNIEXPORT     __attribute__((visibility("default")))
-#define JNIIMPORT     __attribute__((visibility("default")))
-#define JNICALL
-
-typedef int jint;
-#ifdef _LP64 /* 64-bit */
-typedef long jlong;
-#else
-typedef long long jlong;
-#endif
-
-typedef signed char jbyte;
-
-#endif /* !_JAVASOFT_JNI_MD_H_ */
+/*
+ * @test
+ * @summary run CTW for all classes from jdk.crypto.ucrypto module
+ *
+ * @library /test/lib / /testlibrary/ctw/src
+ * @modules java.base/jdk.internal.jimage
+ *          java.base/jdk.internal.misc
+ *          java.base/jdk.internal.reflect
+ * @modules jdk.crypto.ucrypto
+ *
+ * @build sun.hotspot.WhiteBox
+ * @run driver ClassFileInstaller sun.hotspot.WhiteBox
+ *                                sun.hotspot.WhiteBox$WhiteBoxPermission
+ * @run main/timeout=7200 sun.hotspot.tools.ctw.CtwRunner modules:jdk.crypto.ucrypto
+ */
