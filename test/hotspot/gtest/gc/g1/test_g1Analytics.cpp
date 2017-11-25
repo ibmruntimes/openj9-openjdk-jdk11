@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -19,25 +19,17 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- */
-
-/**
- * @test
- * @bug 8044538
- * @summary assert hit while printing relocations for jump table entries
  *
- * @run main/othervm -XX:+IgnoreUnrecognizedVMOptions -Xcomp -XX:CompileCommand=compileonly,java.lang.String*::* -XX:+PrintRelocations
- *                   compiler.relocations.TestPrintRelocations
- */
-/**
- * The test compiles all methods (-Xcomp) and prints their relocation
- * entries (-XX:+PrintRelocations) to make sure the printing works.
  */
 
-package compiler.relocations;
+#include "precompiled.hpp"
+#include "gc/g1/g1Predictions.hpp"
+#include "gc/g1/g1Analytics.hpp"
+#include "unittest.hpp"
 
-public class TestPrintRelocations {
-
-    static public void main(String[] args) {
-    }
+TEST_VM(G1Analytics, is_initialized) {
+  G1Predictions p(0.888888); // the actual sigma value doesn't matter
+  G1Analytics a(&p);
+  ASSERT_EQ(a.recent_avg_pause_time_ratio(), 0.0);
+  ASSERT_EQ(a.last_pause_time_ratio(), 0.0);
 }
