@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,22 +22,19 @@
  *
  */
 
-/*
- * @test
- * @summary Load classes from CDS archive into a single custom loader using parallel threads (finger print)
- * (NOTE: AppCDS does not support uncompressed oops)
- * @requires (vm.opt.UseCompressedOops == null) | (vm.opt.UseCompressedOops == true)
- * @requires vm.cds.custom.loaders
- * @library /test/lib /test/hotspot/jtreg/runtime/appcds
- * @modules java.base/jdk.internal.misc
- *          java.management
- *          jdk.jartool/sun.tools.jar
- * @compile ../test-classes/ParallelLoad.java ../test-classes/ParallelClasses.java
- * @run main ParallelTestSingleFP
- */
+import java.io.IOException;
 
-public class ParallelTestSingleFP extends ParallelTestBase {
-    public static void main(String[] args) throws Exception {
-        ParallelTestBase.run(args, SINGLE_CUSTOM_LOADER, FINGERPRINT_MODE);
+/*
+ * @test TestGCBasherWithAllocateHeapAt
+ * @key gc
+ * @key stress
+ * @requires vm.gc.G1
+ * @requires vm.flavor == "server" & !vm.emulatedClient
+ * @summary Stress Java heap allocation with AllocateHeapAt flag using GC basher.
+ * @run main/othervm/timeout=500 -Xlog:gc*=info -Xmx256m -server -XX:+UseG1GC -XX:AllocateHeapAt=. TestGCBasherWithAllocateHeapAt 120000
+ */
+public class TestGCBasherWithAllocateHeapAt {
+    public static void main(String[] args) throws IOException {
+        TestGCBasher.main(args);
     }
 }
