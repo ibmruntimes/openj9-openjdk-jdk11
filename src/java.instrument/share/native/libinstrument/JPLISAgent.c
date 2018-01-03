@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2003, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 2003, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -637,16 +643,6 @@ setLivePhaseEventHandlers(  JPLISAgent * agent) {
     check_phase_ret_false(jvmtierror);
     jplis_assert(jvmtierror == JVMTI_ERROR_NONE);
 
-
-    if ( jvmtierror == JVMTI_ERROR_NONE ) {
-        /* turn off VMInit */
-        jvmtierror = (*jvmtienv)->SetEventNotificationMode(
-                                                    jvmtienv,
-                                                    JVMTI_DISABLE,
-                                                    JVMTI_EVENT_VM_INIT,
-                                                    NULL /* all threads */);
-        check_phase_ret_false(jvmtierror);
-        jplis_assert(jvmtierror == JVMTI_ERROR_NONE);
     }
 
     return (jvmtierror == JVMTI_ERROR_NONE);
@@ -1189,6 +1185,10 @@ retransformClasses(JNIEnv * jnienv, JPLISAgent * agent, jobjectArray classes) {
     if (classArray != NULL) {
         deallocate(retransformerEnv, (void*)classArray);
     }
+
+    /* Return back if we executed the JVMTI API in a wrong phase
+     */
+    check_phase_ret(errorCode);
 
     /* Return back if we executed the JVMTI API in a wrong phase
      */

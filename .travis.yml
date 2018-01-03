@@ -1,0 +1,6 @@
+script:
+  # Call the build_ibmsdk jenkins job
+  - IFS='/' read -a myarray <<< "${TRAVIS_PULL_REQUEST_SLUG}"
+  - echo "${myarray[0]}"
+  - echo "${myarray[1]}"
+  - curl -X POST "https://hyc-rt-openjdk-jenkins.swg-devops.com/job/build_ibmsdk/buildWithParameters?token=ab08aeae8ad3f6ec828b42afbc6b484c&PLATFORM=linux-x64&GIT_ORG=github.ibm.com:${myarray[0]}&GIT_REPO=IBMSDK-java-test&GIT_BRANCH=ibm_current&PULL_REQUEST=1"

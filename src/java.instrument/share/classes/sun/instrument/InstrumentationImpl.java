@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2003, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 2003, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -367,6 +373,9 @@ public class InstrumentationImpl implements Instrumentation {
 
     private native boolean
     isRetransformClassesSupported0(long nativeAgent);
+
+    private native void
+    setHasTransformers(long nativeAgent, boolean has);
 
     private native void
     setHasTransformers(long nativeAgent, boolean has);

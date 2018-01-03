@@ -1,4 +1,6 @@
 #
+# (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
+#
 # Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -38,11 +40,11 @@ $(eval $(call IncludeCustomExtension, CompileJavaModules.gmk))
 ################################################################################
 # Module specific build settings
 
-java.activation_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+java.activation_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 
 ################################################################################
 
-java.base_ADD_JAVAC_FLAGS += -Xdoclint:all/protected,-reference '-Xdoclint/package:java.*,javax.*' -XDstringConcat=inline
+java.base_ADD_JAVAC_FLAGS += -XDstringConcat=inline 
 java.base_COPY += .icu .dat .spp content-types.properties hijrah-config-islamic-umalqura.properties
 java.base_CLEAN += intrinsic.properties
 
@@ -244,7 +246,7 @@ java.logging_ADD_JAVAC_FLAGS += -Xdoclint:all/protected,-reference '-Xdoclint/pa
 
 ################################################################################
 
-java.management_ADD_JAVAC_FLAGS += -Xdoclint:all/protected,-reference '-Xdoclint/package:java.*,javax.*'
+java.management_ADD_JAVAC_FLAGS += #-Xdoclint:all/protected,-reference '-Xdoclint/package:java.*,javax.*'
 
 ################################################################################
 
@@ -261,7 +263,7 @@ java.transaction_ADD_JAVAC_FLAGS += -Xdoclint:all/protected '-Xdoclint/package:j
 ################################################################################
 
 java.sql_ADD_JAVAC_FLAGS += -Xdoclint:all/protected '-Xdoclint/package:java.*,javax.*'
-java.sql_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+java.sql_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 
 ################################################################################
 
@@ -279,7 +281,7 @@ java.rmi_CLEAN_FILES += $(wildcard \
 
 ################################################################################
 
-java.corba_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+java.corba_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 
 java.corba_COPY += .prp
 java.corba_CLEAN += .properties
@@ -307,17 +309,17 @@ java.xml_CLEAN += .properties
 
 ################################################################################
 
-java.xml.bind_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+java.xml.bind_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 java.xml.bind_CLEAN += .properties
 
 ################################################################################
 
-java.xml.soap_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+java.xml.soap_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 java.xml.soap_CLEAN += .properties
 
 ################################################################################
 
-java.xml.ws_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+java.xml.ws_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 java.xml.ws_COPY += .xml
 java.xml.ws_CLEAN += .properties
 
@@ -399,7 +401,7 @@ jdk.scripting.nashorn.shell_COPY += .js .properties
 
 ################################################################################
 
-jdk.rmic_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+jdk.rmic_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 jdk.rmic_CLEAN += .properties
 
 ################################################################################
@@ -553,13 +555,13 @@ jdk.aot_ADD_JAVAC_FLAGS += -parameters -XDstringConcat=inline \
 
 ################################################################################
 
-jdk.xml.bind_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+jdk.xml.bind_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 jdk.xml.bind_CLEAN += .properties
 jdk.xml.bind_COPY += .xsd JAXBContextFactory.java ZeroOneBooleanAdapter.java
 
 ################################################################################
 
-jdk.xml.ws_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
+jdk.xml.ws_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
 jdk.xml.ws_CLEAN += .properties
 
 ################################################################################
@@ -677,6 +679,7 @@ endif
 ################################################################################
 # If this is an imported module, copy the pre built classes and resources into
 # the modules output dir
+
 
 ifneq ($(wildcard $(IMPORT_MODULES_CLASSES)/$(MODULE)), )
   $(JDK_OUTPUTDIR)/modules/$(MODULE)/_imported.marker: \

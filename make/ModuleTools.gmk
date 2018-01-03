@@ -28,7 +28,7 @@ _MODULE_TOOLS_GMK := 1
 
 include JavaCompilation.gmk
 
-TOOLS_CLASSES_DIR := $(BUILDTOOLS_OUTPUTDIR)/tools_jigsaw_classes
+TOOLS_CLASSES_DIR := $(BUILDTOOLS_OUTPUTDIR)/tools_jigsaw_classes/
 
 # To avoid reevaluating the compilation setup for the tools each time this file
 # is included, the actual compilation is handled by CompileModuleTools.gmk. The
@@ -45,7 +45,7 @@ TOOL_MODULESUMMARY := $(BUILD_JAVA) -esa -ea -cp $(TOOLS_CLASSES_DIR) \
     build.tools.jigsaw.ModuleSummary
 
 TOOL_ADD_PACKAGES_ATTRIBUTE := $(BUILD_JAVA) $(JAVA_FLAGS_SMALL) \
-    -cp $(TOOLS_CLASSES_DIR) \
+    -cp $(TOOLS_CLASSES_DIR)/ \
     --add-exports java.base/jdk.internal.module=ALL-UNNAMED \
     build.tools.jigsaw.AddPackagesAttribute
 

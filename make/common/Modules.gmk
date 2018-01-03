@@ -1,4 +1,6 @@
 #
+# (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
+#
 # Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -254,7 +256,10 @@ FindAllModuleInfos = \
     $(sort $(wildcard \
         $(foreach sub, $(SRC_SUBDIRS), \
           $(patsubst %,%/$(strip $1)/$(sub)/module-info.java, $(TOP_SRC_DIRS))) \
-        $(patsubst %,%/$(strip $1)/module-info.java, $(IMPORT_MODULES_SRC))))
+        $(patsubst %,%/$(strip $1)/module-info.java, $(IMPORT_MODULES_SRC)))) \
+    $(wildcard \
+        $(foreach sub, $(SRC_SUBDIRS), \
+          $(patsubst %,%/$(strip $1)/$(sub)/module-info.java.extra, $(TOP_SRC_DIRS))))
 
 # Find module-info.java files in the specific source dir
 # Param 1 - Src dir to find module-info.java files in
@@ -319,37 +324,45 @@ MODULE_DEPS_MAKEFILE := $(MAKESUPPORT_OUTPUTDIR)/module-deps.gmk
 
 MODULE_INFOS := $(call FindAllModuleInfos, *)
 
+ifeq ($(TOOLCHAIN_TYPE),microsoft)
+  CPP_FLAGS_DEPS := -EP -nologo
+else ifeq ($(TOOLCHAIN_TYPE), xlc)
+  CPP_FLAGS_DEPS := -E
+else
+  CPP_FLAGS_DEPS := -P - <
+endif
+
 $(MODULE_DEPS_MAKEFILE): $(MODULE_INFOS) \
     $(call DependOnVariable, MODULE_INFOS, $(MAKESUPPORT_OUTPUTDIR)/MODULE_INFOS.vardeps)
 	$(MKDIR) -p $(@D)
 	$(RM) $@
 	$(foreach m, $(MODULE_INFOS), \
-	    ( $(PRINTF) "DEPS_$(call GetModuleNameFromModuleInfo, $m) :=" && \
-	      $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\
-	          BEGIN      { if (MODULE != "java.base") printf(" java.base"); } \
-	          /^ *requires/ { sub(/;/, ""); \
-	                          sub(/requires /, " "); \
-	                          sub(/ static /, " "); \
-	                          sub(/ transitive /, " "); \
-	                          sub(/\/\/.*/, ""); \
-	                          sub(/\/\*.*\*\//, ""); \
-	                          gsub(/^ +\*.*/, ""); \
-	                          gsub(/ /, ""); \
-	                          printf(" %s", $$0) } \
-	          END           { printf("\n") }' $m && \
-	      $(PRINTF) "TRANSITIVE_MODULES_$(call GetModuleNameFromModuleInfo, $m) :=" && \
-	      $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\
-	          BEGIN      { if (MODULE != "java.base") printf(" java.base"); } \
-	          /^ *requires  *transitive/ { \
-	                          sub(/;/, ""); \
-	                          sub(/requires/, ""); \
-	                          sub(/transitive/, ""); \
-	                          sub(/\/\/.*/, ""); \
-	                          sub(/\/\*.*\*\//, ""); \
-	                          gsub(/^ +\*.*/, ""); \
-	                          gsub(/ /, ""); \
-	                          printf(" %s", $$0) } \
-	          END           { printf("\n") }' $m \
+		( $(CPP) $(CPP_FLAGS_DEPS) $m | $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\ 
+	        	BEGIN        { printf("DEPS_%s +=", MODULE); \  
+					if (MODULE != "java.base") printf(" java.base"); } \	
+			/./          { gsub(/\r/, ""); } \
+			/\t/         { gsub(/\t/, " "); } \
+			/  +/        { gsub(/  +/, " "); } \
+			/^ /         { sub(/^ /, ""); } \
+			/^requires / { sub(/requires /, " "); \
+					sub(/ transitive /, " "); \
+					sub(/;/, ""); \
+					gsub(/ /, ""); \
+		                       	printf(" %s", $$0) } \
+			END          { printf("\n") }' && \
+		$(CPP) $(CPP_FLAGS_DEPS) $m | $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\
+			BEGIN        { printf("TRANSITIVE_MODULES_%s +=", MODULE); \
+					if (MODULE != "java.base") printf(" java.base"); } \
+			/./          { gsub(/\r/, ""); } \
+			/\t/         { gsub(/\t/, " "); } \
+			/  +/        { gsub(/  +/, " "); } \
+			/^ /         { sub(/^ /, ""); } \
+			/^requires transitive / { \
+					sub(/requires /, " "); \
+					sub(/ transitive /, " "); \
+					sub(/;/, ""); \
+					gsub(/ /, ""); \
+					printf(" %s", $$0) } \
 	    ) >> $@ $(NEWLINE))
 
 -include $(MODULE_DEPS_MAKEFILE)

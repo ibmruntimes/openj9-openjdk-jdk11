@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2000, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -31,7 +37,6 @@ import java.io.FileDescriptor;
 import jdk.internal.misc.VM;
 import jdk.internal.ref.Cleaner;
 import sun.nio.ch.DirectBuffer;
-
 
 class Direct$Type$Buffer$RW$$BO$
 #if[rw]
@@ -85,7 +90,7 @@ class Direct$Type$Buffer$RW$$BO$
                 // Paranoia
                 return;
             }
-            UNSAFE.freeMemory(address);
+            UNSAFE.freeDBMemory(address);
             address = 0;
             Bits.unreserveMemory(size, capacity);
         }
@@ -118,7 +123,7 @@ class Direct$Type$Buffer$RW$$BO$
 
         long base = 0;
         try {
-            base = UNSAFE.allocateMemory(size);
+            base = UNSAFE.DBallocateMemory(size);
         } catch (OutOfMemoryError x) {
             Bits.unreserveMemory(size, cap);
             throw x;
@@ -312,7 +317,8 @@ class Direct$Type$Buffer$RW$$BO$
     public $Type$Buffer put($type$ x) {
 #if[rw]
         UNSAFE.put$Swaptype$(ix(nextPutIndex()), $swap$($toBits$(x)));
-        return this;
+        Bits.keepAlive(this);
+	return this;
 #else[rw]
         throw new ReadOnlyBufferException();
 #end[rw]
@@ -321,7 +327,8 @@ class Direct$Type$Buffer$RW$$BO$
     public $Type$Buffer put(int i, $type$ x) {
 #if[rw]
         UNSAFE.put$Swaptype$(ix(checkIndex(i)), $swap$($toBits$(x)));
-        return this;
+        Bits.keepAlive(this);
+	return this;
 #else[rw]
         throw new ReadOnlyBufferException();
 #end[rw]
@@ -347,6 +354,7 @@ class Direct$Type$Buffer$RW$$BO$
             if (srem > rem)
                 throw new BufferOverflowException();
             UNSAFE.copyMemory(sb.ix(spos), ix(pos), (long)srem << $LG_BYTES_PER_VALUE$);
+	    Bits.keepAlive(this);	
             sb.position(spos + srem);
             position(pos + srem);
         } else if (src.hb != null) {
@@ -413,7 +421,8 @@ class Direct$Type$Buffer$RW$$BO$
         int rem = (pos <= lim ? lim - pos : 0);
 
         UNSAFE.copyMemory(ix(pos), ix(0), (long)rem << $LG_BYTES_PER_VALUE$);
-        position(rem);
+        Bits.keepAlive(this);
+	position(rem);
         limit(capacity());
         discardMark();
         return this;
@@ -505,6 +514,7 @@ class Direct$Type$Buffer$RW$$BO$
     void _put(int i, byte b) {                  // package-private
 #if[rw]
         UNSAFE.putByte(address + i, b);
+	Bits.keepAlive(this);
 #else[rw]
         throw new ReadOnlyBufferException();
 #end[rw]

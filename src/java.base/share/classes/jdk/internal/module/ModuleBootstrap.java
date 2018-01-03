@@ -1,4 +1,10 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -56,6 +62,7 @@ import jdk.internal.misc.JavaLangAccess;
 import jdk.internal.misc.JavaLangModuleAccess;
 import jdk.internal.misc.SharedSecrets;
 import jdk.internal.perf.PerfCounter;
+import jdk.internal.loader.ClassLoaders;						//IBM-shared_classes_misc
 
 /**
  * Initializes/boots the module system.
@@ -343,6 +350,11 @@ public final class ModuleBootstrap {
         }
 
         Counters.add("jdk.module.boot.4.resolveTime", t4);
+
+        ClassLoader appLoader = ClassLoaders.appClassLoader();							//IBM-shared_classes_misc
+        ClassLoader platformLoader = ClassLoaders.platformClassLoader();				//IBM-shared_classes_misc
+        ((BuiltinClassLoader)platformLoader).initializeSharedClassesSupport();			//IBM-shared_classes_misc
+        ((BuiltinClassLoader)appLoader).initializeSharedClassesSupport();				//IBM-shared_classes_misc
 
 
         // Step 5: Map the modules in the configuration to class loaders.
