@@ -80,6 +80,7 @@ module jdk.jlink {
         jdk.tools.jlink.internal.plugins.DefaultCompressPlugin,
         jdk.tools.jlink.internal.plugins.ExcludeVMPlugin,
         jdk.tools.jlink.internal.plugins.IncludeLocalesPlugin,
-        jdk.tools.jlink.internal.plugins.ReleaseInfoPlugin,
+        jdk.tools.jlink.internal.plugins.GenerateJLIClassesPlugin,
+	jdk.tools.jlink.internal.plugins.ReleaseInfoPlugin,
         jdk.tools.jlink.internal.plugins.ClassForNamePlugin;
  }

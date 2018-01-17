@@ -103,7 +103,7 @@ public final class GenerateJLIClassesPlugin implements Plugin {
 
     @Override
     public Set<State> getState() {
-        return EnumSet.of(State.DISABLED, State.FUNCTIONAL);
+        return EnumSet.of(State.AUTO_ENABLE, State.FUNCTIONAL);
     }
 
     @Override
