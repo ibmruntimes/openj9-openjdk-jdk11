@@ -1402,7 +1402,6 @@ public class ObjectInputStream
      * @throws InvalidClassException if the filter rejects creation
      */
     private void checkArray(Class<?> arrayType, int arrayLength) throws InvalidClassException {
-        Objects.requireNonNull(arrayType);
         if (! arrayType.isArray()) {
             throw new IllegalArgumentException("not an array type");
         }
