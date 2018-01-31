@@ -35,7 +35,6 @@ package java.nio;
 
 import java.io.FileDescriptor;
 import java.lang.ref.Reference;
-
 import jdk.internal.misc.VM;
 import jdk.internal.ref.Cleaner;
 import sun.nio.ch.DirectBuffer;
