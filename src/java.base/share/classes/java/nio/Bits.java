@@ -97,10 +97,6 @@ class Bits {                            // package-private
         return (int)(size + (long)pageSize() - 1L) / pageSize();
     }
 
-    static void keepAlive(Object o) {                                      
-       // Do nothing. This is just to provide a chance for JIT to optimize.
-    }                                                                      
-
     private static boolean UNALIGNED = UNSAFE.unalignedAccess();
 
     static boolean unaligned() {
