@@ -95,17 +95,6 @@ Java_sun_instrument_InstrumentationImpl_setHasTransformers
 
 /*
  * Class:     sun_instrument_InstrumentationImpl
- * Method:    setHasTransformers
- * Signature: (Z)V
- */
-JNIEXPORT void JNICALL
-Java_sun_instrument_InstrumentationImpl_setHasTransformers
-  (JNIEnv * jnienv, jobject implThis, jlong agent, jboolean has) {
-    setHasTransformers(jnienv, (JPLISAgent*)(intptr_t)agent, has);
-}
-
-/*
- * Class:     sun_instrument_InstrumentationImpl
  * Method:    setHasRetransformableTransformers
  * Signature: (Z)V
  */

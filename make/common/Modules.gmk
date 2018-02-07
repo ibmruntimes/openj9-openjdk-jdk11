@@ -337,32 +337,35 @@ $(MODULE_DEPS_MAKEFILE): $(MODULE_INFOS) \
 	$(MKDIR) -p $(@D)
 	$(RM) $@
 	$(foreach m, $(MODULE_INFOS), \
-		( $(CPP) $(CPP_FLAGS_DEPS) $m | $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\ 
-	        	BEGIN        { printf("DEPS_%s +=", MODULE); \  
-					if (MODULE != "java.base") printf(" java.base"); } \	
-			/./          { gsub(/\r/, ""); } \
-			/\t/         { gsub(/\t/, " "); } \
-			/  +/        { gsub(/  +/, " "); } \
-			/^ /         { sub(/^ /, ""); } \
-			/^requires / { sub(/requires /, " "); \
-					sub(/ transitive /, " "); \
-					sub(/;/, ""); \
-					gsub(/ /, ""); \
-		                       	printf(" %s", $$0) } \
-			END          { printf("\n") }' && \
-		$(CPP) $(CPP_FLAGS_DEPS) $m | $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\
-			BEGIN        { printf("TRANSITIVE_MODULES_%s +=", MODULE); \
-					if (MODULE != "java.base") printf(" java.base"); } \
-			/./          { gsub(/\r/, ""); } \
-			/\t/         { gsub(/\t/, " "); } \
-			/  +/        { gsub(/  +/, " "); } \
-			/^ /         { sub(/^ /, ""); } \
-			/^requires transitive / { \
-					sub(/requires /, " "); \
-					sub(/ transitive /, " "); \
-					sub(/;/, ""); \
-					gsub(/ /, ""); \
-					printf(" %s", $$0) } \
+	 	    ( $(CPP) $(CPP_FLAGS_DEPS) $m | $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\
+		          BEGIN        { printf("DEPS_%s +=", MODULE); \
+		                         if (MODULE != "java.base") printf(" java.base"); } \
+		          /./          { gsub(/\r/, ""); } \
+		          /\t/         { gsub(/\t/, " "); } \
+		          /  +/        { gsub(/  +/, " "); } \
+		          /^ /         { sub(/^ /, ""); } \
+		          /^requires / { sub(/requires /, " "); \
+		                         sub(/ transitive /, " "); \
+	                                 sub(/static /, " "); \
+		                         sub(/;/, ""); \
+		                         gsub(/ /, ""); \
+		                         printf(" %s", $$0) } \
+		          END          { printf("\n") }' && \
+		      $(CPP) $(CPP_FLAGS_DEPS) $m | $(NAWK) -v MODULE=$(call GetModuleNameFromModuleInfo, $m) '\
+		          BEGIN        { printf("TRANSITIVE_MODULES_%s +=", MODULE); \
+		                         if (MODULE != "java.base") printf(" java.base"); } \
+		          /./          { gsub(/\r/, ""); } \
+		          /\t/         { gsub(/\t/, " "); } \
+		          /  +/        { gsub(/  +/, " "); } \
+		          /^ /         { sub(/^ /, ""); } \
+		          /^requires transitive / { \
+		                         sub(/requires /, " "); \
+		                         sub(/ transitive /, " "); \
+	                                 sub(/static /, " "); \
+		                         sub(/;/, ""); \
+		                         gsub(/ /, ""); \
+		                         printf(" %s", $$0) } \
+		          END          { printf("\n") }' \
 	    ) >> $@ $(NEWLINE))
 
 -include $(MODULE_DEPS_MAKEFILE)

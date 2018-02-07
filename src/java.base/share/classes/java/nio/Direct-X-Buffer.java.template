@@ -90,7 +90,7 @@ class Direct$Type$Buffer$RW$$BO$
                 // Paranoia
                 return;
             }
-            UNSAFE.freeDBMemory(address);
+            UNSAFE.freeDBBMemory(address);
             address = 0;
             Bits.unreserveMemory(size, capacity);
         }
@@ -123,7 +123,7 @@ class Direct$Type$Buffer$RW$$BO$
 
         long base = 0;
         try {
-            base = UNSAFE.DBallocateMemory(size);
+            base = UNSAFE.allocateDBBMemory(size);
         } catch (OutOfMemoryError x) {
             Bits.unreserveMemory(size, cap);
             throw x;

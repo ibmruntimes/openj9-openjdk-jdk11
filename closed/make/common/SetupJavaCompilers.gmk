@@ -17,13 +17,6 @@
 # 
 # ===========================================================================
 
-TARGETS += \
-	$(INCLUDE_TARGET_DIR)/jvmti.h \
-	$(INCLUDE_TARGET_DIR)/ibmjvmti.h \
-	#
+# OpenJ9 requires more lenient javac warnings
+JAVAC_WARNINGS := -Xlint:-removal
 
-$(INCLUDE_TARGET_DIR)/jvmti.h : $(TOPDIR)/openj9/runtime/include/jvmti.h
-	$(call install-file)
-
-$(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
-	$(call install-file)

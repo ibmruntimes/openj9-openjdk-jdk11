@@ -17,13 +17,7 @@
 # 
 # ===========================================================================
 
-TARGETS += \
-	$(INCLUDE_TARGET_DIR)/jvmti.h \
-	$(INCLUDE_TARGET_DIR)/ibmjvmti.h \
-	#
+################################################################################
+# We don't want to build openjdk Lib-java.management
+TARGETS := $(filter-out $(BUILD_LIBMANAGEMENT),$(TARGETS))
 
-$(INCLUDE_TARGET_DIR)/jvmti.h : $(TOPDIR)/openj9/runtime/include/jvmti.h
-	$(call install-file)
-
-$(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
-	$(call install-file)

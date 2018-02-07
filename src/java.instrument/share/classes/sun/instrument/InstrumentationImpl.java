@@ -378,9 +378,6 @@ public class InstrumentationImpl implements Instrumentation {
     setHasTransformers(long nativeAgent, boolean has);
 
     private native void
-    setHasTransformers(long nativeAgent, boolean has);
-
-    private native void
     setHasRetransformableTransformers(long nativeAgent, boolean has);
 
     private native void

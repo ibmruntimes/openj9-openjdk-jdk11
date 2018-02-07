@@ -643,7 +643,6 @@ setLivePhaseEventHandlers(  JPLISAgent * agent) {
     check_phase_ret_false(jvmtierror);
     jplis_assert(jvmtierror == JVMTI_ERROR_NONE);
 
-    }
 
     return (jvmtierror == JVMTI_ERROR_NONE);
 }

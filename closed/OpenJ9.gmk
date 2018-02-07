@@ -224,7 +224,7 @@ $(OUTPUTDIR)/vm/util/openj9_version_info.h : \
 	$(foreach var,$(OPENJ9_VERSION_VARS),$(call DependOnVariable, $(var)))
 
 # Only update version files when the SHAs change.
-$(OUTPUTDIR)/vm/tr.source/jit.version : $(call DependOnVariable, OPENJ9_SHA)
+$(OUTPUTDIR)/vm/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
 	@$(MKDIR) -p $(@D)
 	$(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
 
@@ -234,7 +234,7 @@ $(OUTPUTDIR)/vm/omr/OMR_VERSION_STRING : $(call DependOnVariable, OPENJ9OMR_SHA)
 
 run-preprocessors-j9 : stage-j9 \
 		$(OUTPUTDIR)/vm/omr/OMR_VERSION_STRING \
-		$(OUTPUTDIR)/vm/tr.source/jit.version \
+		$(OUTPUTDIR)/vm/compiler/jit.version \
 		$(OUTPUTDIR)/vm/util/openj9_version_info.h
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	(export BOOT_JDK=$(BOOT_JDK) \
