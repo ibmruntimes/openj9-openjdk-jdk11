@@ -73,9 +73,11 @@ else
   OMR_EXTRA_CONFIGURE_ARGS := "--enable-warnings-as-errors OMR_TREAT_WARNINGS_AS_ERRORS=1"
 endif
 
-# disable mingw on windows, use default c compiler
 ifeq ($(OPENJDK_TARGET_OS),windows)
-  EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
+  # On Windows, the mingw compiler is used for certain files such as 
+  # the bytecode interpreter.
+  # Uncomment the following line to use the default compiler throughout.
+  # EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
 else
   EXPORT_NO_USE_MINGW :=
 endif
