@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,42 +21,40 @@
  * questions.
  */
 
-/**
- * @test GuardShrinkWarning
- * @key gc regression
- * @summary Remove warning about CMS generation shrinking.
- * @bug 8012111
+ /*
+ * @test
+ * @bug 8193184
+ * @key nmt
+ * @summary Check class counters in summary report
  * @library /test/lib
  * @modules java.base/jdk.internal.misc
  *          java.management
- * @run main/othervm GuardShrinkWarning
- * @author jon.masamitsu@oracle.com
+ * @run main/othervm -Xbootclasspath/a:. -XX:NativeMemoryTracking=summary JcmdSummaryClass
  */
 
-import jdk.test.lib.process.OutputAnalyzer;
 import jdk.test.lib.process.ProcessTools;
+import jdk.test.lib.process.OutputAnalyzer;
+import jdk.test.lib.JDKToolFinder;
 
-public class GuardShrinkWarning {
-  public static void main(String args[]) throws Exception {
 
-    ProcessBuilder pb = ProcessTools.createJavaProcessBuilder(
-      "-showversion",
-      "-XX:+UseConcMarkSweepGC",
-      "-XX:+ExplicitGCInvokesConcurrent",
-      "GuardShrinkWarning$SystemGCCaller"
-      );
+import java.util.regex.*;
 
-    OutputAnalyzer output = new OutputAnalyzer(pb.start());
+public class JcmdSummaryClass {
 
-    output.shouldNotContain("Shrinking of CMS not yet implemented");
+    public static void main(String args[]) throws Exception {
+        ProcessBuilder pb = new ProcessBuilder();
+        OutputAnalyzer output;
+        // Grab my own PID
+        String pid = Long.toString(ProcessTools.getProcessId());
 
-    output.shouldNotContain("error");
+        // Run 'jcmd <pid> VM.native_memory baseline=true'
+        pb.command(new String[] { JDKToolFinder.getJDKTool("jcmd"), pid, "VM.native_memory"});
+        pb.start().waitFor();
 
-    output.shouldHaveExitValue(0);
-  }
-  static class SystemGCCaller {
-    public static void main(String [] args) {
-      System.gc();
+        String classes_line = "classes #\\d+";
+        String instance_array_classes_line = "instance classes #\\d+, array classes #\\d+";
+        output = new OutputAnalyzer(pb.start());
+        output.shouldMatch(classes_line);
+        output.shouldMatch(instance_array_classes_line);
     }
-  }
 }
