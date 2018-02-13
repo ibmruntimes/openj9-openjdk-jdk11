@@ -296,7 +296,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 		com.ibm.jpp.commandline.CommandlineBuilder \
 			-verdict \
 			-baseDir "$(JPP_BASE_DIR)/" \
-			-config JAVA10 \
+			-config JAVA11 \
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
 			-dest "$(JPP_DEST)" \
