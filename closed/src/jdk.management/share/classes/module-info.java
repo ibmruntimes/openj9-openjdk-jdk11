@@ -1,5 +1,11 @@
 /*
- * Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2015, 2018 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
+ * Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,24 +30,14 @@
  */
 
 /**
- * Defines the attach API.
- *
- * @uses com.sun.tools.attach.spi.AttachProvider
+ * Defines JDK-specific management interfaces for the JVM.
  *
  * @moduleGraph
  * @since 9
  */
-module jdk.attach {
-    requires jdk.internal.jvmstat;
+module jdk.management {
+    requires transitive java.management;
 
-    exports com.sun.tools.attach;
-    exports com.sun.tools.attach.spi;
-
-    exports sun.tools.attach to
-        jdk.jcmd;
-
-    uses com.sun.tools.attach.spi.AttachProvider;
-
-    provides com.sun.tools.attach.spi.AttachProvider with
-        sun.tools.attach.AttachProviderImpl;
+    exports com.sun.management;
 }
+
