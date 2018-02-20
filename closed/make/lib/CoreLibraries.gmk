@@ -18,6 +18,6 @@
 # ===========================================================================
 
 ################################################################################
-# We don't want to build openjdk Lib-jdk.management
-TARGETS := $(filter-out $(BUILD_LIBMANAGEMENT_EXT),$(TARGETS))
+LIBJAVA_MAPFILE := $(TOPDIR)/closed/make/mapfiles/libjava/mapfile-vers
+
 

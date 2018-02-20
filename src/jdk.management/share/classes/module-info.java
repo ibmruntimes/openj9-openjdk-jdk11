@@ -1,10 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2015, 2017 All Rights Reserved
- * ===========================================================================
- */
-
-/*
  * Copyright (c) 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -39,5 +33,8 @@ module jdk.management {
     requires transitive java.management;
 
     exports com.sun.management;
+
+    provides sun.management.spi.PlatformMBeanProvider with
+        com.sun.management.internal.PlatformMBeanProviderImpl;
 }
 

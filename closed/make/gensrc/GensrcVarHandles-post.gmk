@@ -17,7 +17,5 @@
 # 
 # ===========================================================================
 
-################################################################################
-# We don't want to build openjdk Lib-jdk.management
-TARGETS := $(filter-out $(BUILD_LIBMANAGEMENT_EXT),$(TARGETS))
-
+# OpenJ9 uses it's own VarHandles implementation
+GENSRC_JAVA_BASE := $(filter-out $(GENSRC_VARHANDLES),$(GENSRC_JAVA_BASE))
