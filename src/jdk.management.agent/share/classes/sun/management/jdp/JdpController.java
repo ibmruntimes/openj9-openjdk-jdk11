@@ -40,6 +40,7 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.UnsupportedOperationException;
+import sun.management.VMManagement;
 
 /**
  * JdpController is responsible to create and manage a broadcast loop.

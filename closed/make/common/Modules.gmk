@@ -32,8 +32,8 @@ MODULES_FILTER += \
     #
 
 TOP_SRC_DIRS += \
-    $(SUPPORT_OUTPUTDIR)/j9jcl_sources \
     $(TOPDIR)/closed/src \
+    $(SUPPORT_OUTPUTDIR)/j9jcl_sources \
     #
 
 # Shortly after this makefile fragment is included, Modules.gmk computes the
