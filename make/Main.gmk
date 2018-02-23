@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011, 2017, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2011, 2018, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -56,8 +56,6 @@ $(eval $(call IncludeCustomExtension, Main.gmk))
 # All modules for the current target platform.
 ALL_MODULES := $(call FindAllModules)
 
-# If not already set, set the JVM lib target so that the JVM will be built.
-JVM_VARIANT_TARGETS ?= hotspot-$(JVM_VARIANT_MAIN)-libs
 ################################################################################
 ################################################################################
 #
@@ -126,10 +124,9 @@ ifneq ($(CREATING_BUILDJDK), true)
   LANGTOOLS_GENSRC_TARGETS := $(filter $(addsuffix -%, $(LANGTOOLS_MODULES)), $(GENSRC_TARGETS))
   INTERIM_LANGTOOLS_GENSRC_TARGETS := $(filter $(addsuffix -%, \
       $(INTERIM_LANGTOOLS_BASE_MODULES)), $(GENSRC_TARGETS))
-  CORBA_GENSRC_TARGETS := $(filter $(addsuffix -%, $(CORBA_MODULES)), $(GENSRC_TARGETS))
   HOTSPOT_GENSRC_TARGETS := $(filter $(addsuffix -%, $(HOTSPOT_MODULES)), $(GENSRC_TARGETS))
   JDK_GENSRC_TARGETS := $(filter-out $(LANGTOOLS_GENSRC_TARGETS) \
-      $(CORBA_GENSRC_TARGETS) $(HOTSPOT_GENSRC_TARGETS), $(GENSRC_TARGETS))
+      $(HOTSPOT_GENSRC_TARGETS), $(GENSRC_TARGETS))
 
   GENSRC_MODULEINFO_MODULES := $(ALL_MODULES)
   GENSRC_MODULEINFO_TARGETS := $(addsuffix -gensrc-moduleinfo, \
@@ -620,8 +617,6 @@ else
 
   buildtools-modules: exploded-image-base
 
-  $(CORBA_GENSRC_TARGETS): interim-langtools
-
   $(HOTSPOT_GENSRC_TARGETS): interim-langtools buildtools-hotspot
 
   $(JDK_GENSRC_TARGETS): interim-langtools buildtools-jdk
@@ -646,8 +641,11 @@ else
 
   generate-exported-symbols: java.base-libs jdk.jdwp.agent-libs
 
+  # If not already set, set the JVM variant target so that the JVM will be built.
+  JVM_MAIN_LIB_TARGETS ?= hotspot-$(JVM_VARIANT_MAIN)-libs
+
   # Building one JVM variant is enough to start building the other libs
-  $(LIBS_TARGETS): $(JVM_VARIANT_TARGETS)
+  $(LIBS_TARGETS): $(JVM_MAIN_LIB_TARGETS)
 
   $(LAUNCHER_TARGETS): java.base-libs
 
@@ -723,12 +721,12 @@ else
   ifneq ($(CREATING_BUILDJDK), true)
     java.base-jmod: jrtfs-jar $(filter-out java.base-jmod, $(JMOD_TARGETS))
   endif
-
-  # If not already set, set the JVM lib target so that the JVM will be built.
+    
+  # If not already set, set the JVM target so that the JVM will be built.
   JVM_MAIN_TARGETS ?= hotspot
    
   # Building java.base-jmod requires all of VM (ie hotspot) to be built.
-  java.base-jmod: $(JVM_MAIN_TARGET) 
+  java.base-jmod: $(JVM_MAIN_TARGETS) 
 
   # Declare dependencies from <module>-jmod to all other module targets
   # When creating a BUILDJDK, the java compilation has already been done by the
@@ -830,8 +828,11 @@ else
 
   docs-reference-api-modulegraph: exploded-image buildtools-modules
 
+  # If not already set, then set the JVM specific docs targets
+  JVM_DOCS_TARGETS ?= hotspot-$(JVM_VARIANT_MAIN)-gensrc
+  
   # The gensrc steps for hotspot and jdk.jdi create html spec files.
-  docs-jdk-specs: jdk.jdi-gensrc \
+  docs-jdk-specs: $(JVM_DOCS_TARGETS) jdk.jdi-gensrc \
       docs-jdk-index
 
   docs-jdk-index: exploded-image buildtools-modules
@@ -898,6 +899,7 @@ endif
 ################################################################################
 # Virtual targets without recipes
 
+# If not already set, set the JVM specific tools targets
 JVM_TOOLS_TARGETS ?= buildtools-hotspot
 buildtools: buildtools-langtools interim-langtools interim-rmic \
     buildtools-jdk $(JVM_TOOLS_TARGETS)
@@ -943,8 +945,7 @@ $(foreach m, $(LAUNCHER_MODULES), $(eval $m: $m-launchers))
 $(foreach m, $(ALL_COPY_MODULES), $(eval $m: $m-copy))
 
 # Building java.base includes building all of hotspot.
-JVM_BUILD_TARGETS ?= hotspot
-java.base: $(JVM_BUILD_TARGETS)
+java.base: $(JVM_MAIN_TARGETS)
 
 demos: demos-jdk
 
@@ -1011,7 +1012,7 @@ endif
 # This target builds the documentation image
 docs-image: docs-jdk
 
-# If not already set, set the targets to built the test image
+# If not already set, set the JVM specific targets to build the test image
 JVM_TEST_IMAGE_TARGETS ?= test-image-hotspot-jtreg-native test-image-hotspot-gtest
 
 # This target builds the test image
@@ -1108,8 +1109,6 @@ clean-support: clean-jdk
 
 clean-test: clean-test-results clean-test-support
 
-clean-test: clean-test-results clean-test-support
-
 # Remove everything, including configure configuration. If the output
 # directory was created by configure and now becomes empty, remove it as well.
 dist-clean: clean
@@ -1166,4 +1165,3 @@ $(eval $(call IncludeCustomExtension, Main-post.gmk))
 .PHONY: $(ALL_TARGETS)
 
 FRC: # Force target
-
