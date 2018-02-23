@@ -1,10 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
- * ===========================================================================
- */
-
-/*
  * Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -74,6 +68,4 @@ module java.rmi {
         jdk.jconsole;
 
     uses java.rmi.server.RMIClassLoaderSpi;
-    uses com.ibm.sharedclasses.spi.SharedClassProvider;
-    
 }
