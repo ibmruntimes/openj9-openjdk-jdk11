@@ -49,8 +49,7 @@ ifeq (,$(OPENJ9OMR_SHA))
 endif
 
 OPENJ9_ALT_SHARED_LIBRARIES := \
-  j9vm_b156/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) \
-  jcl/cl_se9/$(LIBRARY_PREFIX)jclse9_29$(SHARED_LIBRARY_SUFFIX) \
+  j9vm_jdk11/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) \
   #
 OPENJ9_SHARED_LIBRARIES := $(filter-out $(notdir $(OPENJ9_ALT_SHARED_LIBRARIES)), $(notdir $(wildcard $(OUTPUTDIR)/vm/$(LIBRARY_PREFIX)*$(SHARED_LIBRARY_SUFFIX))))
 OPENJ9_PROPERTY_FILES := $(notdir $(wildcard $(OUTPUTDIR)/vm/java*.properties))
@@ -60,7 +59,7 @@ OPENJ9_MISC_FILES := \
   options.default \
   #
 OPENJ9_NOTICE_FILES := openj9-notices.html
-OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm_b156$(SHARED_LIBRARY_SUFFIX)
+OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX)
 
 #openjdk makeflags don't work with openj9/omr native compiles; override with number of cpus which openj9 and omr need supplied
 override MAKEFLAGS := -j $(JOBS)
@@ -274,7 +273,7 @@ build-j9 : run-preprocessors-j9
 	@$(ECHO) OpenJ9 compile complete
 	# jvm and jsig are required for compiling other java.base support natives
 	@$(MKDIR) -p $(OUTPUTDIR)/support/modules_libs/java.base/server/
-	@$(CP) -p $(OUTPUTDIR)/vm/j9vm_b156/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) $(OUTPUTDIR)/support/modules_libs/java.base/server/
+	@$(CP) -p $(OUTPUTDIR)/vm/j9vm_jdk11/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) $(OUTPUTDIR)/support/modules_libs/java.base/server/
 	@$(ECHO) Creating support/modules_libs/java.base/server/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) from J9 sources
 	@$(CP) -p $(OUTPUTDIR)/vm/$(LIBRARY_PREFIX)jsig$(SHARED_LIBRARY_SUFFIX) $(OUTPUTDIR)/support/modules_libs/java.base/
 	@$(ECHO) Creating support/modules_libs/java.base/$(LIBRARY_PREFIX)jsig$(SHARED_LIBRARY_SUFFIX) from J9 sources
