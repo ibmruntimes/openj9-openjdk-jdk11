@@ -56,8 +56,6 @@ $(eval $(call IncludeCustomExtension, Main.gmk))
 # All modules for the current target platform.
 ALL_MODULES := $(call FindAllModules)
 
-# If not already set, set the JVM lib target so that the JVM will be built.
-JVM_VARIANT_TARGETS ?= hotspot-$(JVM_VARIANT_MAIN)-libs
 ################################################################################
 ################################################################################
 #
@@ -647,7 +645,7 @@ else
   JVM_MAIN_LIB_TARGETS ?= hotspot-$(JVM_VARIANT_MAIN)-libs
 
   # Building one JVM variant is enough to start building the other libs
-  $(LIBS_TARGETS): $(JVM_VARIANT_TARGETS)
+  $(LIBS_TARGETS): $(JVM_MAIN_LIB_TARGETS)
 
   $(LAUNCHER_TARGETS): java.base-libs
 
@@ -723,7 +721,7 @@ else
   ifneq ($(CREATING_BUILDJDK), true)
     java.base-jmod: jrtfs-jar $(filter-out java.base-jmod, $(JMOD_TARGETS))
   endif
-    
+
   # If not already set, set the JVM target so that the JVM will be built.
   JVM_MAIN_TARGETS ?= hotspot
    
@@ -834,7 +832,7 @@ else
   JVM_DOCS_TARGETS ?= hotspot-$(JVM_VARIANT_MAIN)-gensrc
   
   # The gensrc steps for hotspot and jdk.jdi create html spec files.
-  docs-jdk-specs: jdk.jdi-gensrc \
+  docs-jdk-specs: $(JVM_DOCS_TARGETS) jdk.jdi-gensrc \
       docs-jdk-index
 
   docs-jdk-index: exploded-image buildtools-modules
