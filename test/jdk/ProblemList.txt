@@ -464,9 +464,8 @@ tools/pack200/CommandLineTests.java                             8059906 generic-
 
 tools/launcher/FXLauncherTest.java                              8068049 linux-all,macosx-all
 
-tools/jimage/JImageExtractTest.java                             8170120 generic-all
-tools/jimage/JImageListTest.java                                8170120 generic-all
-tools/jimage/JImageVerifyTest.java                              8170120 generic-all
+tools/jimage/JImageExtractTest.java                             8198405 windows-all
+tools/jimage/JImageListTest.java                                8198405 windows-all
 
 ############################################################################
 
@@ -510,12 +509,12 @@ com/sun/jndi/ldap/DeadSSLLdapTimeoutTest.java                   8169942 linux-i5
 
 com/sun/jndi/ldap/LdapTimeoutTest.java                          8151678 linux-all
 
-javax/rmi/PortableRemoteObject/8146975/RmiIiopReturnValueTest.java 8194663 generic-all
-
-org/omg/CORBA/OrbPropertiesTest.java			        8194663 generic-all
-
-javax/rmi/PortableRemoteObject/ConcurrentHashMapTest.java       8194663 generic-all
-
 javax/rmi/ssl/SSLSocketParametersTest.sh                        8194663 generic-all
 
 ############################################################################
+
+###########################################################################
+#
+# Java EE Module Removal
+#
+com/sun/jdi/RedefineCrossEvent.java                          8194308    generic-all  Java EE Module Removal
