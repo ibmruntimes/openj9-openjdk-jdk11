@@ -27,11 +27,11 @@ CLEAN_DIRS += vm
 	java.base-libs \
 	#
 
-JVM_VARIANT_TARGETS := j9vm-build
-JVM_MAIN_TARGETS := j9vm-build j9vm-compose-buildjvm 
-JVM_BUILD_TARGETS := j9vm-build
-JVM_TOOLS_TARGETS := 
-JVM_TEST_IMAGE_TARGETS := 
+JVM_MAIN_LIB_TARGETS := j9vm-build
+JVM_MAIN_TARGETS := j9vm-build
+JVM_TOOLS_TARGETS :=
+JVM_DOCS_TARGETS :=
+JVM_TEST_IMAGE_TARGETS :=
 DEFAULT_JMOD_DEPS := j9vm-compose-buildjvm
 	
 java.base-libs : j9vm-build
