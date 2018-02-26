@@ -183,9 +183,3 @@ for i in "${!git_urls[@]}" ; do
 	fi
 done
 
-echo "################################################################"
-echo "OPENJ9 18.3 WORKAROUND: overlaying openj9overlay temp fixes...!!"
-cp -r openj9overlay/* openj9
-echo "OPENJ9 overlayed."
-echo "################################################################"
-
