@@ -1,5 +1,26 @@
 /*
- * Copyright (c) 2012, 2017, Oracle and/or its affiliates. All rights reserved.
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2012, 2018 All Rights Reserved
+ * ===========================================================================
+ * 
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+ * 
+ * ===========================================================================
+ */
+
+/*
+ * Copyright (c) 2012, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -433,10 +454,33 @@ abstract class IntPipeline<E_IN>
     }
 
     // Terminal ops from IntStream
+    private static boolean ibmTryGPU = false;
+    protected static native void promoteGPUCompile();
 
     @Override
     public void forEach(IntConsumer action) {
-        evaluate(ForEachOps.makeInt(action, false));
+    	boolean instanceOfRangeIntSpliterator = getSourceSpliterator() instanceof Streams.RangeIntSpliterator;
+    	if (instanceOfRangeIntSpliterator) {
+    		Streams.RangeIntSpliterator intRange = (Streams.RangeIntSpliterator)getSourceSpliterator();
+    		int last = intRange.upTo;
+    		if  (intRange.upTo != Integer.MAX_VALUE && intRange.last == 1){
+    			last = intRange.upTo + 1;
+    		}
+    		// ibmTryGPU will be set at runtime by the JIT via the -Xjit:enableGPU option
+    		if (ibmTryGPU) {
+    			for (int i = intRange.from; i < last; i++){
+    				action.accept(i);
+    			}
+    			if (intRange.upTo == Integer.MAX_VALUE && intRange.last == 1){
+    				action.accept(Integer.MAX_VALUE);
+    			}
+    			return;
+    		}
+    	}             
+    	evaluate(ForEachOps.makeInt(action, false));
+    	if (instanceOfRangeIntSpliterator){
+    		promoteGPUCompile();
+    	}
     }
 
     @Override
