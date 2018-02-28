@@ -24,7 +24,7 @@ else
   JVMCFG_ARCH := $(OPENJDK_TARGET_CPU_LEGACY)
 endif
 
-ALT_JVMCFG_SRC := $(TOPDIR)/closed/src/java.base/$(OPENJDK_TARGET_OS_TYPE)/conf/$(JVMCFG_ARCH)/jvm.cfg
+ALT_JVMCFG_SRC := $(TOPDIR)/closed/src/java.base/conf/jvm.cfg
 
 TARGETS += \
 	$(INCLUDE_TARGET_DIR)/jvmti.h \
