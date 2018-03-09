@@ -1,7 +1,8 @@
+# exclude build directories
+/build
+/.build
 # exclude all source directories
-/build/
-/.build/
-/omr/
-/openj9/
+/omr
+/openj9
 # exclude optional eclipse project file
 /.project
