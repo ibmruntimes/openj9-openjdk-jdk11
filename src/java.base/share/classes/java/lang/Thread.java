@@ -231,9 +231,10 @@ class Thread implements Runnable {
     /* Set the blocker field; invoked via jdk.internal.misc.SharedSecrets
      * from java.nio code
      */
-    void blockedOn(Interruptible b) {
-        synchronized (blockerLock) {
-            blocker = b;
+    static void blockedOn(Interruptible b) {
+        Thread me = Thread.currentThread();
+        synchronized (me.blockerLock) {
+            me.blocker = b;
         }
     }
 
@@ -1006,17 +1007,21 @@ class Thread implements Runnable {
      * @spec JSR-51
      */
     public void interrupt() {
-        if (this != Thread.currentThread())
+        if (this != Thread.currentThread()) {
             checkAccess();
 
-        synchronized (blockerLock) {
-            Interruptible b = blocker;
-            if (b != null) {
-                interrupt0();           // Just to set the interrupt flag
-                b.interrupt(this);
-                return;
+            // thread may be blocked in an I/O operation
+            synchronized (blockerLock) {
+                Interruptible b = blocker;
+                if (b != null) {
+                    interrupt0();  // set interrupt status
+                    b.interrupt(this);
+                    return;
+                }
             }
         }
+
+        // set interrupt status
         interrupt0();
     }
 
