@@ -226,7 +226,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @exception  SecurityException  if a security manager exists and its
      *             {@code checkCreateClassLoader} method doesn't allow
      *             creation of a class loader.
-     * @exception  NullPointerException if {@code urls} is {@code null}.
+     * @exception  NullPointerException if {@code urls} or any of its
+     *             elements is {@code null}.
      * @see SecurityManager#checkCreateClassLoader
      */
     public URLClassLoader(URL[] urls, ClassLoader parent) {
@@ -272,7 +273,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @exception  SecurityException  if a security manager exists and its
      *             {@code checkCreateClassLoader} method doesn't allow
      *             creation of a class loader.
-     * @exception  NullPointerException if {@code urls} is {@code null}.
+     * @exception  NullPointerException if {@code urls} or any of its
+     *             elements is {@code null}.
      * @see SecurityManager#checkCreateClassLoader
      */
     public URLClassLoader(URL[] urls) {
@@ -317,7 +319,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @exception  SecurityException  if a security manager exists and its
      *             {@code checkCreateClassLoader} method doesn't allow
      *             creation of a class loader.
-     * @exception  NullPointerException if {@code urls} is {@code null}.
+     * @exception  NullPointerException if {@code urls} or any of its
+     *             elements is {@code null}.
      * @see SecurityManager#checkCreateClassLoader
      */
     public URLClassLoader(URL[] urls, ClassLoader parent,
@@ -347,7 +350,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @param  parent the parent class loader for delegation
      *
      * @throws IllegalArgumentException if the given name is empty.
-     * @throws NullPointerException if {@code urls} is {@code null}.
+     * @throws NullPointerException if {@code urls} or any of its
+     *         elements is {@code null}.
      *
      * @throws SecurityException if a security manager exists and its
      *         {@link SecurityManager#checkCreateClassLoader()} method doesn't
@@ -383,7 +387,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * @param  factory the URLStreamHandlerFactory to use when creating URLs
      *
      * @throws IllegalArgumentException if the given name is empty.
-     * @throws NullPointerException if {@code urls} is {@code null}.
+     * @throws NullPointerException if {@code urls} or any of its
+     *         elements is {@code null}.
      *
      * @throws SecurityException if a security manager exists and its
      *         {@code checkCreateClassLoader} method doesn't allow
@@ -1024,7 +1029,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      *
      * @param urls the URLs to search for classes and resources
      * @param parent the parent class loader for delegation
-     * @exception  NullPointerException if {@code urls} is {@code null}.
+     * @exception  NullPointerException if {@code urls} or any of its
+     *             elements is {@code null}.
      * @return the resulting class loader
      */
     public static URLClassLoader newInstance(final URL[] urls,
@@ -1050,7 +1056,8 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      * loading the class.
      *
      * @param urls the URLs to search for classes and resources
-     * @exception  NullPointerException if {@code urls} is {@code null}.
+     * @exception  NullPointerException if {@code urls} or any of its
+     *             elements is {@code null}.
      * @return the resulting class loader
      */
     public static URLClassLoader newInstance(final URL[] urls) {

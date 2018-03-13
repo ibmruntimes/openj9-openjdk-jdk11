@@ -117,7 +117,7 @@ public class BuiltinClassLoader
     // parent ClassLoader
     private final BuiltinClassLoader parent;
 
-    // the URL class path or null if there is no class path
+    // the URL class path, or null if there is no class path
     private final URLClassPath ucp;
 
     // Private member fields used for Shared classes                          		//IBM-shared_classes_misc
