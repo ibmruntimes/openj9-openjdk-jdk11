@@ -174,9 +174,15 @@ public abstract class MappedByteBuffer
         int count = Bits.pageCount(length);
         long a = mappingAddress(offset);
         byte x = 0;
-        for (int i=0; i<count; i++) {
-            x ^= unsafe.getByte(a);
-            a += ps;
+        try {
+            for (int i=0; i<count; i++) {
+                // TODO consider changing to getByteOpaque thus avoiding
+                // dead code elimination and the need to calculate a checksum
+                x ^= unsafe.getByte(a);
+                a += ps;
+            }
+        } finally {
+            Reference.reachabilityFence(this);
         }
         if (unused != 0)
             unused = x;

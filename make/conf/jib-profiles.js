@@ -232,7 +232,8 @@ var getJibProfilesCommon = function (input, data) {
     common.main_profile_names = [
         "linux-x64", "linux-x86", "macosx-x64", "solaris-x64",
         "solaris-sparcv9", "windows-x64", "windows-x86",
-        "linux-arm64", "linux-arm-vfp-hflt", "linux-arm-vfp-hflt-dyn"
+        "linux-aarch64", "linux-arm64", "linux-arm-vfp-hflt",
+        "linux-arm-vfp-hflt-dyn"
     ];
 
     // These are the base setttings for all the main build profiles.
@@ -429,7 +430,7 @@ var getJibProfilesProfiles = function (input, common, data) {
         "macosx-x64": {
             target_os: "macosx",
             target_cpu: "x64",
-            dependencies: ["devkit", "autoconf", "freetype"],
+            dependencies: ["devkit", "autoconf"],
             configure_args: concat(common.configure_args_64bit, "--with-zlib=system",
                 "--with-macosx-version-max=10.7.0"),
         },
@@ -453,7 +454,7 @@ var getJibProfilesProfiles = function (input, common, data) {
         "windows-x64": {
             target_os: "windows",
             target_cpu: "x64",
-            dependencies: ["devkit", "autoconf", "freetype"],
+            dependencies: ["devkit", "autoconf"],
             configure_args: concat(common.configure_args_64bit),
         },
 
@@ -461,8 +462,18 @@ var getJibProfilesProfiles = function (input, common, data) {
             target_os: "windows",
             target_cpu: "x86",
             build_cpu: "x64",
-            dependencies: ["devkit", "autoconf", "freetype"],
+            dependencies: ["devkit", "autoconf"],
             configure_args: concat(common.configure_args_32bit),
+        },
+
+        "linux-aarch64": {
+            target_os: "linux",
+            target_cpu: "aarch64",
+            build_cpu: "x64",
+            dependencies: ["devkit", "autoconf", "build_devkit", "cups"],
+            configure_args: [
+                "--openjdk-target=aarch64-linux-gnu"
+            ],
         },
 
         "linux-arm64": {
@@ -581,6 +592,9 @@ var getJibProfilesProfiles = function (input, common, data) {
         },
         "windows-x86": {
             platform: "windows-x86",
+        },
+       "linux-aarch64": {
+            platform: "linux-aarch64",
         },
        "linux-arm64": {
             platform: "linux-arm64-vfp-hflt",
@@ -781,7 +795,9 @@ var getJibProfilesDependencies = function (input, common) {
         solaris_x64: "SS12u4-Solaris11u1+1.0",
         solaris_sparcv9: "SS12u4-Solaris11u1+1.1",
         windows_x64: "VS2013SP4+1.0",
-        linux_aarch64: "gcc-linaro-aarch64-linux-gnu-4.8-2013.11_linux+1.0",
+        linux_aarch64: (input.profile != null && input.profile.indexOf("arm64") >= 0
+                    ? "gcc-linaro-aarch64-linux-gnu-4.8-2013.11_linux+1.0"
+                    : "gcc7.3.0-Fedora27+1.0"),
         linux_arm: (input.profile != null && input.profile.indexOf("hflt") >= 0
                     ? "gcc-linaro-arm-linux-gnueabihf-raspbian-2012.09-20120921_linux+1.0"
                     : "arm-linaro-4.7+1.0")
@@ -793,12 +809,6 @@ var getJibProfilesDependencies = function (input, common) {
 
     var boot_jdk_platform = (input.build_os == "macosx" ? "osx" : input.build_os)
         + "-" + input.build_cpu;
-
-    var freetype_version = {
-        windows_x64: "2.7.1-v120+1.1",
-        windows_x86: "2.7.1-v120+1.1",
-        macosx_x64: "2.7.1-Xcode6.3-MacOSX10.9+1.0"
-    }[input.target_platform];
 
     var makeBinDir = (input.build_os == "windows"
         ? input.get("gnumake", "install_path") + "/cygwin/bin"
@@ -874,13 +884,6 @@ var getJibProfilesDependencies = function (input, common) {
                 : "autoconf-" + input.build_platform),
             configure_args: "",
             environment_path: input.get("autoconf", "install_path")
-        },
-
-        freetype: {
-            organization: common.organization,
-            ext: "tar.gz",
-            revision: freetype_version,
-            module: "freetype-" + input.target_platform
         },
 
         graphviz: {

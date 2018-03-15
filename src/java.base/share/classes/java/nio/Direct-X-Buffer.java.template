@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,6 +38,7 @@ import java.lang.ref.Reference;
 import jdk.internal.misc.VM;
 import jdk.internal.ref.Cleaner;
 import sun.nio.ch.DirectBuffer;
+
 
 class Direct$Type$Buffer$RW$$BO$
 #if[rw]
@@ -263,16 +264,28 @@ class Direct$Type$Buffer$RW$$BO$
     }
 
     public $type$ get() {
-        return $fromBits$($swap$(UNSAFE.get$Swaptype$(ix(nextGetIndex()))));
+        try {
+            return $fromBits$($swap$(UNSAFE.get$Swaptype$(ix(nextGetIndex()))));
+        } finally {
+            Reference.reachabilityFence(this);
+        }
     }
 
     public $type$ get(int i) {
-        return $fromBits$($swap$(UNSAFE.get$Swaptype$(ix(checkIndex(i)))));
+        try {
+            return $fromBits$($swap$(UNSAFE.get$Swaptype$(ix(checkIndex(i)))));
+        } finally {
+            Reference.reachabilityFence(this);
+        }
     }
 
 #if[streamableType]
     $type$ getUnchecked(int i) {
-        return $fromBits$($swap$(UNSAFE.get$Swaptype$(ix(i))));
+        try {
+            return $fromBits$($swap$(UNSAFE.get$Swaptype$(ix(i))));
+        } finally {
+            Reference.reachabilityFence(this);
+        }
     }
 #end[streamableType]
 
@@ -288,21 +301,25 @@ class Direct$Type$Buffer$RW$$BO$
                 throw new BufferUnderflowException();
 
             long dstOffset = ARRAY_BASE_OFFSET + ((long)offset << $LG_BYTES_PER_VALUE$);
+            try {
 #if[!byte]
-            if (order() != ByteOrder.nativeOrder())
-                UNSAFE.copySwapMemory(null,
+                if (order() != ByteOrder.nativeOrder())
+                    UNSAFE.copySwapMemory(null,
+                                          ix(pos),
+                                          dst,
+                                          dstOffset,
+                                          (long)length << $LG_BYTES_PER_VALUE$,
+                                          (long)1 << $LG_BYTES_PER_VALUE$);
+                else
+#end[!byte]
+                    UNSAFE.copyMemory(null,
                                       ix(pos),
                                       dst,
                                       dstOffset,
-                                      (long)length << $LG_BYTES_PER_VALUE$,
-                                      (long)1 << $LG_BYTES_PER_VALUE$);
-            else
-#end[!byte]
-                UNSAFE.copyMemory(null,
-                                  ix(pos),
-                                  dst,
-                                  dstOffset,
-                                  (long)length << $LG_BYTES_PER_VALUE$);
+                                      (long)length << $LG_BYTES_PER_VALUE$);
+            } finally {
+                Reference.reachabilityFence(this);
+            }
             position(pos + length);
         } else {
             super.get(dst, offset, length);
@@ -317,9 +334,12 @@ class Direct$Type$Buffer$RW$$BO$
 
     public $Type$Buffer put($type$ x) {
 #if[rw]
-        UNSAFE.put$Swaptype$(ix(nextPutIndex()), $swap$($toBits$(x)));
-        Reference.reachabilityFence(this);
-	return this;
+        try {
+            UNSAFE.put$Swaptype$(ix(nextPutIndex()), $swap$($toBits$(x)));
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+        return this;
 #else[rw]
         throw new ReadOnlyBufferException();
 #end[rw]
@@ -327,9 +347,12 @@ class Direct$Type$Buffer$RW$$BO$
 
     public $Type$Buffer put(int i, $type$ x) {
 #if[rw]
-        UNSAFE.put$Swaptype$(ix(checkIndex(i)), $swap$($toBits$(x)));
-        Reference.reachabilityFence(this);
-	return this;
+        try {
+            UNSAFE.put$Swaptype$(ix(checkIndex(i)), $swap$($toBits$(x)));
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+        return this;
 #else[rw]
         throw new ReadOnlyBufferException();
 #end[rw]
@@ -354,8 +377,12 @@ class Direct$Type$Buffer$RW$$BO$
 
             if (srem > rem)
                 throw new BufferOverflowException();
-            UNSAFE.copyMemory(sb.ix(spos), ix(pos), (long)srem << $LG_BYTES_PER_VALUE$);
-            Reference.reachabilityFence(this);
+            try {
+                UNSAFE.copyMemory(sb.ix(spos), ix(pos), (long)srem << $LG_BYTES_PER_VALUE$);
+            } finally {
+                Reference.reachabilityFence(sb);
+                Reference.reachabilityFence(this);
+            }
             sb.position(spos + srem);
             position(pos + srem);
         } else if (src.hb != null) {
@@ -389,21 +416,25 @@ class Direct$Type$Buffer$RW$$BO$
                 throw new BufferOverflowException();
 
             long srcOffset = ARRAY_BASE_OFFSET + ((long)offset << $LG_BYTES_PER_VALUE$);
+            try {
 #if[!byte]
-            if (order() != ByteOrder.nativeOrder())
-                UNSAFE.copySwapMemory(src,
+                if (order() != ByteOrder.nativeOrder())
+                    UNSAFE.copySwapMemory(src,
+                                          srcOffset,
+                                          null,
+                                          ix(pos),
+                                          (long)length << $LG_BYTES_PER_VALUE$,
+                                          (long)1 << $LG_BYTES_PER_VALUE$);
+                else
+#end[!byte]
+                    UNSAFE.copyMemory(src,
                                       srcOffset,
                                       null,
                                       ix(pos),
-                                      (long)length << $LG_BYTES_PER_VALUE$,
-                                      (long)1 << $LG_BYTES_PER_VALUE$);
-            else
-#end[!byte]
-                UNSAFE.copyMemory(src,
-                                  srcOffset,
-                                  null,
-                                  ix(pos),
-                                  (long)length << $LG_BYTES_PER_VALUE$);
+                                      (long)length << $LG_BYTES_PER_VALUE$);
+            } finally {
+                Reference.reachabilityFence(this);
+            }
             position(pos + length);
         } else {
             super.put(src, offset, length);
@@ -420,10 +451,12 @@ class Direct$Type$Buffer$RW$$BO$
         int lim = limit();
         assert (pos <= lim);
         int rem = (pos <= lim ? lim - pos : 0);
-
-        UNSAFE.copyMemory(ix(pos), ix(0), (long)rem << $LG_BYTES_PER_VALUE$);
-        Reference.reachabilityFence(this);
-	position(rem);
+        try {
+            UNSAFE.copyMemory(ix(pos), ix(0), (long)rem << $LG_BYTES_PER_VALUE$);
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+        position(rem);
         limit(capacity());
         discardMark();
         return this;
@@ -507,20 +540,6 @@ class Direct$Type$Buffer$RW$$BO$
 
 
 #if[byte]
-
-    byte _get(int i) {                          // package-private
-        return UNSAFE.getByte(address + i);
-    }
-
-    void _put(int i, byte b) {                  // package-private
-#if[rw]
-        UNSAFE.putByte(address + i, b);
-        Reference.reachabilityFence(this);
-#else[rw]
-        throw new ReadOnlyBufferException();
-#end[rw]
-    }
-
     // #BIN
     //
     // Binary-data access methods  for short, char, int, long, float,
