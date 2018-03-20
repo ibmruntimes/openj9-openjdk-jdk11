@@ -46,6 +46,7 @@ SUNWprivate_1.1 {
 		JNU_GetFieldByName;
 		JNU_GetStaticFieldByName;
 		JNU_GetStringPlatformChars;
+		JNU_InitializeEncoding;
 		JNU_IsInstanceOfByName;
 		JNU_MonitorWait;
 		JNU_NewObjectByName;

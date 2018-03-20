@@ -840,6 +840,15 @@ InitializeEncoding(JNIEnv *env, const char *encname)
     String_value_ID = (*env)->GetFieldID(env, strClazz, "value", "[B");
 }
 
+/*
+ * Export this method to allow OpenJ9 to initialize platform encoding explicitly.
+ */
+JNIEXPORT void JNICALL
+JNU_InitializeEncoding(JNIEnv *env, const char *encname)
+{
+	InitializeEncoding(env, encname);
+}
+
 JNIEXPORT jstring
 NewStringPlatform(JNIEnv *env, const char *str)
 {
