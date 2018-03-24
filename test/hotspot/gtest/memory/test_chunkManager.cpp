@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, 2018 Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,34 +21,20 @@
  * questions.
  */
 
-/**
- * @test
- * @bug 7009359
- * @summary HS optimizes new StringBuffer(null) so it does not throw NPE as expected
- *
- * @run main/othervm -Xbatch -XX:+IgnoreUnrecognizedVMOptions -XX:+OptimizeStringConcat
- *                   -XX:CompileCommand=dontinline,compiler.c2.Test7009359::stringmakerBUG
- *                   compiler.c2.Test7009359
- */
+#include "precompiled.hpp"
 
-package compiler.c2;
+// The test function is only available in debug builds
+#ifdef ASSERT
 
-public class Test7009359 {
-    public static void main (String[] args) {
-        for(int i = 0; i < 100000; i++) {
-            if(!stringmakerBUG(null).equals("NPE")) {
-                System.out.println("StringBuffer(null) does not throw NPE");
-                System.exit(97);
-            }
-        }
-    }
+#include "unittest.hpp"
 
-    public static String stringmakerBUG(String str) {
-       try {
-           return new StringBuffer(str).toString();
-       } catch (NullPointerException e) {
-           return "NPE";
-       }
-    }
+void ChunkManager_test_list_index();
+
+TEST(ChunkManager, list_index) {
+  // The ChunkManager is only available in metaspace.cpp,
+  // so the test code is located in that file.
+  ChunkManager_test_list_index();
+
 }
 
+#endif // ASSERT
