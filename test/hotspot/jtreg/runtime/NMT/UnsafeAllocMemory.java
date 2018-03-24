@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,23 +23,34 @@
 
 /*
  * @test
- * @bug 8137167
- * @summary Randomly generates commands with random types
+ * @summary Unsafe.allocateMemory should be tagged as Other
+ * @key nmt jcmd
+ * @library /test/lib
  * @modules java.base/jdk.internal.misc
- * @library /test/lib /
- *
- * @build sun.hotspot.WhiteBox
- * @run driver ClassFileInstaller sun.hotspot.WhiteBox
- *                                sun.hotspot.WhiteBox$WhiteBoxPermission
- * @run driver/timeout=1200 compiler.compilercontrol.mixed.RandomCommandsTest
+ *          java.management
+ * @run main/othervm -Xbootclasspath/a:. -XX:NativeMemoryTracking=summary UnsafeAllocMemory
  */
 
-package compiler.compilercontrol.mixed;
+import jdk.test.lib.process.ProcessTools;
+import jdk.test.lib.process.OutputAnalyzer;
+import jdk.test.lib.JDKToolFinder;
+import jdk.internal.misc.Unsafe;
 
-import compiler.compilercontrol.share.MultiCommand;
+public class UnsafeAllocMemory {
+  public static void main(String args[]) throws Exception {
+    OutputAnalyzer output;
 
-public class RandomCommandsTest {
-    public static void main(String[] args) {
-        MultiCommand.generateRandomTest(false).test();
-    }
+    // Grab my own PID
+    String pid = Long.toString(ProcessTools.getProcessId());
+    ProcessBuilder pb = new ProcessBuilder();
+
+    Unsafe unsafe = Unsafe.getUnsafe();
+    unsafe.allocateMemory(128 * 1024);
+
+    // Run 'jcmd <pid> VM.native_memory summary'
+    pb.command(new String[] { JDKToolFinder.getJDKTool("jcmd"), pid, "VM.native_memory", "summary"});
+    output = new OutputAnalyzer(pb.start());
+
+    output.shouldContain("Other (reserved=");
+  }
 }

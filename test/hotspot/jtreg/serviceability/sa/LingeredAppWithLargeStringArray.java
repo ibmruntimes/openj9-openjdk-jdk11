@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,34 +21,15 @@
  * questions.
  */
 
-/**
- * @test
- * @bug 7009359
- * @summary HS optimizes new StringBuffer(null) so it does not throw NPE as expected
- *
- * @run main/othervm -Xbatch -XX:+IgnoreUnrecognizedVMOptions -XX:+OptimizeStringConcat
- *                   -XX:CompileCommand=dontinline,compiler.c2.Test7009359::stringmakerBUG
- *                   compiler.c2.Test7009359
- */
+import jdk.test.lib.apps.LingeredApp;
 
-package compiler.c2;
-
-public class Test7009359 {
-    public static void main (String[] args) {
-        for(int i = 0; i < 100000; i++) {
-            if(!stringmakerBUG(null).equals("NPE")) {
-                System.out.println("StringBuffer(null) does not throw NPE");
-                System.exit(97);
-            }
+public class LingeredAppWithLargeStringArray extends LingeredApp {
+    public static void main(String args[]) {
+        String[] hugeArray = new String[Integer.MAX_VALUE/8];
+        String[] smallArray = {"Just", "for", "testing"};
+        for (int i = 0; i < hugeArray.length/16; i++) {
+            hugeArray[i] = new String(smallArray[i%3]);
         }
+        LingeredApp.main(args);
     }
-
-    public static String stringmakerBUG(String str) {
-       try {
-           return new StringBuffer(str).toString();
-       } catch (NullPointerException e) {
-           return "NPE";
-       }
-    }
-}
-
+ }
