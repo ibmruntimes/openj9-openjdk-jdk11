@@ -1,7 +1,6 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
 # ===========================================================================
-#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
@@ -14,7 +13,6 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-#
 # ===========================================================================
 
 AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
@@ -163,7 +161,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
-  OPENJDK_TAG=`git -C $TOPDIR describe --abbrev=0 --tags "${OPENJDK_SHA}"`
+  OPENJDK_TAG=`git -C $TOPDIR describe --abbrev=0 --tags --match "jdk-11*" "${OPENJDK_SHA}"`
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
 ])
