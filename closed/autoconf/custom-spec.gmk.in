@@ -44,8 +44,12 @@ endif
 
 # for constructing version output
 COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
+USERNAME                := @USERNAME@
 OPENJDK_SHA             := @OPENJDK_SHA@
 OPENJDK_TAG             := @OPENJDK_TAG@
+
+J9JDK_EXT_VERSION       := ${VERSION_NUMBER_FOUR_POSITIONS}
+J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
 # required by UMA
 FREEMARKER_JAR          := @FREEMARKER_JAR@
