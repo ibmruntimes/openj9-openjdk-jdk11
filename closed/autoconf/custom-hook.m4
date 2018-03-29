@@ -166,6 +166,10 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   OPENJDK_TAG=`git -C $TOPDIR describe --abbrev=0 --tags --match "jdk-11*" "${OPENJDK_SHA}"`
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
+
+  # Outer [ ] to quote m4.
+  [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
+  AC_SUBST(USERNAME)
 ])
 
 AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
