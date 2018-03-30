@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,23 +23,28 @@
 
 /*
  * @test
- * @bug 8137167
- * @summary Randomly generates commands with random types
- * @modules java.base/jdk.internal.misc
+ * @bug 8196294
+ * @summary when loop strip is enabled, LoopStripMiningIterShortLoop should be not null
  * @library /test/lib /
- *
- * @build sun.hotspot.WhiteBox
- * @run driver ClassFileInstaller sun.hotspot.WhiteBox
- *                                sun.hotspot.WhiteBox$WhiteBoxPermission
- * @run driver/timeout=1200 compiler.compilercontrol.mixed.RandomCommandsTest
+ * @modules java.base/jdk.internal.misc
+ *          java.management
+ * @run driver CheckLoopStripMiningIterShortLoop
  */
 
-package compiler.compilercontrol.mixed;
+import jdk.test.lib.process.OutputAnalyzer;
+import jdk.test.lib.process.ProcessTools;
 
-import compiler.compilercontrol.share.MultiCommand;
+public class CheckLoopStripMiningIterShortLoop {
 
-public class RandomCommandsTest {
-    public static void main(String[] args) {
-        MultiCommand.generateRandomTest(false).test();
+    public static void main(String[] args) throws Exception {
+        ProcessBuilder pb = ProcessTools.createJavaProcessBuilder("-XX:+UseG1GC", "-XX:+PrintFlagsFinal", "-version");
+        OutputAnalyzer out = new OutputAnalyzer(pb.start());
+
+        long iter = Long.parseLong(out.firstMatch("uintx LoopStripMiningIter                      = (\\d+)", 1));
+        long iterShort = Long.parseLong(out.firstMatch("uintx LoopStripMiningIterShortLoop             = (\\d+)", 1));
+
+        if (iter <= 0 || iterShort <= 0) {
+            throw new RuntimeException("Bad defaults for loop strip mining");
+        }
     }
 }
