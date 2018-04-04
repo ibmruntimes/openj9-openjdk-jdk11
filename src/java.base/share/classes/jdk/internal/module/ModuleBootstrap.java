@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2014, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -40,7 +40,6 @@ import java.lang.module.ModuleReference;
 import java.lang.module.ResolvedModule;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -551,7 +550,7 @@ public final class ModuleBootstrap {
             Path[] paths = new Path[dirs.length];
             int i = 0;
             for (String dir: dirs) {
-                paths[i++] = Paths.get(dir);
+                paths[i++] = Path.of(dir);
             }
             return ModulePath.of(patcher, paths);
         }
