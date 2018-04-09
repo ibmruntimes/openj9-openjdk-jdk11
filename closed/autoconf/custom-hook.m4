@@ -192,7 +192,12 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
-  OPENJDK_TAG=`git -C $TOPDIR describe --abbrev=0 --tags --match "jdk-11*" "${OPENJDK_SHA}"`
+  LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --tags="jdk-11*" --max-count=1 2>/dev/null`
+  if test "x$LAST_TAGGED_SHA" != x; then
+    OPENJDK_TAG=`git -C $TOPDIR describe --abbrev=0 --tags "$LAST_TAGGED_SHA"`
+  else
+    OPENJDK_TAG=
+  fi
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
 
