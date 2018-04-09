@@ -267,8 +267,14 @@ endif
 # Adjust .spec files replacing references to gcc-4.6. Openjdk requires 4.8.2 or newer.
 SPEC_SED_SCRIPT := -e 's/gcc-4.6/gcc/g'
 
-# As DDR is not enabled we use sed to filter .spec files.
-SPEC_SED_SCRIPT += $(call SedDisable,module_ddr)
+# Adjust DDR enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_useOmrDdr)
+  SPEC_SED_SCRIPT    += $(call SedEnable,module_ddr)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_useOmrDdr)
+  SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
+endif
 
 # Disable windows rebase.
 SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
@@ -397,6 +403,12 @@ build-j9 : run-preprocessors-j9
 	@$(CP) -p $(OUTPUTDIR)/vm/redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX) $(MODULES_LIBS_DIR)/java.base/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
 	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/server
 	@$(CP) -p $(OUTPUTDIR)/vm/redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX) $(MODULES_LIBS_DIR)/java.base/server/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+	@$(ECHO) Copying j9ddr.dat
+	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)
+	@$(CP) -p $(OUTPUTDIR)/vm/j9ddr.dat $(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)/
+endif
 
 J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl_sources.done
 
