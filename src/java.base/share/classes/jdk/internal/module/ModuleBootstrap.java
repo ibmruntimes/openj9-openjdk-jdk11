@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
+ * (c) Copyright IBM Corp. 2014, 2018 All Rights Reserved
  * ===========================================================================
  */
 
@@ -350,12 +350,6 @@ public final class ModuleBootstrap {
 
         Counters.add("jdk.module.boot.4.resolveTime", t4);
 
-        ClassLoader appLoader = ClassLoaders.appClassLoader();							//IBM-shared_classes_misc
-        ClassLoader platformLoader = ClassLoaders.platformClassLoader();				//IBM-shared_classes_misc
-        ((BuiltinClassLoader)platformLoader).initializeSharedClassesSupport();			//IBM-shared_classes_misc
-        ((BuiltinClassLoader)appLoader).initializeSharedClassesSupport();				//IBM-shared_classes_misc
-
-
         // Step 5: Map the modules in the configuration to class loaders.
         // The static configuration provides the mapping of standard and JDK
         // modules to the boot and platform loaders. All other modules (JDK
@@ -423,6 +417,11 @@ public final class ModuleBootstrap {
             if (savedModuleFinder != finder)
                 limitedFinder = new SafeModuleFinder(finder);
         }
+
+        ClassLoader appLoader = ClassLoaders.appClassLoader();                                                  //IBM-shared_classes_misc
+        ClassLoader platformLoader = ClassLoaders.platformClassLoader();                                //IBM-shared_classes_misc
+        ((BuiltinClassLoader)platformLoader).initializeSharedClassesSupport();                  //IBM-shared_classes_misc
+        ((BuiltinClassLoader)appLoader).initializeSharedClassesSupport();                               //IBM-shared_classes_misc
 
         // total time to initialize
         Counters.add("jdk.module.boot.totalTime", t0);
