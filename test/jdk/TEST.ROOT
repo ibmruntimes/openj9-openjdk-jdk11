@@ -1,3 +1,21 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+
 # This file identifies the root of the test-suite hierarchy.
 # It also contains test-suite configuration information.
 
@@ -29,14 +47,14 @@ groups=TEST.groups
 # Source files for classes that will be used at the beginning of each test suite run,
 # to determine additional characteristics of the system for use with the @requires tag.
 # Note: compiled bootlibs code will be located in the folder 'bootClasses'
-requires.extraPropDefns = ../../test/jtreg-ext/requires/VMProps.java [../../closed/test/jtreg-ext/requires/VMPropsExt.java]
-requires.extraPropDefns.bootlibs = ../../test/lib/sun ../../test/lib/jdk/test/lib/Platform.java
-requires.extraPropDefns.vmOpts = -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI -Xbootclasspath/a:bootClasses
-requires.properties= \
-    sun.arch.data.model \
-    java.runtime.name \
-    vm.graal.enabled \
-    vm.cds
+#requires.extraPropDefns = ../../test/jtreg-ext/requires/VMProps.java [../../closed/test/jtreg-ext/requires/VMPropsExt.java]
+#requires.extraPropDefns.bootlibs = ../../test/lib/sun ../../test/lib/jdk/test/lib/Platform.java
+#requires.extraPropDefns.vmOpts = -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI -Xbootclasspath/a:bootClasses
+#requires.properties= \
+#    sun.arch.data.model \
+#    java.runtime.name \
+#    vm.graal.enabled \
+#    vm.cds
 
 # Minimum jtreg version
 requiredVersion=4.2 b12
