@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,22 +22,18 @@
  *
  */
 
-// A simple class to extend an abstract class and get loaded with different
-// loaders.  This class is loaded via LOADER2.  A similar named class will
-// be loaded via LOADER1.
-public class many_loader extends bug_21227 {
-  final Object _ref_to_be_p0wned;
+package com.simple;
 
-  many_loader() {
-    _ref_to_be_p0wned = bug_21227._p0wnee;
-    System.out.println("Gonna hack this thing: " + _ref_to_be_p0wned.toString() );
-  }
+import java.lang.reflect.Method;
 
-  // I need to compile (hence call in a loop) a function which returns a value
-  // loaded from classloader other than the system one.  The point of this
-  // call is to give me an abstract 'hook' into a function loaded with a
-  // foreign loader.
-  public many_loader[] make( IFace iface ) { 
-    throw new Error("do not call me");
-  }
+public class Main {
+    public static void main(String[] args) throws Exception {
+        System.out.println("Hello World!");
+        if (args.length > 0 && args[0].equals("with_add_opens")) {
+            Method method = ClassLoader.class.getDeclaredMethod("defineClass",
+                byte[].class, int.class, int.class);
+            method.setAccessible(true);
+            System.out.println("method.setAccessible succeeded!");
+        }
+    }
 }
