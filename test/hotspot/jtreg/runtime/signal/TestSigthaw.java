@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2009, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -22,18 +20,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package jdk.internal.misc;
 
-import java.security.PermissionCollection;
-import java.security.ProtectionDomain;
 
-public interface JavaSecurityProtectionDomainAccess {
-    interface ProtectionDomainCache {
-        void put(ProtectionDomain pd, PermissionCollection pc);
-        PermissionCollection get(ProtectionDomain pd);
-    }
-    /**
-     * Returns the ProtectionDomainCache.
-     */
-    ProtectionDomainCache getProtectionDomainCache();
-}
+/*
+ * @test
+ * @requires os.family != "windows"
+ *
+ * @summary converted from VM testbase runtime/signal/sigthaw01.
+ * VM testbase keywords: [signal, runtime, linux, solaris, macosx]
+ *
+ * @library /test/lib
+ * @run main/native SigTestDriver SIGTHAW
+ */
+
