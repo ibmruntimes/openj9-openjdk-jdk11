@@ -1,6 +1,4 @@
 #
-# (c) Copyright IBM Corp. 2014, 2017 All Rights Reserved
-#
 # Copyright (c) 2014, 2018, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
@@ -40,7 +38,7 @@ $(eval $(call IncludeCustomExtension, CompileJavaModules.gmk))
 ################################################################################
 # Module specific build settings
 
-java.base_ADD_JAVAC_FLAGS += -XDstringConcat=inline
+java.base_ADD_JAVAC_FLAGS += -Xdoclint:all/protected,-reference '-Xdoclint/package:java.*,javax.*' -XDstringConcat=inline
 java.base_COPY += .icu .dat .spp content-types.properties hijrah-config-islamic-umalqura.properties
 java.base_CLEAN += intrinsic.properties
 
@@ -234,7 +232,7 @@ java.logging_ADD_JAVAC_FLAGS += -Xdoclint:all/protected,-reference '-Xdoclint/pa
 
 ################################################################################
 
-java.management_ADD_JAVAC_FLAGS += #-Xdoclint:all/protected,-reference '-Xdoclint/package:java.*,javax.*'
+java.management_ADD_JAVAC_FLAGS += -Xdoclint:all/protected,-reference '-Xdoclint/package:java.*,javax.*'
 
 ################################################################################
 
@@ -251,7 +249,7 @@ java.transaction.xa_ADD_JAVAC_FLAGS += -Xdoclint:all/protected '-Xdoclint/packag
 ################################################################################
 
 java.sql_ADD_JAVAC_FLAGS += -Xdoclint:all/protected '-Xdoclint/package:java.*,javax.*'
-java.sql_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
+java.sql_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
 
 ################################################################################
 
@@ -347,7 +345,7 @@ jdk.scripting.nashorn.shell_COPY += .js .properties
 
 ################################################################################
 
-jdk.rmic_SETUP += GENERATE_JDKBYTECODE_NOWARNINGS
+jdk.rmic_SETUP := GENERATE_JDKBYTECODE_NOWARNINGS
 jdk.rmic_CLEAN += .properties
 
 ################################################################################
