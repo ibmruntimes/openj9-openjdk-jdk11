@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,14 +21,9 @@
  * questions.
  */
 
-// key: compiler.err.cant.apply.symbol
-// key: compiler.misc.inconvertible.types
-// key: compiler.misc.infer.no.conforming.assignment.exists
-// options: -source 7 -Xlint:-options
-
-import java.util.*;
-
-class InferredDoNotConformToEq {
-    <X> void m(List<X> lx1, List<X> lx2) {}
-    { this.m(Arrays.asList(""), Arrays.asList(1)); }
-}
+/**
+ * JDK 11 and later versioned overlay for the {@code jdk.internal.vm.compiler.management} module.
+ * This cannot be used in JDK 10 where {@code jdk.internal.vm.compiler.management} is a
+ * non-upgradeable module.
+ */
+package org.graalvm.compiler.hotspot.management;
