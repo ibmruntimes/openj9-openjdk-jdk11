@@ -22,7 +22,7 @@
  *
  */
 
-module java.activation {
-    exports javax.activation;
+module java.net.http {
+    exports java.net.http;
 }
 
