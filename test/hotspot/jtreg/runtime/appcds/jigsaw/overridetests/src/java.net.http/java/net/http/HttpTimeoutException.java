@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,25 +22,10 @@
  *
  */
 
-package javax/activation;
+package java.net.http;
 
-public class UnsupportedDataTypeException2
-    version 51:0
-{
-
-public Method "<init>":"()V"
-    stack 1 locals 1
-{
-    aload_0;
-    invokespecial   Method java/lang/Object."<init>":"()V";
-    return;
+public class HttpTimeoutException {
+    public String toString() {
+        return "hi";
+    }
 }
-
-public Method toString:"()Ljava/lang/String;"
-    stack 1 locals 1
-{
-    ldc String "hi";
-    areturn;
-}
-
-} // end class UnsupportedDataTypeException2

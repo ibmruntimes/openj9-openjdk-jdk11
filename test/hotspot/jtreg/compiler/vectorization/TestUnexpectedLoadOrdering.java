@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -19,19 +19,33 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
+ */
+
+/**
+ * @test
+ * @bug 8201367
+ * @summary RPO walk of counted loop block doesn't properly order loads
+ *
+ * @run main/othervm -XX:-BackgroundCompilation -XX:-UseCountedLoopSafepoints TestUnexpectedLoadOrdering
  *
  */
 
-package javax/activation;
+public class TestUnexpectedLoadOrdering {
 
-public class MimeType
-    version 51:0
-{
+    public static void main(String[] args) {
+        double[] array1 = new double[1000];
+        double[] array2 = new double[1000];
+        for (int i = 0; i < 20_000; i++) {
+            test(array1, array2);
+        }
+    }
 
-public Method thisClassIsDummy:"()V"
-    stack 0 locals 0
-{
-    return;
+    private static double test(double[] array1, double[] array2) {
+        double res = 0;
+        for (int i = 0; i < array1.length; i++) {
+            array2[i] = i;
+            res += array1[i];
+        }
+        return res;
+    }
 }
-
-} // end class MimeType
