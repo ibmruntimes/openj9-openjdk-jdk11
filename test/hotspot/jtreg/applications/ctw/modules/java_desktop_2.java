@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -19,18 +19,20 @@
  * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
  * or visit www.oracle.com if you need additional information or have any
  * questions.
- *
  */
 
-package javax.activation;
-
-import java.io.IOException;
-
-public class UnsupportedDataTypeException extends IOException {
-    public UnsupportedDataTypeException() {
-    }
-
-    public String toString() {
-        return "hi";
-    }
-}
+/*
+ * @test
+ * @summary run CTW for some classes from java.desktop module
+ *
+ * @library /test/lib / /testlibrary/ctw/src
+ * @modules java.base/jdk.internal.jimage
+ *          java.base/jdk.internal.misc
+ *          java.base/jdk.internal.reflect
+ * @modules java.desktop
+ *
+ * @build sun.hotspot.WhiteBox
+ * @run driver ClassFileInstaller sun.hotspot.WhiteBox
+ *                                sun.hotspot.WhiteBox$WhiteBoxPermission
+ * @run main/timeout=7200 sun.hotspot.tools.ctw.CtwRunner modules:java.desktop 50% 100%
+ */
