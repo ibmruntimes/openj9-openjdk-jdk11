@@ -142,7 +142,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xz64)
+      wa64|xa64|xl64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -187,16 +187,16 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 [
   AC_ARG_WITH(noncompressedrefs, [AS_HELP_STRING([--with-noncompressedrefs],
     [build non-compressedrefs vm (large heap)])])
-    
+
   # When compiling natively host_cpu and build_cpu are the same. But when
   # cross compiling we need to work with the host_cpu (which is where the final
   # JVM will run).
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($host_cpu)
-  
+
   if test "x$with_noncompressedrefs" = x; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
-  else 
+  else
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}"
     OPENJ9_LIBS_SUBDIR=default
   fi
