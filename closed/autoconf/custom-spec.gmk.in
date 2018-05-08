@@ -30,9 +30,6 @@ define IncludeCustomExtension
   endif
 endef
 
-# Override JAVA_FLAGS_BIG heap and stack sizes
-JAVA_FLAGS_BIG          := -Xms64M -Xmx1600M -XX:ThreadStackSize=1536
-
 # Temporary workaround for OpenJ9 JIT issue #1522
 export IBM_JAVA_OPTIONS := -Xjit:disableStringPeepholes
 
