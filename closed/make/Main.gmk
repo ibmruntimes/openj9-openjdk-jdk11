@@ -33,7 +33,7 @@ JVM_TEST_IMAGE_TARGETS :=
 DEFAULT_JMOD_DEPS := j9vm-compose-buildjvm
 PHASE_MAKEDIRS += $(TOPDIR)/closed/make/closed_make
 
-java.base-libs : j9vm-build
+java.base-libs : java.base-copy j9vm-build
 
 j9vm-build : buildtools-langtools
 	+($(CD) $(TOPDIR)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) VERSION_MAJOR=$(VERSION_FEATURE) build-j9)
