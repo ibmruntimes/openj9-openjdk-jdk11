@@ -106,7 +106,8 @@ OPENJ9_MISC_FILES := \
 	options.default \
 	#
 
-OPENJ9_NOTICE_FILES := openj9-notices.html
+OPENJ9_NOTICE_FILE := openj9/longabout.html
+OPENJ9_NOTICE_FILE_RENAME := openj9-notices.html
 OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX)
 
 MODULES_LIBS_DIR := $(OUTPUTDIR)/support/modules_libs
@@ -162,8 +163,7 @@ $(foreach file,$(OPENJ9_ALT_SHARED_LIBRARIES) $(OPENJ9_BUILD_LIBRARIES), \
 $(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
 	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/lib/$(file),$(OUTPUTDIR)/vm/$(file))))
 
-$(foreach file,$(OPENJ9_NOTICE_FILES), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(file),$(TOPDIR)/$(file))))
+$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(TOPDIR)/$(OPENJ9_NOTICE_FILE)))
 
 $(foreach file,$(OPENJ9_REDIRECTOR), \
 	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUTDIR)/vm/$(file))))
@@ -193,8 +193,7 @@ $(foreach file,$(OPENJ9_SHARED_LIBRARIES), \
 $(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
 	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/lib/$(file),$(OUTPUTDIR)/vm/$(file))))
 
-$(foreach file,$(OPENJ9_NOTICE_FILES), \
-	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(file),$(TOPDIR)/$(file))))
+$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(TOPDIR)/$(OPENJ9_NOTICE_FILE)))
 
 $(foreach file,$(OPENJ9_REDIRECTOR), \
 	$(eval $(call openj9_copy_prereq,stage_openj9_$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUTDIR)/vm/$(file))))
