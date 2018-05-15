@@ -19,7 +19,6 @@ CLEAN_DIRS += vm
 
 .PHONY : \
 	j9vm-build \
-	j9vm-compose-buildjvm \
 	openj9-jdk-image \
 	openj9-jre-image \
 	java.base-libs \
@@ -30,24 +29,23 @@ JVM_MAIN_TARGETS := j9vm-build
 JVM_TOOLS_TARGETS :=
 JVM_DOCS_TARGETS :=
 JVM_TEST_IMAGE_TARGETS :=
-DEFAULT_JMOD_DEPS := j9vm-compose-buildjvm
+DEFAULT_JMOD_DEPS := j9vm-build
 PHASE_MAKEDIRS += $(TOPDIR)/closed/make/closed_make
+
+OPENJ9_MAKE := $(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk SPEC=$(SPEC) VERSION_MAJOR=$(VERSION_FEATURE)
 
 java.base-libs : java.base-copy j9vm-build
 
 j9vm-build : buildtools-langtools
-	+($(CD) $(TOPDIR)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) VERSION_MAJOR=$(VERSION_FEATURE) build-j9)
-
-j9vm-compose-buildjvm : j9vm-build $(J9JCL_GENSRC_MAKEFILE)
-	+($(CD) $(TOPDIR)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_build_jdk)
+	+$(OPENJ9_MAKE) openj9_build_jdk
 
 product-images : openj9-jdk-image openj9-jre-image
 
 openj9-jdk-image : jdk-image j9vm-build
-	+($(CD) $(TOPDIR)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_jdk_image)
+	+$(OPENJ9_MAKE) openj9_jdk_image
 
 openj9-jre-image : jre-image j9vm-build
-	+($(CD) $(TOPDIR)/closed && $(MAKE) -f OpenJ9.gmk SPEC=$(SPEC) stage_openj9_jre_image)
+	+$(OPENJ9_MAKE) openj9_jre_image
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
