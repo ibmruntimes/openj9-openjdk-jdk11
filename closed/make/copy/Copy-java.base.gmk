@@ -26,6 +26,12 @@ endif
 
 ALT_JVMCFG_SRC := $(TOPDIR)/closed/src/java.base/conf/jvm.cfg
 
+override-jvm.cfg : $(LIB_DST_DIR)/jvm.cfg
+	$(ECHO) "Overriding jvm.cfg with J9VM version"
+	$(CP) $(ALT_JVMCFG_SRC) $(LIB_DST_DIR)/jvm.cfg
+
+TARGETS += override-jvm.cfg
+
 TARGETS += \
 	$(INCLUDE_TARGET_DIR)/jvmti.h \
 	$(INCLUDE_TARGET_DIR)/ibmjvmti.h \
