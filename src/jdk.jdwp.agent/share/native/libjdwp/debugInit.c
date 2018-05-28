@@ -1,7 +1,5 @@
-/*******************************************************************************
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- *
- * Copyright (c) 1998, 2016, Oracle and/or its affiliates. All rights reserved.
+/*
+ * Copyright (c) 1998, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -60,7 +58,6 @@
 static jboolean vmInitialized;
 static jrawMonitorID initMonitor;
 static jboolean initComplete;
-static jboolean VMInitComplete;
 static jbyte currentSessionID;
 
 /*
@@ -438,9 +435,8 @@ cbEarlyVMInit(jvmtiEnv *jvmti_env, JNIEnv *env, jthread thread)
     if ( gdata->vmDead ) {
         EXIT_ERROR(AGENT_ERROR_INTERNAL,"VM dead at VM_INIT time");
     }
-    if (initOnStartup) {
+    if (initOnStartup)
         initialize(env, thread, EI_VM_INIT);
-    }
     vmInitialized = JNI_TRUE;
     LOG_MISC(("END cbEarlyVMInit"));
 }
@@ -621,32 +617,6 @@ debugInit_waitInitComplete(void)
     debugMonitorExit(initMonitor);
 }
 
-void
-signalVMInitComplete(void)
-{
-    /*
-     * VM Initialization is complete
-     */
-    LOG_MISC(("signal VM initialization complete"));
-    debugMonitorEnter(initMonitor);
-    VMInitComplete = JNI_TRUE;
-    debugMonitorNotifyAll(initMonitor);
-    debugMonitorExit(initMonitor);
-}
-
-/*
- * Wait for VM initialization to complete.
- */
-void
-debugInit_waitVMInitComplete(void)
-{
-    debugMonitorEnter(initMonitor);
-    while (!VMInitComplete) {
-        debugMonitorWait(initMonitor);
-    }
-    debugMonitorExit(initMonitor);
-}
-
 /* All process exit() calls come from here */
 void
 forceExit(int exit_code)
@@ -702,7 +672,6 @@ initialize(JNIEnv *env, jthread thread, EventIndex triggering_ei)
     LOG_MISC(("Begin initialize()"));
     currentSessionID = 0;
     initComplete = JNI_FALSE;
-    VMInitComplete = JNI_FALSE;
 
     if ( gdata->vmDead ) {
         EXIT_ERROR(AGENT_ERROR_INTERNAL,"VM dead at initialize() time");

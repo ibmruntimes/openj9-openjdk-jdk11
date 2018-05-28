@@ -1,6 +1,4 @@
-/*******************************************************************************
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- *
+/*
  * Copyright (c) 1998, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -41,6 +39,4 @@ void debugInit_reset(JNIEnv *env);
 void debugInit_exit(jvmtiError, const char *);
 void forceExit(int);
 
-void debugInit_waitVMInitComplete(void);
-void signalVMInitComplete(void);
 #endif
