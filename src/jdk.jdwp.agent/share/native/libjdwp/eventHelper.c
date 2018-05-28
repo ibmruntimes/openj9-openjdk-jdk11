@@ -1,7 +1,5 @@
-/*******************************************************************************
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- *
- * Copyright (c) 1998, 2006, Oracle and/or its affiliates. All rights reserved.
+/*
+ * Copyright (c) 1998, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -582,7 +580,6 @@ handleReportVMInitCommand(JNIEnv* env, ReportVMInitCommand *command)
         (void)threadControl_suspendThread(command->thread, JNI_FALSE);
     }
 
-	signalVMInitComplete();
     outStream_initCommand(&out, uniqueID(), 0x0,
                           JDWP_COMMAND_SET(Event),
                           JDWP_COMMAND(Event, Composite));
