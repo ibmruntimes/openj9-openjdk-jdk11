@@ -393,15 +393,6 @@ else
 endif
 	@$(ECHO) OpenJ9 compile complete
 
-	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base
-	@$(CP) -p \
-		$(addprefix $(OUTPUTDIR)/vm/, \
-			J9TraceFormat.dat \
-			java*.properties \
-			OMRTraceFormat.dat \
-			options.default) \
-		$(MODULES_LIBS_DIR)/java.base/
-
 	# jvm is required for compiling other java.base support natives
 	@$(ECHO) "Creating support/modules_libs/java.base/*/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) from J9 sources"
 	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/j9vm
