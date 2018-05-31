@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, 2018, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -23,27 +23,29 @@
 # questions.
 #
 
-include LibCommon.gmk
+default: all
+
+include $(SPEC)
+include MakeBase.gmk
+include TextFileProcessing.gmk
 
 ################################################################################
 
-ifneq ($(filter $(OPENJDK_TARGET_OS), solaris linux macosx), )
+# Version file needs to be processed with version numbers
+VERSION_FILE := jdk/nashorn/internal/runtime/resources/version.properties
 
-  $(eval $(call SetupJdkLibrary, BUILD_LIBEXTNET, \
-      NAME := extnet, \
-      SRC := $(TOPDIR)/src/jdk.net/$(OPENJDK_TARGET_OS)/native/libextnet, \
-      OPTIMIZATION := LOW, \
-      CFLAGS := $(CFLAGS_JDKLIB) -I$(SUPPORT_OUTPUTDIR)/headers/jdk.net, \
-      LDFLAGS := $(LDFLAGS_JDKLIB) \
-          $(call SET_SHARED_LIBRARY_ORIGIN), \
-      LIBS := -ljava, \
-      LIBS_solaris := -lsocket, \
-      LIBS_linux := -ljvm, \
-  ))
+$(eval $(call SetupTextFileProcessing, BUILD_VERSION_FILE, \
+    SOURCE_FILES := $(TOPDIR)/src/$(MODULE)/share/classes/$(VERSION_FILE).template, \
+    OUTPUT_FILE := $(SUPPORT_OUTPUTDIR)/gensrc/$(MODULE)/$(VERSION_FILE), \
+    REPLACEMENTS := \
+        @@VERSION_STRING@@ => $(VERSION_STRING) ; \
+        @@VERSION_SHORT@@ => $(VERSION_SHORT) , \
+))
 
-  $(BUILD_LIBEXTNET): $(call FindLib, java.base, java)
-
-  TARGETS += $(BUILD_LIBEXTNET)
-endif
+TARGETS += $(NASGEN_RUN_FILE) $(BUILD_VERSION_FILE)
 
 ################################################################################
+
+all: $(TARGETS)
+
+.PHONY: all default
