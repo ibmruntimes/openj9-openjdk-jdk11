@@ -30,9 +30,6 @@ define IncludeCustomExtension
   endif
 endef
 
-# Temporary workaround for OpenJ9 JIT issue #1522
-export IBM_JAVA_OPTIONS := -Xjit:disableStringPeepholes
-
 OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
 OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
 
