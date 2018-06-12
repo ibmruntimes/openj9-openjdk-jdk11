@@ -180,33 +180,6 @@ $(foreach file,$(OPENJ9_MANAGEMENT_LIBRARIES), \
 
 endef
 
-# generated_target_rules
-# ----------------------
-# param 1 = The make goal
-# param 2 = The jdk/jre directory to add openj9 content
-define generated_target_rules
-
-.PHONY : $1
-
-$(foreach file,$(OPENJ9_SHARED_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
-	$(eval $(call openj9_copy_prereq,$1,$2/lib/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(TOPDIR)/$(OPENJ9_NOTICE_FILE)))
-
-$(foreach file,$(OPENJ9_REDIRECTOR), \
-	$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_JAVA_BASE_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(notdir $(file)),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_SHARED_CLASSES_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-endef
-
 # openj9_copy_prereq
 # ------------------
 # param 1 = The make goal.
@@ -237,17 +210,9 @@ define openj9_copy_tree_impl
 endef
 
 openj9_build_jdk : build-j9
-ifeq ($(BUILD_JDK),$(JDK_OUTPUTDIR))
 	+$(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk create_build_jdk
-endif
 
-# If we weren't given a BUILD_JDK, we must create one.
-ifeq ($(BUILD_JDK),$(JDK_OUTPUTDIR))
-  $(eval $(call generated_target_rules_build,create_build_jdk,$(JDK_OUTPUTDIR)))
-endif
-
-$(eval $(call generated_target_rules,openj9_jdk_image,$(JDK_IMAGE_DIR)))
-$(eval $(call generated_target_rules,openj9_jre_image,$(JRE_IMAGE_DIR)))
+$(eval $(call generated_target_rules_build,create_build_jdk,$(JDK_OUTPUTDIR)))
 
 # Comments for stage-j9
 # Currently there is a staged location where j9 is built.  This is due to a number of reasons:
