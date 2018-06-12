@@ -19,8 +19,6 @@ CLEAN_DIRS += vm
 
 .PHONY : \
 	j9vm-build \
-	openj9-jdk-image \
-	openj9-jre-image \
 	java.base-libs \
 	#
 
@@ -39,14 +37,6 @@ java.base-libs : java.base-copy j9vm-build
 j9vm-build : buildtools-langtools
 	+$(OPENJ9_MAKE) openj9_build_jdk
 
-product-images : openj9-jdk-image openj9-jre-image
-
-openj9-jdk-image : jdk-image j9vm-build
-	+$(OPENJ9_MAKE) openj9_jdk_image
-
-openj9-jre-image : jre-image j9vm-build
-	+$(OPENJ9_MAKE) openj9_jre_image
-
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
 .PHONY : openj9.dtfj-ddr-gensrc openj9.dtfj-ddr-jar
@@ -60,5 +50,3 @@ openj9.dtfj-ddr-jar : openj9.dtfj-ddr-gensrc
 openj9.dtfj-jmod : openj9.dtfj-ddr-jar
 
 endif # OPENJ9_ENABLE_DDR
-
-ALL_TARGETS += openj9-jdk-image openj9-jre-image
