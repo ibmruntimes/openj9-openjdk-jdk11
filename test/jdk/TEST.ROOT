@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -41,6 +41,7 @@ javax/management com/sun/awt sun/awt sun/java2d javax/xml/jaxp/testng/validation
 
 # Tests that cannot run concurrently
 exclusiveAccess.dirs=java/rmi/Naming java/util/prefs sun/management/jmxremote sun/tools/jstatd sun/security/mscapi java/util/stream java/util/Arrays/largeMemory java/util/BitSet/stream javax/rmi
+
 # Group definitions
 groups=TEST.groups
 
@@ -55,8 +56,10 @@ groups=TEST.groups
 #requires.properties= \
 #    sun.arch.data.model \
 #    java.runtime.name \
+#    vm.gc.Z \
 #    vm.graal.enabled \
-#    vm.cds
+#    vm.cds \
+#    docker.support
 
 # Minimum jtreg version
 requiredVersion=4.2 b12
