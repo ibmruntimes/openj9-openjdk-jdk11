@@ -164,6 +164,9 @@ $(foreach file,$(OPENJ9_ALT_SHARED_LIBRARIES) $(OPENJ9_BUILD_LIBRARIES), \
 $(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
 	$(eval $(call openj9_copy_prereq,$1,$2/lib/$(file),$(OUTPUTDIR)/vm/$(file))))
 
+$(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
+	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.base/$(file),$(OUTPUTDIR)/vm/$(file))))
+
 $(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(TOPDIR)/$(OPENJ9_NOTICE_FILE)))
 
 $(foreach file,$(OPENJ9_REDIRECTOR), \
