@@ -41,7 +41,6 @@ javax/management com/sun/awt sun/awt sun/java2d javax/xml/jaxp/testng/validation
 
 # Tests that cannot run concurrently
 exclusiveAccess.dirs=java/rmi/Naming java/util/prefs sun/management/jmxremote sun/tools/jstatd sun/security/mscapi java/util/stream java/util/Arrays/largeMemory java/util/BitSet/stream javax/rmi
-
 # Group definitions
 groups=TEST.groups
 
@@ -59,7 +58,8 @@ groups=TEST.groups
 #    vm.gc.Z \
 #    vm.graal.enabled \
 #    vm.cds \
-#    docker.support
+#    docker.support \
+#    release.implementor
 
 # Minimum jtreg version
 requiredVersion=4.2 b12
