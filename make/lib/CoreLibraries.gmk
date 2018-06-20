@@ -195,7 +195,6 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBJIMAGE, \
     OPTIMIZATION := LOW, \
     CFLAGS := $(CFLAGS_JDKLIB), \
     CXXFLAGS := $(CXXFLAGS_JDKLIB), \
-    DISABLED_WARNINGS_gcc := implicit-fallthrough, \
     CFLAGS_unix := -UDEBUG, \
     LDFLAGS := $(LDFLAGS_JDKLIB) $(LDFLAGS_CXX_JDK) \
         $(call SET_SHARED_LIBRARY_ORIGIN), \
@@ -347,7 +346,8 @@ else ifeq ($(OPENJDK_TARGET_OS), aix)
       EXCLUDE_FILES := $(LIBJLI_EXCLUDE_FILES), \
       EXTRA_FILES := $(LIBJLI_EXTRA_FILES), \
       OPTIMIZATION := HIGH, \
-      CFLAGS := $(STATIC_LIBRARY_FLAGS) $(LIBJLI_CFLAGS_JDKLIB) $(LIBJLI_CFLAGS), \
+      CFLAGS := $(STATIC_LIBRARY_FLAGS) $(LIBJLI_CFLAGS_JDKLIB) $(LIBJLI_CFLAGS) \
+          $(addprefix -I, $(LIBJLI_SRC_DIRS)), \
       ARFLAGS := $(ARFLAGS), \
       OBJECT_DIR := $(SUPPORT_OUTPUTDIR)/native/$(MODULE)/libjli_static))
 
