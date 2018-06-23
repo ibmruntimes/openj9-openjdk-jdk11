@@ -21,40 +21,36 @@
  * questions.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.TreeMap;
-import java.net.http.HttpHeaders;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
+
+import javax.swing.SwingWorker;
 
 /**
- * An HttpHeaders consisting of the given name value pairs.
+ * @test
+ * @bug 6608234
  */
-public class FixedHttpHeaders extends HttpHeaders {
+public final class CheckCancellationException {
 
-    private final Map<String, List<String>> map =
-            new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private static final CountDownLatch go = new CountDownLatch(1);
 
-    @Override
-    public Map<String, List<String>> map() {
-        return map;
-    }
-
-    /**
-     * Creates an HttpHeaders of the given name value pairs.
-     */
-    public static HttpHeaders of(String... params) {
-        Objects.requireNonNull(params);
-        if ((params.length & 0x1) != 0)
-            throw new IllegalArgumentException("odd number of params");
-        FixedHttpHeaders headers = new FixedHttpHeaders();
-        for (int i = 0; i < params.length; i += 2) {
-            String name = params[i];
-            String value = params[i + 1];
-            headers.map.computeIfAbsent(name, k -> new ArrayList<>(1))
-                       .add(value);
+    public static void main(final String[] args) throws Exception {
+        SwingWorker<?, ?> worker = new SwingWorker() {
+            protected Void doInBackground() {
+                go.countDown();
+                while (!Thread.interrupted()) ;
+                return null;
+            }
+        };
+        worker.execute();
+        go.await();
+        worker.cancel(true);
+        try {
+            worker.get();
+        } catch (final CancellationException expected) {
+            // expected exception
+            return;
         }
-        return headers;
+        throw new RuntimeException("CancellationException was not thrown");
     }
 }
