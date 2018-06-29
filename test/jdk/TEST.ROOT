@@ -49,17 +49,23 @@ groups=TEST.groups
 # Source files for classes that will be used at the beginning of each test suite run,
 # to determine additional characteristics of the system for use with the @requires tag.
 # Note: compiled bootlibs code will be located in the folder 'bootClasses'
-#requires.extraPropDefns = ../../test/jtreg-ext/requires/VMProps.java [../../closed/test/jtreg-ext/requires/VMPropsExt.java]
-#requires.extraPropDefns.bootlibs = ../../test/lib/sun ../../test/lib/jdk/test/lib/Platform.java
-#requires.extraPropDefns.vmOpts = -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI -Xbootclasspath/a:bootClasses
-#requires.properties= \
-#    sun.arch.data.model \
-#    java.runtime.name \
-#    vm.gc.Z \
-#    vm.graal.enabled \
-#    vm.cds \
-#    docker.support \
-#    release.implementor
+requires.extraPropDefns = ../../test/jtreg-ext/requires/VMProps.java [../../closed/test/jtreg-ext/requires/VMPropsExt.java]
+requires.extraPropDefns.bootlibs = ../../test/lib/sun ../../test/lib/jdk/test/lib/Platform.java
+requires.extraPropDefns.vmOpts = -XX:+UnlockDiagnosticVMOptions -XX:+WhiteBoxAPI -Xbootclasspath/a:bootClasses
+requires.properties= \
+    sun.arch.data.model \
+    java.runtime.name \
+    vm.gc.Z \
+    vm.graal.enabled \
+    vm.cds \
+    vm.hasSA \
+    vm.hasSAandCanAttach \
+    docker.support \
+    release.implementor
+
+# Unset Hotspot requires properties for OpenJ9
+requires.extraPropDefns =
+requires.properties =
 
 # Minimum jtreg version
 requiredVersion=4.2 b12
@@ -73,3 +79,4 @@ useNewOptions=true
 
 # Use --patch-module instead of -Xmodule:
 useNewPatchModule=true
+
