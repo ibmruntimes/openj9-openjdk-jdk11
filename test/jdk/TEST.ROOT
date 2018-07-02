@@ -63,9 +63,8 @@ requires.properties= \
     docker.support \
     release.implementor
 
-# Unset Hotspot requires properties for OpenJ9
-requires.extraPropDefns =
-requires.properties =
+# Unset Hotspot VMProps ProdDefns requires class and replace with optional OpenJ9 class
+requires.extraPropDefns = [../../closed/test/jtreg-ext/requires/OpenJ9PropsExt.java]
 
 # Minimum jtreg version
 requiredVersion=4.2 b12
