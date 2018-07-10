@@ -70,3 +70,11 @@ OPENJ9_LIBS_SUBDIR      := @OPENJ9_LIBS_SUBDIR@
 
 # Get shell to configure OMR
 export CONFIG_SHELL     := @CONFIG_SHELL@
+
+ifeq ($(OPENJDK_TARGET_OS), windows)
+  # Set environment variables for Microsoft Visual Studio toolchain.
+  # Note that PATH is set in spec.gmk.
+  export INCLUDE := "@VS_INCLUDE@"
+  export LIB := "@VS_LIB@"
+  export MSVC_VERSION := @TOOLCHAIN_VERSION@
+endif
