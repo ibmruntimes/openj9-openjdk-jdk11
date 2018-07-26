@@ -346,7 +346,7 @@ run-preprocessors-j9 : stage-j9 \
 		$(OUTPUTDIR)/vm/compiler/jit.version \
 		$(OUTPUTDIR)/vm/include/openj9_version_info.h
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
-	export BOOT_JDK=$(BOOT_JDK) \
+	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUTDIR)/vm $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
 			CMAKE=$(CMAKE) \
@@ -377,6 +377,11 @@ endif
 	@$(CP) -p $(OUTPUTDIR)/vm/redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX) $(MODULES_LIBS_DIR)/java.base/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
 	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/server
 	@$(CP) -p $(OUTPUTDIR)/vm/redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX) $(MODULES_LIBS_DIR)/java.base/server/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
+
+ifeq (windows,$(OPENJDK_TARGET_OS))
+	@$(ECHO) "Updating vm/lib/jvm.* with vm/j9vm_jdk11/jdk11_jvm.*"
+	@$(CP) -p $(OUTPUTDIR)/vm/j9vm_jdk11/$(LIBRARY_PREFIX)jdk11_jvm$(STATIC_LIBRARY_SUFFIX) $(OUTPUTDIR)/vm/lib/jvm$(STATIC_LIBRARY_SUFFIX)
+endif
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@$(ECHO) Copying j9ddr.dat
