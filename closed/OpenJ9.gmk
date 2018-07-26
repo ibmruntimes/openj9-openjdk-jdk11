@@ -110,6 +110,22 @@ OPENJ9_NOTICE_FILE := openj9/longabout.html
 OPENJ9_NOTICE_FILE_RENAME := openj9-notices.html
 OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX)
 
+OPENJ9_DDR_FILES :=
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  .PHONY : run-ddrgen
+  $(OUTPUTDIR)/vm/j9ddr.dat : run-ddrgen
+  run-ddrgen :
+	export OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+		VERSION_MAJOR=$(VERSION_FEATURE) \
+		$(EXPORT_MSVS_ENV_VARS) \
+	&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk \
+		CC="$(CC)" \
+		CXX="$(CXX)"
+
+  OPENJ9_DDR_FILES += j9ddr.dat
+endif
+
 MODULES_LIBS_DIR := $(OUTPUTDIR)/support/modules_libs
 
 # openjdk makeflags don't work with openj9/omr native compiles; override with number of CPUs which openj9 and omr need supplied
@@ -180,6 +196,9 @@ $(foreach file,$(OPENJ9_SHARED_CLASSES_LIBRARIES), \
 
 $(foreach file,$(OPENJ9_MANAGEMENT_LIBRARIES), \
 	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.management/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
+
+$(foreach file,$(OPENJ9_DDR_FILES), \
+	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
 
 endef
 
@@ -381,12 +400,6 @@ endif
 ifeq (windows,$(OPENJDK_TARGET_OS))
 	@$(ECHO) "Updating vm/lib/jvm.* with vm/j9vm_jdk11/jdk11_jvm.*"
 	@$(CP) -p $(OUTPUTDIR)/vm/j9vm_jdk11/$(LIBRARY_PREFIX)jdk11_jvm$(STATIC_LIBRARY_SUFFIX) $(OUTPUTDIR)/vm/lib/jvm$(STATIC_LIBRARY_SUFFIX)
-endif
-
-ifeq (true,$(OPENJ9_ENABLE_DDR))
-	@$(ECHO) Copying j9ddr.dat
-	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)
-	@$(CP) -p $(OUTPUTDIR)/vm/j9ddr.dat $(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)/
 endif
 
 J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl_sources.done
