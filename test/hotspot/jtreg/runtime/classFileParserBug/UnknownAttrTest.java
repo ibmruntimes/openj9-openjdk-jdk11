@@ -23,16 +23,22 @@
 
 /*
  * @test
- * @summary
- * @requires vm.opt.final.EnableJVMCI == true
- *
- * @modules jdk.internal.vm.compiler
- *
- * @library /test/lib /compiler/graalunit /
- *
- * @build compiler.graalunit.common.GraalUnitTestLauncher
- *
- * @run driver jdk.test.lib.FileInstaller ../../ProblemList-graal.txt ExcludeList.txt
- *
- * @run main/othervm compiler.graalunit.common.GraalUnitTestLauncher -prefix org.graalvm.compiler.jtt.reflect.[fF] -exclude ExcludeList.txt
+ * @bug 8207944
+ * @summary Unknown attribute erroneously causes ClassFormatError exception.
+ * @compile UnknownAttr.jcod
+ * @run main UnknownAttrTest
  */
+
+// Test that an unknown class attribute is ignored and no exception is thrown.
+public class UnknownAttrTest {
+    public static void main(String args[]) throws Throwable {
+
+        System.out.println("Regression test for bug 8207944");
+        try {
+            Class newClass = Class.forName("UnknownAttr");
+        } catch (java.lang.Throwable e) {
+            throw new RuntimeException(
+                "Unexpected exception: " + e.getMessage());
+        }
+    }
+}

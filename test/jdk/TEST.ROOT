@@ -60,6 +60,7 @@ requires.properties= \
     vm.cds \
     vm.hasSA \
     vm.hasSAandCanAttach \
+    vm.hasJFR \
     docker.support \
     release.implementor
 
