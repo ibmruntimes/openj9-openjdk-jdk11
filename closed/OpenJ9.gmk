@@ -22,6 +22,9 @@ endif
 include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
 
+default :
+	$(error OpenJ9.gmk has no default target)
+
 ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
 endif
@@ -49,85 +52,6 @@ ifeq (,$(OPENJ9OMR_SHA))
   $(error Could not determine OMR SHA)
 endif
 
-OPENJ9_ALT_SHARED_LIBRARIES := \
-	$(LIBRARY_PREFIX)jclse11_29$(SHARED_LIBRARY_SUFFIX) \
-	j9vm_jdk11/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) \
-	#
-
-OPENJ9_SHARED_CLASSES_LIBRARIES := \
-	$(LIBRARY_PREFIX)j9shr29$(SHARED_LIBRARY_SUFFIX) \
-	#
-
-OPENJ9_JAVA_BASE_LIBRARIES := \
-	$(LIBRARY_PREFIX)cuda4j29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9dmp29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9gc29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9gcchk29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9hookable29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9jit29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9jnichk29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9jvmti29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9prt29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9thr29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9trc29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9vm29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9vmchk29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9vrb29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)j9zlib29$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)jsig$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)omrsig$(SHARED_LIBRARY_SUFFIX) \
-	$(OPENJ9_ALT_SHARED_LIBRARIES) \
-	#
-
-OPENJ9_MANAGEMENT_LIBRARIES := \
-	$(LIBRARY_PREFIX)management$(SHARED_LIBRARY_SUFFIX) \
-	$(LIBRARY_PREFIX)management_ext$(SHARED_LIBRARY_SUFFIX) \
-	#
-
-OPENJ9_ALL_LIBRARIES := \
-	$(wildcard $(OUTPUTDIR)/vm/$(LIBRARY_PREFIX)*$(SHARED_LIBRARY_SUFFIX))
-
-OPENJ9_BUILD_LIBRARIES := \
-	$(filter-out \
-		$(notdir $(OPENJ9_ALT_SHARED_LIBRARIES)), \
-		$(notdir $(OPENJ9_ALL_LIBRARIES)))
-
-OPENJ9_SHARED_LIBRARIES := \
-	$(filter-out \
-		$(notdir $(OPENJ9_ALT_SHARED_LIBRARIES) $(OPENJ9_JAVA_BASE_LIBRARIES) $(OPENJ9_SHARED_CLASSES_LIBRARIES)), \
-		$(notdir $(OPENJ9_ALL_LIBRARIES)))
-
-OPENJ9_PROPERTY_FILES := \
-	$(notdir $(wildcard $(OUTPUTDIR)/vm/java*.properties))
-
-OPENJ9_MISC_FILES := \
-	J9TraceFormat.dat \
-	OMRTraceFormat.dat \
-	options.default \
-	#
-
-OPENJ9_NOTICE_FILE := openj9/longabout.html
-OPENJ9_NOTICE_FILE_RENAME := openj9-notices.html
-OPENJ9_REDIRECTOR := redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX)
-
-OPENJ9_DDR_FILES :=
-
-ifeq (true,$(OPENJ9_ENABLE_DDR))
-  .PHONY : run-ddrgen
-  $(OUTPUTDIR)/vm/j9ddr.dat : run-ddrgen
-  run-ddrgen :
-	export OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		VERSION_MAJOR=$(VERSION_FEATURE) \
-		$(EXPORT_MSVS_ENV_VARS) \
-	&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk \
-		CC="$(CC)" \
-		CXX="$(CXX)"
-
-  OPENJ9_DDR_FILES += j9ddr.dat
-endif
-
-MODULES_LIBS_DIR := $(OUTPUTDIR)/support/modules_libs
-
 # openjdk makeflags don't work with openj9/omr native compiles; override with number of CPUs which openj9 and omr need supplied
 override MAKEFLAGS := -j $(JOBS)
 
@@ -147,84 +71,35 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
   # Uncomment the following line to use the default compiler throughout.
   # EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
   # set the output directory for shared libraries
-  OPENJ9_LIBS_OUTPUT_DIR := bin
+  OPENJ9_BIN_OR_LIB_DIR := bin
 else
   EXPORT_MSVS_ENV_VARS :=
   EXPORT_NO_USE_MINGW :=
-  OPENJ9_LIBS_OUTPUT_DIR := lib
+  OPENJ9_BIN_OR_LIB_DIR := lib
 endif
 
 .PHONY : \
 	build-j9 \
+	build-openj9-tools \
 	clean-j9 \
 	clean-j9-dist \
+	create_build_jdk \
 	generate-j9jcl-sources \
 	openj9_build_jdk \
 	run-preprocessors-j9 \
 	stage-j9 \
 	stage-openj9-tools \
-	build-openj9-tools \
 	#
-
-# generated_target_rules_build
-# ----------------------------
-# param 1 = The make goal
-# param 2 = The jdk/jre directory to add openj9 content
-define generated_target_rules_build
-
-.PHONY : $1
-
-$(foreach file,$(OPENJ9_ALT_SHARED_LIBRARIES) $(OPENJ9_BUILD_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/$(OPENJ9_LIBS_SUBDIR)/$(notdir $(file)),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
-	$(eval $(call openj9_copy_prereq,$1,$2/lib/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_MISC_FILES) $(OPENJ9_PROPERTY_FILES), \
-	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.base/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_NOTICE_FILE_RENAME),$(TOPDIR)/$(OPENJ9_NOTICE_FILE)))
-
-$(foreach file,$(OPENJ9_REDIRECTOR), \
-	$(eval $(call openj9_copy_prereq,$1,$2/$(OPENJ9_LIBS_OUTPUT_DIR)/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_JAVA_BASE_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)/$(notdir $(file)),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_SHARED_CLASSES_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/openj9.sharedclasses/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_MANAGEMENT_LIBRARIES), \
-	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.management/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-$(foreach file,$(OPENJ9_DDR_FILES), \
-	$(eval $(call openj9_copy_prereq,$1,$(MODULES_LIBS_DIR)/java.base/$(OPENJ9_LIBS_SUBDIR)/$(file),$(OUTPUTDIR)/vm/$(file))))
-
-endef
-
-# openj9_copy_prereq
-# ------------------
-# param 1 = The make goal.
-# param 2 = The target file to create or update.
-# parma 3 = The source file to copy.
-define openj9_copy_prereq
-$1 : $2
-$2 : $3
-	@$(MKDIR) -p $$(@D)
-	@$(CP) $$< $$@
-endef
 
 # openj9_copy_tree
 # ----------------
-# param 1 = The target directory to create or update.
-# param 2 = The source directory to copy.
-define openj9_copy_tree
-	$(call openj9_copy_tree_impl,$(strip $(abspath $1)),$(strip $(abspath $2)))
-endef
+# $1 = The target directory to create or update.
+# $2 = The source directory to copy.
+openj9_copy_tree = $(call openj9_copy_tree_impl,$(strip $1),$(strip $2))
 
 OPENJ9_MARKER_FILE := .up-to-date
 
-# Use '-m' / '--touch' to avoid file modification times ('-m' works with older tar implementations).
+# Use '-m' to update file modification times ('-m' is equivalent to '--touch' in some implementations of tar)
 define openj9_copy_tree_impl
 	@$(MKDIR) -p $1
 	@$(TAR) --create --directory=$2 $(if $(wildcard $1/$(OPENJ9_MARKER_FILE)),--newer=$1/$(OPENJ9_MARKER_FILE)) --exclude-vcs . | $(TAR) --extract --directory=$1 -m
@@ -234,11 +109,175 @@ endef
 openj9_build_jdk : build-j9
 	+$(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk create_build_jdk
 
-$(eval $(call generated_target_rules_build,create_build_jdk,$(JDK_OUTPUTDIR)))
+# openj9_add_jdk_rules
+# --------------------
+# $1 = target file to create or update
+# $2 = source file to copy
+define openj9_add_jdk_rules
+create_build_jdk : $(strip $1)
+$(strip $1) : $(strip $2)
+	$$(call install-file)
+endef
+
+# openj9_add_jdk_basic
+# --------------------
+# $1 = target directories
+# $2 = source paths (relative to the vm build directory)
+openj9_add_jdk_basic = \
+	$(foreach target, $1, \
+		$(foreach source, $2, \
+			$(eval $(call openj9_add_jdk_rules, \
+				$(target)/$(notdir $(source)), \
+				$(OUTPUTDIR)/vm/$(source)))))
+
+# openj9_add_jdk_bin
+# ------------------
+# $1 = module name
+# $2 = source paths (relative to the vm build directory)
+openj9_add_jdk_bin = \
+	$(call openj9_add_jdk_basic, \
+		$(addsuffix /$(OPENJ9_LIBS_SUBDIR), \
+			$(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, $1)), \
+		$2)
+
+# openj9_add_jdk_shlibs
+# ---------------------
+# $1 = module name
+# $2 = simple library names (relative to the vm build directory)
+openj9_add_jdk_shlibs = \
+	$(call openj9_add_jdk_bin, \
+		$1, \
+		$(foreach lib, $2, \
+			$(patsubst ./%,%,$(dir $(lib))$(call SHARED_LIBRARY,$(notdir $(lib))))))
+
+# openj9_add_jdk_lib
+# ------------------
+# $1 = module name
+# $2 = source paths (relative to the vm build directory)
+openj9_add_jdk_lib = $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/lib $(call FindLibDirForModule, $1), $2)
+
+# openj9_add_jdk_special
+# ----------------------
+# $1 = target file name
+# $2 = source path (relative to the vm build directory)
+openj9_add_jdk_special = \
+	$(foreach target, $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, java.base), \
+		$(eval $(call openj9_add_jdk_rules, $(target)/$(strip $1), $(OUTPUTDIR)/vm/$(strip $2))))
+
+# redirector
+
+$(foreach subdir, j9vm server, \
+	$(call openj9_add_jdk_special, \
+		$(subdir)/$(call SHARED_LIBRARY,jvm), \
+		redirector/$(call SHARED_LIBRARY,jvm_jdk11)))
+
+# java.base
+
+$(call openj9_add_jdk_shlibs, java.base, \
+    j9vm_jdk11/jvm \
+    j9dmp29 \
+    j9gc29 \
+    j9gcchk29 \
+    j9hookable29 \
+    j9jit29 \
+    j9jnichk29 \
+    j9jvmti29 \
+    j9prt29 \
+    j9thr29 \
+    j9trc29 \
+    j9vm29 \
+    j9vmchk29 \
+    j9vrb29 \
+    j9zlib29 \
+    jclse11_29 \
+    jsig \
+    omrsig \
+    )
+
+ifeq (windows,$(OPENJDK_TARGET_OS))
+$(eval $(call openj9_add_jdk_rules, \
+	$(OUTPUTDIR)/vm/lib/$(call STATIC_LIBRARY,jvm), \
+	$(OUTPUTDIR)/vm/j9vm_jdk11/$(call STATIC_LIBRARY,jdk11_jvm)))
+endif
+
+$(call openj9_add_jdk_lib, java.base, \
+	$(notdir $(wildcard $(OUTPUTDIR)/vm/java*.properties)) \
+	J9TraceFormat.dat \
+	OMRTraceFormat.dat \
+	options.default \
+	)
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+$(call openj9_add_jdk_bin, java.base, j9ddr.dat)
+
+.PHONY : run-ddrgen
+$(OUTPUTDIR)/vm/j9ddr.dat : run-ddrgen
+run-ddrgen :
+	export \
+		CC="$(CC)" \
+		CXX="$(CXX)" \
+		$(EXPORT_MSVS_ENV_VARS) \
+		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+		VERSION_MAJOR=$(VERSION_FEATURE) \
+	&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
+endif
+
+$(eval $(call openj9_add_jdk_rules, \
+	$(call FindLibDirForModule, java.base)/openj9-notices.html, \
+	$(TOPDIR)/openj9/longabout.html))
+
+# java.base (internal)
+#   gdb_j929
+
+# libraries for other modules
+$(call openj9_add_jdk_shlibs, java.management, management management_ext)
+$(call openj9_add_jdk_shlibs, openj9.cuda, cuda4j29)
+$(call openj9_add_jdk_shlibs, openj9.dtjf, j9jextract)
+$(call openj9_add_jdk_shlibs, openj9.sharedclasses, j9shr29)
+
+# openj9_test_image_rules
+# -----------------------
+# $1 = absolute library path
+define openj9_test_image_rules
+openj9_test_image : $(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1))
+$(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1)) : $(strip $1)
+	$$(call install-file)
+endef
+
+$(foreach lib, \
+	$(patsubst %, $(OUTPUTDIR)/vm/$(call SHARED_LIBRARY,%), \
+		balloon29 \
+		bcuwhite \
+		bcvwhite \
+		gptest \
+		hooktests \
+		j9ben \
+		j9lazyClassLoad \
+		j9thrnumanatives29 \
+		j9thrtestnatives29 \
+		j9unresolved \
+		j9vmtest \
+		jcoregen29 \
+		jlmagent29 \
+		jniargtests \
+		jvmtitest \
+		memorywatcher29 \
+		migration \
+		osmemory29 \
+		SharedClassesNativeAgent \
+		softmxtest \
+		testjvmtiA \
+		testjvmtiB \
+		testlibA \
+		testlibB \
+		vmruntimestateagent29 \
+		), \
+	$(if $(wildcard $(lib)), \
+		$(eval $(call openj9_test_image_rules, $(lib)))))
 
 # Comments for stage-j9
 # Currently there is a staged location where j9 is built.  This is due to a number of reasons:
-# 1. make currently leaves output file in current directory
+# 1. make currently leaves output files in current directory
 # 2. generated source and header files
 # 3. repo layout compared to source.zip layout
 # See issue 49 for more information and actions to correct this action.
@@ -282,7 +321,7 @@ SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
 
 # openj9_stage_buildspec_file
 # ---------------------------
-# param 1 = The simple name of the file to copy.
+# $1 = The simple name of the file to copy.
 define openj9_stage_buildspec_file
 stage-j9 : $(OUTPUTDIR)/vm/buildspecs/$1
 $(OUTPUTDIR)/vm/buildspecs/$1 : $(OPENJ9_TOPDIR)/buildspecs/$1
@@ -324,9 +363,9 @@ stage-j9 : stage-openj9-tools
 
 OPENJ9_VERSION_VARS := \
 	COMPILER_VERSION_STRING \
+	HOTSPOT_TARGET_OS \
 	J9JDK_EXT_NAME \
 	J9JDK_EXT_VERSION \
-	HOTSPOT_TARGET_OS \
 	OPENJ9_TAG \
 	OPENJ9_VERSION_STRING \
 	OPENJDK_SHA \
@@ -346,7 +385,7 @@ $(OUTPUTDIR)/vm/include/openj9_version_info.h : $(TOPDIR)/closed/openj9_version_
 	@$(SED) $(OPENJ9_VERSION_SCRIPT) > $@ < $<
 
 # capture values for use with DependOnVariable
-OPENJ9_VERSION_MAP := $(foreach var,$(sort $(OPENJ9_VERSION_VARS)),$(var)='$(value $(var))'))
+OPENJ9_VERSION_MAP := $(foreach var,$(sort $(OPENJ9_VERSION_VARS)),$(var)='$(value $(var))')
 
 # update if the map changes
 $(OUTPUTDIR)/vm/include/openj9_version_info.h : $(call DependOnVariable,OPENJ9_VERSION_MAP)
@@ -389,18 +428,6 @@ else
 		&& $(MAKE) -C $(OUTPUTDIR)/vm $(MAKEFLAGS) all
 endif
 	@$(ECHO) OpenJ9 compile complete
-
-	# jvm is required for compiling other java.base support natives
-	@$(ECHO) "Creating support/modules_libs/java.base/*/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX) from J9 sources"
-	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/j9vm
-	@$(CP) -p $(OUTPUTDIR)/vm/redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX) $(MODULES_LIBS_DIR)/java.base/j9vm/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
-	@$(MKDIR) -p $(MODULES_LIBS_DIR)/java.base/server
-	@$(CP) -p $(OUTPUTDIR)/vm/redirector/$(LIBRARY_PREFIX)jvm_jdk11$(SHARED_LIBRARY_SUFFIX) $(MODULES_LIBS_DIR)/java.base/server/$(LIBRARY_PREFIX)jvm$(SHARED_LIBRARY_SUFFIX)
-
-ifeq (windows,$(OPENJDK_TARGET_OS))
-	@$(ECHO) "Updating vm/lib/jvm.* with vm/j9vm_jdk11/jdk11_jvm.*"
-	@$(CP) -p $(OUTPUTDIR)/vm/j9vm_jdk11/$(LIBRARY_PREFIX)jdk11_jvm$(STATIC_LIBRARY_SUFFIX) $(OUTPUTDIR)/vm/lib/jvm$(STATIC_LIBRARY_SUFFIX)
-endif
 
 J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl_sources.done
 

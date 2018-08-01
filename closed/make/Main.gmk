@@ -20,6 +20,7 @@ CLEAN_DIRS += vm
 .PHONY : \
 	j9vm-build \
 	java.base-libs \
+	test-image-openj9 \
 	#
 
 JVM_MAIN_LIB_TARGETS := j9vm-build
@@ -36,6 +37,13 @@ java.base-libs : java.base-copy j9vm-build
 
 j9vm-build : buildtools-langtools
 	+$(OPENJ9_MAKE) openj9_build_jdk
+
+test-image : test-image-openj9
+
+test-image-openj9 : j9vm-build
+	+$(OPENJ9_MAKE) openj9_test_image
+
+ALL_TARGETS += test-image-openj9
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
