@@ -1,4 +1,8 @@
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ *
  * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -252,7 +256,7 @@ recompute:
             j = 0;
             for (i=jz-1;i>=jk;i--) j |= iq[i];
             if(j==0) { /* need recomputation */
-                for(k=1;iq[jk-k]==0;k++);   /* k = no. of terms needed */
+                for(k=1;k<=jk&&iq[jk-k]==0;k++);   /* k = no. of terms needed */
 
                 for(i=jz+1;i<=jz+k;i++) {   /* add q[jz+1] to q[jz+k] */
                     f[jx+i] = (double) ipio2[jv+i];
