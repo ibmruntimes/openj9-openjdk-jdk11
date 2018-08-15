@@ -213,7 +213,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
       OPENJ9_PLATFORM_CODE=oa64
       OPENJ9_BUILDSPEC="osx_x86-64"
     else
-      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}, contact support team!])
+      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le; then
     OPENJ9_PLATFORM_CODE=xl64
@@ -231,7 +231,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_BUILDSPEC=linux_arm_linaro
     OPENJ9_LIBS_SUBDIR=default
   else
-    AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}, contact support team!])
+    AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi
 
   AC_SUBST(OPENJ9_BUILDSPEC)
