@@ -263,7 +263,7 @@ mlib_status mlib_ImageLookUp_Bit_U8_1(const mlib_u8 *src,
       }
 
 #ifdef _LITTLE_ENDIAN
-      emask = (mlib_u32)-(((mlib_s32)1) >> ((4 - (size - i)) * 8));
+      emask = ((mlib_u32)(-1)) >> ((4 - (size - i)) * 8);
 #else
       emask = (mlib_u32)-(((mlib_s32)1) << ((4 - (size - i)) * 8));
 #endif /* _LITTLE_ENDIAN */
@@ -272,7 +272,7 @@ mlib_status mlib_ImageLookUp_Bit_U8_1(const mlib_u8 *src,
 #else /* _NO_LONGLONG */
 
 #ifdef _LITTLE_ENDIAN
-      mlib_u64 emask = (mlib_u64)-(((mlib_s64)1) >> ((8 - (size - i)) * 8));
+      mlib_u64 emask = ((mlib_u64)-1) >> ((8 - (size - i)) * 8);
 #else
       mlib_u64 emask = (mlib_u64)-(((mlib_s64)1) << ((8 - (size - i)) * 8));
 #endif /* _LITTLE_ENDIAN */
@@ -399,7 +399,7 @@ mlib_status mlib_ImageLookUp_Bit_U8_2(const mlib_u8 *src,
       }
 
 #ifdef _LITTLE_ENDIAN
-      emask = (mlib_u32)-(((mlib_s32)1) >> ((4 - (size - i)) * 8));
+      emask = ((mlib_u32)(-1)) >> ((4 - (size - i)) * 8);
 #else
       emask = (mlib_u32)-(((mlib_s32)1) << ((4 - (size - i)) * 8));
 #endif /* _LITTLE_ENDIAN */
@@ -417,7 +417,7 @@ mlib_status mlib_ImageLookUp_Bit_U8_2(const mlib_u8 *src,
       }
 
 #ifdef _LITTLE_ENDIAN
-      emask = (mlib_u64)-(((mlib_s64)1) >> ((8 - (size - i)) * 8));
+      emask = ((mlib_u64)(-1)) >> ((8 - (size - i)) * 8);
 #else
       emask = (mlib_u64)-(((mlib_s64)1) << ((8 - (size - i)) * 8));
 #endif /* _LITTLE_ENDIAN */
@@ -569,7 +569,7 @@ mlib_status mlib_ImageLookUp_Bit_U8_3(const mlib_u8 *src,
       }
 
 #ifdef _LITTLE_ENDIAN
-      emask = (mlib_u32)-(((mlib_s32)1) >> ((4 - (size - i)) * 8));
+      emask = ((mlib_u32)(-1)) >> ((4 - (size - i)) * 8);
 #else
       emask = (mlib_u32)-(((mlib_s32)1) << ((4 - (size - i)) * 8));
 #endif /* _LITTLE_ENDIAN */
