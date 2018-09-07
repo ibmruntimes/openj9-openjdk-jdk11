@@ -16,7 +16,7 @@
 # ===========================================================================
 
 AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
-[ 
+[
   # Where are the OpenJ9 sources.
   OPENJ9OMR_TOPDIR="$TOPDIR/omr"
   OPENJ9_TOPDIR="$TOPDIR/openj9"
@@ -40,6 +40,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_NUMA
+  OPENJ9_CONFIGURE_WARNINGS
   OPENJ9_THIRD_PARTY_REQUIREMENTS
 ])
 
@@ -68,6 +69,43 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 AC_DEFUN([OPENJ9_BASIC_SETUP_FUNDAMENTAL_TOOLS],
 [
   BASIC_REQUIRE_PROGS(M4, m4)
+])
+
+AC_DEFUN_ONCE([OPENJ9_CONFIGURE_WARNINGS],
+[
+  AC_ARG_ENABLE([warnings-as-errors-omr], [AS_HELP_STRING([--disable-warnings-as-errors-omr],
+      [do not consider OMR compile warnings to be errors @<:@enabled@:>@])])
+  AC_MSG_CHECKING([if OMR compile warnings are considered errors])
+  if test "x$enable_warnings_as_errors_omr" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly set)])
+    WARNINGS_AS_ERRORS_OMR=true
+  elif test "x$enable_warnings_as_errors_omr" = xno ; then
+    AC_MSG_RESULT([no])
+    WARNINGS_AS_ERRORS_OMR=false
+  elif test "x$enable_warnings_as_errors_omr" = x ; then
+    AC_MSG_RESULT([yes (default)])
+    WARNINGS_AS_ERRORS_OMR=true
+  else
+    AC_MSG_ERROR([--disable-warnings-as-errors-omr accepts no argument])
+  fi
+  AC_SUBST(WARNINGS_AS_ERRORS_OMR)
+
+  AC_ARG_ENABLE([warnings-as-errors-openj9], [AS_HELP_STRING([--disable-warnings-as-errors-openj9],
+      [do not consider OpenJ9 native compile warnings to be errors @<:@enabled@:>@])])
+  AC_MSG_CHECKING([if OpenJ9 native compile warnings are considered errors])
+  if test "x$enable_warnings_as_errors_openj9" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly set)])
+    WARNINGS_AS_ERRORS_OPENJ9=true
+  elif test "x$enable_warnings_as_errors_openj9" = xno ; then
+    AC_MSG_RESULT([no])
+    WARNINGS_AS_ERRORS_OPENJ9=false
+  elif test "x$enable_warnings_as_errors_openj9" = x ; then
+    AC_MSG_RESULT([yes (default)])
+    WARNINGS_AS_ERRORS_OPENJ9=true
+  else
+    AC_MSG_ERROR([--disable-warnings-as-errors-openj9 accepts no argument])
+  fi
+  AC_SUBST(WARNINGS_AS_ERRORS_OPENJ9)
 ])
 
 AC_DEFUN_ONCE([OPENJ9_CONFIGURE_NUMA],
@@ -303,7 +341,7 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
- if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
     OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
   else

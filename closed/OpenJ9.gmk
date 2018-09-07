@@ -55,9 +55,13 @@ endif
 # openjdk makeflags don't work with openj9/omr native compiles; override with number of CPUs which openj9 and omr need supplied
 override MAKEFLAGS := -j $(JOBS)
 
-# honour the --disable-warnings-as-errors configure parameter during compilation of OMR
-ifeq (false,$(WARNINGS_AS_ERRORS))
+# Propagate configure option '--disable-warnings-as-errors-omr' to OMR.
+ifeq (false,$(WARNINGS_AS_ERRORS_OMR))
   OMR_EXTRA_CONFIGURE_ARGS := --disable-warnings-as-errors
+endif
+
+# Propagate configure option '--disable-warnings-as-errors-openj9' to OpenJ9.
+ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
   export UMA_SUPPRESS_WARNINGS_AS_ERRORS := 1
 endif
 
