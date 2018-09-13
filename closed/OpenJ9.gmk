@@ -178,25 +178,25 @@ $(foreach subdir, j9vm server, \
 # java.base
 
 $(call openj9_add_jdk_shlibs, java.base, \
-    j9vm_jdk11/jvm \
-    j9dmp29 \
-    j9gc29 \
-    j9gcchk29 \
-    j9hookable29 \
-    j9jit29 \
-    j9jnichk29 \
-    j9jvmti29 \
-    j9prt29 \
-    j9thr29 \
-    j9trc29 \
-    j9vm29 \
-    j9vmchk29 \
-    j9vrb29 \
-    j9zlib29 \
-    jclse11_29 \
-    jsig \
-    omrsig \
-    )
+	j9vm_jdk11/jvm \
+	j9dmp29 \
+	j9gc29 \
+	j9gcchk29 \
+	j9hookable29 \
+	j9jit29 \
+	j9jnichk29 \
+	j9jvmti29 \
+	j9prt29 \
+	j9thr29 \
+	j9trc29 \
+	j9vm29 \
+	j9vmchk29 \
+	j9vrb29 \
+	j9zlib29 \
+	jclse11_29 \
+	jsig \
+	omrsig \
+	)
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
 $(eval $(call openj9_add_jdk_rules, \
@@ -248,7 +248,26 @@ $(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1)) : $(strip $1)
 	$$(call install-file)
 endef
 
-$(foreach lib, \
+$(foreach file, \
+	$(patsubst %, $(OUTPUTDIR)/vm/%$(EXE_SUFFIX), \
+		algotest \
+		bcvunit \
+		cfdump \
+		ctest \
+		dyntest \
+		gc_rwlocktest \
+		glaunch \
+		invtest \
+		jsigjnitest \
+		pltest \
+		propstest \
+		shrtest \
+		testjep178_dynamic \
+		testjep178_static \
+		thrstatetest \
+		vmLifecyleTests \
+		vmtest \
+		) \
 	$(patsubst %, $(OUTPUTDIR)/vm/$(call SHARED_LIBRARY,%), \
 		balloon29 \
 		bcuwhite \
@@ -276,8 +295,8 @@ $(foreach lib, \
 		testlibB \
 		vmruntimestateagent29 \
 		), \
-	$(if $(wildcard $(lib)), \
-		$(eval $(call openj9_test_image_rules, $(lib)))))
+	$(if $(wildcard $(file)), \
+		$(eval $(call openj9_test_image_rules, $(file)))))
 
 # Comments for stage-j9
 # Currently there is a staged location where j9 is built.  This is due to a number of reasons:
