@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2015, 2017 All Rights Reserved
+ * (c) Copyright IBM Corp. 2015, 2018 All Rights Reserved
  * ===========================================================================
  */
 
@@ -849,9 +849,10 @@ public class BuiltinClassLoader
      */
     private Class<?> findClassInModuleOrNull(LoadedModule loadedModule, String cn) {
 		Class<?> c = null;												//IBM-shared_classes_misc
-		ModuleReader reader = moduleReaderFor(loadedModule.mref());		//IBM-shared_classes_misc
+		PrivilegedAction<ModuleReader> paModuleReaderFor = () -> moduleReaderFor(loadedModule.mref()); //IBM-shared_classes_misc
+		ModuleReader reader = AccessController.doPrivileged(paModuleReaderFor); //IBM-shared_classes_misc
 		if (!(reader instanceof PatchedModuleReader)) {					//IBM-shared_classes_misc
-			c = findClassInSharedClassesCache(cn, loadedModule, false);	//IBM-shared_classes_misc												
+			c = findClassInSharedClassesCache(cn, loadedModule, false);	//IBM-shared_classes_misc
 		}																//IBM-shared_classes_misc
 		if (null != c) {												//IBM-shared_classes_misc
 			return c;													//IBM-shared_classes_misc
