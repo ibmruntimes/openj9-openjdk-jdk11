@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 1997, 2017 All Rights Reserved
+ * (c) Copyright IBM Corp. 1997, 2018 All Rights Reserved
  * ===========================================================================
  */
 
@@ -755,13 +755,22 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                    }                                                           //IBM-shared_classes_misc
                }                                                               //IBM-shared_classes_misc
            } else {                                                            //IBM-shared_classes_misc
-               if (man != null) {                                              //IBM-shared_classes_misc
-                   definePackage(pkgname, man, url);                           //IBM-shared_classes_misc
-               } else {                                                        //IBM-shared_classes_misc
-                    definePackage(pkgname, null, null, null, null, null, null, null); //IBM-shared_classes_misc
-                }                                                               //IBM-shared_classes_misc
-           }                            
-       }                                                                      //IBM-shared_classes_misc
+               try {                                                           //IBM-shared_classes_misc
+                   if (null != man) {                                          //IBM-shared_classes_misc
+                      definePackage(pkgname, man, url);                        //IBM-shared_classes_misc
+                   } else {                                                    //IBM-shared_classes_misc
+                      definePackage(pkgname, null, null, null, null, null, null, null); //IBM-shared_classes_misc
+                    }                                                          //IBM-shared_classes_misc
+                } catch (IllegalArgumentException iae) {                       //IBM-shared_classes_misc
+                    // https://github.com/eclipse/openj9/issues/3038           //IBM-shared_classes_misc
+                    // Detect and ignore race between two threads defining different classes in the same package. //IBM-shared_classes_misc
+                    if (getAndVerifyPackage(pkgname, man, url) == null) {      //IBM-shared_classes_misc
+                        // Should never happen                                 //IBM-shared_classes_misc
+                        throw new AssertionError("Cannot find package " + pkgname); //IBM-shared_classes_misc
+                    }                                                          //IBM-shared_classes_misc
+                }                                                              //IBM-shared_classes_misc
+           }                                                                   //IBM-shared_classes_misc
+       }                                                                       //IBM-shared_classes_misc
        /*                                                                      //IBM-shared_classes_misc
          * Now read the class bytes and define the class.  We don't need to call  //IBM-shared_classes_misc
          * storeSharedClass(), since its already in our shared class cache.     //IBM-shared_classes_misc
