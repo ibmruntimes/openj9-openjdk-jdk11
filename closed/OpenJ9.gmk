@@ -237,7 +237,7 @@ $(eval $(call openj9_add_jdk_rules, \
 # libraries for other modules
 $(call openj9_add_jdk_shlibs, java.management, management management_ext)
 $(call openj9_add_jdk_shlibs, openj9.cuda, cuda4j29)
-$(call openj9_add_jdk_shlibs, openj9.dtjf, j9jextract)
+$(call openj9_add_jdk_shlibs, openj9.dtfj, j9jextract)
 $(call openj9_add_jdk_shlibs, openj9.sharedclasses, j9shr29)
 
 # openj9_test_image_rules
