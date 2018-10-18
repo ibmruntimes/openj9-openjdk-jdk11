@@ -33,6 +33,11 @@ endef
 OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
 OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
 
+# compiler overrides
+OPENJ9_CC               := @OPENJ9_CC@
+OPENJ9_CXX              := @OPENJ9_CXX@
+OPENJ9_DEVELOPER_DIR    := @OPENJ9_DEVELOPER_DIR@
+
 # treatment of warnings in native code
 WARNINGS_AS_ERRORS_OMR    := @WARNINGS_AS_ERRORS_OMR@
 WARNINGS_AS_ERRORS_OPENJ9 := @WARNINGS_AS_ERRORS_OPENJ9@
