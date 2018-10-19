@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -74,6 +74,7 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Stream;
 
+import jdk.internal.misc.SharedSecrets;
 import jdk.internal.misc.VM;
 import jdk.internal.module.ModulePatcher.PatchedModuleReader;
 import jdk.internal.module.Resources;
@@ -1166,7 +1167,8 @@ public class BuiltinClassLoader
      * Manifest are used to get the package version and sealing information.
      *
      * @throws IllegalArgumentException if the package name duplicates an
-     * existing package either in this class loader or one of its ancestors
+     *      existing package either in this class loader or one of its ancestors
+     * @throws SecurityException if the package name is untrusted in the manifest
      */
     private Package definePackage(String pn, Manifest man, URL url) {
         String specTitle = null;
@@ -1179,7 +1181,8 @@ public class BuiltinClassLoader
         URL sealBase = null;
 
         if (man != null) {
-            Attributes attr = man.getAttributes(pn.replace('.', '/').concat("/"));
+            Attributes attr = SharedSecrets.javaUtilJarAccess()
+                    .getTrustedAttributes(man, pn.replace('.', '/').concat("/"));
             if (attr != null) {
                 specTitle = attr.getValue(Attributes.Name.SPECIFICATION_TITLE);
                 specVersion = attr.getValue(Attributes.Name.SPECIFICATION_VERSION);
@@ -1225,10 +1228,12 @@ public class BuiltinClassLoader
     /**
      * Returns {@code true} if the specified package name is sealed according to
      * the given manifest.
+     *
+     * @throws SecurityException if the package name is untrusted in the manifest
      */
     private boolean isSealed(String pn, Manifest man) {
-        String path = pn.replace('.', '/').concat("/");
-        Attributes attr = man.getAttributes(path);
+        Attributes attr = SharedSecrets.javaUtilJarAccess()
+                .getTrustedAttributes(man, pn.replace('.', '/').concat("/"));
         String sealed = null;
         if (attr != null)
             sealed = attr.getValue(Attributes.Name.SEALED);
