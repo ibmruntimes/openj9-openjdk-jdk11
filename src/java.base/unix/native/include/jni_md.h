@@ -1,8 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- * ===========================================================================
- *
  * Copyright (c) 1996, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -26,7 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
+ 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
+ 
 #ifndef _JAVASOFT_JNI_MD_H_
 #define _JAVASOFT_JNI_MD_H_
 
