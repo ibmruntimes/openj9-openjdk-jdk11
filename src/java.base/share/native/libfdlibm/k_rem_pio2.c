@@ -1,8 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- * ===========================================================================
- *
  * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -26,7 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 /*
  * __kernel_rem_pio2(x,y,e0,nx,prec,ipio2)
  * double x[],y[]; int e0,nx,prec; int ipio2[];
