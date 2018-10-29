@@ -1,10 +1,4 @@
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- * ===========================================================================
- *
- * Copyright (c) 2015, 2016, Oracle and/or its affiliates. All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -32,7 +26,11 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 #include <string.h>
 
 #include "jni.h"
