@@ -36,6 +36,11 @@ endef
 OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
 OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
 
+# compiler overrides
+OPENJ9_CC               := @OPENJ9_CC@
+OPENJ9_CXX              := @OPENJ9_CXX@
+OPENJ9_DEVELOPER_DIR    := @OPENJ9_DEVELOPER_DIR@
+
 # treatment of warnings in native code
 WARNINGS_AS_ERRORS_OMR    := @WARNINGS_AS_ERRORS_OMR@
 WARNINGS_AS_ERRORS_OPENJ9 := @WARNINGS_AS_ERRORS_OPENJ9@
@@ -75,9 +80,9 @@ OPENJ9_PLATFORM_CODE    := @OPENJ9_PLATFORM_CODE@
 
 OPENJ9_LIBS_SUBDIR      := @OPENJ9_LIBS_SUBDIR@
 
-# Export autoconf cache variables for CC/CXX
-# This is for the case where ccache is enabled
-# It ensures that OMR autoconf uses the compiler, not ccache
+# Export autoconf cache variables for CC/CXX.
+# This is for the case where ccache is enabled.
+# It ensures that OMR autoconf uses the compiler, not ccache.
 export ac_cv_prog_CC    := @CC@
 export ac_cv_prog_CXX   := @CXX@
 

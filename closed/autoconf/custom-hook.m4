@@ -40,6 +40,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_PLATFORM_SETUP
   OPENJDK_VERSION_DETAILS
   OPENJ9_CONFIGURE_CMAKE
+  OPENJ9_CONFIGURE_COMPILERS
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_NUMA
@@ -51,15 +52,15 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 [
   AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
     [
-      if test "x$with_cmake" != "x"; then
+      if test "x$with_cmake" != x ; then
         CMAKE=$with_cmake
       fi
       with_cmake=yes
     ],
     [with_cmake=no])
-  if test "$with_cmake" == "yes"; then
+  if test "$with_cmake" == yes ; then
     AC_PATH_PROG([CMAKE], [cmake])
-    if test "x$CMAKE" == x; then
+    if test "x$CMAKE" == x ; then
       AC_MSG_ERROR([Could not find CMake])
     fi
     OPENJ9_ENABLE_CMAKE=true
@@ -113,10 +114,10 @@ AC_DEFUN_ONCE([OPENJ9_CONFIGURE_WARNINGS],
 
 AC_DEFUN_ONCE([OPENJ9_CONFIGURE_NUMA],
 [
-  if test "x$OPENJDK_TARGET_OS" = xlinux; then
-    if test "x$OPENJDK_TARGET_CPU_ARCH" = xx86 -o "x$OPENJDK_TARGET_CPU_ARCH" = xppc; then
+  if test "x$OPENJDK_TARGET_OS" = xlinux ; then
+    if test "x$OPENJDK_TARGET_CPU_ARCH" = xx86 -o "x$OPENJDK_TARGET_CPU_ARCH" = xppc ; then
       AC_MSG_CHECKING([checking for numa])
-      if test -f /usr/include/numa.h -a -f /usr/include/numaif.h; then
+      if test -f /usr/include/numa.h -a -f /usr/include/numaif.h ; then
         AC_MSG_RESULT([yes])
       else
         AC_MSG_RESULT([no])
@@ -125,6 +126,25 @@ AC_DEFUN_ONCE([OPENJ9_CONFIGURE_NUMA],
       fi
     fi
   fi
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_COMPILERS],
+[
+  AC_ARG_WITH(openj9-cc, [AS_HELP_STRING([--with-openj9-cc], [build OpenJ9 with a specific C compiler])],
+    [OPENJ9_CC=$with_openj9_cc],
+    [OPENJ9_CC=])
+
+  AC_ARG_WITH(openj9-cxx, [AS_HELP_STRING([--with-openj9-cxx], [build OpenJ9 with a specific C++ compiler])],
+    [OPENJ9_CXX=$with_openj9_cxx],
+    [OPENJ9_CXX=])
+
+  AC_ARG_WITH(openj9-developer-dir, [AS_HELP_STRING([--with-openj9-developer-dir], [build OpenJ9 with a specific Xcode version])],
+    [OPENJ9_DEVELOPER_DIR=$with_openj9_developer_dir],
+    [OPENJ9_DEVELOPER_DIR=])
+
+  AC_SUBST(OPENJ9_CC)
+  AC_SUBST(OPENJ9_CXX)
+  AC_SUBST(OPENJ9_DEVELOPER_DIR)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
@@ -232,7 +252,7 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
   # JVM will run).
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($host_cpu)
 
-  if test "x$with_noncompressedrefs" = x; then
+  if test "x$with_noncompressedrefs" = x ; then
     OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_${OPENJ9_CPU}_cmprssptrs"
     OPENJ9_LIBS_SUBDIR=compressedrefs
   else
@@ -240,38 +260,38 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_LIBS_SUBDIR=default
   fi
 
-  if test "x$OPENJ9_CPU" = xx86-64; then
-    if test "x$OPENJDK_BUILD_OS" = xlinux; then
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJDK_BUILD_OS" = xwindows; then
+    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-        OPENJ9_BUILDSPEC="win_x86-64"
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        OPENJ9_BUILDSPEC=win_x86-64
       else
-        OPENJ9_BUILDSPEC="win_x86-64_cmprssptrs"
+        OPENJ9_BUILDSPEC=win_x86-64_cmprssptrs
       fi
-    elif test "x$OPENJDK_BUILD_OS" = xmacosx; then
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
-      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
-        OPENJ9_BUILDSPEC="osx_x86-64"
+      if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
+        OPENJ9_BUILDSPEC=osx_x86-64
       else
-        OPENJ9_BUILDSPEC="osx_x86-64_cmprssptrs"
+        OPENJ9_BUILDSPEC=osx_x86-64_cmprssptrs
       fi
     else
       AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
     fi
-  elif test "x$OPENJ9_CPU" = xppc-64_le; then
+  elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
-    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault; then
+    if test "x$OPENJ9_LIBS_SUBDIR" = xdefault ; then
       OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_le_gcc"
     else
       OPENJ9_BUILDSPEC="${OPENJDK_BUILD_OS}_ppc-64_cmprssptrs_le_gcc"
     fi
-  elif test "x$OPENJ9_CPU" = x390-64; then
+  elif test "x$OPENJ9_CPU" = x390-64 ; then
     OPENJ9_PLATFORM_CODE=xz64
-  elif test "x$OPENJ9_CPU" = xppc-64; then
+  elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
-  elif test "x$OPENJ9_CPU" = xarm; then
+  elif test "x$OPENJ9_CPU" = xarm ; then
     OPENJ9_PLATFORM_CODE=xr32
     OPENJ9_BUILDSPEC=linux_arm_linaro
     OPENJ9_LIBS_SUBDIR=default
@@ -289,7 +309,7 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
   LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --tags="jdk-11*" --topo-order --max-count=1 2>/dev/null`
-  if test "x$LAST_TAGGED_SHA" != x; then
+  if test "x$LAST_TAGGED_SHA" != x ; then
     OPENJDK_TAG=`git -C $TOPDIR describe --tags "$LAST_TAGGED_SHA"`
   else
     OPENJDK_TAG=
@@ -309,7 +329,7 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
   AC_ARG_WITH(freemarker-jar, [AS_HELP_STRING([--with-freemarker-jar],
       [path to freemarker.jar (used to build OpenJ9 build tools)])])
 
-  if test "x$with_freemarker_jar" == x; then
+  if test "x$with_freemarker_jar" == x ; then
     AC_MSG_RESULT([no])
     printf "\n"
     printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
@@ -329,7 +349,7 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
   else
     AC_MSG_RESULT([yes])
     AC_MSG_CHECKING([checking that '$with_freemarker_jar' exists])
-    if test -f "$with_freemarker_jar"; then
+    if test -f "$with_freemarker_jar" ; then
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no])
@@ -337,7 +357,7 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
     fi
   fi
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
   else
     FREEMARKER_JAR=$with_freemarker_jar
@@ -348,7 +368,7 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
-  if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
+  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
     OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
   else
@@ -362,5 +382,5 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   AC_CONFIG_FILES([$OUTPUTDIR/custom-spec.gmk:$CLOSED_AUTOCONF_DIR/custom-spec.gmk.in])
 
   # explicitly disable classlist generation
-  ENABLE_GENERATE_CLASSLIST="false"
+  ENABLE_GENERATE_CLASSLIST=false
 ])
