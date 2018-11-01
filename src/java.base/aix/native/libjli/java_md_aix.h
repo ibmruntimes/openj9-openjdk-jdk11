@@ -1,10 +1,13 @@
 /*
- * Copyright (c) 2016 SAP SE. All rights reserved.
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
- *
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
  * published by the Free Software Foundation.
+ *
+ * IBM designates this particular file as subject to the "Classpath" exception
+ * as provided by IBM in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -13,35 +16,45 @@
  * accompanied this code).
  *
  * You should have received a copy of the GNU General Public License version
- * 2 along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
- * or visit www.oracle.com if you need additional information or have any
- * questions.
+ * 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+ * ===========================================================================
  */
 
 #ifndef JAVA_MD_AIX_H
 #define JAVA_MD_AIX_H
 
-/*
- * Very limited AIX port of dladdr() for libjli.so.
- *
- * We try to mimick dladdr(3) on Linux (see http://linux.die.net/man/3/dladdr)
- * dladdr(3) is not POSIX but a GNU extension, and is not available on AIX.
- *
- * We only support Dl_info.dli_fname here as this is the only thing that is
- * used of it by libjli.so. A more comprehensive port of dladdr can be found
- * in the hotspot implementation which is not available at this place, though.
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {
-  const char *dli_fname; /* file path of loaded library */
-  void *dli_fbase;       /* unsupported */
-  const char *dli_sname; /* unsupported */
-  void *dli_saddr;       /* unsupported */
+typedef struct Dl_info {
+	/* pathname of shared object that contains address */
+	const char *dli_fname;
+#if 0 /* unsupported fields */
+	/* base address at which shared object is loaded */
+	void *dli_fbase;
+	/* name of symbol whose definition overlaps addr */
+	const char *dli_sname;
+	/* exact address of symbol named in dli_sname */
+	void *dli_saddr;
+#endif /* unsupported */
 } Dl_info;
 
+/*
+ * A limited implementation for AIX of the API in glibc on other platforms.
+ *
+ * Given the address in a code section of the process, return information
+ * about the module and function containing that address.
+ *
+ * @param addr the code address of interest
+ * @param info where the module and function information is to be returned
+ *
+ * @return non-zero on success, zero otherwise
+ */
 int dladdr(void *addr, Dl_info *info);
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif /* JAVA_MD_AIX_H */
