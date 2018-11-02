@@ -179,6 +179,17 @@ $(foreach subdir, j9vm server, \
 		$(subdir)/$(call SHARED_LIBRARY,jvm), \
 		redirector/$(call SHARED_LIBRARY,jvm_jdk11)))
 
+# jsig
+$(call openj9_add_jdk_special, \
+        server/$(call SHARED_LIBRARY,jsig), \
+        $(call SHARED_LIBRARY,jsig))
+$(call openj9_add_jdk_special, \
+        j9vm/$(call SHARED_LIBRARY,jsig), \
+        $(call SHARED_LIBRARY,jsig))
+$(call openj9_add_jdk_special, \
+        $(call SHARED_LIBRARY,jsig), \
+        $(call SHARED_LIBRARY,jsig))
+
 # java.base
 
 $(call openj9_add_jdk_shlibs, java.base, \
