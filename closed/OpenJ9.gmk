@@ -5,7 +5,7 @@
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
 #
-# IBM designates this particular file as subject to the "Classpath" exception 
+# IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
@@ -180,15 +180,15 @@ $(foreach subdir, j9vm server, \
 		redirector/$(call SHARED_LIBRARY,jvm_jdk11)))
 
 # jsig
+
+$(foreach subdir, j9vm server, \
+	$(call openj9_add_jdk_special, \
+		$(subdir)/$(call SHARED_LIBRARY,jsig), \
+		$(call SHARED_LIBRARY,jsig)))
+
 $(call openj9_add_jdk_special, \
-        server/$(call SHARED_LIBRARY,jsig), \
-        $(call SHARED_LIBRARY,jsig))
-$(call openj9_add_jdk_special, \
-        j9vm/$(call SHARED_LIBRARY,jsig), \
-        $(call SHARED_LIBRARY,jsig))
-$(call openj9_add_jdk_special, \
-        $(call SHARED_LIBRARY,jsig), \
-        $(call SHARED_LIBRARY,jsig))
+	$(call SHARED_LIBRARY,jsig), \
+	$(call SHARED_LIBRARY,jsig))
 
 # java.base
 
@@ -209,7 +209,6 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	j9vrb29 \
 	j9zlib29 \
 	jclse11_29 \
-	jsig \
 	omrsig \
 	)
 
