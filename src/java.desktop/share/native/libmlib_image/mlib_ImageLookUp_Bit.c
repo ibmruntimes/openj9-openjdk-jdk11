@@ -22,11 +22,7 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- * ===========================================================================
- */
+
 
 /*
  * FUNCTION
