@@ -43,8 +43,10 @@ j9vm-build : buildtools-langtools
 
 test-image : test-image-openj9
 
-test-image-openj9 : j9vm-build
+test-image-openj9 : exploded-image
 	+$(OPENJ9_MAKE) openj9_test_image
+	# create file with build information in native libraries folder to identify which build the libraries belong to
+	$(JDK_OUTPUTDIR)/bin/java -version > $(TEST_IMAGE_DIR)/openj9/java-version.txt 2>&1
 
 ALL_TARGETS += test-image-openj9
 
