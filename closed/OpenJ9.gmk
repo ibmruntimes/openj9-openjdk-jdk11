@@ -177,7 +177,7 @@ openj9_add_jdk_special = \
 $(foreach subdir, j9vm server, \
 	$(call openj9_add_jdk_special, \
 		$(subdir)/$(call SHARED_LIBRARY,jvm), \
-		redirector/$(call SHARED_LIBRARY,jvm_jdk11)))
+		redirector/$(call SHARED_LIBRARY,jvm)))
 
 # jsig
 
