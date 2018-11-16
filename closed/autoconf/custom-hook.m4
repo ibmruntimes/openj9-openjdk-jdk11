@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -370,14 +370,6 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
   # Configure for openssl build
   CONFIGURE_OPENSSL
-
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
-    OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
-  else
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L\$(SUPPORT_OUTPUTDIR)/../vm"
-    OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -L\$(SUPPORT_OUTPUTDIR)/../vm"
-  fi
 
   CLOSED_AUTOCONF_DIR="$TOPDIR/closed/autoconf"
 
