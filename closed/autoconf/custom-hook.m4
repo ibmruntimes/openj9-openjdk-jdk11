@@ -342,42 +342,44 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 [
   # check 3rd party library requirement for UMA
-  AC_MSG_CHECKING([that freemarker location is set])
   AC_ARG_WITH(freemarker-jar, [AS_HELP_STRING([--with-freemarker-jar],
       [path to freemarker.jar (used to build OpenJ9 build tools)])])
-
-  if test "x$with_freemarker_jar" == x ; then
-    AC_MSG_RESULT([no])
-    printf "\n"
-    printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-    printf "and has to be provided during configure process.\n"
-    printf "\n"
-    printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-    printf "\n"
-    printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-    printf "\n"
-    printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-    printf "\n"
-    printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-    printf "\n"
-
-    AC_MSG_NOTICE([Could not find freemarker.jar])
-    AC_MSG_ERROR([Cannot continue])
-  else
-    AC_MSG_RESULT([yes])
-    AC_MSG_CHECKING([checking that '$with_freemarker_jar' exists])
-    if test -f "$with_freemarker_jar" ; then
-      AC_MSG_RESULT([yes])
-    else
+  FREEMARKER_JAR=
+  if test "x$with_cmake" == x ; then
+    AC_MSG_CHECKING([that freemarker location is set])
+    if test "x$with_freemarker_jar" == x ; then
       AC_MSG_RESULT([no])
-      AC_MSG_ERROR([freemarker.jar not found at '$with_freemarker_jar'])
-    fi
-  fi
+      printf "\n"
+      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
+      printf "and has to be provided during configure process.\n"
+      printf "\n"
+      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
+      printf "\n"
+      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
+      printf "\n"
+      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
+      printf "\n"
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
-  else
-    FREEMARKER_JAR=$with_freemarker_jar
+      AC_MSG_NOTICE([Could not find freemarker.jar])
+      AC_MSG_ERROR([Cannot continue])
+    else
+      AC_MSG_RESULT([yes])
+      AC_MSG_CHECKING([checking that '$with_freemarker_jar' exists])
+      if test -f "$with_freemarker_jar" ; then
+        AC_MSG_RESULT([yes])
+      else
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([freemarker.jar not found at '$with_freemarker_jar'])
+      fi
+    fi
+
+    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+    else
+      FREEMARKER_JAR=$with_freemarker_jar
+    fi
   fi
 
   AC_SUBST(FREEMARKER_JAR)

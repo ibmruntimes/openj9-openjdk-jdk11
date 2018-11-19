@@ -136,7 +136,7 @@ openj9_add_jdk_basic = \
 		$(foreach source, $2, \
 			$(eval $(call openj9_add_jdk_rules, \
 				$(target)/$(notdir $(source)), \
-				$(OUTPUTDIR)/vm/$(source)))))
+				$(OPENJ9_VM_BUILD_DIR)/$(source)))))
 
 # openj9_add_jdk_bin
 # ------------------
@@ -170,7 +170,7 @@ openj9_add_jdk_lib = $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/lib $(call Fi
 # $2 = source path (relative to the vm build directory)
 openj9_add_jdk_special = \
 	$(foreach target, $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, java.base), \
-		$(eval $(call openj9_add_jdk_rules, $(target)/$(strip $1), $(OUTPUTDIR)/vm/$(strip $2))))
+		$(eval $(call openj9_add_jdk_rules, $(target)/$(strip $1), $(OPENJ9_VM_BUILD_DIR)/$(strip $2))))
 
 # redirector
 
@@ -223,7 +223,7 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
 endif
 
 $(call openj9_add_jdk_lib, java.base, \
-	$(notdir $(wildcard $(OUTPUTDIR)/vm/java*.properties)) \
+	$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)) \
 	J9TraceFormat.dat \
 	OMRTraceFormat.dat \
 	options.default \
@@ -267,7 +267,7 @@ $(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1)) : $(strip $1)
 endef
 
 $(foreach file, \
-	$(patsubst %, $(OUTPUTDIR)/vm/%$(EXE_SUFFIX), \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/%$(EXE_SUFFIX), \
 		algotest \
 		bcvunit \
 		cfdump \
@@ -286,7 +286,7 @@ $(foreach file, \
 		vmLifecyleTests \
 		vmtest \
 		) \
-	$(patsubst %, $(OUTPUTDIR)/vm/$(call SHARED_LIBRARY,%), \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/$(call SHARED_LIBRARY,%), \
 		balloon29 \
 		bcuwhite \
 		bcvwhite \
@@ -422,7 +422,7 @@ OPENJ9_VERSION_VARS := \
 OPENJ9_VERSION_SCRIPT := \
 	$(foreach var,$(OPENJ9_VERSION_VARS),-e 's|@${var}@|$(value $(var))|g')
 
-$(OUTPUTDIR)/vm/include/openj9_version_info.h : $(TOPDIR)/closed/openj9_version_info.h.in
+$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h : $(TOPDIR)/closed/openj9_version_info.h.in
 	@$(MKDIR) -p $(@D)
 	@$(SED) $(OPENJ9_VERSION_SCRIPT) > $@ < $<
 
@@ -430,14 +430,14 @@ $(OUTPUTDIR)/vm/include/openj9_version_info.h : $(TOPDIR)/closed/openj9_version_
 OPENJ9_VERSION_MAP := $(foreach var,$(sort $(OPENJ9_VERSION_VARS)),$(var)='$(value $(var))')
 
 # update if the map changes
-$(OUTPUTDIR)/vm/include/openj9_version_info.h : $(call DependOnVariable,OPENJ9_VERSION_MAP)
+$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h : $(call DependOnVariable,OPENJ9_VERSION_MAP)
 
 # Only update version files when the SHAs change.
-$(OUTPUTDIR)/vm/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
+$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version : $(call DependOnVariable, OPENJ9_SHA)
 	@$(MKDIR) -p $(@D)
 	$(ECHO) '#define TR_LEVEL_NAME "$(OPENJ9_SHA)"' > $@
 
-$(OUTPUTDIR)/vm/omr/OMR_VERSION_STRING : $(call DependOnVariable, OPENJ9OMR_SHA)
+$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING : $(call DependOnVariable, OPENJ9OMR_SHA)
 	@$(MKDIR) -p $(@D)
 	$(ECHO) '#define OMR_VERSION_STRING "$(OPENJ9OMR_SHA)"' > $@
 
@@ -453,15 +453,33 @@ ifneq (,$(OPENJ9_DEVELOPER_DIR))
   CUSTOM_COMPILER_ENV_VARS += DEVELOPER_DIR="$(OPENJ9_DEVELOPER_DIR)"
 endif
 
+ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+$(OUTPUTDIR)/vm/cmake.stamp :
+	cd $(OUTPUTDIR)/vm && \
+	$(CMAKE) \
+	  -C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(OPENJ9_BUILDSPEC).cmake \
+		-DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR) \
+		-DBUILD_ID=$(BUILD_ID) \
+		-DJAVA_SPEC_VERSION=$(VERSION_MAJOR) \
+		-DOPENJ9_BUILD=true \
+		$(OPENJ9_TOPDIR)
+	touch $(OUTPUTDIR)/vm/cmake.stamp
+
+run-preprocessors-j9: \
+		$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING \
+		$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
+		$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h \
+		$(OUTPUTDIR)/vm/cmake.stamp
+
+else # OPENJ9_ENABLE_CMAKE
 run-preprocessors-j9 : stage-j9 \
-		$(OUTPUTDIR)/vm/omr/OMR_VERSION_STRING \
-		$(OUTPUTDIR)/vm/compiler/jit.version \
-		$(OUTPUTDIR)/vm/include/openj9_version_info.h
+		$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING \
+		$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
+		$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUTDIR)/vm $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
-			CMAKE=$(CMAKE) \
 			EXTRA_CONFIGURE_ARGS=$(OMR_EXTRA_CONFIGURE_ARGS) \
 			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
 			J9VM_SHA=$(OPENJ9_SHA) \
@@ -471,16 +489,11 @@ run-preprocessors-j9 : stage-j9 \
 			SPEC=$(OPENJ9_BUILDSPEC) \
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
 			tools
-
+endif # OPENJ9_ENABLE_CMAKE
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUTDIR)/vm
-ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
-		&& $(MAKE) -C $(OUTPUTDIR)/vm/build $(MAKEFLAGS) install
-else
 	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUTDIR)/vm $(MAKEFLAGS) all
-endif
 	@$(ECHO) OpenJ9 compile complete
 
 J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl_sources.done
