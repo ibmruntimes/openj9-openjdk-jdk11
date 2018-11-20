@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 
 package com.sun.crypto.provider;
 
@@ -33,6 +38,8 @@ import java.security.spec.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 import javax.crypto.BadPaddingException;
+
+import jdk.crypto.jniprovider.NativeCrypto;
 
 /**
  * This class represents the symmetric algorithms in its various modes
@@ -53,6 +60,21 @@ import javax.crypto.BadPaddingException;
  */
 
 final class CipherCore {
+
+    /*
+     * Check whether native crypto is disabled with property.
+     *
+     * By default, the native crypto is enabled and uses the native
+     * crypto library implementation.
+     *
+     * The property 'jdk.nativeCBC' is used to disable Native CBC alone,
+     * 'jdk.nativeGCM' is used to disable Native GCM alone and
+     * 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
+     * CBC and GCM).
+     */
+    private static boolean useNativeCrypto = true;
+    private static boolean useNativeCBC = true;
+    private static boolean useNativeGCM = true;
 
     /*
      * internal buffer
@@ -185,7 +207,17 @@ final class CipherCore {
         SymmetricCipher rawImpl = cipher.getEmbeddedCipher();
         if (modeUpperCase.equals("CBC")) {
             cipherMode = CBC_MODE;
-            cipher = new CipherBlockChaining(rawImpl);
+
+            /*
+             * Check whether native CBC is enabled and instantiate
+             * the NativeCipherBlockChaining class.
+             */
+            if (useNativeCBC && blockSize == 16) {
+                cipher = new NativeCipherBlockChaining(rawImpl);
+            } else {
+                cipher = new CipherBlockChaining(rawImpl);
+            }
+
         } else if (modeUpperCase.equals("CTS")) {
             cipherMode = CTS_MODE;
             cipher = new CipherTextStealing(rawImpl);
@@ -203,7 +235,17 @@ final class CipherCore {
                     ("GCM mode can only be used for AES cipher");
             }
             cipherMode = GCM_MODE;
-            cipher = new GaloisCounterMode(rawImpl);
+
+            /*
+             * Check whether native GCM is enabled and instantiate
+             * the NativeGaloisCounterMode class.
+             */
+            if (useNativeGCM) {
+                cipher = new NativeGaloisCounterMode(rawImpl);
+            } else {
+                cipher = new GaloisCounterMode(rawImpl);
+            }
+
             padding = null;
         } else if (modeUpperCase.startsWith("CFB")) {
             cipherMode = CFB_MODE;
@@ -328,7 +370,13 @@ final class CipherCore {
         switch (cipherMode) {
         case GCM_MODE:
             if (isDoFinal) {
-                int tagLen = ((GaloisCounterMode) cipher).getTagLen();
+                int tagLen = 0;
+                 if (useNativeGCM) {
+                    tagLen = ((NativeGaloisCounterMode) cipher).getTagLen();
+                } else {
+                    tagLen = ((GaloisCounterMode) cipher).getTagLen();
+                }
+
                 if (!decrypting) {
                     totalLen = Math.addExact(totalLen, tagLen);
                 } else {
@@ -405,8 +453,15 @@ final class CipherCore {
         }
         if (cipherMode == GCM_MODE) {
             algName = "GCM";
-            spec = new GCMParameterSpec
-                (((GaloisCounterMode) cipher).getTagLen()*8, iv);
+
+            if (useNativeGCM) {
+                spec = new GCMParameterSpec
+                        (((NativeGaloisCounterMode) cipher).getTagLen()*8, iv);
+            } else {
+                spec = new GCMParameterSpec
+                        (((GaloisCounterMode) cipher).getTagLen()*8, iv);
+            }
+
         } else {
            if (algName.equals("RC2")) {
                RC2Crypt rawImpl = (RC2Crypt) cipher.getEmbeddedCipher();
@@ -585,8 +640,14 @@ final class CipherCore {
                 lastEncIv = ivBytes;
                 lastEncKey = keyBytes;
             }
-            ((GaloisCounterMode) cipher).init
-                (decrypting, algorithm, keyBytes, ivBytes, tagLen);
+
+            if (useNativeGCM) {
+                ((NativeGaloisCounterMode) cipher).init
+                        (decrypting, algorithm, keyBytes, ivBytes, tagLen);
+            } else {
+                ((GaloisCounterMode) cipher).init
+                        (decrypting, algorithm, keyBytes, ivBytes, tagLen);
+            }
         } else {
             cipher.init(decrypting, algorithm, keyBytes, ivBytes);
         }
@@ -1222,5 +1283,56 @@ final class CipherCore {
     void updateAAD(byte[] src, int offset, int len) {
         checkReinit();
         cipher.updateAAD(src, offset, len);
+    }
+
+    private static String privilegedGetProperty(final String property) {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
+                return System.getProperty(property);
+            }
+        });
+    }
+
+    static {
+        String nativeCryptTrace = privilegedGetProperty("jdk.nativeCryptoTrace");
+        String nativeCryptStr   = privilegedGetProperty("jdk.nativeCrypto");
+        String nativeCBCStr     = privilegedGetProperty("jdk.nativeCBC");
+        String nativeGCMStr     = privilegedGetProperty("jdk.nativeGCM");
+
+        useNativeCrypto = Boolean.parseBoolean(nativeCryptStr) || (nativeCryptStr == null);
+
+        if (!useNativeCrypto) {
+            useNativeCBC = false;
+            useNativeGCM = false;
+        } else {
+            useNativeCBC = Boolean.parseBoolean(nativeCBCStr) || (nativeCBCStr == null);
+            useNativeGCM = Boolean.parseBoolean(nativeGCMStr) || (nativeGCMStr == null);
+        }
+
+        if (useNativeCBC || useNativeGCM) {
+            /*
+             * User want to use native crypto implementation.
+             * Make sure the native crypto libraries are loaded successfully.
+             * Otherwise, throw a warning message and fall back to the in-built
+             * java crypto implementation.
+             */
+            if (!NativeCrypto.isLoaded()) {
+                useNativeCBC = false;
+                useNativeGCM = false;
+
+               if (nativeCryptTrace != null) {
+                   System.err.println("Warning: Native crypto library load failed." +
+                                   " Using Java crypto implementation");
+               }
+            } else {
+                if (nativeCryptTrace != null) {
+                   System.err.println("CipherCore Load - using native crypto library.");
+                }
+            }
+        } else {
+                if (nativeCryptTrace != null) {
+                   System.err.println("CipherCore Load - native crypto library disabled.");
+                }
+       }
     }
 }

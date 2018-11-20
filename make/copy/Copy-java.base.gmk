@@ -22,6 +22,9 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
 
 include CopyCommon.gmk
 include Modules.gmk
@@ -237,6 +240,42 @@ ifeq ($(ENABLE_LIBFFI_BUNDLING), true)
   ))
 
   TARGETS += $(COPY_LIBFFI)
+endif
+
+##########################################################################################
+# Optionally copy OpenSSL Crypto Lbrary
+
+ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
+  ifeq ($(OPENJDK_TARGET_OS), windows)
+    ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
+      OPENSSL_LIB_NAME = libcrypto-1_1-x64.dll
+    else
+      OPENSSL_LIB_NAME = libcrypto-1_1.dll
+    endif
+  else ifeq ($(OPENJDK_TARGET_OS), aix)
+    # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way) 
+    # instead of 'libcrypto.so' files.
+    # For reference, corresponding OpenSSL PR is 
+    #     https://github.com/openssl/openssl/pull/6487
+    # For OpenSSL v1.1.0, bundle libcrypto.so library with JDK
+    OPENSSL_LIB_NAME = libcrypto.so
+    ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+      # For OpenSSL v1.1.1, bundle libcrypto.a library with JDK
+      OPENSSL_LIB_NAME = libcrypto.a
+    endif
+  else
+    OPENSSL_LIB_NAME = libcrypto.so.1.1
+  endif
+
+  OPENSSL_TARGET_LIB = $(LIB_DST_DIR)/$(OPENSSL_LIB_NAME)
+
+  $(OPENSSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
+	$(CP) $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME) $@
+    ifeq ($(OPENJDK_BUILD_OS), windows)
+	$(CHMOD) +rx $@
+    endif
+
+  TARGETS += $(OPENSSL_TARGET_LIB)
 endif
 
 ################################################################################
