@@ -22,6 +22,9 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+ 
+/* Add comment in ordert to test copyrightCheck - shouyld fail as no IBM Copyright is included */
+ 
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
