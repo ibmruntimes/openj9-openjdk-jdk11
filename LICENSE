@@ -10,6 +10,8 @@ document, but changing it is not allowed.
 
 Preamble
 
+Test copyrightCheck script - should pass 
+
 The licenses for most software are designed to take away your freedom to share
 and change it.  By contrast, the GNU General Public License is intended to
 guarantee your freedom to share and change free software--to make sure the
