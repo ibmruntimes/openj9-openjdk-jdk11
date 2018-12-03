@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 package sun.security.ssl;
 
 import java.math.BigInteger;
@@ -154,6 +159,7 @@ final class SSLSessionImpl extends ExtendedSSLSession {
         this.useExtendedMasterSecret = false;
         this.creationTime = System.currentTimeMillis();
         this.identificationProtocol = null;
+        this.boundValues = new ConcurrentHashMap<>();
     }
 
     /*
@@ -204,6 +210,41 @@ final class SSLSessionImpl extends ExtendedSSLSession {
         }
         this.creationTime = creationTime;
         this.identificationProtocol = hc.sslConfig.identificationProtocol;
+        this.boundValues = new ConcurrentHashMap<>();
+
+        if (SSLLogger.isOn && SSLLogger.isOn("session")) {
+             SSLLogger.finest("Session initialized:  " + this);
+        }
+    }
+
+    SSLSessionImpl(SSLSessionImpl baseSession, SessionId newId) {
+        this.protocolVersion = baseSession.getProtocolVersion();
+        this.cipherSuite = baseSession.cipherSuite;
+        this.sessionId = newId;
+        this.host = baseSession.getPeerHost();
+        this.port = baseSession.getPeerPort();
+        this.localSupportedSignAlgs =
+            baseSession.localSupportedSignAlgs == null ?
+                Collections.emptySet() :
+                Collections.unmodifiableCollection(
+                        baseSession.localSupportedSignAlgs);
+        this.peerSupportedSignAlgs =
+                baseSession.getPeerSupportedSignatureAlgorithms();
+        this.serverNameIndication = baseSession.serverNameIndication;
+        this.requestedServerNames = baseSession.getRequestedServerNames();
+        this.masterSecret = baseSession.getMasterSecret();
+        this.useExtendedMasterSecret = baseSession.useExtendedMasterSecret;
+        this.creationTime = baseSession.getCreationTime();
+        this.lastUsedTime = System.currentTimeMillis();
+        this.identificationProtocol = baseSession.getIdentificationProtocol();
+        this.localCerts = baseSession.localCerts;
+        this.peerCerts = baseSession.peerCerts;
+        this.statusResponses = baseSession.statusResponses;
+        this.resumptionMasterSecret = baseSession.resumptionMasterSecret;
+        this.context = baseSession.context;
+        this.negotiatedMaxFragLen = baseSession.negotiatedMaxFragLen;
+        this.maximumPacketSize = baseSession.maximumPacketSize;
+        this.boundValues = baseSession.boundValues;
 
         if (SSLLogger.isOn && SSLLogger.isOn("session")) {
              SSLLogger.finest("Session initialized:  " + this);
@@ -772,8 +813,7 @@ final class SSLSessionImpl extends ExtendedSSLSession {
      * key and the calling security context. This is important since
      * sessions can be shared across different protection domains.
      */
-    private final ConcurrentHashMap<SecureKey, Object> boundValues =
-            new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<SecureKey, Object> boundValues;
 
     /**
      * Assigns a session value.  Session change events are given if
