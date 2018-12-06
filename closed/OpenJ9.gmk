@@ -288,6 +288,7 @@ $(foreach file, \
 		bcvwhite \
 		gptest \
 		hooktests \
+		j9aixbaddep \
 		j9ben \
 		j9lazyClassLoad \
 		j9thrnumanatives29 \
