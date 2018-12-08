@@ -98,25 +98,6 @@ TARGETS += $(BUILD_LIBNIO)
 $(BUILD_LIBNIO): $(BUILD_LIBNET)
 
 ################################################################################
-# Create the Java Native crypto library
-
-ifeq ($(WITH_OPENSSL), yes)
-  $(eval $(call SetupJdkLibrary, BUILD_JNCRYPTO, \
-      NAME := jncrypto, \
-      OPTIMIZATION := LOW, \
-      CFLAGS := $(CFLAGS_JDKLIB) -c $(OPENSSL_CFLAGS), \
-      DISABLED_WARNINGS_gcc := sign-compare implicit-fallthrough unused-value, \
-      DISABLED_WARNINGS_clang := sign-compare, \
-      DISABLED_WARNINGS_microsoft := 4101 4244 4146 4018, \
-      LDFLAGS := $(LDFLAGS_JDKLIB) \
-          $(call SET_SHARED_LIBRARY_ORIGIN), \
-      LIBS := $(OPENSSL_LIBS), \
-  ))
-
-  TARGETS += $(BUILD_JNCRYPTO)
-endif
-
-################################################################################
 # Create the macosx security library
 
 ifeq ($(OPENJDK_TARGET_OS), macosx)
@@ -215,8 +196,8 @@ ifeq ($(STATIC_BUILD), true)
       $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/$(LIBRARY_PREFIX)verify.symbols \
       $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/$(LIBRARY_PREFIX)zip.symbols \
       $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/$(LIBRARY_PREFIX)jimage.symbols \
-      $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/$(LIBRARY_PREFIX)jncrypto.symbols \
       $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/server/$(LIBRARY_PREFIX)jvm.symbols \
+      $(INCLUDE_CUSTOM_EXTENSION_SYMBOLS) \
       #
 
   JAVA_BASE_EXPORT_SYMBOL_FILE := $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/java.base.symbols
@@ -228,7 +209,8 @@ ifeq ($(STATIC_BUILD), true)
   # The individual symbol files is generated when the respective lib is built
   $(JAVA_BASE_EXPORT_SYMBOLS_SRC): $(BUILD_LIBJLI) $(BUILD_LIBJAVA) \
       $(BUILD_LIBNET) $(BUILD_LIBNIO) $(BUILD_LIBVERIFY) $(BUILD_LIBZIP) \
-      $(BUILD_LIBJIMAGE) $(BUILD_JNCRYPTO)
+      $(BUILD_LIBJIMAGE) \
+      $(INCLUDE_CUSTOM_EXTENSION_LIB)
 
   TARGETS += $(JAVA_BASE_EXPORT_SYMBOL_FILE)
 endif
