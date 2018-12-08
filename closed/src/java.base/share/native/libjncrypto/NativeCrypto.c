@@ -112,7 +112,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
     }
 
 
-    return (long)context;
+    return (jlong)context;
 }
 
 /* Update Digest context
@@ -215,7 +215,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContex
     context->nativeBuffer2 = (unsigned char*)nativeBuffer2;
     context->ctx = ctx;
 
-    return (long)context;
+    return (jlong)context;
 }
 
 /* Destroy Cipher context
