@@ -43,8 +43,12 @@ $(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
 
 ##########################################################################################
 # Optionally copy OpenSSL Crypto Lbrary
- ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
-  ifeq ($(OPENJDK_TARGET_OS), windows)
+ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
+  ifeq ($(OPENJDK_TARGET_OS), linux)
+    OPENSSL_LIB_NAME = libcrypto.so.1.1
+  else ifeq ($(OPENJDK_TARGET_OS), macosx)
+    OPENSSL_LIB_NAME = libcrypto.1.1.dylib
+  else ifeq ($(OPENJDK_TARGET_OS), windows)
     ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
       OPENSSL_LIB_NAME = libcrypto-1_1-x64.dll
     else
@@ -62,7 +66,7 @@ $(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
       OPENSSL_LIB_NAME = libcrypto.a
     endif
   else
-    OPENSSL_LIB_NAME = libcrypto.so.1.1
+    OPENSSL_LIB_NAME = libcrypto.so
   endif
    OPENSSL_TARGET_LIB = $(LIB_DST_DIR)/$(OPENSSL_LIB_NAME)
    $(OPENSSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
