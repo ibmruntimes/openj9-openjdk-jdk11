@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 
 package sun.security.provider;
 
@@ -30,6 +35,7 @@ import java.net.*;
 import java.util.Map;
 import java.security.*;
 
+import jdk.crypto.jniprovider.NativeCrypto;
 import jdk.internal.util.StaticProperty;
 import sun.security.action.GetPropertyAction;
 
@@ -80,6 +86,15 @@ final class SunEntries {
     private static final boolean useLegacyDSA =
         Boolean.parseBoolean(GetPropertyAction.privilegedGetProperty
             ("jdk.security.legacyDSAKeyPairGenerator"));
+
+    /*
+     * Check whether native crypto is enabled with property.
+     * By default, the native crypto is enabled  and uses native library crypto.
+     * The property 'jdk.nativeDigest' is used to disable Native digest alone
+     * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
+     * CBC and GCM).
+     */
+    private static boolean useNativeDigest = true;
 
     private SunEntries() {
         // empty
@@ -191,29 +206,52 @@ final class SunEntries {
         /*
          * Digest engines
          */
+        String providerSHA;
+        String providerSHA224;
+        String providerSHA256;
+        String providerSHA384;
+        String providerSHA512;
+        /*
+         * Set the digest provider based on whether native crypto is
+         * enabled or not.
+         */
+        if (useNativeDigest) {
+            providerSHA = "sun.security.provider.NativeSHA";
+            providerSHA224 = "sun.security.provider.NativeSHA2$SHA224";
+            providerSHA256 = "sun.security.provider.NativeSHA2$SHA256";
+            providerSHA384 = "sun.security.provider.NativeSHA5$SHA384";
+            providerSHA512 = "sun.security.provider.NativeSHA5$SHA512";
+        } else {
+            providerSHA = "sun.security.provider.SHA";
+            providerSHA224 = "sun.security.provider.SHA2$SHA224";
+            providerSHA256 = "sun.security.provider.SHA2$SHA256";
+            providerSHA384 = "sun.security.provider.SHA5$SHA384";
+            providerSHA512 = "sun.security.provider.SHA5$SHA512";
+        }
+
         map.put("MessageDigest.MD2", "sun.security.provider.MD2");
         map.put("MessageDigest.MD5", "sun.security.provider.MD5");
-        map.put("MessageDigest.SHA", "sun.security.provider.SHA");
+        map.put("MessageDigest.SHA", providerSHA);
 
         map.put("Alg.Alias.MessageDigest.SHA-1", "SHA");
         map.put("Alg.Alias.MessageDigest.SHA1", "SHA");
         map.put("Alg.Alias.MessageDigest.1.3.14.3.2.26", "SHA");
         map.put("Alg.Alias.MessageDigest.OID.1.3.14.3.2.26", "SHA");
 
-        map.put("MessageDigest.SHA-224", "sun.security.provider.SHA2$SHA224");
+        map.put("MessageDigest.SHA-224", providerSHA224);
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.4", "SHA-224");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.4",
                 "SHA-224");
 
-        map.put("MessageDigest.SHA-256", "sun.security.provider.SHA2$SHA256");
+        map.put("MessageDigest.SHA-256", providerSHA256);
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.1", "SHA-256");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.1",
                 "SHA-256");
-        map.put("MessageDigest.SHA-384", "sun.security.provider.SHA5$SHA384");
+        map.put("MessageDigest.SHA-384", providerSHA384);
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.2", "SHA-384");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.2",
                 "SHA-384");
-        map.put("MessageDigest.SHA-512", "sun.security.provider.SHA5$SHA512");
+        map.put("MessageDigest.SHA-512", providerSHA512);
         map.put("Alg.Alias.MessageDigest.2.16.840.1.101.3.4.2.3", "SHA-512");
         map.put("Alg.Alias.MessageDigest.OID.2.16.840.1.101.3.4.2.3",
                 "SHA-512");
@@ -418,6 +456,48 @@ final class SunEntries {
              * We can try using the URL path.
              */
             return new File(device.getPath());
+        }
+    }
+
+    static {
+
+        String nativeCryptTrace = GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace");
+        String nativeCryptStr = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
+        String nativeDigestStr = GetPropertyAction.privilegedGetProperty("jdk.nativeDigest");
+
+        if (Boolean.parseBoolean(nativeCryptStr) || nativeCryptStr == null) {
+                /* nativeCrypto is enabled */
+                if (!(Boolean.parseBoolean(nativeDigestStr) || nativeDigestStr == null)) {
+                        useNativeDigest = false;
+                }
+        } else {
+                /* nativeCrypto is disabled */
+                useNativeDigest = false;
+        }
+
+        if (useNativeDigest) {
+            /*
+             * User want to use native crypto implementation.
+             * Make sure the native crypto libraries are loaded successfully.
+             * Otherwise, throw a warning message and fall back to the in-built
+             * java crypto implementation.
+             */
+            if (!NativeCrypto.isLoaded()) {
+                useNativeDigest = false;
+
+                if (nativeCryptTrace != null) {
+                   System.err.println("Warning: Native crypto library load failed." +
+                                   " Using Java crypto implementation");
+                }
+            } else {
+                if (nativeCryptTrace != null) {
+                   System.err.println("MessageDigest load - using Native crypto library.");
+                }
+            }
+        } else {
+            if (nativeCryptTrace != null) {
+               System.err.println("MessageDigest load - Native crypto library disabled.");
+            }
         }
     }
 }

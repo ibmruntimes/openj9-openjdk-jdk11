@@ -26,6 +26,7 @@
 # exclude all source directories
 /omr
 /openj9
+/openssl
 # exclude optional eclipse project file
 /.project
 
