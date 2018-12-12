@@ -5,7 +5,7 @@
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
 #
-# IBM designates this particular file as subject to the "Classpath" exception 
+# IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
@@ -68,12 +68,12 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   else
     OPENSSL_LIB_NAME = libcrypto.so
   endif
-   OPENSSL_TARGET_LIB = $(LIB_DST_DIR)/$(OPENSSL_LIB_NAME)
-   $(OPENSSL_TARGET_LIB): $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
-	$(CP) $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME) $@
-    ifeq ($(OPENJDK_BUILD_OS), windows)
-	$(CHMOD) +rx $@
-    endif
-   TARGETS += $(OPENSSL_TARGET_LIB)
+  OPENSSL_TARGET_LIB = $(LIB_DST_DIR)/$(OPENSSL_LIB_NAME)
+  TARGETS += $(OPENSSL_TARGET_LIB)
+  $(OPENSSL_TARGET_LIB) : $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
+	$(CP) $< $@
+  ifeq ($(OPENJDK_BUILD_OS), windows)
+	$(CHMOD) a+rx $@
+  endif
 endif
- ################################################################################
+################################################################################
