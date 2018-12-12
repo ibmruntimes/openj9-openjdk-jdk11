@@ -46,7 +46,6 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_NUMA
   OPENJ9_CONFIGURE_WARNINGS
   OPENJ9_THIRD_PARTY_REQUIREMENTS
-  CONFIGURE_OPENSSL
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
@@ -369,6 +368,9 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 [
+  # Configure for openssl build
+  CONFIGURE_OPENSSL
+
   if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
     LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
     OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
@@ -394,7 +396,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     [enable bundling of the openssl crypto library with the jdk build])])
   WITH_OPENSSL=yes
   if test "x$with_openssl" = x; then
-    # User doesn't want to build with OpenSSL.. Ensure that jncrypto library is not built
+    # User doesn't want to build with OpenSSL. No need to build openssl libraries
     WITH_OPENSSL=no
   else
     AC_MSG_CHECKING([for OPENSSL])
@@ -425,7 +427,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       else
         AC_MSG_RESULT([no])
         printf "$TOPDIR/openssl is not found.\n"
-        printf "  run get_source.sh --openssl-version=1.1.0h\n"
+        printf "  run get_source.sh --openssl-version=1.1.1\n"
         printf "  Then, run configure with '--with-openssl=fetched'\n"
         AC_MSG_ERROR([Cannot continue])
       fi
