@@ -24,6 +24,11 @@
 #
 
 ################################################################################
+
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
+
 # The order of these defines the priority by which we try to find them.
 VALID_VS_VERSIONS="2017 2013 2015 2012 2010"
 
@@ -112,10 +117,10 @@ AC_DEFUN([TOOLCHAIN_CHECK_POSSIBLE_VISUAL_STUDIO_ROOT],
     if test -d "$VS_BASE"; then
       AC_MSG_NOTICE([Found Visual Studio installation at $VS_BASE using $METHOD])
       if test "x$OPENJDK_TARGET_CPU_BITS" = x32; then
-        VCVARSFILES="vc/bin/vcvars32.bat vc/auxiliary/build/vcvars32.bat"
+        VCVARSFILES="vc/bin/vcvars32.bat vc/auxiliary/build/vcvarsamd64_x86.bat vc/auxiliary/build/vcvars32.bat"
       else
-        VCVARSFILES="vc/bin/amd64/vcvars64.bat vc/bin/x86_amd64/vcvarsx86_amd64.bat \
-            vc/auxiliary/build/vcvarsx86_amd64.bat vc/auxiliary/build/vcvars64.bat"
+        VCVARSFILES="vc/bin/amd64/vcvars64.bat vc/auxiliary/build/vcvars64.bat \
+                     vc/bin/x86_amd64/vcvarsx86_amd64.bat vc/auxiliary/build/vcvarsx86_amd64.bat"
       fi
 
       for VCVARSFILE in $VCVARSFILES; do
