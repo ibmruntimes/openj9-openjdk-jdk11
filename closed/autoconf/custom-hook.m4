@@ -417,11 +417,15 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         OPENSSL_DIR=$TOPDIR/openssl
         FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        OPENSSL_LIBS="-L${OPENSSL_DIR} -lssl -lcrypto"
+        OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
         if test -s $OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1; then
           BUILD_OPENSSL=no
         else
           BUILD_OPENSSL=yes
+        fi
+
+        if test "x$BUNDLE_OPENSSL" = xyes ; then
+          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
         fi
         AC_MSG_RESULT([yes])
       else
@@ -432,6 +436,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         AC_MSG_ERROR([Cannot continue])
       fi
     fi
+
     # if --with-openssl=system
     if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem; then
       if test "x$OPENJDK_BUILD_OS" = xwindows; then
@@ -445,6 +450,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         AC_MSG_ERROR([Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'])
       fi
     fi
+
     # if --with-openssl=/custom/path/where/openssl/is/present
     if test "x$FOUND_OPENSSL" != xyes; then
       # User specified path where openssl is installed
@@ -456,37 +462,41 @@ AC_DEFUN([CONFIGURE_OPENSSL],
           if test -s "$OPENSSL_DIR/lib/libcrypto.lib"; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libssl.lib libcrypto.lib"
+            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
           fi
         else
-          if test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1"; then
+          if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
             FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lssl -lcrypto"
+            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/lib
+            fi
+          elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}.1.1" ; then
+            FOUND_OPENSSL=yes
+            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
+              OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+            fi
           fi
         fi
       fi
-      # openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" = xyes; then
-        AC_MSG_RESULT([yes])
-      else
+
+      #openssl is not found in user specified location. Abort.
+      if test "x$FOUND_OPENSSL" != xyes ; then
         AC_MSG_RESULT([no])
         AC_MSG_ERROR([Unable to find openssl in specified location $OPENSSL_DIR])
       fi
+      AC_MSG_RESULT([yes])
     fi
-    if test "x$OPENSSL_DIR" != x; then
+
+    if test "x$OPENSSL_DIR" != x ; then
       AC_MSG_CHECKING([if we should bundle openssl])
-      if test "x$BUNDLE_OPENSSL" = xyes; then
-        if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin; then
-          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR/bin
-          BASIC_FIXUP_PATH(OPENSSL_BUNDLE_LIB_PATH)
-        else
-          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
-        fi
-      fi
       AC_MSG_RESULT([$BUNDLE_OPENSSL])
     fi
   fi
+
   AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)
   AC_SUBST(OPENSSL_DIR)
   AC_SUBST(WITH_OPENSSL)
