@@ -733,26 +733,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
        URL url = codesource.getLocation();                                     //IBM-shared_classes_misc
        if (i != -1) {                                                          //IBM-shared_classes_misc
            String pkgname = name.substring(0, i);                              //IBM-shared_classes_misc
-           // Check if package already loaded.                                 //IBM-shared_classes_misc
-           Package pkg = getPackage(pkgname);                                  //IBM-shared_classes_misc
-            if (pkg != null) {                                                  //IBM-shared_classes_misc
-               // Package found, so check package sealing.                     //IBM-shared_classes_misc
-               if (pkg.isSealed()) {                                           //IBM-shared_classes_misc
-                   // Verify that code source URL is the same.                 //IBM-shared_classes_misc
-                   if (!pkg.isSealed(url)) {                                   //IBM-shared_classes_misc
-                       throw new SecurityException(                            //IBM-shared_classes_misc
-                           "sealing violation: package " + pkgname + " is sealed"); //IBM-shared_classes_misc
-                   }                                                           //IBM-shared_classes_misc
-               } else {                                                        //IBM-shared_classes_misc
-                   // Make sure we are not attempting to seal the package      //IBM-shared_classes_misc
-                   // at this code source URL.                                 //IBM-shared_classes_misc
-                   if ((man != null) && isSealed(pkgname, man)) {              //IBM-shared_classes_misc
-                       throw new SecurityException(                            //IBM-shared_classes_misc
-                           "sealing violation: can't seal package " + pkgname +  //IBM-shared_classes_misc
-                           ": already loaded");                                //IBM-shared_classes_misc
-                   }                                                           //IBM-shared_classes_misc
-               }                                                               //IBM-shared_classes_misc
-           } else {                                                            //IBM-shared_classes_misc
+           if (getAndVerifyPackage(pkgname, man, url) == null) {               //IBM-shared_classes_misc
                try {                                                           //IBM-shared_classes_misc
                    if (null != man) {                                          //IBM-shared_classes_misc
                       definePackage(pkgname, man, url);                        //IBM-shared_classes_misc
