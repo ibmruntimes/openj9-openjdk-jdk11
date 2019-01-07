@@ -202,6 +202,20 @@ grant codeBase "jrt:/jdk.zipfs" {
     permission java.util.PropertyPermission "os.name", "read";
 };
 
+grant codeBase "jrt:/openj9.cuda" {
+    permission java.util.PropertyPermission "com.ibm.oti.vm.library.version", "read";
+    permission java.lang.RuntimePermission "loadLibrary.cuda4j29";
+};
+
+grant codeBase "jrt:/openj9.gpu" {
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.gpu.spi";
+    permission com.ibm.gpu.GPUPermission "access";
+    permission java.util.PropertyPermission "com.ibm.gpu.verbose", "read";
+    permission java.util.PropertyPermission "com.ibm.gpu.enforce", "read";
+    permission java.util.PropertyPermission "com.ibm.gpu.enable", "read";
+    permission java.util.PropertyPermission "com.ibm.gpu.disable", "read";
+};
+
 // permissions needed by applications using java.desktop module
 grant {
     permission java.lang.RuntimePermission "accessClassInPackage.com.sun.beans";
