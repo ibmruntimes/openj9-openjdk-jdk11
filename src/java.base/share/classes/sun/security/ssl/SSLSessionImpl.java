@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 package sun.security.ssl;
@@ -308,13 +308,6 @@ final class SSLSessionImpl extends ExtendedSSLSession {
 
     String getIdentificationProtocol() {
         return this.identificationProtocol;
-    }
-
-    /*
-     * Get the PSK identity. Take care not to use it in multiple connections.
-     */
-    synchronized Optional<byte[]> getPskIdentity() {
-        return Optional.ofNullable(pskIdentity);
     }
 
     /* PSK identities created from new_session_ticket messages should only
