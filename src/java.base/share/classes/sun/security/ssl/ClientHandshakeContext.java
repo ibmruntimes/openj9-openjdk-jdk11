@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved.
+ * ===========================================================================
+ */
 
 package sun.security.ssl;
 
@@ -89,6 +94,9 @@ class ClientHandshakeContext extends HandshakeContext {
     X509Certificate[] deferredCerts;
 
     ClientHelloMessage initialClientHelloMsg = null;
+
+    // PSK identity is selected in first Hello and used again after HRR
+    byte[] pskIdentity;
 
     ClientHandshakeContext(SSLContextImpl sslContext,
             TransportContext conContext) throws IOException {

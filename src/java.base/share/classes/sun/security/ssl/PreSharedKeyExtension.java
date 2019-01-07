@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 package sun.security.ssl;
@@ -661,7 +661,11 @@ final class PreSharedKeyExtension {
                 return null;
             }
             SecretKey psk = pskOpt.get();
-            Optional<byte[]> pskIdOpt = chc.resumingSession.getPskIdentity();
+            // The PSK ID can only be used in one connections, but this method
+            // may be called twice in a connection if the server sends HRR.
+            // ID is saved in the context so it can be used in the second call.
+            Optional<byte[]> pskIdOpt = Optional.ofNullable(chc.pskIdentity)
+                .or(chc.resumingSession::consumePskIdentity);
             if (!pskIdOpt.isPresent()) {
                 if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
                     SSLLogger.fine(
@@ -669,7 +673,12 @@ final class PreSharedKeyExtension {
                 }
                 return null;
             }
-            byte[] pskId = pskIdOpt.get();
+            chc.pskIdentity = pskIdOpt.get();
+
+            //The session cannot be used again. Remove it from the cache.
+            SSLSessionContextImpl sessionCache = (SSLSessionContextImpl)
+                chc.sslContext.engineGetClientSessionContext();
+            sessionCache.remove(chc.resumingSession.getSessionId());
 
             if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
                 SSLLogger.fine(
@@ -681,7 +690,7 @@ final class PreSharedKeyExtension {
                     chc.resumingSession.getTicketCreationTime());
             int obfuscatedAge =
                     ageMillis + chc.resumingSession.getTicketAgeAdd();
-            identities.add(new PskIdentity(pskId, obfuscatedAge));
+            identities.add(new PskIdentity(chc.pskIdentity, obfuscatedAge));
 
             SecretKey binderKey = deriveBinderKey(psk, chc.resumingSession);
             ClientHelloMessage clientHello = (ClientHelloMessage)message;
@@ -833,10 +842,6 @@ final class PreSharedKeyExtension {
                     "Received pre_shared_key extension: ", shPsk);
             }
 
-            // The PSK identity should not be reused, even if it is
-            // not selected.
-            chc.resumingSession.consumePskIdentity();
-
             if (shPsk.selectedIdentity != 0) {
                 chc.conContext.fatal(Alert.ILLEGAL_PARAMETER,
                     "Selected identity index is not in correct range.");
@@ -846,11 +851,6 @@ final class PreSharedKeyExtension {
                 SSLLogger.fine(
                 "Resuming session: ", chc.resumingSession);
             }
-
-            // remove the session from the cache
-            SSLSessionContextImpl sessionCache = (SSLSessionContextImpl)
-                    chc.sslContext.engineGetClientSessionContext();
-            sessionCache.remove(chc.resumingSession.getSessionId());
         }
     }
 
@@ -863,13 +863,6 @@ final class PreSharedKeyExtension {
 
             if (SSLLogger.isOn && SSLLogger.isOn("ssl,handshake")) {
                 SSLLogger.fine("Handling pre_shared_key absence.");
-            }
-
-            if (chc.handshakeExtensions.containsKey(
-                    SSLExtension.CH_PRE_SHARED_KEY)) {
-                // The PSK identity should not be reused, even if it is
-                // not selected.
-                chc.resumingSession.consumePskIdentity();
             }
 
             // The server refused to resume, or the client did not
