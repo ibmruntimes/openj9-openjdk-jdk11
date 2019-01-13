@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -43,16 +43,26 @@ $(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
 
 ##########################################################################################
 # Optionally copy OpenSSL Crypto Lbrary
+# To bundle first search for openssl 1.1.x library, if not found, search for 1.0.x
 ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   ifeq ($(OPENJDK_TARGET_OS), linux)
     OPENSSL_LIB_NAME = libcrypto.so.1.1
+    ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+      OPENSSL_LIB_NAME = libcrypto.so.1.0.0
+    endif
   else ifeq ($(OPENJDK_TARGET_OS), macosx)
     OPENSSL_LIB_NAME = libcrypto.1.1.dylib
+    ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+      OPENSSL_LIB_NAME = libcrypto.1.0.0.dylib
+    endif
   else ifeq ($(OPENJDK_TARGET_OS), windows)
     ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
       OPENSSL_LIB_NAME = libcrypto-1_1-x64.dll
     else
       OPENSSL_LIB_NAME = libcrypto-1_1.dll
+    endif
+    ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME))", "")
+      OPENSSL_LIB_NAME = libeay32.dll
     endif
   else ifeq ($(OPENJDK_TARGET_OS), aix)
     # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way)
