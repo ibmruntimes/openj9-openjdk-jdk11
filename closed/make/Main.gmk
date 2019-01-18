@@ -1,0 +1,60 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+CLEAN_DIRS += vm
+
+.PHONY : \
+	j9vm-build \
+	java.base-libs \
+	test-image-openj9 \
+	#
+
+JVM_MAIN_LIB_TARGETS := j9vm-build
+JVM_MAIN_TARGETS := j9vm-build
+JVM_TOOLS_TARGETS :=
+JVM_DOCS_TARGETS :=
+JVM_TEST_IMAGE_TARGETS :=
+DEFAULT_JMOD_DEPS := j9vm-build
+PHASE_MAKEDIRS := $(TOPDIR)/closed/make/closed_make $(PHASE_MAKEDIRS)
+
+OPENJ9_MAKE := $(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk SPEC=$(SPEC) VERSION_MAJOR=$(VERSION_FEATURE) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS)
+
+java.base-libs : java.base-copy j9vm-build
+
+j9vm-build : buildtools-langtools
+	+$(OPENJ9_MAKE) openj9_build_jdk
+
+test-image : test-image-openj9
+
+test-image-openj9 : j9vm-build
+	+$(OPENJ9_MAKE) openj9_test_image
+
+ALL_TARGETS += test-image-openj9
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+
+.PHONY : openj9.dtfj-ddr-gensrc openj9.dtfj-ddr-jar
+
+openj9.dtfj-ddr-gensrc : j9vm-build $(addsuffix -java, java.base java.desktop openj9.dtfj openj9.traceformat)
+	+$(MAKE) -f $(TOPDIR)/closed/make/DDR-gensrc.gmk SPEC=$(SPEC)
+
+openj9.dtfj-ddr-jar : openj9.dtfj-ddr-gensrc
+	+$(MAKE) -f $(TOPDIR)/closed/make/DDR-jar.gmk SPEC=$(SPEC)
+
+openj9.dtfj-jmod : openj9.dtfj-ddr-jar
+
+endif # OPENJ9_ENABLE_DDR
