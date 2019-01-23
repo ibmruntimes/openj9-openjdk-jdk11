@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -115,6 +115,24 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
     return (jlong)context;
 }
 
+/*
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    DigestDestroyContext
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyContext
+  (JNIEnv *env, jclass thisObj, jlong c){
+
+    OpenSSLMDContext *context = (OpenSSLMDContext*) c;
+    if (context == NULL){
+        return -1;
+    }
+
+    EVP_MD_CTX_free(context->ctx);
+    free(context);
+    return 0;
+}
+
 /* Update Digest context
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
@@ -189,6 +207,23 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
         handleErrors();
 
     return size;
+}
+
+/* Reset Digest
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    DigestReset
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
+  (JNIEnv *env, jclass thisObj, jlong c){
+
+    OpenSSLMDContext *context = (OpenSSLMDContext*) c;
+
+    EVP_MD_CTX_reset(context->ctx);
+
+    if (1 != EVP_DigestInit_ex(context->ctx, context->digestAlg, NULL))
+        handleErrors();
 }
 
 /* Create Cipher context
