@@ -23,12 +23,6 @@
  * questions.
  */
  
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
- * ===========================================================================
- */
- 
 #ifndef _JAVASOFT_JNI_MD_H_
 #define _JAVASOFT_JNI_MD_H_
 
@@ -43,9 +37,6 @@
     #define JNIEXPORT     __attribute__((visibility("default")))
     #define JNIIMPORT     __attribute__((visibility("default")))
   #endif
-#elif defined(__xlC__) && (__xlC__ >= 0x0d01) /* xlc version 13.1 or better required */
-  #define JNIEXPORT       __attribute__((visibility("default")))
-  #define JNIIMPORT       __attribute__((visibility("default")))
 #else
   #define JNIEXPORT
   #define JNIIMPORT
