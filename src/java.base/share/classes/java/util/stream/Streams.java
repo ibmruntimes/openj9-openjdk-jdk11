@@ -1,5 +1,26 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2012, 2018 All Rights Reserved
+ * ===========================================================================
+ * 
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+ * 
+ * ===========================================================================
+ */
+
+/*
+ * Copyright (c) 2012, 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -55,12 +76,12 @@ final class Streams {
         // Can never be greater that upTo, this avoids overflow if upper bound
         // is Integer.MAX_VALUE
         // All elements are traversed if from == upTo & last == 0
-        private int from;
-        private final int upTo;
+        int from;
+        final int upTo;
         // 1 if the range is closed and the last element has not been traversed
         // Otherwise, 0 if the range is open, or is a closed range and all
         // elements have been traversed
-        private int last;
+        int last;
 
         RangeIntSpliterator(int from, int upTo, boolean closed) {
             this(from, upTo, closed ? 1 : 0);

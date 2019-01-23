@@ -1,0 +1,102 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+# This macro is called to allow inclusion of closed source counterparts.
+# If running without closed sources, it expands to nothing.
+# Usage: This function is called in an open makefile, with the following
+# arguments:
+# $1 the name of the makefile
+define IncludeCustomExtension
+  ifndef OPENJDK
+    custom_dir := closed/make
+    custom_include_file := $$(TOPDIR)/$$(custom_dir)/$(strip $1)
+    ifneq ($$(wildcard $$(custom_include_file)), )
+      include $$(custom_include_file)
+    endif
+  endif
+endef
+
+OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
+OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
+
+# treatment of warnings in native code
+WARNINGS_AS_ERRORS_OMR    := @WARNINGS_AS_ERRORS_OMR@
+WARNINGS_AS_ERRORS_OPENJ9 := @WARNINGS_AS_ERRORS_OPENJ9@
+
+# CUDA
+OPENJ9_ENABLE_CUDA      := @OPENJ9_ENABLE_CUDA@
+ifneq (,@OPENJ9_CUDA_HOME@)
+export CUDA_HOME        := @OPENJ9_CUDA_HOME@
+endif
+ifneq (,@OPENJ9_GDK_HOME@)
+export GDK_HOME         := @OPENJ9_GDK_HOME@
+endif
+
+# DDR
+OPENJ9_ENABLE_DDR       := @OPENJ9_ENABLE_DDR@
+
+# for constructing version output
+COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
+USERNAME                := @USERNAME@
+OPENJDK_SHA             := @OPENJDK_SHA@
+OPENJDK_TAG             := @OPENJDK_TAG@
+
+# J9JDK_EXT_VERSION       := ${VERSION_NUMBER_FOUR_POSITIONS}
+J9JDK_EXT_VERSION       := HEAD
+J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
+
+# required by CMake
+export CMAKE                := @CMAKE@
+export OPENJ9_ENABLE_CMAKE  := @OPENJ9_ENABLE_CMAKE@
+
+# required by UMA
+FREEMARKER_JAR          := @FREEMARKER_JAR@
+OPENJ9_BUILDSPEC        := @OPENJ9_BUILDSPEC@
+
+# required by JPP
+OPENJ9_PLATFORM_CODE    := @OPENJ9_PLATFORM_CODE@
+
+OPENJ9_LIBS_SUBDIR      := @OPENJ9_LIBS_SUBDIR@
+
+# Export autoconf cache variables for CC/CXX
+# This is for the case where ccache is enabled
+# It ensures that OMR autoconf uses the compiler, not ccache
+export ac_cv_prog_CC    := @CC@
+export ac_cv_prog_CXX   := @CXX@
+
+ifeq ($(OPENJDK_TARGET_OS), windows)
+  # Set environment variables for Microsoft Visual Studio toolchain.
+  # Note that PATH is set in spec.gmk.
+  export INCLUDE := "@VS_INCLUDE@"
+  export LIB := "@VS_LIB@"
+  export MSVC_VERSION := @TOOLCHAIN_VERSION@
+endif
+
+ifeq ($(OPENJDK_BUILD_OS), macosx)
+  # MACOSX_DEPLOYMENT_TARGET acts similar to -mmacosx-version-min=version
+  # compiler option. If both the compiler option is specified and the
+  # environment variable is set, then the compiler option will take
+  # precedence. Here, MACOSX_DEPLOYMENT_TARGET environment variable and
+  # the compiler option will point to the same version. The environment
+  # variable is defined to support dependencies where the compiler option
+  # is not applied.
+  export MACOSX_DEPLOYMENT_TARGET := @MACOSX_VERSION_MIN@
+  ifeq ($(OPENJ9_LIBS_SUBDIR), compressedrefs)
+    # Set page zero size to 4KB for mapping memory below 4GB.
+    LDFLAGS_JDKEXE += -pagezero_size 0x1000
+  endif
+endif
