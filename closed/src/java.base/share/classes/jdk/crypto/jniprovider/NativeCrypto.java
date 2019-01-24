@@ -123,4 +123,40 @@ public class NativeCrypto {
                                               int aadLen,
                                               int tagLen);
 
+    /* Native RSA interfaces */
+    public static final native long createRSAPublicKey(byte[] n,
+                                                       int nLen,
+                                                       byte[] e,
+                                                       int eLen);
+
+    public static final native long createRSAPrivateCrtKey(byte[] n,
+                                                           int nLen,
+                                                           byte[] d,
+                                                           int dLen,
+                                                           byte[] e,
+                                                           int eLen,
+                                                           byte[] p,
+                                                           int pLen,
+                                                           byte[] q,
+                                                           int qLen,
+                                                           byte[] dp,
+                                                           int dpLen,
+                                                           byte[] dq,
+                                                           int dqLen,
+                                                           byte[] qinv,
+                                                           int qinvLen);
+
+    public static final native void destroyRSAKey(long key);
+
+    public static final native int RSADP(byte[] k,
+                                         int kLen,
+                                         byte[] m,
+                                         int verify,
+                                         long RSAPrivateCrtKey);
+
+    public static final native int RSAEP(byte[] k,
+                                         int kLen,
+                                         byte[] m,
+                                         long RSAPublicKey);
+
 }
