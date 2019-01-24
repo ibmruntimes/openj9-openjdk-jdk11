@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package sun.security.rsa;
 
@@ -37,6 +42,7 @@ import sun.security.x509.X509Key;
 import sun.security.x509.AlgorithmId;
 
 import static sun.security.rsa.RSAUtil.KeyType;
+import jdk.crypto.jniprovider.NativeCrypto;
 
 /**
  * RSA public key implementation for "RSA", "RSASSA-PSS" algorithms.
@@ -203,5 +209,33 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
                         getAlgorithm(),
                         getFormat(),
                         getEncoded());
+    }
+
+    private long nativeRSAKey = 0x0;
+
+    /**
+     * Get native RSA Public Key context pointer.
+     * Create native context if uninitialized.
+     */
+    protected long getNativePtr() {
+        if (nativeRSAKey != 0x0) {
+            return nativeRSAKey;
+        }
+
+        BigInteger n = this.getModulus();
+        BigInteger e = this.getPublicExponent();
+
+        byte[] n_2c = n.toByteArray();
+        byte[] e_2c = e.toByteArray();
+
+        nativeRSAKey = NativeCrypto.createRSAPublicKey(n_2c,n_2c.length, e_2c, e_2c.length);
+        return nativeRSAKey;
+    }
+
+    @Override
+    public void finalize() {
+        if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
+           NativeCrypto.destroyRSAKey(nativeRSAKey);
+        }
     }
 }
