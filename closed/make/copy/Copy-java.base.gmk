@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -68,6 +68,15 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   else
     OPENSSL_LIB_NAME = libcrypto.so
   endif
+
+  # On Mac OS, update the crypto library path to @rpath as the default is /usr/local/lib/
+  ifeq ($(OPENJDK_BUILD_OS), macosx)
+    .PHONY : RPATH_CRYPTO_LIB
+    TARGETS += RPATH_CRYPTO_LIB
+    RPATH_CRYPTO_LIB :
+	install_name_tool -id "@rpath/$(OPENSSL_LIB_NAME)" "$(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)"
+  endif
+
   OPENSSL_TARGET_LIB = $(LIB_DST_DIR)/$(OPENSSL_LIB_NAME)
   TARGETS += $(OPENSSL_TARGET_LIB)
   $(OPENSSL_TARGET_LIB) : $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_LIB_NAME)
