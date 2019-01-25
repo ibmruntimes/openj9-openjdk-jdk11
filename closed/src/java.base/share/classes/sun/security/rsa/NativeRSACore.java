@@ -99,8 +99,12 @@ public final class NativeRSACore {
 
         BigInteger n = key.getModulus();
         byte[] output = new byte[getByteLength(n)];
-
-        int outputLen = NativeCrypto.RSAEP(msg, msg.length, output, nativePtr);
+        int outputLen;
+        try {
+            outputLen = NativeCrypto.RSAEP(msg, msg.length, output, nativePtr);
+        } finally {
+            java.lang.ref.Reference.reachabilityFence(key);
+        }
 
         if (outputLen == -1) {
             return null;
@@ -131,7 +135,11 @@ public final class NativeRSACore {
             verifyInt = -1;
         }
 
-        outputLen = NativeCrypto.RSADP(msg, msg.length, output, verifyInt, nativePtr);
+        try {
+            outputLen = NativeCrypto.RSADP(msg, msg.length, output, verifyInt, nativePtr);
+        } finally {
+            java.lang.ref.Reference.reachabilityFence(key);
+        }
 
         if (outputLen == -1) {
             return null;
