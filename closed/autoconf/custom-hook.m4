@@ -371,14 +371,6 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   # Configure for openssl build
   CONFIGURE_OPENSSL
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
-    OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
-  else
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L\$(SUPPORT_OUTPUTDIR)/../vm"
-    OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -L\$(SUPPORT_OUTPUTDIR)/../vm"
-  fi
-
   CLOSED_AUTOCONF_DIR="$TOPDIR/closed/autoconf"
 
   # Create the custom-spec.gmk
