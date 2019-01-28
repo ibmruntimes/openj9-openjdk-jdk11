@@ -109,11 +109,10 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
 
     if (copyContext != 0) {
         EVP_MD_CTX *contextToCopy = ((OpenSSLMDContext*) copyContext)->ctx;
-        EVP_MD_CTX_copy_ex(ctx,contextToCopy);
+        EVP_MD_CTX_copy_ex(ctx, contextToCopy);
     }
 
-
-    return (jlong)context;
+    return (jlong)(intptr_t)context;
 }
 
 /*
@@ -207,7 +206,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
     if (1 != EVP_DigestInit_ex(context->ctx, context->digestAlg, NULL))
         handleErrors();
 
-    return size;
+    return (jint)size;
 }
 
 /* Reset Digest
@@ -251,7 +250,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContex
     context->nativeBuffer2 = (unsigned char*)nativeBuffer2;
     context->ctx = ctx;
 
-    return (jlong)context;
+    return (jlong)(intptr_t)context;
 }
 
 /* Destroy Cipher context
@@ -268,7 +267,6 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContex
      EVP_CIPHER_CTX_free(context->ctx);
      free(context);
      return 0;
-
 }
 
 /* Initialize CBC context
@@ -352,7 +350,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate
     (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
-    return outputLen;
+    return (jint)outputLen;
 }
 
 /* CBC Final Encryption
@@ -394,7 +392,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt
     (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
-    return outputLen+outputLen1;
+    return (jint)(outputLen + outputLen1);
 }
 
 int first_time_gcm = 0;
@@ -411,11 +409,11 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
   jbyteArray aad, jint aadLen, jint tagLen) {
 
     unsigned char* inputNative = NULL;
-    int len, len_cipher = 0;
-    unsigned char* keyNative;
-    unsigned char* ivNative;
-    unsigned char* outputNative;
-    unsigned char* aadNative;
+    int len = 0, len_cipher = 0;
+    unsigned char* keyNative = NULL;
+    unsigned char* ivNative = NULL;
+    unsigned char* outputNative = NULL;
+    unsigned char* aadNative = NULL;
 
     EVP_CIPHER_CTX* ctx = NULL;
     const EVP_CIPHER* evp_gcm_cipher = NULL;
@@ -447,7 +445,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
     }
 
     if (inLen > 0) {
-        inputNative  = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
+        inputNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, input, 0));
         if (inputNative == NULL) {
             (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
             (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
@@ -462,7 +460,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
         ERR_load_crypto_strings();
         first_time_gcm = 1;
     }
-    
+
     switch(keyLen) {
         case 16:
             evp_gcm_cipher = EVP_aes_128_gcm();
@@ -508,16 +506,16 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMEncrypt
 
     EVP_CIPHER_CTX_free(ctx);
 
-    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative,   0);
-    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative,    0);
-    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative,0);
+    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
     if (inLen > 0) {
         (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     }
 
-    (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative,  0);
-    return len_cipher;
+    (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative, 0);
+    return (jint)len_cipher;
 }
 
 /* GCM Decryption
@@ -533,10 +531,10 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
 
     unsigned char* inputNative = NULL;
     unsigned char* aadNative = NULL;
-    int ret, len, plaintext_len = 0;
-    unsigned char* keyNative;
-    unsigned char* ivNative;
-    unsigned char* outputNative;
+    int ret = 0, len = 0, plaintext_len = 0;
+    unsigned char* keyNative = NULL;
+    unsigned char* ivNative = NULL;
+    unsigned char* outputNative = NULL;
     EVP_CIPHER_CTX* ctx = NULL;
     const EVP_CIPHER* evp_gcm_cipher = NULL;
 
@@ -632,22 +630,22 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
 
     EVP_CIPHER_CTX_free(ctx);
 
-    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative,   0);
-    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative,    0);
-    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative,0);
+    (*env)->ReleasePrimitiveArrayCritical(env, key, keyNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, iv, ivNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, output, outputNative, 0);
 
     if (inLen > 0) {
         (*env)->ReleasePrimitiveArrayCritical(env, input, inputNative, 0);
     }
 
     if (aadLen > 0) {
-        (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, aad, aadNative, 0);
     }
 
     if (ret > 0) {
         /* Successful Decryption */
         plaintext_len += len;
-        return plaintext_len;
+        return (jint)plaintext_len;
     } else {
         /* Tag Mismatch */
         return -1;
@@ -676,31 +674,31 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPublic
 
     eNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, e, 0));
     if (eNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
         return -1;
     }
 
     RSA* publicRSAKey = RSA_new();
 
-    BIGNUM* nBN = convertJavaBItoBN(nNative,nLen);
-    BIGNUM* eBN = convertJavaBItoBN(eNative,eLen);
-    
+    BIGNUM* nBN = convertJavaBItoBN(nNative, nLen);
+    BIGNUM* eBN = convertJavaBItoBN(eNative, eLen);
+
     if (publicRSAKey == NULL || nBN == NULL || eBN == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
         return -1;
     }
 
     int ret = RSA_set0_key(publicRSAKey, nBN, eBN, NULL);
 
-    (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-    (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
+    (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
 
     if (ret == 0) {
         return -1;
     }
 
-    return (jlong)publicRSAKey;
+    return (jlong)(intptr_t)publicRSAKey;
 }
 
 /* Create an RSA Private CRT Key
@@ -721,79 +719,79 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivat
     unsigned char* dqNative;
     unsigned char* qinvNative;
 
-    nNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, n, 0));
+    nNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, n, 0));
     if (nNative == NULL) {
         return -1;
     }
 
-    dNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, d, 0));
+    dNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, d, 0));
     if (dNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
         return -1;
     }
 
-    eNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, e, 0));
+    eNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, e, 0));
     if (eNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative, 0);
         return -1;
     }
 
-    pNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, p, 0));
+    pNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, p, 0));
     if (pNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
         return -1;
     }
 
-    qNative    = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, q, 0));
+    qNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, q, 0));
     if (qNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative, 0);
         return -1;
     }
 
-    dpNative   = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, dp, 0));
+    dpNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, dp, 0));
     if (dpNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, q, qNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, q, qNative, 0);
         return -1;
     }
 
-    dqNative   = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, dq, 0));
+    dqNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, dq, 0));
     if (dqNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, q, qNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, dp, dpNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, q, qNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, dp, dpNative, 0);
         return -1;
     }
 
     qinvNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, qinv, 0));
     if (qinvNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, q, qNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, dp, dpNative,  0);
-        (*env)->ReleasePrimitiveArrayCritical(env, dq, dqNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, d, dNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, e, eNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, p, pNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, q, qNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, dp, dpNative, 0);
+        (*env)->ReleasePrimitiveArrayCritical(env, dq, dqNative, 0);
         return -1;
     }
 
     RSA* privateRSACrtKey = RSA_new();
 
-    BIGNUM* nBN = convertJavaBItoBN(nNative,nLen);
-    BIGNUM* eBN = convertJavaBItoBN(eNative,eLen);
-    BIGNUM* dBN = convertJavaBItoBN(dNative,dLen);
+    BIGNUM* nBN = convertJavaBItoBN(nNative, nLen);
+    BIGNUM* eBN = convertJavaBItoBN(eNative, eLen);
+    BIGNUM* dBN = convertJavaBItoBN(dNative, dLen);
 
     if (privateRSACrtKey == NULL || nBN == NULL || eBN == NULL || dBN == NULL) {
 
@@ -812,8 +810,8 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivat
 
     ret = RSA_set0_key(privateRSACrtKey, nBN, eBN, dBN);
 
-    BIGNUM* pBN = convertJavaBItoBN(pNative,pLen);
-    BIGNUM* qBN = convertJavaBItoBN(qNative,qLen);
+    BIGNUM* pBN = convertJavaBItoBN(pNative, pLen);
+    BIGNUM* qBN = convertJavaBItoBN(qNative, qLen);
 
     if (ret == 0 || pBN == NULL || qBN == NULL) {
         (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
@@ -829,9 +827,9 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivat
 
     ret = RSA_set0_factors(privateRSACrtKey, pBN, qBN);
 
-    BIGNUM* dpBN   = convertJavaBItoBN(dpNative,  dpLen);
-    BIGNUM* dqBN   = convertJavaBItoBN(dqNative,  dqLen);
-    BIGNUM* qinvBN = convertJavaBItoBN(qinvNative,qinvLen);
+    BIGNUM* dpBN = convertJavaBItoBN(dpNative, dpLen);
+    BIGNUM* dqBN = convertJavaBItoBN(dqNative, dqLen);
+    BIGNUM* qinvBN = convertJavaBItoBN(qinvNative, qinvLen);
 
     if (ret == 0 || dpBN == NULL || dqBN == NULL || qinvBN == NULL) {
         (*env)->ReleasePrimitiveArrayCritical(env, n, nNative, 0);
@@ -855,11 +853,11 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivat
     (*env)->ReleasePrimitiveArrayCritical(env, dp, dpNative, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, dq, dqNative, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, qinv, qinvNative, 0);
-    
+
     if (ret == 0)
         return -1;
 
-    return (jlong)privateRSACrtKey;
+    return (jlong)(intptr_t)privateRSACrtKey;
 }
 
 /* Free RSA Public/Private Key
@@ -892,7 +890,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP
 
     mNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, m, 0));
     if (mNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, k, kNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, k, kNative, 0);
         return -1;
     }
 
@@ -901,9 +899,9 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP
     // OSSL_RSA_public_decrypt returns -1 on error
     int msg_len = RSA_public_decrypt(kLen, kNative, mNative, rsaKey, RSA_NO_PADDING);
 
-    (*env)->ReleasePrimitiveArrayCritical(env, k, kNative,  0);
-    (*env)->ReleasePrimitiveArrayCritical(env, m, mNative,  0);
-    return msg_len;
+    (*env)->ReleasePrimitiveArrayCritical(env, k, kNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, m, mNative, 0);
+    return (jint)msg_len;
 }
 
 /* RSADP Cryptographic Primitive, RSA Private Key operation
@@ -927,7 +925,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
 
     mNative = (unsigned char*)((*env)->GetPrimitiveArrayCritical(env, m, 0));
     if (mNative == NULL) {
-        (*env)->ReleasePrimitiveArrayCritical(env, k, kNative,  0);
+        (*env)->ReleasePrimitiveArrayCritical(env, k, kNative, 0);
         return -1;
     }
 
@@ -964,10 +962,10 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
         }
     }
 
-    (*env)->ReleasePrimitiveArrayCritical(env, k, kNative,  0);
-    (*env)->ReleasePrimitiveArrayCritical(env, m, mNative,  0);
+    (*env)->ReleasePrimitiveArrayCritical(env, k, kNative, 0);
+    (*env)->ReleasePrimitiveArrayCritical(env, m, mNative, 0);
 
-    return msg_len;
+    return (jint)msg_len;
 }
 
 /*
