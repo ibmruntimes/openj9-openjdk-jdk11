@@ -69,6 +69,12 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
     // must be null for "RSA" keys.
     private AlgorithmParameterSpec keyParams;
 
+    private static NativeCrypto nativeCrypto;
+
+    static {
+        nativeCrypto = nativeCrypto.getNativeCrypto();
+    }
+
     /**
      * Generate a new RSAPublicKey from the specified encoding.
      * Used by SunPKCS11 provider.
@@ -228,14 +234,14 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
         byte[] n_2c = n.toByteArray();
         byte[] e_2c = e.toByteArray();
 
-        nativeRSAKey = NativeCrypto.createRSAPublicKey(n_2c,n_2c.length, e_2c, e_2c.length);
+        nativeRSAKey = nativeCrypto.createRSAPublicKey(n_2c,n_2c.length, e_2c, e_2c.length);
         return nativeRSAKey;
     }
 
     @Override
     public void finalize() {
         if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
-           NativeCrypto.destroyRSAKey(nativeRSAKey);
+           nativeCrypto.destroyRSAKey(nativeRSAKey);
         }
     }
 }

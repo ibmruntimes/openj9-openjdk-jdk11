@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -90,6 +90,12 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
     private byte[] aadBufferSave = null;
     private byte[] ibufferSave = null;
     private byte[] ibufferSave_enc = null;
+
+    private static NativeCrypto nativeCrypto;
+
+    static {
+        nativeCrypto = NativeCrypto.getNativeCrypto();
+    }
 
     private static void checkDataLength(int processed, int len) {
         if (processed > MAX_BUF_SIZE - len) {
@@ -338,7 +344,7 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
 
         byte[] aad = ((aadBuffer == null || aadBuffer.size() == 0) ? emptyAAD : aadBuffer.toByteArray());
 
-        NativeCrypto.GCMEncrypt(key, key.length,
+        nativeCrypto.GCMEncrypt(key, key.length,
               iv, iv.length,
               in, inOfs, len,
               out, outOfs,
@@ -429,7 +435,7 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
         len = in.length;
         ibuffer.reset();
 
-        int ret = NativeCrypto.GCMDecrypt(key, key.length,
+        int ret = nativeCrypto.GCMDecrypt(key, key.length,
                 iv, iv.length,
                 in, inOfs, len,
                 out, outOfs,

@@ -57,6 +57,12 @@ import sun.security.jca.JCAUtil;
  */
 public final class NativeRSACore {
 
+    private static NativeCrypto nativeCrypto;
+
+    static {
+        nativeCrypto = NativeCrypto.getNativeCrypto();
+    }
+
     /**
      * Return the number of bytes required to store the magnitude byte[] of
      * this BigInteger. Do not count a 0x00 byte toByteArray() would
@@ -100,7 +106,7 @@ public final class NativeRSACore {
         BigInteger n = key.getModulus();
         byte[] output = new byte[getByteLength(n)];
 
-        int outputLen = NativeCrypto.RSAEP(msg, msg.length, output, nativePtr);
+        int outputLen = nativeCrypto.RSAEP(msg, msg.length, output, nativePtr);
 
         if (outputLen == -1) {
             return null;
@@ -131,7 +137,7 @@ public final class NativeRSACore {
             verifyInt = -1;
         }
 
-        outputLen = NativeCrypto.RSADP(msg, msg.length, output, verifyInt, nativePtr);
+        outputLen = nativeCrypto.RSADP(msg, msg.length, output, verifyInt, nativePtr);
 
         if (outputLen == -1) {
             return null;

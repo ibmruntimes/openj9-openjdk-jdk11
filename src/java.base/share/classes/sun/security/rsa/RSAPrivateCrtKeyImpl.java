@@ -77,6 +77,12 @@ public final class RSAPrivateCrtKeyImpl
     // Must be null for "RSA" keys.
     private AlgorithmParameterSpec keyParams;
 
+    private static NativeCrypto nativeCrypto;
+
+    static {
+        nativeCrypto = NativeCrypto.getNativeCrypto();
+    }
+
     /**
      * Generate a new key from its encoding. Returns a CRT key if possible
      * and a non-CRT key otherwise. Used by RSAKeyFactory.
@@ -270,7 +276,7 @@ public final class RSAPrivateCrtKeyImpl
         byte[] dQ_2c   = dQ.toByteArray();
         byte[] qInv_2c = qInv.toByteArray();
 
-        nativeRSAKey = NativeCrypto.createRSAPrivateCrtKey(n_2c,n_2c.length, d_2c, d_2c.length, e_2c, e_2c.length,
+        nativeRSAKey = nativeCrypto.createRSAPrivateCrtKey(n_2c,n_2c.length, d_2c, d_2c.length, e_2c, e_2c.length,
                 p_2c, p_2c.length, q_2c, q_2c.length,
                 dP_2c, dP_2c.length, dQ_2c, dQ_2c.length, qInv_2c, qInv_2c.length);
         return nativeRSAKey;
@@ -279,7 +285,7 @@ public final class RSAPrivateCrtKeyImpl
     @Override
     public void finalize() {
         if (nativeRSAKey != 0x0 && nativeRSAKey != -1) {
-            NativeCrypto.destroyRSAKey(nativeRSAKey);
+            nativeCrypto.destroyRSAKey(nativeRSAKey);
         }
     }
 
