@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -242,16 +242,31 @@ public class BuiltinClassLoader
      * Returns if -Xshareclasses is used in the command line         							//IBM-shared_classes_misc
      */  																						//IBM-shared_classes_misc
     private static boolean isSharedClassesEnabled() {											//IBM-shared_classes_misc
-    	return AccessController.doPrivileged((PrivilegedAction<Boolean>) ()						//IBM-shared_classes_misc
-    			-> Boolean.getBoolean("com.ibm.oti.shared.enabled"));							//IBM-shared_classes_misc
+    	/* 																						//IBM-shared_classes_misc
+    	 * Lambda expression can't be used here due to bootstrap problem 						//IBM-shared_classes_misc
+    	 * when jdk.internal.lambda.dumpProxyClasses is enabled.								//IBM-shared_classes_misc
+    	 * More details are at https://github.com/eclipse/openj9/issues/3399					//IBM-shared_classes_misc
+    	 */																						//IBM-shared_classes_misc
+    	return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {					//IBM-shared_classes_misc
+    		public Boolean run() {																//IBM-shared_classes_misc
+    			return Boolean.getBoolean("com.ibm.oti.shared.enabled");						//IBM-shared_classes_misc
+    		}																					//IBM-shared_classes_misc
+    	});																						//IBM-shared_classes_misc
    	}																							//IBM-shared_classes_misc
 
     /*                                                                          					//IBM-shared_classes_misc
      * Gets the URL of the jimage file         														//IBM-shared_classes_misc
      */  																							//IBM-shared_classes_misc
 	private static void setJimageURL() {															//IBM-shared_classes_misc
-		String javaHome = AccessController.doPrivileged((PrivilegedAction<String>) () -> {		//IBM-shared_classes_misc
-			return System.getProperty("java.home");												//IBM-shared_classes_misc
+    	/* 																						//IBM-shared_classes_misc
+    	 * Lambda expression can't be used here due to bootstrap problem 						//IBM-shared_classes_misc
+    	 * when jdk.internal.lambda.dumpProxyClasses is enabled.								//IBM-shared_classes_misc
+    	 * More details are at https://github.com/eclipse/openj9/issues/3399					//IBM-shared_classes_misc
+    	 */																						//IBM-shared_classes_misc
+		String javaHome = AccessController.doPrivileged( new PrivilegedAction<String>() {		//IBM-shared_classes_misc
+			public String run() {																//IBM-shared_classes_misc
+				return System.getProperty("java.home");											//IBM-shared_classes_misc
+			}																					//IBM-shared_classes_misc
 		});																						//IBM-shared_classes_misc
 		Path p = Paths.get(javaHome, "lib", "modules");											//IBM-shared_classes_misc
 		if (Files.isRegularFile(p)) {															//IBM-shared_classes_misc
