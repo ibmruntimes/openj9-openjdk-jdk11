@@ -193,7 +193,6 @@ $(call openj9_add_jdk_special, \
 # java.base
 
 $(call openj9_add_jdk_shlibs, java.base, \
-	j9vm_jdk11/jvm \
 	j9dmp29 \
 	j9gc29 \
 	j9gcchk29 \
@@ -209,6 +208,7 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	j9vrb29 \
 	j9zlib29 \
 	jclse11_29 \
+	jvm \
 	omrsig \
 	)
 
