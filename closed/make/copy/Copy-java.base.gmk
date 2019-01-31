@@ -23,7 +23,7 @@ TARGETS += \
 	$(INCLUDE_TARGET_DIR)/ibmjvmti.h \
 	#
 
-$(INCLUDE_TARGET_DIR)/jvmti.h : $(TOPDIR)/openj9/runtime/include/jvmti.h
+$(INCLUDE_TARGET_DIR)/jvmti.h : $(OUTPUTDIR)/vm/include/jvmti.h
 	$(call install-file)
 
 $(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
