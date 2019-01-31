@@ -315,7 +315,8 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
   LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --tags="jdk-11*" --topo-order --max-count=1 2>/dev/null`
   if test "x$LAST_TAGGED_SHA" != x ; then
-    OPENJDK_TAG=`git -C $TOPDIR describe --tags "$LAST_TAGGED_SHA"`
+    # Choose the latest tag when there is more than one for the same SHA.
+    OPENJDK_TAG=`git -C $TOPDIR tag --points-at "$LAST_TAGGED_SHA" | grep '+' | sort -V | tail -1`
   else
     OPENJDK_TAG=
   fi
