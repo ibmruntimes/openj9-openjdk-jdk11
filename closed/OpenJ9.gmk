@@ -207,7 +207,7 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	j9vmchk29 \
 	j9vrb29 \
 	j9zlib29 \
-	jclse11_29 \
+	jclse29 \
 	jvm \
 	omrsig \
 	)
