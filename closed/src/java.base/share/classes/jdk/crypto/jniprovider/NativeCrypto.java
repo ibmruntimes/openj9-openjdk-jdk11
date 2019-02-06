@@ -26,6 +26,12 @@ package jdk.crypto.jniprovider;
 
 import java.security.*;
 
+import com.ibm.oti.vm.VM;
+
+import jdk.internal.misc.Unsafe;
+import jdk.internal.reflect.Reflection;
+import jdk.internal.reflect.CallerSensitive;
+
 public class NativeCrypto {
 
     private static boolean loaded = false;
@@ -55,6 +61,21 @@ public class NativeCrypto {
         return loaded;
     }
 
+    private NativeCrypto() {
+        //empty
+    }
+
+    @CallerSensitive
+    public static NativeCrypto getNativeCrypto() {
+
+        ClassLoader callerClassLoader = Reflection.getCallerClass().getClassLoader();
+
+        if ((callerClassLoader != null) && (callerClassLoader != VM.getVMLangAccess().getExtClassLoader())) {
+            throw new SecurityException("NativeCrypto");
+        }
+        return new NativeCrypto();
+    }
+
     /* Native digest interfaces */
     public static final native int loadCrypto();
 
@@ -75,57 +96,93 @@ public class NativeCrypto {
                                                          int digestLen);
 
     /* Native CBC interfaces */
-    public static final native long CBCCreateContext(long nativeBuffer,
-                                                     long nativeBuffer2);
+    public final native long CBCCreateContext(long nativeBuffer,
+                                              long nativeBuffer2);
 
-    public static final native int CBCDestroyContext(long context);
+    public final native int CBCDestroyContext(long context);
 
-    public static final native int CBCInit(long context,
-                                            int mode,
-                                            byte[] iv,
-                                            int ivlen,
-                                            byte[] key,
-                                            int keylen);
+    public final native int CBCInit(long context,
+                                    int mode,
+                                    byte[] iv,
+                                    int ivlen,
+                                    byte[] key,
+                                    int keylen);
 
-    public static final native int  CBCUpdate(long context,
-                                              byte[] input,
-                                              int inputOffset,
-                                              int inputLen,
-                                              byte[] output,
-                                              int outputOffset);
+    public final native int  CBCUpdate(long context,
+                                       byte[] input,
+                                       int inputOffset,
+                                       int inputLen,
+                                       byte[] output,
+                                       int outputOffset);
 
-    public static final native int  CBCFinalEncrypt(long context,
-                                               byte[] input,
-                                               int inputOffset,
-                                               int inputLen,
-                                               byte[] output,
-                                               int outputOffset);
+    public final native int  CBCFinalEncrypt(long context,
+                                             byte[] input,
+                                             int inputOffset,
+                                             int inputLen,
+                                             byte[] output,
+                                             int outputOffset);
 
     /* Native GCM interfaces */
-    public static final native int GCMEncrypt(byte[] key,
-                                              int keylen,
-                                              byte[] iv,
-                                              int ivlen,
-                                              byte[] input,
-                                              int inOffset,
-                                              int inLen,
-                                              byte[] output,
-                                              int outOffset,
-                                              byte[] aad,
-                                              int aadLen,
-                                              int tagLen);
+    public final native int GCMEncrypt(byte[] key,
+                                       int keylen,
+                                       byte[] iv,
+                                       int ivlen,
+                                       byte[] input,
+                                       int inOffset,
+                                       int inLen,
+                                       byte[] output,
+                                       int outOffset,
+                                       byte[] aad,
+                                       int aadLen,
+                                       int tagLen);
 
-    public static final native int GCMDecrypt(byte[] key,
-                                              int keylen,
-                                              byte[] iv,
-                                              int ivlen,
-                                              byte[] input,
-                                              int inOffset,
-                                              int inLen,
-                                              byte[] output,
-                                              int outOffset,
-                                              byte[] aad,
-                                              int aadLen,
-                                              int tagLen);
+    public final native int GCMDecrypt(byte[] key,
+                                       int keylen,
+                                       byte[] iv,
+                                       int ivlen,
+                                       byte[] input,
+                                       int inOffset,
+                                       int inLen,
+                                       byte[] output,
+                                       int outOffset,
+                                       byte[] aad,
+                                       int aadLen,
+                                       int tagLen);
+
+    /* Native RSA interfaces */
+    public final native long createRSAPublicKey(byte[] n,
+                                                int nLen,
+                                                byte[] e,
+                                                int eLen);
+
+    public final native long createRSAPrivateCrtKey(byte[] n,
+                                                    int nLen,
+                                                    byte[] d,
+                                                    int dLen,
+                                                    byte[] e,
+                                                    int eLen,
+                                                    byte[] p,
+                                                    int pLen,
+                                                    byte[] q,
+                                                    int qLen,
+                                                    byte[] dp,
+                                                    int dpLen,
+                                                    byte[] dq,
+                                                    int dqLen,
+                                                    byte[] qinv,
+                                                    int qinvLen);
+
+    public final native void destroyRSAKey(long key);
+
+    public final native int RSADP(byte[] k,
+                                  int kLen,
+                                  byte[] m,
+                                  int verify,
+                                  long RSAPrivateCrtKey);
+
+    public final native int RSAEP(byte[] k,
+                                  int kLen,
+                                  byte[] m,
+                                  long RSAPublicKey);
 
 }

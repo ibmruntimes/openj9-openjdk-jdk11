@@ -236,6 +236,9 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
     arm)
       OPENJ9_CPU=arm
       ;;
+    aarch64)
+      OPENJ9_CPU=aarch64
+      ;;
     *)
       AC_MSG_ERROR([unsupported OpenJ9 cpu $1])
       ;;
@@ -295,6 +298,8 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_PLATFORM_CODE=xr32
     OPENJ9_BUILDSPEC=linux_arm_linaro
     OPENJ9_LIBS_SUBDIR=default
+  elif test "x$OPENJ9_CPU" = xaarch64 ; then
+    OPENJ9_PLATFORM_CODE=xr64
   else
     AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi
@@ -310,7 +315,8 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
   LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --tags="jdk-11*" --topo-order --max-count=1 2>/dev/null`
   if test "x$LAST_TAGGED_SHA" != x ; then
-    OPENJDK_TAG=`git -C $TOPDIR describe --tags "$LAST_TAGGED_SHA"`
+    # Choose the latest tag when there is more than one for the same SHA.
+    OPENJDK_TAG=`git -C $TOPDIR tag --points-at "$LAST_TAGGED_SHA" | grep '+' | sort -V | tail -1`
   else
     OPENJDK_TAG=
   fi
@@ -371,14 +377,6 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
   # Configure for openssl build
   CONFIGURE_OPENSSL
 
-  if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
-    OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -libpath:\$(SUPPORT_OUTPUTDIR)/../vm/lib"
-  else
-    LDFLAGS_JDKLIB="${LDFLAGS_JDKLIB} -L\$(SUPPORT_OUTPUTDIR)/../vm"
-    OPENJDK_BUILD_LDFLAGS_JDKLIB="${OPENJDK_BUILD_LDFLAGS_JDKLIB} -L\$(SUPPORT_OUTPUTDIR)/../vm"
-  fi
-
   CLOSED_AUTOCONF_DIR="$TOPDIR/closed/autoconf"
 
   # Create the custom-spec.gmk
@@ -423,7 +421,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         fi
 
         if test "x$BUNDLE_OPENSSL" = xyes ; then
-          OPENSSL_BUNDLE_LIB_PATH=$OPENSSL_DIR
+          OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
         fi
         AC_MSG_RESULT([yes])
       else
