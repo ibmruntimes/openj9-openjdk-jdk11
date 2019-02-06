@@ -22,11 +22,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
- * ===========================================================================
- */
 package sun.security.ssl;
 
 import java.math.BigInteger;
