@@ -313,7 +313,8 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
-  LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --tags="jdk-11*" --topo-order --max-count=1 2>/dev/null`
+  # Find first rev tagged by jdk-11* but not containing "_openj9"
+  LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --exclude="*_openj9*" --tags="jdk-11*" --topo-order --max-count=1 2>/dev/null`
   if test "x$LAST_TAGGED_SHA" != x ; then
     # Choose the latest tag when there is more than one for the same SHA.
     OPENJDK_TAG=`git -C $TOPDIR tag --points-at "$LAST_TAGGED_SHA" | grep '+' | sort -V | tail -1`
