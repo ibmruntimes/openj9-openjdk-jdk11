@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -26,13 +26,14 @@
   $(eval $(call SetupJdkLibrary, BUILD_JNCRYPTO, \
       NAME := jncrypto, \
       OPTIMIZATION := LOW, \
-      CFLAGS := $(CFLAGS_JDKLIB) -c $(OPENSSL_CFLAGS), \
+      CFLAGS := $(CFLAGS_JDKLIB) \
+                -c $(OPENSSL_CFLAGS), \
       DISABLED_WARNINGS_gcc := sign-compare implicit-fallthrough unused-value, \
       DISABLED_WARNINGS_clang := sign-compare, \
       DISABLED_WARNINGS_microsoft := 4101 4244 4146 4018, \
       LDFLAGS := $(LDFLAGS_JDKLIB) \
           $(call SET_SHARED_LIBRARY_ORIGIN), \
-      LIBS := $(OPENSSL_LIBS), \
+      LIBS_unix := $(LIBDL), \
   ))
    TARGETS += $(BUILD_JNCRYPTO)
 endif

@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -20,8 +20,13 @@
 
 FindSrcDirsForLib += \
 	$(call uniq, $(wildcard \
+		$(TOPDIR)/closed/src/$(strip $1)/$(OPENJDK_TARGET_OS)/native/lib$(strip $2) \
+		$(TOPDIR)/closed/src/$(strip $1)/$(OPENJDK_TARGET_OS_TYPE)/native/lib$(strip $2) \
 		$(TOPDIR)/closed/src/$(strip $1)/share/native/lib$(strip $2)))
+
 
 FindSrcDirsForComponent += \
 	$(call uniq, $(wildcard \
+		$(TOPDIR)/closed/src/$(strip $1)/$(OPENJDK_TARGET_OS)/native/$(strip $2) \
+		$(TOPDIR)/closed/src/$(strip $1)/$(OPENJDK_TARGET_OS_TYPE)/native/$(strip $2) \
 		$(TOPDIR)/closed/src/$(strip $1)/share/native/$(strip $2)))

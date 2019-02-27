@@ -405,7 +405,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     if test "x$BUNDLE_OPENSSL" = x; then
       BUNDLE_OPENSSL=no
     fi
-    # if --with-openssl=fetched
+    # Process --with-openssl=fetched
     if test "x$with_openssl" = xfetched ; then
       if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         AC_MSG_RESULT([no])
@@ -414,9 +414,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       fi
       if test -d "$TOPDIR/openssl" ; then
         OPENSSL_DIR="$TOPDIR/openssl"
-        FOUND_OPENSSL=yes
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-        OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
         if test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
           BUILD_OPENSSL=no
         else
@@ -430,23 +428,23 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       else
         AC_MSG_RESULT([no])
         printf "$TOPDIR/openssl is not found.\n"
-        printf "  run get_source.sh --openssl-version=1.1.1\n"
+        printf "  run get_source.sh --openssl-version=<version as 1.0.2p or later>\n"
         printf "  Then, run configure with '--with-openssl=fetched'\n"
         AC_MSG_ERROR([Cannot continue])
       fi
-    fi
-
-    # if --with-openssl=system
-    if test "x$FOUND_OPENSSL" != xyes && test "x$with_openssl" = xsystem ; then
+    # Process --with-openssl=system
+    elif test "x$with_openssl" = xsystem ; then
       if test "x$OPENJDK_BUILD_OS" = xwindows ; then
         AC_MSG_RESULT([no])
         printf "On Windows, value of \"system\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
         AC_MSG_ERROR([Cannot continue])
       fi
-      # Check modules using pkg-config, but only if we have it
-      PKG_CHECK_MODULES(OPENSSL, openssl >= 1.1.0, [FOUND_OPENSSL=yes], [FOUND_OPENSSL=no])
+      # We can use the system installed openssl only when it is package installed.
+      # If not package installed, fail with an error message.
+      # PKG_CHECK_MODULES will setup the variable OPENSSL_CFLAGS and OPENSSL_LIB when successful.
+      PKG_CHECK_MODULES(OPENSSL, openssl >= 1.0.2, [FOUND_OPENSSL=yes], [FOUND_OPENSSL=no])
       if test "x$FOUND_OPENSSL" != xyes ; then
-        AC_MSG_ERROR([Unable to find openssl 1.1.0(and above) installed on System. Please use other options for '--with-openssl'])
+        AC_MSG_ERROR([Unable to find openssl 1.0.2(and above) installed on System. Please use other options for '--with-openssl'])
       fi
       # The crypto library bundling option is not available when --with-openssl=system.
       if test "x$BUNDLE_OPENSSL" = xyes ; then
@@ -454,20 +452,15 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         printf "The option --enable_openssl_bundling is not available with --with-openssl=system. Use option fetched or openssl-custom-path to bundle crypto library\n"
         AC_MSG_ERROR([Cannot continue])
       fi
-    fi
-
-    # if --with-openssl=/custom/path/where/openssl/is/present
-    if test "x$FOUND_OPENSSL" != xyes ; then
-      # User specified path where openssl is installed
+    # Process --with-openssl=/custom/path/where/openssl/is/present
+    # As the value is not fetched or system, assume user specified the
+    # path where openssl is installed
+    else
       OPENSSL_DIR=$with_openssl
       BASIC_FIXUP_PATH(OPENSSL_DIR)
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
+        OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-          # On Windows, check for libcrypto.lib
-          if test -s "$OPENSSL_DIR/lib/libcrypto.lib" ; then
-            FOUND_OPENSSL=yes
-            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-libpath:${OPENSSL_DIR}/lib libcrypto.lib"
             if test "x$BUNDLE_OPENSSL" = xyes ; then
               if test -d "$OPENSSL_DIR/bin" ; then
                 OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/bin"
@@ -475,12 +468,9 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
               fi
             fi
-          fi
         else
           if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-            FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR}/lib -lcrypto"
             if test "x$BUNDLE_OPENSSL" = xyes ; then
               # On Mac OSX, create local copy of the crypto library to update @rpath
               # as the default is /usr/local/lib.
@@ -489,16 +479,13 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 $MKDIR -p "${LOCAL_CRYPTO}"
                 $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
                 $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
-                OPENSSL_LIBS="-L${LOCAL_CRYPTO} -lcrypto"
                 OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
               else
                 OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib"
               fi
             fi
           elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-            FOUND_OPENSSL=yes
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
-            OPENSSL_LIBS="-L${OPENSSL_DIR} -lcrypto"
             if test "x$BUNDLE_OPENSSL" = xyes ; then
               # On Mac OSX, create local copy of the crypto library to update @rpath
               # as the default is /usr/local/lib.
@@ -507,7 +494,6 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 $MKDIR -p "${LOCAL_CRYPTO}"
                 $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
                 $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
-                OPENSSL_LIBS="-L${LOCAL_CRYPTO} -lcrypto"
                 OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
               else
                 OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
@@ -515,20 +501,16 @@ AC_DEFUN([CONFIGURE_OPENSSL],
             fi
           fi
         fi
-      fi
-
-      #openssl is not found in user specified location. Abort.
-      if test "x$FOUND_OPENSSL" != xyes ; then
+      else
+        #openssl is not found in user specified location. Abort.
         AC_MSG_RESULT([no])
         AC_MSG_ERROR([Unable to find openssl in specified location $OPENSSL_DIR])
       fi
       AC_MSG_RESULT([yes])
     fi
 
-    if test "x$OPENSSL_DIR" != x ; then
-      AC_MSG_CHECKING([if we should bundle openssl])
-      AC_MSG_RESULT([$BUNDLE_OPENSSL])
-    fi
+    AC_MSG_CHECKING([if we should bundle openssl])
+    AC_MSG_RESULT([$BUNDLE_OPENSSL])
   fi
 
   AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)
@@ -536,5 +518,4 @@ AC_DEFUN([CONFIGURE_OPENSSL],
   AC_SUBST(WITH_OPENSSL)
   AC_SUBST(BUILD_OPENSSL)
   AC_SUBST(OPENSSL_CFLAGS)
-  AC_SUBST(OPENSSL_LIBS)
 ])

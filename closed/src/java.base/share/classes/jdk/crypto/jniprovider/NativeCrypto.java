@@ -34,21 +34,21 @@ import jdk.internal.reflect.CallerSensitive;
 
 public class NativeCrypto {
 
-    private static boolean loaded = false;
-
-    static {
-        AccessController.doPrivileged(
-            (PrivilegedAction<Void>) () -> {
+    private static final boolean loaded = AccessController.doPrivileged(
+            (PrivilegedAction<Boolean>) () -> {
+            Boolean isLoaded = Boolean.FALSE;
             try {
                 System.loadLibrary("jncrypto"); // check for native library
-                loaded = true;
-            } catch (UnsatisfiedLinkError usle) {
-                loaded = false;
+                // load OpenSSL crypto library dynamically.
+                if (loadCrypto() == 0) {
+                    isLoaded = Boolean.TRUE;
+                }
+            } catch (UnsatisfiedLinkError usle) { 
+                // Return that isLoaded is false (default set above)
             }
-            return null;
-        });
-
-    }
+            
+            return isLoaded;
+        }).booleanValue();
 
     public static final boolean isLoaded() {
         return loaded;
@@ -70,6 +70,8 @@ public class NativeCrypto {
     }
 
     /* Native digest interfaces */
+    static final native int loadCrypto();
+
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
 
