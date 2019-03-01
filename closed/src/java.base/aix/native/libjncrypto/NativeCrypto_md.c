@@ -32,18 +32,22 @@
 /* Load the crypto library (return NULL on error) */
 void * load_crypto_library() {
     void * result = NULL;
-    const char *libname = "libcrypto64.so.1.1";
-    const char *oldname = "libcrypto.so.1.0.0";
-    const char *symlink = "libcrypto.so";
+    const char *libname111 = "libcrypto.a(libcrypto64.so.1.1)";
+    const char *libname110 = "libcrypto.so.1.1";
+    const char *libname102 = "libcrypto.so.1.0.0";
+    const char *symlink = "libcrypto.a(libcrypto64.so)";
 
-    result = dlopen (libname, RTLD_NOW);
+    char *errorstr;
+    result = dlopen (libname111, RTLD_NOW | RTLD_MEMBER);
     if (result == NULL) {
-        result = dlopen (oldname, RTLD_NOW);
+        result = dlopen (libname110, RTLD_NOW);
         if (result == NULL) {
-            result = dlopen (symlink, RTLD_NOW);
+            result = dlopen (libname102, RTLD_NOW);
+            if (result == NULL) {
+                result = dlopen (symlink, RTLD_NOW | RTLD_MEMBER);
+            }
         }
     }
-
     return result;
 }
 

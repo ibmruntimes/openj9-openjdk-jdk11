@@ -390,7 +390,7 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 AC_DEFUN([CONFIGURE_OPENSSL],
 [
   AC_ARG_WITH(openssl, [AS_HELP_STRING([--with-openssl],
-    [Use either fetched | system | <path to openssl 1.1.0 (and above)])])
+    [Use either fetched | system | <path to openssl 1.0.2 (and above)])])
   AC_ARG_ENABLE(openssl-bundling, [AS_HELP_STRING([--enable-openssl-bundling],
     [enable bundling of the openssl crypto library with the jdk build])])
   WITH_OPENSSL=yes
@@ -428,7 +428,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       else
         AC_MSG_RESULT([no])
         printf "$TOPDIR/openssl is not found.\n"
-        printf "  run get_source.sh --openssl-version=<version as 1.0.2p or later>\n"
+        printf "  run get_source.sh --openssl-version=<version as 1.0.2 or later>\n"
         printf "  Then, run configure with '--with-openssl=fetched'\n"
         AC_MSG_ERROR([Cannot continue])
       fi
@@ -478,6 +478,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 LOCAL_CRYPTO="$TOPDIR/openssl"
                 $MKDIR -p "${LOCAL_CRYPTO}"
                 $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/libcrypto.1.0.0.dylib" "${LOCAL_CRYPTO}"
                 $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
                 OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
               else
@@ -493,6 +494,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 LOCAL_CRYPTO="$TOPDIR/openssl"
                 $MKDIR -p "${LOCAL_CRYPTO}"
                 $CP "${OPENSSL_DIR}/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/libcrypto.1.0.0.dylib" "${LOCAL_CRYPTO}"
                 $CP -a "${OPENSSL_DIR}/libcrypto.dylib" "${LOCAL_CRYPTO}"
                 OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
               else
