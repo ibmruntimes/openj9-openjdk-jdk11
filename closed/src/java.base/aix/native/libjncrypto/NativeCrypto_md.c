@@ -37,7 +37,6 @@ void * load_crypto_library() {
     const char *libname102 = "libcrypto.so.1.0.0";
     const char *symlink = "libcrypto.a(libcrypto64.so)";
 
-    char *errorstr;
     result = dlopen (libname111, RTLD_NOW | RTLD_MEMBER);
     if (result == NULL) {
         result = dlopen (libname110, RTLD_NOW);

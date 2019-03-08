@@ -536,7 +536,7 @@ JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    CBCCreateContext
- * Signature: (JJ)J
+ * Signature: ()J
  */
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContext
   (JNIEnv *env, jclass thisObj) {
@@ -556,7 +556,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCCreateContex
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    CBCDestroyContext
- * Signature: (J)J
+ * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContext
   (JNIEnv *env, jclass thisObj, jlong c) {
@@ -574,7 +574,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCDestroyContex
  *
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    CBCInit
- * Signature: (JI[BI[BI)V
+ * Signature: (JI[BI[BI)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
   (JNIEnv *env, jclass thisObj, jlong c, jint mode, jbyteArray iv, jint iv_len,
