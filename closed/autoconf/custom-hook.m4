@@ -313,13 +313,18 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
-  # Find first rev tagged by jdk-11* but not containing "_openj9"
-  LAST_TAGGED_SHA=`git -C $TOPDIR rev-list --exclude="*_openj9*" --tags="jdk-11*" --topo-order --max-count=1 2>/dev/null`
-  if test "x$LAST_TAGGED_SHA" != x ; then
-    # Choose the latest tag when there is more than one for the same SHA.
-    OPENJDK_TAG=`git -C $TOPDIR tag --points-at "$LAST_TAGGED_SHA" | grep '+' | sort -V | tail -1`
-  else
-    OPENJDK_TAG=
+  # Iterate over the tags with acceptable names, then select the nearest ancestor.
+  OPENJDK_TAG=
+  for tag in `git -C $TOPDIR tag --list "jdk-11*+*" | sed -e "/_openj9/d" -e "s:^:refs/tags/:"` ; do
+    if git -C $TOPDIR merge-base --is-ancestor $tag HEAD ; then
+      if test x$OPENJDK_TAG = x || git -C $TOPDIR merge-base --is-ancestor $OPENJDK_TAG $tag ; then
+        OPENJDK_TAG=$tag
+      fi
+    fi
+  done
+  if test x$OPENJDK_TAG != x ; then
+    # Choose the latest tag when there is more than one for the same commit.
+    OPENJDK_TAG=`git -C $TOPDIR tag --points-at $OPENJDK_TAG | grep "jdk-11.*+" | grep -v _openj9 | sort -V | tail -1`
   fi
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
