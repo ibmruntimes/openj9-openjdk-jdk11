@@ -41,9 +41,9 @@ OPENSSL_MAKE := $(MAKE) -f $(TOPDIR)/closed/openssl.gmk SPEC=$(SPEC)
 openssl-build : buildtools-langtools
 	+$(OPENSSL_MAKE)
 
-java.base-copy : openssl-build
+java.base-copy : j9vm-build
 
-java.base-libs : java.base-copy j9vm-build
+java.base-libs : java.base-copy
 
 j9vm-build : openssl-build
 	+$(OPENJ9_MAKE) openj9_build_jdk
