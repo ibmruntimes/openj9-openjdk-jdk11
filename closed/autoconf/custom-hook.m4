@@ -324,7 +324,12 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   done
   if test x$OPENJDK_TAG != x ; then
     # Choose the latest tag when there is more than one for the same commit.
-    OPENJDK_TAG=`git -C $TOPDIR tag --points-at $OPENJDK_TAG | grep "jdk-11.*+" | grep -v _openj9 | sort -V | tail -1`
+    # Versions tags are formatted: jdk-V[.W[.X]]+B; with V, W, X, B being numeric.
+    # First, sort on build number (B):
+    tag_sort1="sort -t+ -k2n"
+    # Second, (stable) sort on (W), (X):
+    tag_sort2="sort -t. -k2n -k3n -s"
+    OPENJDK_TAG=`git -C $TOPDIR tag --points-at $OPENJDK_TAG | grep "jdk-11.*+" | grep -v _openj9 | $tag_sort1 | $tag_sort2 | tail -1`
   fi
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
