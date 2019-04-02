@@ -24,7 +24,13 @@ include LauncherCommon.gmk
 
 $(eval $(call SetupBuildLauncher, jps, \
     MAIN_MODULE := jdk.jcmd, \
-    MAIN_CLASS := openj9.tools.attach.diagnostics.Jps, \
+    MAIN_CLASS := openj9.tools.attach.diagnostics.tools.Jps, \
     CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
     JAVA_ARGS := -Djdk.attach.allowAttachSelf=true, \
+))
+
+$(eval $(call SetupBuildLauncher, jstack, \
+    MAIN_MODULE := jdk.jcmd, \
+    MAIN_CLASS := openj9.tools.attach.diagnostics.tools.Jstack, \
+    CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
 ))
