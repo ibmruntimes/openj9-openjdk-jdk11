@@ -300,6 +300,9 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_LIBS_SUBDIR=default
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
     OPENJ9_PLATFORM_CODE=xr64
+    if test "x$COMPILE_TYPE" = xcross ; then
+      OPENJ9_BUILDSPEC="${OPENJ9_BUILDSPEC}_cross"
+    fi
   else
     AC_MSG_ERROR([Unsupported OpenJ9 cpu ${OPENJ9_CPU}!])
   fi
