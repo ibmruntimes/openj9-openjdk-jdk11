@@ -35,6 +35,7 @@ import java.io.*;
 import java.security.*;
 import javax.crypto.*;
 import static com.sun.crypto.provider.AESConstants.AES_BLOCK_SIZE;
+import com.sun.crypto.provider.AESCrypt;
 
 import jdk.crypto.jniprovider.NativeCrypto;
 
@@ -219,6 +220,11 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
               throws InvalidKeyException {
         if (keyValue == null || ivValue == null) {
             throw new InvalidKeyException("Internal error");
+        }
+
+        if (!AESCrypt.isKeySizeValid(keyValue.length)) {
+            throw new InvalidKeyException("Invalid AES key length: " +
+                keyValue.length + " bytes");
         }
 
         this.key = keyValue.clone();
@@ -413,7 +419,7 @@ final class NativeGaloisCounterMode extends FeedbackCipher {
         if (len < tagLenBytes) {
             throw new AEADBadTagException("Input too short - need tag");
         }
- 
+
         // do this check here can also catch the potential integer overflow
         // scenario for the subsequent output buffer capacity check.
         checkDataLength(ibuffer.size(), (len - tagLenBytes));
