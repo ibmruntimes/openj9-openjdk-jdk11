@@ -454,37 +454,41 @@ ifneq (,$(OPENJ9_DEVELOPER_DIR))
 endif
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-CMAKE_ARGS :=
+  CMAKE_ARGS :=
+  ifeq (windows,$(OPENJDK_TARGET_OS))
+    CMAKE_ARGS += "-DCMAKE_TOOLCHAIN_FILE=$(OUTPUTDIR)/toolchain-win.cmake"
+  else
+    # We grab the C/C++ compilers detected by autoconf or provided by user, not
+    # the CC/CXX variables defined by the makefiles, which potentially include
+    # the ccache command which will throw off cmake.
+    ifneq (,$(OPENJ9_CC))
+      CMAKE_ARGS += "-DCMAKE_C_COMPILER=$(OPENJ9_CC)"
+    else
+      CMAKE_ARGS += "-DCMAKE_C_COMPILER=$(ac_cv_prog_CC)"
+    endif
 
-# We grab the C/C++ compilers detected by autoconf or provided by user, not
-# the CC/CXX variables defined by the makefiles, which potentially include
-# the ccache command which will throw off cmake.
-ifneq (,$(OPENJ9_CC))
-  CMAKE_ARGS += "-DCMAKE_C_COMPILER=$(OPENJ9_CC)"
-else
-  CMAKE_ARGS += "-DCMAKE_C_COMPILER=$(ac_cv_prog_CC)"
-endif
+    ifneq (,$(OPENJ9_CXX))
+      CMAKE_ARGS += "-DCMAKE_CXX_COMPILER=$(OPENJ9_CXX)"
+    else
+      CMAKE_ARGS += "-DCMAKE_CXX_COMPILER=$(ac_cv_prog_CXX)"
+    endif
+  endif # ifeq (windows,$(OPENJDK_TARGET_OS))
 
-ifneq (,$(OPENJ9_CXX))
-  CMAKE_ARGS += "-DCMAKE_CXX_COMPILER=$(OPENJ9_CXX)"
-else
-  CMAKE_ARGS += "-DCMAKE_CXX_COMPILER=$(ac_cv_prog_CXX)"
-endif
 
-ifneq (,$(CCACHE))
-  # openjdk makefiles adds a bunch of environemnt variables to the ccache command.
-  # CMake will not parse this properly, so we wrap the whole thing in the env command.
-  # We also need to add semicolons between arguments or else cmake will treat the whole
-  # thing as one long command name.
+  ifneq (,$(CCACHE))
+    # openjdk makefiles adds a bunch of environemnt variables to the ccache command.
+    # CMake will not parse this properly, so we wrap the whole thing in the env command.
+    # We also need to add semicolons between arguments or else cmake will treat the whole
+    # thing as one long command name.
 
-  # Note: we remove the CCACHE_COMPRESS option that openjdk adds, because it significantly
-  # slows down the build (to the point of erasing any gains from using ccache).
-  CCACHE_NOCOMPRESS := $(filter-out CCACHE_COMPRESS=1,$(CCACHE))
-  ESCAPED_CCACHE := env$(subst $(SPACE),,$(addprefix ;,$(CCACHE_NOCOMPRESS)))
+    # Note: we remove the CCACHE_COMPRESS option that openjdk adds, because it significantly
+    # slows down the build (to the point of erasing any gains from using ccache).
+    CCACHE_NOCOMPRESS := $(filter-out CCACHE_COMPRESS=1,$(CCACHE))
+    ESCAPED_CCACHE := env$(subst $(SPACE),,$(addprefix ;,$(CCACHE_NOCOMPRESS)))
 
-  CMAKE_ARGS += "-DCMAKE_CXX_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
-  CMAKE_ARGS += "-DCMAKE_C_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
-endif
+    CMAKE_ARGS += "-DCMAKE_CXX_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
+    CMAKE_ARGS += "-DCMAKE_C_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
+  endif
 $(OUTPUTDIR)/vm/cmake.stamp :
 	cd $(OUTPUTDIR)/vm && \
 	$(CMAKE) \
