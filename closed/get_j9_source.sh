@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -54,10 +54,10 @@ declare -A git_urls
 declare -A shas
 
 git_urls[openj9]=https://github.com/eclipse/openj9
-branches[openj9]=v0.14.0-release
+branches[openj9]=openj9-0.14.0-m1
 
 git_urls[omr]=https://github.com/eclipse/openj9-omr
-branches[omr]=v0.14.0-release
+branches[omr]=openj9-0.14.0-m1
 
 pflag=false
 
