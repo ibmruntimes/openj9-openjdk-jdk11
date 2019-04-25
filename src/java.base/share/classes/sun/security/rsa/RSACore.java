@@ -281,9 +281,9 @@ public final class RSACore {
         String nativeCryptStr = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
         String nativeRsaStr = GetPropertyAction.privilegedGetProperty("jdk.nativeRSA");
 
-        if (Boolean.parseBoolean(nativeCryptStr) || nativeCryptStr == null) {
+        if (nativeCryptStr == null || Boolean.parseBoolean(nativeCryptStr)) {
                 /* nativeCrypto is enabled */
-                if (!(Boolean.parseBoolean(nativeRsaStr) || nativeRsaStr == null)) {
+                if (!(nativeRsaStr == null || Boolean.parseBoolean(nativeRsaStr))) {
                         useNativeRsa = false;
                 }
         } else {

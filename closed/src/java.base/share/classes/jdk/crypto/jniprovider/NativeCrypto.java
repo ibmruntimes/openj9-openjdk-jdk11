@@ -34,24 +34,32 @@ import jdk.internal.reflect.CallerSensitive;
 
 public class NativeCrypto {
 
-    private static final boolean loaded = AccessController.doPrivileged(
-            (PrivilegedAction<Boolean>) () -> {
-            Boolean isLoaded = Boolean.FALSE;
-            try {
-                System.loadLibrary("jncrypto"); // check for native library
-                // load OpenSSL crypto library dynamically.
-                if (loadCrypto() == 0) {
-                    isLoaded = Boolean.TRUE;
+    //ossl_ver:
+    // -1 : library load failed
+    //  0 : openssl 1.0.x
+    //  1 : openssl 1.1.x
+    private static final int ossl_ver = AccessController.doPrivileged(
+            (PrivilegedAction<Integer>) () -> {
+                int ossl_ver = -1;
+                try {
+                    System.loadLibrary("jncrypto"); // check for native library
+                    // load OpenSSL crypto library dynamically.
+                    ossl_ver = loadCrypto();
+                } catch (UnsatisfiedLinkError usle) { 
+                    // Return that ossl_ver is -1 (default set above)
                 }
-            } catch (UnsatisfiedLinkError usle) { 
-                // Return that isLoaded is false (default set above)
-            }
-            
-            return isLoaded;
-        }).booleanValue();
 
+                return ossl_ver;
+            });
+
+    private static final boolean loaded = (ossl_ver != -1);
+       
     public static final boolean isLoaded() {
         return loaded;
+    }
+
+    public static final int getVersion() {
+        return ossl_ver;
     }
 
     private NativeCrypto() {
@@ -92,10 +100,12 @@ public class NativeCrypto {
 
     public final native void DigestReset(long context);
 
-    /* Native CBC interfaces */
-    public final native long CBCCreateContext();
+    /* Native interfaces shared by CBC and ChaCha20 */
+    public final native long CreateContext();
 
-    public final native int CBCDestroyContext(long context);
+    public final native int DestroyContext(long context);
+
+    /* Native CBC interfaces */
 
     public final native int CBCInit(long context,
                                     int mode,
@@ -181,4 +191,35 @@ public class NativeCrypto {
                                   byte[] m,
                                   long RSAPublicKey);
 
+    /* Native ChaCha20 interfaces */
+    public final native int ChaCha20Init(long context,
+                                    int mode,
+                                    byte[] iv,
+                                    int ivlen,
+                                    byte[] key,
+                                    int keylen);
+
+    public final native int ChaCha20Update(long context,
+                                       byte[] input,
+                                       int inputOffset,
+                                       int inputLen,
+                                       byte[] output,
+                                       int outputOffset,
+                                       byte[] aad,
+                                       int aadLen);
+
+    public final native int ChaCha20FinalEncrypt(long context,
+                                             byte[] output,
+                                             int outputOffset,
+                                             int tagLen);
+
+    public final native int ChaCha20FinalDecrypt(long context, 
+                                       byte[] input,
+                                       int inOffset,
+                                       int inputLen,
+                                       byte[] output,
+                                       int outOffset,
+                                       byte[] aad,
+                                       int aadLen,
+                                       int tagLen);
 }
