@@ -369,13 +369,12 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   echo "sorted: $sortedTags"
 
   # Find latest tag on current branch
-  currentBranch=`git rev-parse --abbrev-ref HEAD`
-  echo "branch: $currentBranch"
   for tag in $sortedTags; do
     echo "tag: $tag"
     contains=`git branch -a --contains "refs/tags/$tag"`
     echo "C: $contains"
-    inBranch=`echo "$contains" | grep "\s$currentBranch$"`
+    # Is in the current checked out branch "* <branch|headless>"
+    inBranch=`echo "$contains" | grep "^\*\s.*"`
     echo "in: $inBranch"
     if test "x$inBranch" != "x" ; then
       OPENJDK_TAG="$tag"
