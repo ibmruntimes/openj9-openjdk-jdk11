@@ -364,13 +364,19 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
   tag_sort2="$SORT -t. -k2nr -k3nr -s"
 
   tagsList=`git tag -l "jdk-11*+*"`
+  echo "tags: $tagsList"
   sortedTags=`echo "$tagsList" | grep -v _openj9 | $tag_sort1 | $tag_sort2`
+  echo "sorted: $sortedTags"
 
   # Find latest tag on current branch
   currentBranch=`git rev-parse --abbrev-ref HEAD`
+  echo "branch: $currentBranch"
   for tag in $sortedTags; do
+    echo "tag: $tag"
     contains=`git branch -a --contains "refs/tags/$tag"`
+    echo "C: $contains"
     inBranch=`echo "$contains" | grep "\s$currentBranch$"`
+    echo "in: $inBranch"
     if test "x$inBranch" != "x" ; then
       OPENJDK_TAG="$tag"
       break
