@@ -73,7 +73,7 @@ import static java.nio.file.StandardCopyOption.*;
  * @test
  * @bug 6990846 7009092 7009085 7015391 7014948 7005986 7017840 7007596
  *      7157656 8002390 7012868 7012856 8015728 8038500 8040059 8069211
- *      8131067 8034802
+ *      8131067 8034802 8210899
  * @summary Test Zip filesystem provider
  * @modules jdk.zipfs
  * @run main ZipFSTester
@@ -95,7 +95,6 @@ public class ZipFSTester {
             test1(fs);
             test2(fs);   // more tests
         }
-
         testStreamChannel();
         testTime(jarFile);
         test8069211();
@@ -434,6 +433,28 @@ public class ZipFSTester {
 
     // check the content of read from zipfs is equal to the "bytes"
     private static void checkRead(Path path, byte[] expected) throws IOException {
+
+        // fileAttribute
+        CRC32 crc32 = new CRC32();
+        crc32.update(expected);
+
+        if (((Long)Files.getAttribute(path, "zip:crc")).intValue() !=
+            (int)crc32.getValue()) {
+            System.out.printf(" getAttribute.crc <%s> failed %x vs %x ...%n",
+                              path.toString(),
+                              ((Long)Files.getAttribute(path, "zip:crc")).intValue(),
+                              (int)crc32.getValue());
+            throw new RuntimeException("CHECK FAILED!");
+        }
+
+        if (((Long)Files.getAttribute(path, "zip:size")).intValue() != expected.length) {
+            System.out.printf(" getAttribute.size <%s> failed %x vs %x ...%n",
+                              path.toString(),
+                              ((Long)Files.getAttribute(path, "zip:size")).intValue(),
+                              expected.length);
+            throw new RuntimeException("CHECK FAILED!");
+        }
+
         //streams
         try (InputStream is = Files.newInputStream(path)) {
             if (!Arrays.equals(is.readAllBytes(), expected)) {
@@ -463,8 +484,12 @@ public class ZipFSTester {
             byte[] buf = new byte[1024];
             ByteBuffer bb = ByteBuffer.wrap(buf);
             for (int i = 0; i < 10; i++) {
-                int pos = rdm.nextInt((int)sbc.size());
-                int len = rdm.nextInt(Math.min(buf.length, expected.length - pos));
+                int pos = 0;
+                int len = 0;
+                if (expected.length > 0) {
+                    pos = rdm.nextInt((int) sbc.size());
+                    len = rdm.nextInt(Math.min(buf.length, expected.length - pos));
+                }
                 // System.out.printf("  --> %d, %d%n", pos, len);
                 bb.position(0).limit(len);    // bb.flip().limit(len);
                 if (sbc.position(pos).position() != pos ||
