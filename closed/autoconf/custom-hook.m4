@@ -46,6 +46,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_NUMA
   OPENJ9_CONFIGURE_WARNINGS
   OPENJ9_THIRD_PARTY_REQUIREMENTS
+  OPENJ9_CHECK_NASM_VERSION
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
@@ -313,27 +314,70 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
   AC_SUBST(OPENJ9_LIBS_SUBDIR)
 ])
 
+AC_DEFUN_ONCE([OPENJ9_CHECK_NASM_VERSION],
+[
+  OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($host_cpu)
+  
+  if test "x$OPENJ9_CPU" = xx86-64 ; then
+    AC_CHECK_PROG(NASM_INSTALLED,nasm,yes,no)
+    if test "x$NASM_INSTALLED" = xyes ; then
+      AC_MSG_CHECKING([whether nasm version requirement is met])
+      
+      # Require NASM v2.11+. This is checked by trying to build conftest.c
+      # containing an instruction that makes use of zmm registers that are
+      # supported on NASM v2.11+
+      AC_LANG_CONFTEST([AC_LANG_SOURCE([vdivpd zmm0, zmm1, zmm3;])])
+
+      # the following hack is needed because conftest.c contains C preprocessor
+      # directives defined in confdefs.h that would cause nasm to error out
+      $SED -i -e '/vdivpd/!d' conftest.c
+
+      if nasm -f elf64 conftest.c 2> /dev/null ; then
+        AC_MSG_RESULT([yes])
+      else
+        # NASM version string is of the following format:
+        #  ---
+        #  NASM version 2.14.02 compiled on Dec 27 2018
+        #  ---
+        # Some builds may not contain any text after the version number
+        #
+        # NASM_VERSION is set within square brackets so that the sed expression would not
+        # require quadrigraps to represent square brackets
+        [NASM_VERSION=`nasm -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`]
+        AC_MSG_ERROR([nasm version detected: $NASM_VERSION; required version 2.11+])
+      fi
+    else
+      AC_MSG_ERROR([nasm not found])
+    fi
+  fi
+])
+
 AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
-  # Iterate over the tags with acceptable names, then select the nearest ancestor.
-  OPENJDK_TAG=
-  for tag in `git -C $TOPDIR tag --list "jdk-11*+*" | sed -e "/_openj9/d" -e "s:^:refs/tags/:"` ; do
-    if git -C $TOPDIR merge-base --is-ancestor $tag HEAD ; then
-      if test x$OPENJDK_TAG = x || git -C $TOPDIR merge-base --is-ancestor $OPENJDK_TAG $tag ; then
-        OPENJDK_TAG=$tag
-      fi
+
+  # We use sort and tail to choose the latest tag in case more than one refers the same commit.
+  # Versions tags are formatted: jdk-V[.W[.X]]+B; with V, W, X, B being numeric.
+  # First, sort on build number (B):
+  tag_sort1="$SORT -t+ -k2n"
+  # Second, (stable) sort on (W), (X):
+  tag_sort2="$SORT -t. -k2n -k3n -s"
+
+  OPENJDK_TAG=`git -C $TOPDIR tag --points-at HEAD | $GREP "jdk-11.*+" | $GREP -v _openj9 | $tag_sort1 | $tag_sort2 | $TAIL -1`
+
+  # If there's no tag for HEAD, find the SHA of most recent ancestor that is tagged.
+  if test x$OPENJDK_TAG = x ; then
+    # For precision, get the full SHA for HEAD.
+    head_sha=`git -C $TOPDIR rev-parse HEAD`
+    # We insert 'filler' here so $head_sha will never be on the first line, which would break the sed filter.
+    tagged_sha=`($ECHO filler ; git -C $TOPDIR rev-list '--tags=jdk-11*+*' '--exclude=*_openj9*' --topo-order --no-walk HEAD) | $SED -e "1,/$head_sha/d" | $HEAD -1`
+
+    if test x$tagged_sha != x ; then
+      # Select the latest tag, like above.
+      OPENJDK_TAG=`git -C $TOPDIR tag --points-at $tagged_sha | $GREP "jdk-11.*+" | $GREP -v _openj9 | $tag_sort1 | $tag_sort2 | $TAIL -1`
     fi
-  done
-  if test x$OPENJDK_TAG != x ; then
-    # Choose the latest tag when there is more than one for the same commit.
-    # Versions tags are formatted: jdk-V[.W[.X]]+B; with V, W, X, B being numeric.
-    # First, sort on build number (B):
-    tag_sort1="sort -t+ -k2n"
-    # Second, (stable) sort on (W), (X):
-    tag_sort2="sort -t. -k2n -k3n -s"
-    OPENJDK_TAG=`git -C $TOPDIR tag --points-at $OPENJDK_TAG | grep "jdk-11.*+" | grep -v _openj9 | $tag_sort1 | $tag_sort2 | tail -1`
   fi
+
   AC_SUBST(OPENJDK_SHA)
   AC_SUBST(OPENJDK_TAG)
 
