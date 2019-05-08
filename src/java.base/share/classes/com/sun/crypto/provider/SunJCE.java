@@ -847,21 +847,19 @@ public final class SunJCE extends Provider {
         return instance;
     }
 
-
     static {
-
         String nativeCryptTrace = GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace");
         String nativeCryptStr = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
         String nativeChaCha20Str = GetPropertyAction.privilegedGetProperty("jdk.nativeChaCha20");
 
-        if (nativeCryptStr == null || Boolean.parseBoolean(nativeCryptStr)) {
-                /* nativeCrypto is enabled */
-                if (!(nativeChaCha20Str == null || Boolean.parseBoolean(nativeChaCha20Str))) {
-                        useNativeChaCha20Cipher = false;
-                }
-        } else {
-                /* nativeCrypto is disabled */
+        if ((nativeCryptStr == null) || Boolean.parseBoolean(nativeCryptStr)) {
+            /* nativeCrypto is enabled */
+            if ((nativeChaCha20Str != null) && !Boolean.parseBoolean(nativeChaCha20Str)) {
                 useNativeChaCha20Cipher = false;
+            }
+        } else {
+            /* nativeCrypto is disabled */
+            useNativeChaCha20Cipher = false;
         }
 
         if (useNativeChaCha20Cipher) {
@@ -884,7 +882,7 @@ public final class SunJCE extends Provider {
                                 " Using Java crypto implementation");
                     } else {
                         System.err.println("Warning: Native crypto library load failed." +
-                                    " Using Java crypto implementation");
+                                " Using Java crypto implementation");
                     }
                 }
             } else {

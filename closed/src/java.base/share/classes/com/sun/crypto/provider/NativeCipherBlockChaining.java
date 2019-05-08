@@ -313,8 +313,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
      */
     @Override
     public void finalize() {
-
         releaseContext(this);
     }
-    
+
 }

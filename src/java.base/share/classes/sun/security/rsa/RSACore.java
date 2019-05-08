@@ -67,8 +67,6 @@ public final class RSACore {
      * and 'jdk.nativeCrypto' is used to enable all native cryptos (Digest,
      * CBC, GCM, and RSA).
      */
-    private static boolean useNativeCrypto = true;
-
     private static boolean useNativeRsa = true;
 
     // globally enable/disable use of blinding
@@ -119,11 +117,11 @@ public final class RSACore {
     public static byte[] rsa(byte[] msg, RSAPublicKey key)
             throws BadPaddingException {
         if (useNativeRsa && key instanceof sun.security.rsa.RSAPublicKeyImpl) {
-             byte[] ret = NativeRSACore.rsa(msg, (sun.security.rsa.RSAPublicKeyImpl) key);
-             if (ret != null) {
-                 return ret;
-             }
-             useNativeRsa = false;
+            byte[] ret = NativeRSACore.rsa(msg, (sun.security.rsa.RSAPublicKeyImpl) key);
+            if (ret != null) {
+                return ret;
+            }
+            useNativeRsa = false;
         }
         return crypt(msg, key.getModulus(), key.getPublicExponent());
     }
@@ -145,7 +143,7 @@ public final class RSACore {
      * generating a signature.
      */
     public static byte[] rsa(byte[] msg, RSAPrivateKey key, boolean verify)
-        throws BadPaddingException {
+            throws BadPaddingException {
         if (key instanceof RSAPrivateCrtKey) {
             if (useNativeRsa && key instanceof sun.security.rsa.RSAPrivateCrtKeyImpl) {
                 byte[] ret = NativeRSACore.rsa(msg, (sun.security.rsa.RSAPrivateCrtKeyImpl) key, verify);
@@ -276,24 +274,24 @@ public final class RSACore {
     }
 
     static {
-
         String nativeCryptTrace = GetPropertyAction.privilegedGetProperty("jdk.nativeCryptoTrace");
         String nativeCryptStr = GetPropertyAction.privilegedGetProperty("jdk.nativeCrypto");
-        String nativeRsaStr = GetPropertyAction.privilegedGetProperty("jdk.nativeRSA");
 
-        if (nativeCryptStr == null || Boolean.parseBoolean(nativeCryptStr)) {
-                /* nativeCrypto is enabled */
-                if (!(nativeRsaStr == null || Boolean.parseBoolean(nativeRsaStr))) {
-                        useNativeRsa = false;
-                }
+        if ((nativeCryptStr != null) && !Boolean.parseBoolean(nativeCryptStr)) {
+            /* nativeCrypto is disabled */
+            useNativeRsa = false;
         } else {
-                /* nativeCrypto is disabled */
+            String nativeRsaStr = GetPropertyAction.privilegedGetProperty("jdk.nativeRSA");
+
+            if ((nativeRsaStr != null) && !Boolean.parseBoolean(nativeRsaStr)) {
+                /* nativeRSA is disabled */
                 useNativeRsa = false;
+            }
         }
 
         if (useNativeRsa) {
             /*
-             * User want to use native crypto implementation.
+             * User wants to use native crypto implementation.
              * Make sure the native crypto libraries are loaded successfully.
              * Otherwise, throw a warning message and fall back to the in-built
              * java crypto implementation.
@@ -302,17 +300,17 @@ public final class RSACore {
                 useNativeRsa = false;
 
                 if (nativeCryptTrace != null) {
-                   System.err.println("Warning: Native crypto library load failed." +
-                                   " Using Java crypto implementation");
+                    System.err.println("Warning: Native crypto library load failed." +
+                            " Using Java crypto implementation");
                 }
             } else {
                 if (nativeCryptTrace != null) {
-                   System.err.println("RSACore load - using Native crypto library.");
+                    System.err.println("RSACore load - using Native crypto library.");
                 }
             }
         } else {
             if (nativeCryptTrace != null) {
-               System.err.println("RSACore load - Native crypto library disabled.");
+                System.err.println("RSACore load - Native crypto library disabled.");
             }
         }
     }
@@ -460,13 +458,13 @@ public final class RSACore {
             }
 
             if (e != null) {
-                u = u.modPow(e, n);   // e: the public exponent
-                                      // u: random ^ e
-                                      // v: random ^ (-1)
+                u = u.modPow(e, n); // e: the public exponent
+                                    // u: random ^ e
+                                    // v: random ^ (-1)
             } else {
-                v = v.modPow(d, n);   // d: the private exponent
-                                      // u: random
-                                      // v: random ^ (-d)
+                v = v.modPow(d, n); // d: the private exponent
+                                    // u: random
+                                    // v: random ^ (-d)
             }
         }
 

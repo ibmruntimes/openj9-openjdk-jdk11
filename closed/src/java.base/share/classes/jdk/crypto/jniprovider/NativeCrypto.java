@@ -21,7 +21,6 @@
  *
  * ===========================================================================
  */
-
 package jdk.crypto.jniprovider;
 
 import java.security.*;
@@ -45,15 +44,15 @@ public class NativeCrypto {
                     System.loadLibrary("jncrypto"); // check for native library
                     // load OpenSSL crypto library dynamically.
                     ossl_ver = loadCrypto();
-                } catch (UnsatisfiedLinkError usle) { 
+                } catch (UnsatisfiedLinkError usle) {
                     // Return that ossl_ver is -1 (default set above)
                 }
 
                 return ossl_ver;
             });
 
-    private static final boolean loaded = (ossl_ver != -1);
-       
+    private static final boolean loaded = ossl_ver != -1;
+
     public static final boolean isLoaded() {
         return loaded;
     }
@@ -68,13 +67,13 @@ public class NativeCrypto {
 
     @CallerSensitive
     public static NativeCrypto getNativeCrypto() {
-
         ClassLoader callerClassLoader = Reflection.getCallerClass().getClassLoader();
 
-        if ((callerClassLoader != null) && (callerClassLoader != VM.getVMLangAccess().getExtClassLoader())) {
-            throw new SecurityException("NativeCrypto");
-        }
-        return new NativeCrypto();
+        if ((callerClassLoader == null) || (callerClassLoader == VM.getVMLangAccess().getExtClassLoader())) {
+			return new NativeCrypto();
+		}
+
+        throw new SecurityException("NativeCrypto");
     }
 
     /* Native digest interfaces */
@@ -192,6 +191,7 @@ public class NativeCrypto {
                                   long RSAPublicKey);
 
     /* Native ChaCha20 interfaces */
+
     public final native int ChaCha20Init(long context,
                                     int mode,
                                     byte[] iv,
@@ -213,7 +213,7 @@ public class NativeCrypto {
                                              int outputOffset,
                                              int tagLen);
 
-    public final native int ChaCha20FinalDecrypt(long context, 
+    public final native int ChaCha20FinalDecrypt(long context,
                                        byte[] input,
                                        int inOffset,
                                        int inputLen,
@@ -222,4 +222,5 @@ public class NativeCrypto {
                                        byte[] aad,
                                        int aadLen,
                                        int tagLen);
+
 }

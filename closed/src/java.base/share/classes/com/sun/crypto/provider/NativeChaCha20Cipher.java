@@ -103,7 +103,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         context = nativeCrypto.CreateContext();
         aadBuf = new ByteArrayOutputStream();
     }
-    
+
     private NativeChaCha20Cipher(int mode) {
         this();
         this.mode = mode;
@@ -468,7 +468,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
                     "Cipher is running in non-AEAD mode");
         } else {
             try {
-                aadLen = Math.addExact(aadLen, (src.remaining()));
+                aadLen = Math.addExact(aadLen, src.remaining());
 
                 // convert ByteBuffer to Array and put into aadBuf
                 byte[] temp_arr = new byte[src.remaining()];
@@ -536,7 +536,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         // 1 : ChaCha20-Poly1305 encrypt
         // 2 : ChaCha20 streaming
         int ossl_mode = -1;
- 
+
         // openssl_iv is only used by OpenSSL, here is the format:
         // Streaming mode: 16 bytes
         //                 first 4 bytes is the block counter (little-endian unsigned 32 bit int)
@@ -853,7 +853,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
 
     private final class EngineStreamOnly implements ChaChaEngine {
 
-        private EngineStreamOnly () { }
+        EngineStreamOnly() { }
 
         @Override
         public synchronized int doUpdate(byte[] in, int inOff, int inLen, byte[] out,
@@ -895,7 +895,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
 
     private final class EngineAEADEnc implements ChaChaEngine {
 
-        private EngineAEADEnc() throws InvalidKeyException {
+        EngineAEADEnc() throws InvalidKeyException {
             counter = 1;
         }
 
@@ -962,7 +962,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         private final ByteArrayOutputStream cipherBuf;
         private final byte[] tag;
 
-        private EngineAEADDec() {
+        EngineAEADDec() {
             counter = 1;
             cipherBuf = new ByteArrayOutputStream(CIPHERBUF_BASE);
             tag = new byte[TAG_LENGTH];
