@@ -1,11 +1,11 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
 #
-# IBM designates this particular file as subject to the "Classpath" exception 
+# IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
@@ -32,6 +32,15 @@ include $(TOPDIR)/make/common/SetupJavaCompilers.gmk
 
 # Supporting definitions.
 DDR_CLASSES_BIN := $(SUPPORT_OUTPUTDIR)/ddr/classes
+DDR_STUBS_BIN := $(SUPPORT_OUTPUTDIR)/ddr/stubs
+
+# Compile stub classes.
+$(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
+	SETUP := GENERATE_USINGJDKBYTECODE, \
+	BIN := $(DDR_STUBS_BIN), \
+	CLASSPATH := $(JDK_OUTPUTDIR)/modules/java.base, \
+	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src_stubs \
+	))
 
 # We depend upon class files from these modules.
 DDR_CLASSPATH := $(addprefix $(JDK_OUTPUTDIR)/modules/, \
@@ -41,11 +50,9 @@ DDR_CLASSPATH := $(addprefix $(JDK_OUTPUTDIR)/modules/, \
 		openj9.traceformat \
 	)
 
-DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
+DDR_CLASSPATH += $(DDR_STUBS_BIN)
 
-ifeq (,$(filter mz31 mz64,$(OPENJ9_PLATFORM_CODE)))
-DDR_SRC_EXCLUDES += com/ibm/j9ddr/corereaders/tdump
-endif
+DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
 
 $(eval $(call SetupJavaCompilation,BUILD_DDR_CLASSES, \
 	SETUP := GENERATE_USINGJDKBYTECODE, \
@@ -54,6 +61,7 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_CLASSES, \
 	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, \
 	EXCLUDES := $(DDR_SRC_EXCLUDES), \
 	COPY := com/ibm/j9ddr/StructureAliases29.dat, \
+	DEPENDS := $(BUILD_DDR_STUBS) \
 	))
 
 $(eval $(call SetupJarArchive,BUILD_DDR_JAR, \
@@ -61,7 +69,7 @@ $(eval $(call SetupJarArchive,BUILD_DDR_JAR, \
 	SRCS := $(DDR_CLASSES_BIN), \
 	SUFFIXES := .class .dat .properties, \
 	EXCLUDES := com/ibm/j9ddr/vm29/structure, \
-	JAR := $(call FindLibDirForModule, openj9.dtfj)/ddr/j9ddr.jar, \
+	JAR := $(call FindLibDirForModule, openj9.dtfj)/ddr/j9ddr.jar \
 	))
 
 all : $(BUILD_DDR_JAR)
