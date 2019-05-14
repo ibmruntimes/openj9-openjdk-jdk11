@@ -356,30 +356,7 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
 
-  # We use sort and tail to choose the latest tag in case more than one refers the same commit.
-  # Versions tags are formatted: jdk-V[.W[.X]]+B; with V, W, X, B being numeric.
-  # First, sort on build number (B):
-  tag_sort1="$SORT -t+ -k2n"
-  # Second, (stable) sort on (W), (X):
-  tag_sort2="$SORT -t. -k2n -k3n -s"
-
-  OPENJDK_TAG=`git -C $TOPDIR tag --points-at HEAD | $GREP "jdk-11.*+" | $GREP -v _openj9 | $tag_sort1 | $tag_sort2 | $TAIL -1`
-
-  # If there's no tag for HEAD, find the SHA of most recent ancestor that is tagged.
-  if test x$OPENJDK_TAG = x ; then
-    # For precision, get the full SHA for HEAD.
-    head_sha=`git -C $TOPDIR rev-parse HEAD`
-    # We insert 'filler' here so $head_sha will never be on the first line, which would break the sed filter.
-    tagged_sha=`($ECHO filler ; git -C $TOPDIR rev-list '--tags=jdk-11*+*' '--exclude=*_openj9*' --topo-order --no-walk HEAD) | $SED -e "1,/$head_sha/d" | $HEAD -1`
-
-    if test x$tagged_sha != x ; then
-      # Select the latest tag, like above.
-      OPENJDK_TAG=`git -C $TOPDIR tag --points-at $tagged_sha | $GREP "jdk-11.*+" | $GREP -v _openj9 | $tag_sort1 | $tag_sort2 | $TAIL -1`
-    fi
-  fi
-
   AC_SUBST(OPENJDK_SHA)
-  AC_SUBST(OPENJDK_TAG)
 
   # Outer [ ] to quote m4.
   [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
