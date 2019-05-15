@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018,2018 All Rights Reserved
  * ===========================================================================
  */
 
@@ -327,11 +327,12 @@ public class ObjectInputStream
      */
 
       /* ClassCache Entry for caching class.forName results upon enableClassCaching */
-     private static ClassCache classCache = null;
+     private static final ClassCache classCache;
      private static final boolean isClassCachingEnabled;
      static {
           isClassCachingEnabled =
              AccessController.doPrivileged(new GetClassCachingSettingAction());
+         classCache = (isClassCachingEnabled ? new ClassCache() : null);
      }
   
 
@@ -792,19 +793,10 @@ public class ObjectInputStream
     {
         String name = desc.getName();
         try {
-        	Class<?> clzRet;
-        	if (isClassCachingEnabled) {
-        		if (classCache == null) {
-        			/* In case there are multiple threads attempting to create ClassCache,
-        			 * the class created last stays and others are discarded.
-        			 */
-        			classCache = new ClassCache();
-        		}
-        		clzRet = classCache.get(name, cachedLudcl);
-        	} else {
-        		clzRet = Class.forName(name, false, latestUserDefinedLoader());
-        	}
-        	return clzRet;
+        	return ((classCache == null) ?
+        	        Class.forName(name, false, latestUserDefinedLoader()) :
+        	        classCache.get(name, cachedLudcl));
+           	
         } catch (ClassNotFoundException ex) {
             Class<?> cl = primClasses.get(name);
             if (cl != null) {
