@@ -89,12 +89,13 @@ final class SunEntries {
 
     /*
      * Check whether native crypto is enabled with property.
-     * By default, the native crypto is enabled  and uses native library crypto.
-     * The property 'jdk.nativeDigest' is used to disable Native digest alone
-     * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
+     * By default, the native crypto is enabled and uses native library crypto.
+     * The native crypto for MessageDigest is disabled until
+     * https://github.com/eclipse/openj9/issues/5611 can be resolved.
+     * The property 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
      * CBC, GCM, and RSA).
      */
-    private static boolean useNativeDigest = true;
+    private static boolean useNativeDigest = false;
 
     private SunEntries() {
         // empty
