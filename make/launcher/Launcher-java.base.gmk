@@ -22,6 +22,9 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+# ===========================================================================
 
 include LauncherCommon.gmk
 
@@ -96,6 +99,7 @@ ifneq ($(findstring $(OPENJDK_TARGET_OS), macosx solaris aix linux), )
       SRC := $(TOPDIR)/src/$(MODULE)/unix/native/jspawnhelper, \
       OPTIMIZATION := LOW, \
       CFLAGS := $(CFLAGS_JDKEXE) -I$(TOPDIR)/src/$(MODULE)/unix/native/libjava, \
+      DISABLED_WARNINGS_gcc := unused-result, \
       EXTRA_OBJECT_FILES := $(SUPPORT_OUTPUTDIR)/native/$(MODULE)/libjava/childproc.o, \
       LDFLAGS := $(LDFLAGS_JDKEXE), \
       OUTPUT_DIR := $(SUPPORT_OUTPUTDIR)/modules_libs/$(MODULE), \
