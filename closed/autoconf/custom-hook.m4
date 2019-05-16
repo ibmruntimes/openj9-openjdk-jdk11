@@ -356,30 +356,7 @@ AC_DEFUN_ONCE([OPENJDK_VERSION_DETAILS],
 [
   OPENJDK_SHA=`git -C $TOPDIR rev-parse --short HEAD`
 
-  # We use sort and tail to choose the latest tag in case more than one refers the same commit.
-  # Versions tags are formatted: jdk-V[.W[.X]]+B; with V, W, X, B being numeric.
-  # First, sort on build number (B):
-  tag_sort1="$SORT -t+ -k2n"
-  # Second, (stable) sort on (W), (X):
-  tag_sort2="$SORT -t. -k2n -k3n -s"
-
-  OPENJDK_TAG=`git -C $TOPDIR tag --points-at HEAD | $GREP "jdk-11.*+" | $GREP -v _openj9 | $tag_sort1 | $tag_sort2 | $TAIL -1`
-
-  # If there's no tag for HEAD, find the SHA of most recent ancestor that is tagged.
-  if test x$OPENJDK_TAG = x ; then
-    # For precision, get the full SHA for HEAD.
-    head_sha=`git -C $TOPDIR rev-parse HEAD`
-    # We insert 'filler' here so $head_sha will never be on the first line, which would break the sed filter.
-    tagged_sha=`($ECHO filler ; git -C $TOPDIR rev-list '--tags=jdk-11*+*' '--exclude=*_openj9*' --topo-order --no-walk HEAD) | $SED -e "1,/$head_sha/d" | $HEAD -1`
-
-    if test x$tagged_sha != x ; then
-      # Select the latest tag, like above.
-      OPENJDK_TAG=`git -C $TOPDIR tag --points-at $tagged_sha | $GREP "jdk-11.*+" | $GREP -v _openj9 | $tag_sort1 | $tag_sort2 | $TAIL -1`
-    fi
-  fi
-
   AC_SUBST(OPENJDK_SHA)
-  AC_SUBST(OPENJDK_TAG)
 
   # Outer [ ] to quote m4.
   [ USERNAME=`$ECHO "$USER" | $TR -d -c '[a-z][A-Z][0-9]'` ]
@@ -444,6 +421,13 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 
   # explicitly disable classlist generation
   ENABLE_GENERATE_CLASSLIST=false
+
+  if test "x$OPENJDK_BUILD_OS" = xwindows ; then
+    OPENJ9_TOOL_DIR="$OUTPUTDIR/tools"
+    AC_SUBST([OPENJ9_TOOL_DIR])
+    OPENJ9_GENERATE_TOOL_WRAPPERS
+    AC_CONFIG_FILES([$OUTPUTDIR/toolchain-win.cmake:$CLOSED_AUTOCONF_DIR/toolchain-win.cmake.in])
+  fi
 ])
 
 AC_DEFUN([CONFIGURE_OPENSSL],
@@ -578,4 +562,38 @@ AC_DEFUN([CONFIGURE_OPENSSL],
   AC_SUBST(WITH_OPENSSL)
   AC_SUBST(BUILD_OPENSSL)
   AC_SUBST(OPENSSL_CFLAGS)
+])
+
+# Create a tool wrapper for use by cmake.
+# Consists of a shell script which wraps commands with an invocation of fixpath.
+# OPENJ9_GENERATE_TOOL_WRAPER(<name_of_wrapper>, <command_to_call>)
+AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPER],
+[
+  tool_file="$OPENJ9_TOOL_DIR/$1"
+
+  echo "#!/bin/sh" > $tool_file
+  # We need to insert an empty string ([]), to stop M4 treating "$@" as a
+  # variable reference
+  printf '%s "%s" "$[]@"\n' "$FIXPATH" "$2" >> $tool_file
+  chmod +x $tool_file
+])
+
+# Generate all the tool wrappers required for cmake on windows
+AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPERS],
+[
+  MSVC_BIN_DIR=$($DIRNAME $CC)
+  SDK_BIN_DIR=$($DIRNAME $RC)
+
+  mkdir -p "$OPENJ9_TOOL_DIR"
+  OPENJ9_GENERATE_TOOL_WRAPPER([cl], [$CC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([lib], [$AR])
+  OPENJ9_GENERATE_TOOL_WRAPPER([link], [$LD])
+  OPENJ9_GENERATE_TOOL_WRAPPER([ml], [$MSVC_BIN_DIR/ml])
+  OPENJ9_GENERATE_TOOL_WRAPPER([ml64], [$MSVC_BIN_DIR/ml64])
+  OPENJ9_GENERATE_TOOL_WRAPPER([rc], [$RC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([mc], [$SDK_BIN_DIR/mc])
+
+  OPENJ9_GENERATE_TOOL_WRAPPER([java], [$JAVA])
+  OPENJ9_GENERATE_TOOL_WRAPPER([jar], [$JAR])
+  OPENJ9_GENERATE_TOOL_WRAPPER([javac], [$JAVAC])
 ])

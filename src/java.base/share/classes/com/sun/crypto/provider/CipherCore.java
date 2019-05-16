@@ -70,7 +70,7 @@ final class CipherCore {
      * The property 'jdk.nativeCBC' is used to disable Native CBC alone,
      * 'jdk.nativeGCM' is used to disable Native GCM alone and
      * 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, and RSA).
+     * CBC, GCM, RSA and ChaCha20).
      */
     private static boolean useNativeCrypto = true;
     private static boolean useNativeCBC = true;
@@ -1299,14 +1299,14 @@ final class CipherCore {
         String nativeCBCStr     = privilegedGetProperty("jdk.nativeCBC");
         String nativeGCMStr     = privilegedGetProperty("jdk.nativeGCM");
 
-        useNativeCrypto = Boolean.parseBoolean(nativeCryptStr) || (nativeCryptStr == null);
+        useNativeCrypto = (nativeCryptStr == null) || Boolean.parseBoolean(nativeCryptStr);
 
         if (!useNativeCrypto) {
             useNativeCBC = false;
             useNativeGCM = false;
         } else {
-            useNativeCBC = Boolean.parseBoolean(nativeCBCStr) || (nativeCBCStr == null);
-            useNativeGCM = Boolean.parseBoolean(nativeGCMStr) || (nativeGCMStr == null);
+            useNativeCBC = (nativeCBCStr == null) || Boolean.parseBoolean(nativeCBCStr);
+            useNativeGCM = (nativeGCMStr == null) || Boolean.parseBoolean(nativeGCMStr);
         }
 
         if (useNativeCBC || useNativeGCM) {

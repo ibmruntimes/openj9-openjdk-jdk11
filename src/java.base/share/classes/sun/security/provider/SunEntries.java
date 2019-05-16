@@ -92,7 +92,7 @@ final class SunEntries {
      * By default, the native crypto is enabled  and uses native library crypto.
      * The property 'jdk.nativeDigest' is used to disable Native digest alone
      * and 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, and RSA).
+     * CBC, GCM, RSA, and ChaCha20).
      */
     private static boolean useNativeDigest = true;
 

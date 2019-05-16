@@ -62,7 +62,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         contexts = new long[numContexts];
 
         for (int i = 0; i < numContexts; i++) {
-            long context = nativeCrypto.CBCCreateContext();
+            long context = nativeCrypto.CreateContext();
             if (context == -1) {
                 throw new ProviderException("Error in Native CipherBlockChaining");
             }
@@ -78,7 +78,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
     synchronized static long getContext(NativeCipherBlockChaining cipher) {
         if (avStack.isEmpty()) {
             cipher.ctxIndx = -1;
-            long context = nativeCrypto.CBCCreateContext();
+            long context = nativeCrypto.CreateContext();
             if (context == -1) {
                 throw new ProviderException("Error in Native CipherBlockChaining");
             }
@@ -97,7 +97,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
     synchronized static void releaseContext(NativeCipherBlockChaining cipher) {
 
         if(cipher.ctxIndx == -1) {
-            long ret = nativeCrypto.CBCDestroyContext(cipher.nativeContext);
+            long ret = nativeCrypto.DestroyContext(cipher.nativeContext);
             if (ret == -1) {
                 throw new ProviderException("Error in Native CipherBlockChaining");
             }
@@ -313,8 +313,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
      */
     @Override
     public void finalize() {
-
         releaseContext(this);
     }
-    
+
 }
