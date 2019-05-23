@@ -317,12 +317,12 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
 AC_DEFUN_ONCE([OPENJ9_CHECK_NASM_VERSION],
 [
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($host_cpu)
-  
+
   if test "x$OPENJ9_CPU" = xx86-64 ; then
     AC_CHECK_PROG(NASM_INSTALLED,nasm,yes,no)
     if test "x$NASM_INSTALLED" = xyes ; then
       AC_MSG_CHECKING([whether nasm version requirement is met])
-      
+
       # Require NASM v2.11+. This is checked by trying to build conftest.c
       # containing an instruction that makes use of zmm registers that are
       # supported on NASM v2.11+
@@ -336,9 +336,9 @@ AC_DEFUN_ONCE([OPENJ9_CHECK_NASM_VERSION],
         AC_MSG_RESULT([yes])
       else
         # NASM version string is of the following format:
-        #  ---
-        #  NASM version 2.14.02 compiled on Dec 27 2018
-        #  ---
+        # ---
+        # NASM version 2.14.02 compiled on Dec 27 2018
+        # ---
         # Some builds may not contain any text after the version number
         #
         # NASM_VERSION is set within square brackets so that the sed expression would not
@@ -459,9 +459,9 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         OPENSSL_DIR="$TOPDIR/openssl"
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         if test "x$BUNDLE_OPENSSL" != x ; then
-            if  ! test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
-                BUILD_OPENSSL=yes
-            fi
+          if ! test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+            BUILD_OPENSSL=yes
+          fi
         fi
         if test "x$BUNDLE_OPENSSL" = xyes ; then
           OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
@@ -503,13 +503,13 @@ AC_DEFUN([CONFIGURE_OPENSSL],
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-            if test "x$BUNDLE_OPENSSL" = xyes ; then
-              if test -d "$OPENSSL_DIR/bin" ; then
-                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/bin"
-              else
-                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
-              fi
+          if test "x$BUNDLE_OPENSSL" = xyes ; then
+            if test -d "$OPENSSL_DIR/bin" ; then
+              OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/bin"
+            else
+              OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
             fi
+          fi
         else
           if test -s "$OPENSSL_DIR/lib/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
             OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
