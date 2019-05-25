@@ -224,8 +224,6 @@ endif
 
 $(call openj9_add_jdk_lib, java.base, \
 	$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)) \
-	J9TraceFormat.dat \
-	OMRTraceFormat.dat \
 	options.default \
 	)
 
@@ -248,14 +246,12 @@ $(eval $(call openj9_add_jdk_rules, \
 	$(call FindLibDirForModule, java.base)/openj9-notices.html, \
 	$(TOPDIR)/openj9/longabout.html))
 
-# java.base (internal)
-#   gdb_j929
-
-# libraries for other modules
+# contributions to other modules
 $(call openj9_add_jdk_shlibs, java.management, management management_ext)
 $(call openj9_add_jdk_shlibs, openj9.cuda, cuda4j29)
 $(call openj9_add_jdk_shlibs, openj9.dtfj, j9jextract)
 $(call openj9_add_jdk_shlibs, openj9.sharedclasses, j9shr29)
+$(call openj9_add_jdk_lib, openj9.traceformat, J9TraceFormat.dat OMRTraceFormat.dat)
 
 # openj9_test_image_rules
 # -----------------------
@@ -454,6 +450,7 @@ ifneq (,$(OPENJ9_DEVELOPER_DIR))
 endif
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+
   CMAKE_ARGS :=
   ifeq (windows,$(OPENJDK_TARGET_OS))
     CMAKE_ARGS += "-DCMAKE_TOOLCHAIN_FILE=$(OUTPUTDIR)/toolchain-win.cmake"
@@ -474,7 +471,6 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     endif
   endif # ifeq (windows,$(OPENJDK_TARGET_OS))
 
-
   ifneq (,$(CCACHE))
     # openjdk makefiles adds a bunch of environemnt variables to the ccache command.
     # CMake will not parse this properly, so we wrap the whole thing in the env command.
@@ -488,7 +484,8 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 
     CMAKE_ARGS += "-DCMAKE_CXX_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
     CMAKE_ARGS += "-DCMAKE_C_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
-  endif
+  endif # CCACHE
+
 $(OUTPUTDIR)/vm/cmake.stamp :
 	cd $(OUTPUTDIR)/vm && \
 	$(CMAKE) \
@@ -502,13 +499,14 @@ $(OUTPUTDIR)/vm/cmake.stamp :
 		$(OPENJ9_TOPDIR)
 	touch $(OUTPUTDIR)/vm/cmake.stamp
 
-run-preprocessors-j9: \
+run-preprocessors-j9 : \
 		$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING \
 		$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
 		$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h \
 		$(OUTPUTDIR)/vm/cmake.stamp
 
 else # OPENJ9_ENABLE_CMAKE
+
 run-preprocessors-j9 : stage-j9 \
 		$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING \
 		$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
@@ -526,7 +524,9 @@ run-preprocessors-j9 : stage-j9 \
 			SPEC=$(OPENJ9_BUILDSPEC) \
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
 			tools
+
 endif # OPENJ9_ENABLE_CMAKE
+
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUTDIR)/vm
 	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
