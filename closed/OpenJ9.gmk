@@ -233,13 +233,8 @@ $(call openj9_add_jdk_bin, java.base, j9ddr.dat)
 .PHONY : run-ddrgen
 $(OUTPUTDIR)/vm/j9ddr.dat : run-ddrgen
 run-ddrgen :
-	export \
-		CC="$(CC)" \
-		CXX="$(CXX)" \
-		$(EXPORT_MSVS_ENV_VARS) \
-		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		VERSION_MAJOR=$(VERSION_FEATURE) \
-	&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
+	export CC="$(CC)" CXX="$(CXX)" $(EXPORT_MSVS_ENV_VARS) \
+		&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
 endif
 
 $(eval $(call openj9_add_jdk_rules, \
@@ -513,6 +508,7 @@ run-preprocessors-j9 : stage-j9 \
 		$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
 	export BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) \
+		OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 		&& $(MAKE) -C $(OUTPUTDIR)/vm $(MAKEFLAGS) -f buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
 			EXTRA_CONFIGURE_ARGS=$(OMR_EXTRA_CONFIGURE_ARGS) \
@@ -523,6 +519,7 @@ run-preprocessors-j9 : stage-j9 \
 			OPENJ9_BUILD=true \
 			SPEC=$(OPENJ9_BUILDSPEC) \
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
+			VERSION_MAJOR=$(VERSION_FEATURE) \
 			tools
 
 endif # OPENJ9_ENABLE_CMAKE
