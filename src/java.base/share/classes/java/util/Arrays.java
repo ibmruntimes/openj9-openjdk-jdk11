@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved.
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved.
  * ===========================================================================
  */
 
@@ -50,6 +50,8 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import com.ibm.gpu.spi.GPUAssistHolder;
 
 /**
  * This class contains various methods for manipulating arrays (such as
