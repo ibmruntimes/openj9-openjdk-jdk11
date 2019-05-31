@@ -584,7 +584,6 @@ java/nio/file/WatchService/MayFlies.java                        7158947 solaris-
 java/nio/file/WatchService/LotsOfCancels.java                   8188039 solaris-all Solaris 11
 java/nio/file/WatchService/LotsOfEvents.java                    7158947 solaris-all Solaris 11
 
-sun/nio/cs/OLD/TestIBMDB.java                                   8211841 aix-ppc64
 
 ############################################################################
 
@@ -690,6 +689,8 @@ sun/security/pkcs11/tls/TestLeadingZeroesP11.java               8204203 windows-
 sun/security/pkcs11/tls/TestMasterSecret.java                   8204203 windows-all
 sun/security/pkcs11/tls/TestPRF.java                            8204203 windows-all
 sun/security/pkcs11/tls/TestPremaster.java                      8204203 windows-all
+
+security/infra/java/security/cert/CertPathValidator/certification/ActalisCA.java  8224768 generic-all
 
 ############################################################################
 
