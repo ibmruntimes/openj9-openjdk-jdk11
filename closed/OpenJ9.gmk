@@ -228,11 +228,16 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 $(call openj9_add_jdk_bin, java.base, j9ddr.dat)
 
 .PHONY : run-ddrgen
-$(OUTPUTDIR)/vm/j9ddr.dat : run-ddrgen
+$(OPENJ9_VM_BUILD_DIR)/j9ddr.dat : run-ddrgen
+
 run-ddrgen :
+ifeq (true,$(OPENJ9_ENABLE_CMAKE))
+	$(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
+else
 	export CC="$(CC)" CXX="$(CXX)" $(EXPORT_MSVS_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
-endif
+endif # OPENJ9_ENABLE_CMAKE
+endif # OPENJ9_ENABLE_DDR
 
 $(eval $(call openj9_add_jdk_rules, \
 	$(call FindLibDirForModule, java.base)/openj9-notices.html, \
@@ -491,6 +496,7 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     CMAKE_ARGS += -DCMAKE_C_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
   endif # CCACHE
 
+  CMAKE_ARGS += -DOMR_DDR=$(OPENJ9_ENABLE_DDR)
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUTDIR)/vm/cmake.stamp :
