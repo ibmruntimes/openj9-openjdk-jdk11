@@ -446,23 +446,31 @@ endif
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 
-  CMAKE_ARGS :=
+  CMAKE_ARGS := \
+	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(OPENJ9_BUILDSPEC).cmake \
+	-DBOOT_JDK="$(BOOT_JDK)" \
+	-DBUILD_ID=$(BUILD_ID) \
+	-DJ9VM_OMR_DIR="$(OPENJ9OMR_TOPDIR)" \
+	-DJAVA_SPEC_VERSION=$(VERSION_FEATURE) \
+	-DOPENJ9_BUILD=true \
+	#
+
   ifeq (windows,$(OPENJDK_TARGET_OS))
-    CMAKE_ARGS += "-DCMAKE_TOOLCHAIN_FILE=$(OUTPUTDIR)/toolchain-win.cmake"
+    CMAKE_ARGS += -DCMAKE_TOOLCHAIN_FILE="$(OUTPUTDIR)/toolchain-win.cmake"
   else
     # We grab the C/C++ compilers detected by autoconf or provided by user, not
     # the CC/CXX variables defined by the makefiles, which potentially include
     # the ccache command which will throw off cmake.
     ifneq (,$(OPENJ9_CC))
-      CMAKE_ARGS += "-DCMAKE_C_COMPILER=$(OPENJ9_CC)"
+      CMAKE_ARGS += -DCMAKE_C_COMPILER="$(OPENJ9_CC)"
     else
-      CMAKE_ARGS += "-DCMAKE_C_COMPILER=$(ac_cv_prog_CC)"
+      CMAKE_ARGS += -DCMAKE_C_COMPILER="$(ac_cv_prog_CC)"
     endif
 
     ifneq (,$(OPENJ9_CXX))
-      CMAKE_ARGS += "-DCMAKE_CXX_COMPILER=$(OPENJ9_CXX)"
+      CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(OPENJ9_CXX)"
     else
-      CMAKE_ARGS += "-DCMAKE_CXX_COMPILER=$(ac_cv_prog_CXX)"
+      CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(ac_cv_prog_CXX)"
     endif
   endif # ifeq (windows,$(OPENJDK_TARGET_OS))
 
@@ -477,22 +485,15 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     CCACHE_NOCOMPRESS := $(filter-out CCACHE_COMPRESS=1,$(CCACHE))
     ESCAPED_CCACHE := env$(subst $(SPACE),,$(addprefix ;,$(CCACHE_NOCOMPRESS)))
 
-    CMAKE_ARGS += "-DCMAKE_CXX_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
-    CMAKE_ARGS += "-DCMAKE_C_COMPILER_LAUNCHER=$(ESCAPED_CCACHE)"
+    CMAKE_ARGS += -DCMAKE_CXX_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
+    CMAKE_ARGS += -DCMAKE_C_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
   endif # CCACHE
 
+  CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
+
 $(OUTPUTDIR)/vm/cmake.stamp :
-	cd $(OUTPUTDIR)/vm && \
-	$(CMAKE) \
-		-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(OPENJ9_BUILDSPEC).cmake \
-		$(CMAKE_ARGS) \
-		-DJ9VM_OMR_DIR=$(OPENJ9OMR_TOPDIR) \
-		-DBUILD_ID=$(BUILD_ID) \
-		-DJAVA_SPEC_VERSION=$(VERSION_FEATURE) \
-		-DOPENJ9_BUILD=true \
-		$(EXTRA_CMAKE_ARGS) \
-		$(OPENJ9_TOPDIR)
-	touch $(OUTPUTDIR)/vm/cmake.stamp
+	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	$(TOUCH) $@
 
 run-preprocessors-j9 : \
 		$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING \
