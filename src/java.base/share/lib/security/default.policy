@@ -103,6 +103,19 @@ grant codeBase "jrt:/jdk.accessibility" {
     permission java.lang.RuntimePermission "accessClassInPackage.sun.awt";
 };
 
+grant codeBase "jrt:/jdk.attach" {
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.util";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.tools.attach.target";
+    permission java.lang.RuntimePermission "accessClassInPackage.openj9.tools.attach.diagnostics.base";
+    permission java.util.PropertyPermission "com.ibm.tools.attach.*", "read";
+    // required by com.ibm.tools.attach.attacher.OpenJ9AttachProvider.listVirtualMachinesImp():commonDir.exists(),
+    // com.ibm.tools.attach.target.Reply.writeReply():new RandomAccessFile(replyFile, "rw"),
+    // and com.ibm.tools.attach.target.Reply.deleteReply():replyFile.delete()
+    permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
+    // required by com.ibm.tools.attach.attacher.OpenJ9VirtualMachine.tryAttachTarget():targetServer.accept()
+    permission java.net.SocketPermission "localhost:1024-", "accept,resolve";
+};
+
 grant codeBase "jrt:/jdk.charsets" {
     permission java.util.PropertyPermission "os.name", "read";
     permission java.util.PropertyPermission "sun.nio.cs.map", "read";
