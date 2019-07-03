@@ -24,6 +24,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * Maintains a list of currently loaded DLLs (Dynamic Link Libraries)
  * and their associated handles. Library names are case-insensitive.
  */
@@ -42,6 +48,7 @@
 static void dll_build_name(char* buffer, size_t buflen,
                            const char* paths, const char* fname) {
     char *path, *paths_copy, *next_token;
+    *buffer = '\0';
 
     paths_copy = strdup(paths);
     if (paths_copy == NULL) {
@@ -52,8 +59,10 @@ static void dll_build_name(char* buffer, size_t buflen,
     path = strtok_s(paths_copy, PATH_SEPARATOR, &next_token);
 
     while (path != NULL) {
-        _snprintf(buffer, buflen, "%s\\%s.dll", path, fname);
-        if (_access(buffer, 0) == 0) {
+        size_t result_len = (size_t)_snprintf(buffer, buflen, "%s\\%s.dll", path, fname);
+        if (result_len >= buflen) {
+            /* Ignore this path that doesn't fit in the supplied buffer. */
+        } else if (_access(buffer, 0) == 0) {
             break;
         }
         *buffer = '\0';
@@ -103,18 +112,16 @@ dbgsysGetLastErrorString(char *buf, int len)
  * Build a machine dependent library name out of a path and file name.
  */
 void
-dbgsysBuildLibName(char *holder, int holderlen, const char *pname, const char *fname)
+dbgsysBuildLibName(char *holder, size_t holderlen, const char *pname, const char *fname)
 {
     const int pnamelen = pname ? (int)strlen(pname) : 0;
 
-    *holder = '\0';
-    /* Quietly truncates on buffer overflow. Should be an error. */
-    if (pnamelen + (int)strlen(fname) + 10 > holderlen) {
-        return;
-    }
-
     if (pnamelen == 0) {
-        sprintf(holder, "%s.dll", fname);
+        size_t result_len = (size_t)_snprintf(holder, holderlen, "%s.dll", fname);
+        if (result_len >= holderlen) {
+            /* Ignore this path that doesn't fit in the supplied buffer. */
+            *holder = '\0';
+        }
     } else {
       dll_build_name(holder, holderlen, pname, fname);
     }
