@@ -32,19 +32,22 @@
 /* Load the crypto library (return NULL on error) */
 void * load_crypto_library() {
     void * result = NULL;
-    const char *libname = "libcrypto.so.1.1";    // Library name for OpenSSL 1.1.0 and 1.1.1
-    const char *oldname = "libcrypto.so.1.0.0";  // Library name for OpenSSL 1.0.2
-    const char *symlink = "libcrypto.so";        // Library name for possible symbolic links
+    size_t i = 0;
+    
+    // Library names for OpenSSL 1.1.1, 1.1.0, 1.0.2 and symbolic links
+    static const char * const libNames[] = {
+        "libcrypto.so.1.1",   // 1.1.x library name
+        "libcrypto.so.1.0.0", // 1.0.x library name
+        "libcrypto.so.10",    // 1.0.x library name on RHEL
+        "libcrypto.so"        // general symlink library name
+    };
 
-    // Check to see if we can load the library
-    result = dlopen (libname,  RTLD_NOW);
-    if (result == NULL) {
-        // Failed to read library so try to load the older library
-        result = dlopen (oldname,  RTLD_NOW);
-        if (result == NULL) {
-            // Failed to load older library so try to load the symlink
-            result = dlopen (symlink,  RTLD_NOW);
-        }
+    // Check to see if we can load the libraries in the order set out above
+    for (i = 0; (NULL == result) && (i < sizeof(libNames) / sizeof(libNames[0])); i++) {
+        const char * libName = libNames[i];
+
+        // Check to see if we can load the library
+        result = dlopen (libName,  RTLD_NOW);
     }
 
     return result;
