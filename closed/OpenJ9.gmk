@@ -197,6 +197,7 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	j9gc29 \
 	j9gcchk29 \
 	j9hookable29 \
+	j9jit29 \
 	j9jnichk29 \
 	j9jvmti29 \
 	j9prt29 \
@@ -210,10 +211,6 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	jvm \
 	omrsig \
 	)
-
-ifneq (aarch64,$(OPENJDK_TARGET_CPU))
-  $(call openj9_add_jdk_shlibs, java.base, j9jit29)
-endif
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
   $(call openj9_add_jdk_lib, java.base, lib/$(call STATIC_LIBRARY,jsig))
@@ -457,6 +454,7 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 	-DJ9VM_OMR_DIR="$(OPENJ9OMR_TOPDIR)" \
 	-DJAVA_SPEC_VERSION=$(VERSION_FEATURE) \
 	-DOPENJ9_BUILD=true \
+	-DOPENJ9_SHA=$(OPENJ9_SHA) \
 	#
 
   ifeq (windows,$(OPENJDK_TARGET_OS))
