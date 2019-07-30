@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -130,7 +130,7 @@ for i in "${!git_urls[@]}" ; do
 		fi
 		cd - > /dev/null
 	else
-		git_clone_command="git clone --recursive -b ${branch} ${git_urls[$i]} ${i}"
+		git_clone_command="git clone -q --recursive -b ${branch} ${git_urls[$i]} ${i}"
 		commands[$i]=$git_clone_command
 
 		echo
