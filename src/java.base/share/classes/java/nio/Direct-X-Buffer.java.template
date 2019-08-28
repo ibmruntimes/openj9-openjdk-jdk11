@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 
 #warn This file is preprocessed before being compiled
 
@@ -86,7 +91,7 @@ class Direct$Type$Buffer$RW$$BO$
                 // Paranoia
                 return;
             }
-            UNSAFE.freeMemory(address);
+            UNSAFE.freeDBBMemory(address);
             address = 0;
             Bits.unreserveMemory(size, capacity);
         }
@@ -119,7 +124,7 @@ class Direct$Type$Buffer$RW$$BO$
 
         long base = 0;
         try {
-            base = UNSAFE.allocateMemory(size);
+            base = UNSAFE.allocateDBBMemory(size);
         } catch (OutOfMemoryError x) {
             Bits.unreserveMemory(size, cap);
             throw x;

@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 package java.util.stream;
 
 import java.util.Comparator;
@@ -55,12 +60,12 @@ final class Streams {
         // Can never be greater that upTo, this avoids overflow if upper bound
         // is Integer.MAX_VALUE
         // All elements are traversed if from == upTo & last == 0
-        private int from;
-        private final int upTo;
+        int from;
+        final int upTo;
         // 1 if the range is closed and the last element has not been traversed
         // Otherwise, 0 if the range is open, or is a closed range and all
         // elements have been traversed
-        private int last;
+        int last;
 
         RangeIntSpliterator(int from, int upTo, boolean closed) {
             this(from, upTo, closed ? 1 : 0);

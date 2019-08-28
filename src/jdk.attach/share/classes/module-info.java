@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 
 /**
  * Defines the attach API.
@@ -41,7 +46,4 @@ module jdk.attach {
         jdk.jcmd;
 
     uses com.sun.tools.attach.spi.AttachProvider;
-
-    provides com.sun.tools.attach.spi.AttachProvider with
-        sun.tools.attach.AttachProviderImpl;
 }

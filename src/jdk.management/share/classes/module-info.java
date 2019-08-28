@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2015, 2018 All Rights Reserved
+ * ===========================================================================
+ */
+
 /**
  * Defines JDK-specific management interfaces for the JVM.
  *
@@ -33,8 +39,5 @@ module jdk.management {
     requires transitive java.management;
 
     exports com.sun.management;
-
-    provides sun.management.spi.PlatformMBeanProvider with
-        com.sun.management.internal.PlatformMBeanProviderImpl;
 }
 

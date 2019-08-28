@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package jdk.internal.loader;
 
@@ -69,7 +74,24 @@ public abstract class Resource {
      */
     public abstract int getContentLength() throws IOException;
 
-    private InputStream cis;
+   private InputStream cis;                                                     //OpenJ9-shared_classes_misc
+    /* Stores the classpath index from which this resource was loaded from - used for Shared class support */ //OpenJ9-shared_classes_misc
+    private int classPathLoadIndex;                                             //OpenJ9-shared_classes_misc
+                                                                                //OpenJ9-shared_classes_misc
+    /*                                                                          //OpenJ9-shared_classes_misc
+     * Sets the classpath index from which this resource was loaded from        //OpenJ9-shared_classes_misc
+     */                                                                         //OpenJ9-shared_classes_misc
+    public void setClasspathLoadIndex(int cpIndex) {                            //OpenJ9-shared_classes_misc
+        classPathLoadIndex = cpIndex;                                           //OpenJ9-shared_classes_misc
+    }                                                                           //OpenJ9-shared_classes_misc
+                                                                                //OpenJ9-shared_classes_misc
+    /*                                                                          //OpenJ9-shared_classes_misc
+     * Returns the classpath index from which this resource was loaded from     //OpenJ9-shared_classes_misc
+     */                                                                         //OpenJ9-shared_classes_misc
+    public int getClasspathLoadIndex() {                                        //OpenJ9-shared_classes_misc
+        return classPathLoadIndex;                                              //OpenJ9-shared_classes_misc
+    }                                                                           //OpenJ9-shared_classes_misc
+                                                                                //OpenJ9-shared_classes_misc
 
     /* Cache result in case getBytes is called after getByteBuffer. */
     private synchronized InputStream cachedInputStream() throws IOException {
@@ -186,3 +208,4 @@ public abstract class Resource {
         return null;
     }
 }
+//OpenJ9-shared_classes_misc

@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 package java.util.stream;
 
 import java.util.Objects;
@@ -373,6 +378,14 @@ abstract class AbstractPipeline<E_IN, E_OUT, S extends BaseStream<E_OUT, S>>
         return sourceStage.parallel;
     }
 
+    /**
+     * Returns the sourceSpliterator
+     *
+     * @return the sourceSpliterator
+     */
+    final Spliterator<?> getSourceSpliterator() {
+    	return sourceSpliterator;
+    }
 
     /**
      * Returns the composition of stream flags of the stream source and all

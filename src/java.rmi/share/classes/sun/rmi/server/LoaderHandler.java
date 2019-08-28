@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package sun.rmi.server;
 
@@ -54,8 +59,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
+
+import com.ibm.sharedclasses.spi.SharedClassProvider;
+
 import sun.reflect.misc.ReflectUtil;
 import sun.rmi.runtime.Log;
 
@@ -1003,7 +1012,17 @@ public final class LoaderHandler {
 
         // createClassLoader permission needed to create loader in context
         perms.add(new RuntimePermission("createClassLoader"));
-
+        // allow the applet classloader access to shared classes.               //OpenJ9-shared_classes_misc
+        ServiceLoader<SharedClassProvider> sl = ServiceLoader.load(SharedClassProvider.class); 											//OpenJ9-shared_classes_misc
+		for (SharedClassProvider sharedClassServiceProvider : sl) {																		//OpenJ9-shared_classes_misc
+			if (null != sharedClassServiceProvider) {																					//OpenJ9-shared_classes_misc
+				if (sharedClassServiceProvider.isSharedClassEnabled()){																	//OpenJ9-shared_classes_misc
+					perms.add(sharedClassServiceProvider.createPermission("sun.rmi.server.LoaderHandler$Loader", "read,write"));		//OpenJ9-shared_classes_misc
+				}																														//OpenJ9-shared_classes_misc
+				break;																													//OpenJ9-shared_classes_misc
+			}																															//OpenJ9-shared_classes_misc
+		}
+		
         // add permissions to read any "java.*" property
         perms.add(new java.util.PropertyPermission("java.*","read"));
 
@@ -1222,3 +1241,4 @@ public final class LoaderHandler {
     }
 
 }
+//OpenJ9-shared_classes_misc

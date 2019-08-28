@@ -1,0 +1,44 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# ===========================================================================
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+#
+# ===========================================================================
+
+################################################################################
+# Create the Java Native crypto library
+ ifeq ($(WITH_OPENSSL), yes)
+  $(eval $(call SetupJdkLibrary, BUILD_JNCRYPTO, \
+      NAME := jncrypto, \
+      OPTIMIZATION := LOW, \
+      CFLAGS := $(CFLAGS_JDKLIB) \
+                -c $(OPENSSL_CFLAGS), \
+      DISABLED_WARNINGS_gcc := sign-compare implicit-fallthrough unused-value, \
+      DISABLED_WARNINGS_clang := sign-compare, \
+      DISABLED_WARNINGS_microsoft := 4101 4244 4146 4018, \
+      LDFLAGS := $(LDFLAGS_JDKLIB) \
+          $(call SET_SHARED_LIBRARY_ORIGIN), \
+      LIBS_unix := $(LIBDL), \
+  ))
+   TARGETS += $(BUILD_JNCRYPTO)
+endif
+
+INCLUDE_CUSTOM_EXTENSION_SYMBOLS := $(SUPPORT_OUTPUTDIR)/modules_libs/java.base/$(LIBRARY_PREFIX)jncrypto.symbols
+INCLUDE_CUSTOM_EXTENSION_LIB := BUILD_JNCRYPTO
+################################################################################
+

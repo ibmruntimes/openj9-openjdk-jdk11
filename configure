@@ -21,13 +21,20 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
-
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# ===========================================================================
+# 
 # This is a thin wrapper which will call the real configure script, and
 # make sure that is called using bash.
 
 # Get an absolute path to this script, since that determines the top-level directory.
 this_script_dir=`dirname $0`
 this_script_dir=`cd $this_script_dir > /dev/null && pwd`
+
+# Set CUSTOM_CONFIG_DIR for OpenJ9 closed extensions
+export CUSTOM_CONFIG_DIR=$this_script_dir/closed/autoconf
+export CUSTOM_ROOT=$this_script_dir
 
 # Delegate to wrapper, forcing wrapper to believe $0 is this script by using -c.
 # This trick is needed to get autoconf to co-operate properly.

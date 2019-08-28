@@ -103,6 +103,19 @@ grant codeBase "jrt:/jdk.accessibility" {
     permission java.lang.RuntimePermission "accessClassInPackage.sun.awt";
 };
 
+grant codeBase "jrt:/jdk.attach" {
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.util";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.tools.attach.target";
+    permission java.lang.RuntimePermission "accessClassInPackage.openj9.tools.attach.diagnostics.base";
+    permission java.util.PropertyPermission "com.ibm.tools.attach.*", "read";
+    // required by com.ibm.tools.attach.attacher.OpenJ9AttachProvider.listVirtualMachinesImp():commonDir.exists(),
+    // com.ibm.tools.attach.target.Reply.writeReply():new RandomAccessFile(replyFile, "rw"),
+    // and com.ibm.tools.attach.target.Reply.deleteReply():replyFile.delete()
+    permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
+    // required by com.ibm.tools.attach.attacher.OpenJ9VirtualMachine.tryAttachTarget():targetServer.accept()
+    permission java.net.SocketPermission "localhost:1024-", "accept,resolve";
+};
+
 grant codeBase "jrt:/jdk.charsets" {
     permission java.util.PropertyPermission "os.name", "read";
     permission java.util.PropertyPermission "sun.nio.cs.map", "read";
@@ -201,6 +214,20 @@ grant codeBase "jrt:/jdk.zipfs" {
     permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
     permission java.lang.RuntimePermission "fileSystemProvider";
     permission java.util.PropertyPermission "os.name", "read";
+};
+
+grant codeBase "jrt:/openj9.cuda" {
+    permission java.util.PropertyPermission "com.ibm.oti.vm.library.version", "read";
+    permission java.lang.RuntimePermission "loadLibrary.cuda4j29";
+};
+
+grant codeBase "jrt:/openj9.gpu" {
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.gpu.spi";
+    permission com.ibm.gpu.GPUPermission "access";
+    permission java.util.PropertyPermission "com.ibm.gpu.verbose", "read";
+    permission java.util.PropertyPermission "com.ibm.gpu.enforce", "read";
+    permission java.util.PropertyPermission "com.ibm.gpu.enable", "read";
+    permission java.util.PropertyPermission "com.ibm.gpu.disable", "read";
 };
 
 // permissions needed by applications using java.desktop module

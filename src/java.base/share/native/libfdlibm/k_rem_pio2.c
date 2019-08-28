@@ -22,7 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * ===========================================================================
+ */
 /*
  * __kernel_rem_pio2(x,y,e0,nx,prec,ipio2)
  * double x[],y[]; int e0,nx,prec; int ipio2[];
@@ -252,7 +256,7 @@ recompute:
             j = 0;
             for (i=jz-1;i>=jk;i--) j |= iq[i];
             if(j==0) { /* need recomputation */
-                for(k=1;iq[jk-k]==0;k++);   /* k = no. of terms needed */
+                for(k=1;k<=jk&&iq[jk-k]==0;k++);   /* k = no. of terms needed */
 
                 for(i=jz+1;i<=jz+k;i++) {   /* add q[jz+1] to q[jz+k] */
                     f[jx+i] = (double) ipio2[jv+i];
