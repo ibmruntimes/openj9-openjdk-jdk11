@@ -60,7 +60,7 @@ public class ArrayConstructorTest {
     @DataProvider
     static Object[][] arrayConstructorNegative() {
         return new Object[][]{
-                {String.class, IllegalArgumentException.class, "not an array class: java.lang.String"},
+                {String.class, IllegalArgumentException.class, "java.lang.String is not an array type."},
                 {null, NullPointerException.class, null}
         };
     }
