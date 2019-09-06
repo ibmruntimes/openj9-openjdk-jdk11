@@ -190,15 +190,23 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	DEPENDS := $(BUILD_DDR_STUBS) \
 	))
 
-# Finally, build the jar for the openj9.dtfj module.
+# Build the jar for the openj9.dtfj module.
+DDR_MODULE_JAR := $(call FindLibDirForModule, openj9.dtfj)/ddr/j9ddr.jar
+
 $(eval $(call SetupJarArchive,BUILD_J9DDR_JAR, \
 	DEPENDENCIES := $(BUILD_J9DDR_MAIN_CLASSES), \
 	SRCS := $(DDR_MAIN_BIN), \
 	SUFFIXES := .class .dat .properties, \
 	EXCLUDES := $(DDR_TOP_PACKAGE)/vm29/structure, \
-	JAR := $(call FindLibDirForModule, openj9.dtfj)/ddr/j9ddr.jar \
+	JAR := $(DDR_MODULE_JAR) \
 	))
 
-build_jar : $(BUILD_J9DDR_TEST_CLASSES) $(BUILD_J9DDR_JAR)
+# Finally, put a copy of the jar in the build JDK.
+DDR_JDKOUT_JAR := $(JDK_OUTPUTDIR)/lib/ddr/j9ddr.jar
+
+$(DDR_JDKOUT_JAR) : $(DDR_MODULE_JAR) $(BUILD_J9DDR_JAR)
+	$(call install-file)
+
+build_jar : $(BUILD_J9DDR_TEST_CLASSES) $(DDR_JDKOUT_JAR)
 
 endif # DDR_GENSRC_DIR
