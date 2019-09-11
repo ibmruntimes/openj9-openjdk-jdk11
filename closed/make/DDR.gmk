@@ -1,0 +1,204 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+# ===========================================================================
+# Overview:
+# - generate
+#     1) compile tools
+#     2a) generate java pointer source files
+#     2b) generate java structure stub source files
+#     2c) generate pointer and structure stub class files
+# - build_jar
+#     3) compile jzos stubs
+#     4a) compile DDR_VM source with 2a, 2b and 3
+#     4b) compile DDR_VM source with 2c and 3
+#     5) build j9ddr.jar from the 4b
+# ===========================================================================
+
+.PHONY : no_default generate build_jar
+
+no_default :
+	$(error DDR.gmk has no default target)
+
+include $(SPEC)
+include $(TOPDIR)/make/common/MakeBase.gmk
+include $(TOPDIR)/make/common/JavaCompilation.gmk
+include $(TOPDIR)/make/common/SetupJavaCompilers.gmk
+
+# The main source directory.
+DDR_VM_SRC_ROOT := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
+
+# The top-level directory for intermediate artifacts.
+DDR_SUPPORT_DIR := $(SUPPORT_OUTPUTDIR)/ddr
+
+# The blob and superset files are built with the VM.
+DDR_BLOB_FILE := $(OUTPUTDIR)/vm/j9ddr.dat
+DDR_SUPERSET_FILE := $(OUTPUTDIR)/vm/superset.dat
+
+# Where to write class files.
+DDR_CLASSES_BIN := $(DDR_SUPPORT_DIR)/classes
+DDR_MAIN_BIN := $(DDR_SUPPORT_DIR)/main
+DDR_STUBS_BIN := $(DDR_SUPPORT_DIR)/stubs
+DDR_TEST_BIN := $(DDR_SUPPORT_DIR)/test
+DDR_TOOLS_BIN := $(DDR_SUPPORT_DIR)/tools
+
+# Where to write generated source files.
+DDR_GENSRC_DIR := $(DDR_SUPPORT_DIR)/gensrc
+
+# Marker files signalling that derived artifacts are up-to-date.
+DDR_CLASSES_MARKER := $(DDR_SUPPORT_DIR)/classes.done
+DDR_COMPILE_MARKER := $(DDR_SUPPORT_DIR)/compile.done
+DDR_POINTERS_MARKER := $(DDR_SUPPORT_DIR)/gensrc-pointers.done
+DDR_STRUCTURES_MARKER := $(DDR_SUPPORT_DIR)/gensrc-structures.done
+DDR_TOOLS_MARKER := $(DDR_SUPPORT_DIR)/tools.marker
+
+#############################################################################
+
+# Build the tools we will need.
+$(eval $(call SetupJavaCompilation,BUILD_DDR_TOOLS, \
+	SETUP := GENERATE_OLDBYTECODE, \
+	BIN := $(DDR_TOOLS_BIN), \
+	CLASSPATH := $(addprefix $(JDK_OUTPUTDIR)/modules/, java.base openj9.dtfj), \
+	SRC := $(DDR_VM_SRC_ROOT), \
+	INCLUDE_FILES := \
+		com/ibm/j9ddr/BytecodeGenerator.java \
+		com/ibm/j9ddr/CTypeParser.java \
+		com/ibm/j9ddr/StructureHeader.java \
+		com/ibm/j9ddr/StructureReader.java \
+		com/ibm/j9ddr/StructureTypeManager.java \
+		com/ibm/j9ddr/logging/LoggerNames.java \
+		com/ibm/j9ddr/tools/ClassGenerator.java \
+		com/ibm/j9ddr/tools/FlagStructureList.java \
+		com/ibm/j9ddr/tools/PointerGenerator.java \
+		com/ibm/j9ddr/tools/StructureStubGenerator.java \
+		com/ibm/j9ddr/tools/store/J9DDRStructureStore.java \
+		com/ibm/j9ddr/tools/store/StructureKey.java \
+		com/ibm/j9ddr/tools/store/StructureMismatchError.java \
+	))
+
+#############################################################################
+
+$(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(BUILD_DDR_TOOLS)
+	@$(ECHO) Generating DDR pointer class source files
+	@$(JAVA) -cp $(DDR_TOOLS_BIN) com.ibm.j9ddr.tools.PointerGenerator \
+		-f $(dir $(DDR_SUPERSET_FILE)) \
+		-s $(notdir $(DDR_SUPERSET_FILE)) \
+		-p com.ibm.j9ddr.vm29.pointer.generated \
+		-v 29 \
+		-o $(DDR_GENSRC_DIR)
+	@$(TOUCH) $@
+
+$(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(BUILD_DDR_TOOLS)
+	@$(ECHO) Generating DDR structure stub source files
+	@$(JAVA) -cp $(DDR_TOOLS_BIN) com.ibm.j9ddr.tools.StructureStubGenerator \
+		-f $(dir $(DDR_SUPERSET_FILE)) \
+		-s $(notdir $(DDR_SUPERSET_FILE)) \
+		-p com.ibm.j9ddr.vm29.structure \
+		-o $(DDR_GENSRC_DIR)
+	@$(TOUCH) $@
+
+# When StructureReader opens the blob, it must be able to find StructureAliases*.dat,
+# which requires that $(DDR_VM_SRC_ROOT) be on the classpath.
+$(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(BUILD_DDR_TOOLS)
+	@$(ECHO) Generating DDR pointer and structure class files
+	@$(RM) -rf $(DDR_CLASSES_BIN)
+	@$(JAVA) -cp "$(DDR_TOOLS_BIN)$(PATH_SEP)$(DDR_VM_SRC_ROOT)" \
+		com.ibm.j9ddr.tools.ClassGenerator \
+			--blob=$(DDR_BLOB_FILE) \
+			--out=$(DDR_CLASSES_BIN)
+	@$(TOUCH) $@
+
+generate : $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER) $(DDR_CLASSES_MARKER)
+
+#############################################################################
+
+# SetupJavaCompilation requires that SRC directories exist: the 'generate' target,
+# which creates $(DDR_GENSRC_DIR), must have been built previously.
+
+ifeq (,$(wildcard $(DDR_GENSRC_DIR)))
+
+build_jar :
+	$(error Directory $(DDR_GENSRC_DIR) does not exist - 'generate' target must be built first.)
+
+else # DDR_GENSRC_DIR
+
+# Compile the stub classes.
+$(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
+	SETUP := GENERATE_USINGJDKBYTECODE, \
+	BIN := $(DDR_STUBS_BIN), \
+	CLASSPATH := $(JDK_OUTPUTDIR)/modules/java.base, \
+	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src_stubs \
+	))
+
+# We depend upon class files from these modules.
+DDR_CLASSPATH := \
+	$(addprefix $(JDK_OUTPUTDIR)/modules/, \
+		java.base \
+		java.desktop \
+		openj9.dtfj \
+		openj9.traceformat \
+	)
+
+# Finally, we depend upon the stub classes.
+DDR_CLASSPATH += $(DDR_STUBS_BIN)
+
+# Packages to be excluded from compilation.
+DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
+
+# The list of structure alias files that must be included in the jar.
+DDR_ALIAS_FILES := \
+	com/ibm/j9ddr/StructureAliases29.dat \
+	com/ibm/j9ddr/StructureAliases29-edg.dat \
+	#
+
+# Compile the Java sources.
+$(eval $(call SetupJavaCompilation,BUILD_J9DDR_MAIN_CLASSES, \
+	SETUP := GENERATE_JDKBYTECODE, \
+	BIN := $(DDR_MAIN_BIN), \
+	CLASSPATH := $(DDR_CLASSPATH), \
+	SRC := $(DDR_VM_SRC_ROOT) $(DDR_GENSRC_DIR), \
+	EXCLUDES := $(DDR_SRC_EXCLUDES), \
+	COPY := $(DDR_ALIAS_FILES), \
+	DEPENDS := $(BUILD_DDR_STUBS) \
+	))
+
+# Compile DDR code again, to ensure compatibility with class files
+# as they would be dynamically generated from the blob.
+$(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
+	SETUP := GENERATE_JDKBYTECODE, \
+	BIN := $(DDR_TEST_BIN), \
+	CLASSPATH := $(DDR_CLASSES_BIN) $(DDR_CLASSPATH), \
+	SRC := $(DDR_VM_SRC_ROOT), \
+	EXCLUDES := $(DDR_SRC_EXCLUDES), \
+	DEPENDS := $(BUILD_DDR_STUBS) \
+	))
+
+# Finally, build the jar for the openj9.dtfj module.
+$(eval $(call SetupJarArchive,BUILD_J9DDR_JAR, \
+	DEPENDENCIES := $(BUILD_J9DDR_MAIN_CLASSES), \
+	SRCS := $(DDR_MAIN_BIN), \
+	SUFFIXES := .class .dat .properties, \
+	EXCLUDES := $(DDR_TOP_PACKAGE)/vm29/structure, \
+	JAR := $(call FindLibDirForModule, openj9.dtfj)/ddr/j9ddr.jar \
+	))
+
+build_jar : $(BUILD_J9DDR_TEST_CLASSES) $(BUILD_J9DDR_JAR)
+
+endif # DDR_GENSRC_DIR
