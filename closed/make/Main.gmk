@@ -68,6 +68,6 @@ openj9.dtfj-ddr-gen : j9vm-build $(addsuffix -java, java.base java.desktop openj
 openj9.dtfj-ddr-jar : openj9.dtfj-ddr-gen
 	+$(MAKE) -f $(TOPDIR)/closed/make/DDR.gmk SPEC=$(SPEC) build_jar
 
-openj9.dtfj-jmod : openj9.dtfj-ddr-jar
+openj9.dtfj-launchers : openj9.dtfj-ddr-jar
 
 endif # OPENJ9_ENABLE_DDR
