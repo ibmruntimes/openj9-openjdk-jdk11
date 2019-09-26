@@ -32,8 +32,6 @@ package jdk.internal.loader;
 
 import com.ibm.sharedclasses.spi.SharedClassProvider; 				//OpenJ9-shared_classes_misc
 
-import java.io.File;
-import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.module.ModuleDescriptor;
@@ -51,7 +49,6 @@ import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.CodeSigner;
 import java.security.CodeSource;
-import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -77,6 +74,7 @@ import jdk.internal.misc.SharedSecrets;
 import jdk.internal.misc.VM;
 import jdk.internal.module.ModulePatcher.PatchedModuleReader;
 import jdk.internal.module.Resources;
+import sun.security.util.LazyCodeSourcePermissionCollection;
 
 
 /**
@@ -874,10 +872,8 @@ public class BuiltinClassLoader
 		}																//OpenJ9-shared_classes_misc
 
         if (System.getSecurityManager() == null) {
-
             return defineClass(cn, loadedModule);
         } else {
-
             PrivilegedAction<Class<?>> pa = () -> defineClass(cn, loadedModule);
             return AccessController.doPrivileged(pa);
         }
@@ -1263,38 +1259,8 @@ public class BuiltinClassLoader
      */
     @Override
     protected PermissionCollection getPermissions(CodeSource cs) {
-        PermissionCollection perms = super.getPermissions(cs);
-
-        // add the permission to access the resource
-        URL url = cs.getLocation();
-        if (url == null)
-            return perms;
-
-        // avoid opening connection when URL is to resource in run-time image
-        if (url.getProtocol().equals("jrt")) {
-            perms.add(new RuntimePermission("accessSystemModules"));
-            return perms;
-        }
-
-        // open connection to determine the permission needed
-        try {
-            Permission p = url.openConnection().getPermission();
-            if (p != null) {
-                // for directories then need recursive access
-                if (p instanceof FilePermission) {
-                    String path = p.getName();
-                    if (path.endsWith(File.separator)) {
-                        path += "-";
-                        p = new FilePermission(path, "read");
-                    }
-                }
-                perms.add(p);
-            }
-        } catch (IOException ioe) { }
-
-        return perms;
+        return new LazyCodeSourcePermissionCollection(super.getPermissions(cs), cs);
     }
-
 
     // -- miscellaneous supporting methods
 
