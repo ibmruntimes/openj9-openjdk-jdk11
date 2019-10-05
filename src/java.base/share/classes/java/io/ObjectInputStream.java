@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018,2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
  * ===========================================================================
  */
 
@@ -336,12 +336,12 @@ public class ObjectInputStream
      }
   
 
-      /** if true LUDCL/forName results would be cached, true by default starting Java8 */
+      /** if true LUDCL/forName results would be cached, false by default starting Java8 */
      private static final class GetClassCachingSettingAction
      implements PrivilegedAction<Boolean> {
  public Boolean run() {
      String property =
-         System.getProperty("com.ibm.enableClassCaching", "true");
+         System.getProperty("com.ibm.enableClassCaching", "false");
      return property.equalsIgnoreCase("true");
  }
  }
