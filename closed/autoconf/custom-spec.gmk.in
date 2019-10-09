@@ -121,3 +121,11 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 else
   OPENJ9_VM_BUILD_DIR := $(OUTPUTDIR)/vm
 endif
+
+ifeq (riscv64,$(OPENJDK_TARGET_CPU))
+  ifeq (cross,$(COMPILE_TYPE))
+    export SYSROOT_CFLAGS
+  else
+    JAVA_FLAGS += -DserverStartupTimeout=36000
+  endif
+endif
