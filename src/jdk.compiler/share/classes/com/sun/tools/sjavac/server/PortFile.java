@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package com.sun.tools.sjavac.server;
 
@@ -76,6 +81,7 @@ public class PortFile {
     private long serverCookie;
     private int myServerPort;
     private long myServerCookie;
+    private boolean isRiscv = System.getProperty("os.arch").toLowerCase().contains("riscv");
 
     /**
      * Create a new portfile.
@@ -247,7 +253,11 @@ public class PortFile {
                 Log.debug("Valid port file values found after " + (System.currentTimeMillis() - startTime) + " ms");
                 return;
             }
-            if (System.currentTimeMillis() > timeout) {
+            
+            /* Keep waiting for port file values as the native compilation with a non-JIT cross build
+             * on Linux/RISCV is extremely slow.
+             */
+            if (!isRiscv && (System.currentTimeMillis() > timeout)) {
                 break;
             }
             Thread.sleep(MS_BETWEEN_ATTEMPTS);

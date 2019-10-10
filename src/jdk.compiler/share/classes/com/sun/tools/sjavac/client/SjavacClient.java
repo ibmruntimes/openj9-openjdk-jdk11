@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * ===========================================================================
+ */
 
 package com.sun.tools.sjavac.client;
 
@@ -84,6 +89,8 @@ public class SjavacClient implements Sjavac {
 
     // Store the server conf settings here.
     private final String settings;
+    
+    private boolean isRiscv = System.getProperty("os.arch").toLowerCase().contains("riscv");
 
     public SjavacClient(Options options) {
         String tmpServerConf = options.getServerConf();
@@ -183,10 +190,15 @@ public class SjavacClient implements Sjavac {
             try {
                 return makeConnectionAttempt();
             } catch (IOException ex) {
-                Log.error("Connection attempt failed: " + ex.getMessage());
-                if (attempt >= MAX_CONNECT_ATTEMPTS) {
-                    Log.error("Giving up");
-                    throw new IOException("Could not connect to server", ex);
+                /* Keep trying to connect as the native compilation with a non-JIT cross build
+                 * on Linux/RISCV is extremely slow.
+                 */
+                if (!isRiscv) {
+                   Log.error("Connection attempt failed: " + ex.getMessage());
+                   if (attempt >= MAX_CONNECT_ATTEMPTS) {
+                       Log.error("Giving up");
+                       throw new IOException("Could not connect to server", ex);
+                   }
                 }
             }
             Thread.sleep(WAIT_BETWEEN_CONNECT_ATTEMPTS);
