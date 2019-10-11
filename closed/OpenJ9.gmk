@@ -493,8 +493,15 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
+  ifeq (true,$(OPENJ9_ENABLE_CUDA))
+    CMAKE_ARGS += -DOMR_OPT_CUDA=ON
+    CMAKE_CUDA_ENV := CUDA_BIN_PATH="$(CUDA_HOME)"
+  else # OPENJ9_ENABLE_CUDA
+    CMAKE_CUDA_ENV :=
+  endif # OPENJ9_ENABLE_CUDA
+
 $(OUTPUTDIR)/vm/cmake.stamp :
-	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	cd $(@D) && $(CMAKE_CUDA_ENV) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUTDIR)/vm/cmake.stamp
