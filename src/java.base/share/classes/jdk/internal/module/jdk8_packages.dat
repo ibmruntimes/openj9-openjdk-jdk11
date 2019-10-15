@@ -22,7 +22,7 @@
 # questions.
 #
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 #
 apple.applescript
@@ -1493,7 +1493,7 @@ com.ibm.security.util.text.resources
 com.ibm.security.validator
 com.ibm.security.x509
 com.ibm.tools.attach.attacher
-com.ibm.tools.attach.target
+openj9.internal.tools.attach.target
 com.ibm.virtualization.management
 com.ibm.virtualization.management.internal
 openj9.lang.management
