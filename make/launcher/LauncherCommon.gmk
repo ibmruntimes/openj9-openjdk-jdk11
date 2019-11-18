@@ -23,6 +23,11 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+# ===========================================================================
+#
+
 include JdkNativeCompilation.gmk
 
 ORIGIN_ARG := $(call SET_EXECUTABLE_ORIGIN,/../lib/jli)
@@ -93,6 +98,16 @@ JAVA_MANIFEST := $(TOPDIR)/src/java.base/windows/native/launcher/java.manifest
 SetupBuildLauncher = $(NamedParamsMacroTemplate)
 define SetupBuildLauncherBody
   # Setup default values (unless overridden)
+  
+  ifeq ($(OPENJDK_TARGET_OS), linux)
+  # Set the image base address for zLinux 64 to 0x60000 for launchers,
+  # allows compressedRefsShift to be 0 when -Xmx is set to 2040m or more.
+  # / RTC PR 100052
+    ifeq ($(OPENJDK_TARGET_CPU), s390x)
+      $1_LDFLAGS += -Wl,-Ttext-segment=0x60000
+    endif
+  endif
+
   ifeq ($$($1_OPTIMIZATION), )
     $1_OPTIMIZATION := LOW
   endif
