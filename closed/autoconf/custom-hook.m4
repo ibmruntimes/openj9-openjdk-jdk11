@@ -227,7 +227,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      ap64|oa64|wa64|xa64|xl64|xz64)
+      ap64|oa64|rv64|wa64|xa64|xl64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -264,6 +264,9 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
       ;;
     aarch64)
       OPENJ9_CPU=aarch64
+      ;;
+    riscv64)
+      OPENJ9_CPU=riscv64
       ;;
     *)
       AC_MSG_ERROR([unsupported OpenJ9 cpu $1])
@@ -375,6 +378,11 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_LIBS_SUBDIR=default
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
     OPENJ9_PLATFORM_CODE=xr64
+    if test "x$COMPILE_TYPE" = xcross ; then
+      OPENJ9_BUILDSPEC="${OPENJ9_BUILDSPEC}_cross"
+    fi
+  elif test "x$OPENJ9_CPU" = xriscv64 ; then
+    OPENJ9_PLATFORM_CODE=rv64
     if test "x$COMPILE_TYPE" = xcross ; then
       OPENJ9_BUILDSPEC="${OPENJ9_BUILDSPEC}_cross"
     fi
@@ -599,6 +607,22 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
               else
                 OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib"
+              fi
+            fi
+          elif test -s "$OPENSSL_DIR/lib64/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
+              # On Mac OSX, create local copy of the crypto library to update @rpath
+              # as the default is /usr/local/lib.
+              if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+                LOCAL_CRYPTO="$TOPDIR/openssl"
+                $MKDIR -p "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/lib64/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/lib64/libcrypto.1.0.0.dylib" "${LOCAL_CRYPTO}"
+                $CP -a "${OPENSSL_DIR}/lib64/libcrypto.dylib" "${LOCAL_CRYPTO}"
+                OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
+              else
+                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib64"
               fi
             fi
           elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
