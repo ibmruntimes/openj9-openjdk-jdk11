@@ -496,9 +496,21 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 
   ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
     CMAKE_ARGS += -DJITSERVER_SUPPORT=ON
+
+    ifneq (,$(OPENSSL_CFLAGS))
+      CMAKE_ARGS += -DOPENSSL_CFLAGS="$(OPENSSL_CFLAGS)"
+    endif
+
+    ifneq (,$(OPENSSL_DIR))
+      CMAKE_ARGS += -DOPENSSL_DIR="$(OPENSSL_DIR)"
+    endif
+
+    ifneq (,$(OPENSSL_BUNDLE_LIB_PATH))
+      CMAKE_ARGS += -DOPENSSL_BUNDLE_LIB_PATH="$(OPENSSL_BUNDLE_LIB_PATH)"
+    endif
   else
     CMAKE_ARGS += -DJITSERVER_SUPPORT=OFF
-  endif
+  endif # OPENJ9_ENABLE_JITSERVER
 
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
@@ -550,8 +562,20 @@ endif
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
   ifneq (true,$(OPENJ9_ENABLE_CMAKE))
     CUSTOM_COMPILER_ENV_VARS += JITSERVER_SUPPORT=1
-  endif
-endif
+
+    ifneq (,$(OPENSSL_CFLAGS))
+      CUSTOM_COMPILER_ENV_VARS += OPENSSL_CFLAGS="$(OPENSSL_CFLAGS)"
+    endif
+
+    ifneq (,$(OPENSSL_DIR))
+      CUSTOM_COMPILER_ENV_VARS += OPENSSL_DIR="$(OPENSSL_DIR)"
+    endif
+
+    ifneq (,$(OPENSSL_BUNDLE_LIB_PATH))
+      CUSTOM_COMPILER_ENV_VARS += OPENSSL_BUNDLE_LIB_PATH="$(OPENSSL_BUNDLE_LIB_PATH)"
+    endif
+  endif # OPENJ9_ENABLE_CMAKE
+endif # OPENJ9_ENABLE_JITSERVER
 
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUTDIR)/vm

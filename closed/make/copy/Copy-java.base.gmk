@@ -87,5 +87,26 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   ifeq ($(OPENJDK_BUILD_OS), windows)
 	$(CHMOD) a+rx $@
   endif
-endif
+
+  ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+    # Copy OpenSSL SSL Lbrary
+    # To bundle first search for libssl 1.1.x library, if not found, search for 1.0.x
+    ifeq ($(OPENJDK_TARGET_OS), linux)
+      OPENSSL_SSL_LIB_NAME = libssl.so.1.1
+      ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_SSL_LIB_NAME))", "")
+        OPENSSL_SSL_LIB_NAME = libssl.so.1.0.0
+        ifeq ("$(wildcard $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_SSL_LIB_NAME))", "")
+          OPENSSL_SSL_LIB_NAME =
+        endif
+      endif
+
+      ifneq ($(OPENSSL_SSL_LIB_NAME), )
+        OPENSSL_SSL_TARGET_LIB = $(LIB_DST_DIR)/$(OPENSSL_SSL_LIB_NAME)
+        TARGETS += $(OPENSSL_SSL_TARGET_LIB)
+        $(OPENSSL_SSL_TARGET_LIB) : $(OPENSSL_BUNDLE_LIB_PATH)/$(OPENSSL_SSL_LIB_NAME)
+			$(call install-file)
+      endif # OPENSSL_SSL_LIB_NAME
+    endif # OPENJDK_TARGET_OS
+  endif # OPENJ9_ENABLE_JITSERVER
+endif # OPENSSL_BUNDLE_LIB_PATH
 ################################################################################
