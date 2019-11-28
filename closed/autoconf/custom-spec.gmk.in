@@ -57,6 +57,9 @@ endif
 # DDR
 OPENJ9_ENABLE_DDR       := @OPENJ9_ENABLE_DDR@
 
+# JITSERVER
+OPENJ9_ENABLE_JITSERVER := @OPENJ9_ENABLE_JITSERVER@
+
 # for constructing version output
 COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
 USERNAME                := @USERNAME@
@@ -120,4 +123,12 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
   OPENJ9_VM_BUILD_DIR := $(OUTPUTDIR)/vm/runtime
 else
   OPENJ9_VM_BUILD_DIR := $(OUTPUTDIR)/vm
+endif
+
+ifeq (riscv64,$(OPENJDK_TARGET_CPU))
+  ifeq (cross,$(COMPILE_TYPE))
+    export SYSROOT_CFLAGS
+  else
+    JAVA_FLAGS += -DserverStartupTimeout=36000
+  endif
 endif

@@ -45,6 +45,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_NUMA
   OPENJ9_CONFIGURE_WARNINGS
+  OPENJ9_CONFIGURE_JITSERVER
   OPENJ9_THIRD_PARTY_REQUIREMENTS
   OPENJ9_CHECK_NASM_VERSION
 ])
@@ -226,7 +227,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      ap64|oa64|wa64|xa64|xl64|xz64)
+      ap64|oa64|rv64|wa64|xa64|xl64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -264,10 +265,62 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
     aarch64)
       OPENJ9_CPU=aarch64
       ;;
+    riscv64)
+      OPENJ9_CPU=riscv64
+      ;;
     *)
       AC_MSG_ERROR([unsupported OpenJ9 cpu $1])
       ;;
   esac
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
+[
+  AC_MSG_CHECKING([for jitserver])
+  AC_ARG_ENABLE([jitserver], [AS_HELP_STRING([--enable-jitserver], [enable JITServer support @<:@disabled@:>@])])
+  OPENJ9_ENABLE_JITSERVER=false
+
+  if test "x$enable_jitserver" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+
+    if test "x$OPENJDK_TARGET_OS" != xlinux ; then
+      AC_MSG_ERROR([jitserver is unsupported for $OPENJDK_TARGET_OS])
+    else
+      AC_CHECK_PROG(PROTOC_INSTALLED,protoc,yes,no)
+      if test "x$PROTOC_INSTALLED" = xno ; then
+        AC_MSG_ERROR([jitserver requires protoc])
+      else
+        AC_MSG_CHECKING([protobuf version])
+        if test "x$OPENJ9_CPU" = xx86-64 ; then
+          MIN_SUPPORTED_PROTOBUF_VERSION=3.5.1
+        else
+          MIN_SUPPORTED_PROTOBUF_VERSION=3.7.1
+        fi
+
+        PROTOBUF_VERSION=`protoc --version 2>&1 | $SED -e 's/libprotoc //'`
+        AC_MSG_RESULT([$PROTOBUF_VERSION])
+
+        AS_VERSION_COMPARE([$PROTOBUF_VERSION], [$MIN_SUPPORTED_PROTOBUF_VERSION],
+          [PROTOBUF_VERSION_SUPPORTED=no],
+          [PROTOBUF_VERSION_SUPPORTED=yes],
+          [PROTOBUF_VERSION_SUPPORTED=yes])
+        if test "x$PROTOBUF_VERSION_SUPPORTED" = xyes ; then
+          OPENJ9_ENABLE_JITSERVER=true
+        else
+          AC_MSG_ERROR([jitserver requires protobuf version >= ($MIN_SUPPORTED_PROTOBUF_VERSION) for ($OPENJ9_CPU)])
+        fi
+      fi
+    fi
+
+  elif test "x$enable_jitserver" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_jitserver" = x ; then
+    AC_MSG_RESULT([no (default)])
+  else
+    AC_MSG_ERROR([--enable-jitserver accepts no argument])
+  fi
+
+  AC_SUBST(OPENJ9_ENABLE_JITSERVER)
 ])
 
 AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
@@ -325,6 +378,11 @@ AC_DEFUN_ONCE([OPENJ9_PLATFORM_SETUP],
     OPENJ9_LIBS_SUBDIR=default
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
     OPENJ9_PLATFORM_CODE=xr64
+    if test "x$COMPILE_TYPE" = xcross ; then
+      OPENJ9_BUILDSPEC="${OPENJ9_BUILDSPEC}_cross"
+    fi
+  elif test "x$OPENJ9_CPU" = xriscv64 ; then
+    OPENJ9_PLATFORM_CODE=rv64
     if test "x$COMPILE_TYPE" = xcross ; then
       OPENJ9_BUILDSPEC="${OPENJ9_BUILDSPEC}_cross"
     fi
@@ -549,6 +607,22 @@ AC_DEFUN([CONFIGURE_OPENSSL],
                 OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
               else
                 OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib"
+              fi
+            fi
+          elif test -s "$OPENSSL_DIR/lib64/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then
+            OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
+            if test "x$BUNDLE_OPENSSL" = xyes ; then
+              # On Mac OSX, create local copy of the crypto library to update @rpath
+              # as the default is /usr/local/lib.
+              if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+                LOCAL_CRYPTO="$TOPDIR/openssl"
+                $MKDIR -p "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/lib64/libcrypto.1.1.dylib" "${LOCAL_CRYPTO}"
+                $CP "${OPENSSL_DIR}/lib64/libcrypto.1.0.0.dylib" "${LOCAL_CRYPTO}"
+                $CP -a "${OPENSSL_DIR}/lib64/libcrypto.dylib" "${LOCAL_CRYPTO}"
+                OPENSSL_BUNDLE_LIB_PATH="${LOCAL_CRYPTO}"
+              else
+                OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}/lib64"
               fi
             fi
           elif test -s "$OPENSSL_DIR/${LIBRARY_PREFIX}crypto${SHARED_LIBRARY_SUFFIX}" ; then

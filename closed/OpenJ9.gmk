@@ -196,7 +196,6 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	j9gc29 \
 	j9gcchk29 \
 	j9hookable29 \
-	j9jit29 \
 	j9jnichk29 \
 	j9jvmti29 \
 	j9prt29 \
@@ -210,6 +209,10 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	jvm \
 	omrsig \
 	)
+
+ifneq (riscv64, $(OPENJDK_TARGET_CPU))
+  $(call openj9_add_jdk_shlibs, java.base, j9jit29)
+endif
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
   $(call openj9_add_jdk_lib, java.base, lib/$(call STATIC_LIBRARY,jsig))
@@ -491,6 +494,12 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     CMAKE_ARGS += -DCMAKE_CXX_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
   endif # CCACHE
 
+  ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+    CMAKE_ARGS += -DJITSERVER_SUPPORT=ON
+  else
+    CMAKE_ARGS += -DJITSERVER_SUPPORT=OFF
+  endif
+
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
   ifeq (true,$(OPENJ9_ENABLE_CUDA))
@@ -537,6 +546,11 @@ ifneq (,$(OPENJ9_CXX))
 endif
 ifneq (,$(OPENJ9_DEVELOPER_DIR))
   CUSTOM_COMPILER_ENV_VARS += DEVELOPER_DIR="$(OPENJ9_DEVELOPER_DIR)"
+endif
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  ifneq (true,$(OPENJ9_ENABLE_CMAKE))
+    CUSTOM_COMPILER_ENV_VARS += JITSERVER_SUPPORT=1
+  endif
 endif
 
 build-j9 : run-preprocessors-j9
