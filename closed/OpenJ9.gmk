@@ -218,7 +218,7 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
   $(call openj9_add_jdk_lib, java.base, lib/$(call STATIC_LIBRARY,jsig))
   $(eval $(call openj9_add_jdk_rules, \
 	$(call FindLibDirForModule, java.base)/$(call STATIC_LIBRARY,jvm), \
-	$(OUTPUTDIR)/vm/redirector/$(call STATIC_LIBRARY,redirector_jvm)))
+	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm)))
 endif
 
 $(call openj9_add_jdk_lib, java.base, \
