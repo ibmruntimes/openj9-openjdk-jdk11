@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
 # ===========================================================================
 # 
 # This code is free software; you can redistribute it and/or modify it
@@ -21,3 +21,100 @@
 # ===========================================================================
 
 JVMTI_HTML := $(TOPDIR)/closed/variant-server/gensrc/jvmtifiles/jvmti.html
+
+##############################################################################
+# Text for openj9 modules
+
+OPENJ9_BASE_URL := https://www.eclipse.org/openj9/
+OPENJ9_BUG_SUBMIT_URL := https://github.com/eclipse/openj9/issues
+OPENJ9_FULL_COMPANY_NAME := IBM Corp
+OPENJ9_JAVADOC_BOTTOM := \
+    <a href="$(OPENJ9_BASE_URL)">Link</a> to Eclipse OpenJ9 documentation.<br> \
+    To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)">Eclipse Openj9 issue.</a><br> \
+    Copyright &copy; 1998, $(COPYRIGHT_YEAR), $(OPENJ9_FULL_COMPANY_NAME). All rights reserved.
+
+##############################################################################
+# The javadoc tool only allows for a single setting for headers and footers
+# per invocation. The sed command below replaces the footer for the pages
+# relating to openj9 classes to the correct value for those classes.
+#
+# '.' need escaping in the sed regex. If more special characters are introduced
+# in the openjdk JAVADOC_BOTTOM in future these would need escaping also.
+#
+# '&' needs escaping in sed replacement text.
+#
+# {@docroot} is expanded by javadoc when the html files are created, so the matching
+# needs to cater for anything {@docroot} may have been substituted by - '../../../..'
+# or '../..' or '..' etc.
+
+# \(\.\./\)*\.\. means zero  or more '../' strings followed by '..'
+
+JAVADOC_DOCROOT := \(\.\./\)*\.\.
+JAVADOC_BOTTOM_REGEX = $(subst {@docroot},$(JAVADOC_DOCROOT),$(subst .,\.,$(JAVADOC_BOTTOM)))
+OPENJ9_JAVADOC_BOTTOM := $(subst &,\&,$(OPENJ9_JAVADOC_BOTTOM))
+OPENJ9_SUBST_COMMAND = $(SED) -e '\''s|$(JAVADOC_BOTTOM_REGEX)|$(OPENJ9_JAVADOC_BOTTOM)|g'\''
+
+################################################################################
+# Define a javadoc Group for the OpenJ9 specific modules
+# Module names are added to DOCS_MODULES in closed/make/common/Modules.gmk
+OPENJ9_GROUP_NAME := OpenJ9
+OPENJ9_GROUP_MODULES := openj9.*
+OPENJ9_GROUP_DESCRIPTION := \
+    Modules whose names start with {@code openj9.} contain APIs provided by the \
+    <a href="$(OPENJ9_JAVADOC_BASE_URL)">Eclipse OpenJ9</a> project. \
+    These APIs can only be used with a JDK which includes the OpenJ9 virtual machine. \
+    #
+JDK_GROUPS += OPENJ9
+
+################################################################################
+# Add openj9 specific modules to the list of modules for which javadoc is required
+OPENJ9_MODULES := $(filter openj9.%,$(call FindAllModules))
+DOCS_MODULES += $(OPENJ9_MODULES)
+
+OPENJDK_JAVADOC_MARKER := $(DOCS_OUTPUTDIR)/api/index.html
+OPENJ9_JAVADOC_MARKER := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_JDK_API_openj9.marker
+JDK_API_CUSTOM_TARGETS += $(OPENJ9_JAVADOC_MARKER)
+
+OPENJ9_JAVADOC_SCRIPT := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_openj9_footer_replace.sh
+OPENJ9_JAVADOC_TEMP  := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_temp.html
+
+################################################################################
+# The OpenJ9 classes are built from the j9jcl_sources and closed/src
+# directories.
+# The packages are beneath directories called /share/classes (or /unix/classes,
+# /windows/classes etc.) which do not appear in the javadoc tree structure.
+# The commands below replace the footer in the javadoc html pages for the
+# following files:
+# 1. The openj9 java source files which override the openjdk versions
+# 2. The openj9.xxxx modules, including the javadoc generated files such as
+#    enum class pages, module-summary.html, package-summary.html etc.)
+# 3. The com/ibm/xxxx packages, including the javadoc generated files such as
+#    enum class pages, module-summary.html, package-summary.html etc.)
+# A temporary script file is used to avoid xargs command line length issues
+# on some platforms. 
+
+OPENJ9_JAVADOC_SCRIPT_BODY = \
+    for path in "$$@" ; do \
+      if [ -f "$(DOCS_OUTPUTDIR)/api/$$path" ] ; then \
+        $(CP) "$(DOCS_OUTPUTDIR)/api/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
+        $(OPENJ9_SUBST_COMMAND) < "$(OPENJ9_JAVADOC_TEMP)" > "$(DOCS_OUTPUTDIR)/api/$$path" ; \
+        $(RM) "$(OPENJ9_JAVADOC_TEMP)" ; \
+      fi ; \
+    done \
+    #
+
+$(OPENJ9_JAVADOC_MARKER) : $(OPENJDK_JAVADOC_MARKER)
+	$(ECHO) '$(OPENJ9_JAVADOC_SCRIPT_BODY)' >$(OPENJ9_JAVADOC_SCRIPT)
+	$(CD) $(SUPPORT_OUTPUTDIR)/j9jcl_sources ; \
+		$(FIND) . -type f -name '*.java' \
+			| $(SED) -e 's|/[^/]\+/classes/|/|' -e 's|\.java$$|.html|' \
+			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)
+	$(CD) $(TOPDIR)/closed/src ; \
+		$(FIND) . -type f -name '*.java' \
+			| $(SED) -e 's|/[^/]\+/classes/|/|' -e 's|\.java$$|.html|' \
+			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)
+	$(CD) $(DOCS_OUTPUTDIR)/api ; \
+		$(FIND) . -type f '(' -path '*/openj9*/*.html' ')' -o '(' -path '*/com/ibm/*.html' ')' \
+			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)
+	$(RM) -f $(OPENJ9_JAVADOC_SCRIPT)
+	$(TOUCH) $@
