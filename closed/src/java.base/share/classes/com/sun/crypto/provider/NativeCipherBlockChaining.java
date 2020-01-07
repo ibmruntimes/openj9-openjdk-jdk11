@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
  * ===========================================================================
  */
 
@@ -36,6 +36,8 @@ import java.util.ArrayDeque;
 import com.sun.crypto.provider.AESCrypt;
 
 import jdk.crypto.jniprovider.NativeCrypto;
+import jdk.internal.ref.CleanerFactory;
+import java.lang.ref.Cleaner;
 
 /**
  * This class represents the native implementation of ciphers in
@@ -52,13 +54,15 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
     protected static long[] contexts;
     protected static ArrayDeque<Integer> avStack = new ArrayDeque<Integer>(numContexts);
 
-    private static NativeCrypto nativeCrypto;
+    private static final NativeCrypto nativeCrypto;
+    private static final Cleaner contextCleaner;
 
     /*
      * Initialize the CBC context.
      */
     static {
         nativeCrypto = NativeCrypto.getNativeCrypto();
+        contextCleaner = CleanerFactory.cleaner();
         contexts = new long[numContexts];
 
         for (int i = 0; i < numContexts; i++) {
@@ -69,6 +73,33 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
             contexts[i] = context;
 
             avStack.push(i);
+        }
+    }
+
+    private static final class CBCCleanerRunnable implements Runnable {
+        private final int ctxIndx;
+        private final long nativeContext;
+
+        public CBCCleanerRunnable(int ctxIndx, long nativeContext) {
+            this.ctxIndx = ctxIndx;
+            this.nativeContext = nativeContext;
+        }
+
+        @Override
+        public void run() {
+            /*
+             * Release the CBC context.
+             */
+            synchronized (NativeCipherBlockChaining.class) {
+                if (ctxIndx == -1) {
+                    long ret = nativeCrypto.DestroyContext(nativeContext);
+                    if (ret == -1) {
+                        throw new ProviderException("Error in Native CipherBlockChaining");
+                    }
+                } else {
+                    avStack.push(ctxIndx);
+                }
+            }
         }
     }
 
@@ -91,21 +122,6 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         return cipher.nativeContext;
     }
 
-    /*
-     * Release the CBC context.
-     */
-    synchronized static void releaseContext(NativeCipherBlockChaining cipher) {
-
-        if(cipher.ctxIndx == -1) {
-            long ret = nativeCrypto.DestroyContext(cipher.nativeContext);
-            if (ret == -1) {
-                throw new ProviderException("Error in Native CipherBlockChaining");
-            }
-        } else {
-            avStack.push(cipher.ctxIndx);
-        }
-    }
-
     private int mode; // 0: decryption 1: encryption
 
     /*
@@ -124,6 +140,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         super(embeddedCipher);
         r = new byte[blockSize];
         nativeContext = getContext(this);
+        contextCleaner.register(this, new CBCCleanerRunnable(this.ctxIndx, this.nativeContext));
     }
 
     /**
@@ -307,13 +324,4 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         }
         return ret;
     }
-
-    /*
-     * Finalize method to release the CBC contexts.
-     */
-    @Override
-    public void finalize() {
-        releaseContext(this);
-    }
-
 }
