@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -170,6 +170,12 @@ openj9_add_jdk_lib = $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/lib $(call Fi
 openj9_add_jdk_special = \
 	$(foreach target, $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, java.base), \
 		$(eval $(call openj9_add_jdk_rules, $(target)/$(strip $1), $(OPENJ9_VM_BUILD_DIR)/$(strip $2))))
+
+# jitserver
+
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/bin $(call FindExecutableDirForModule, java.base), jitserver$(EXE_SUFFIX))
+endif
 
 # redirector
 
@@ -361,6 +367,13 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 else
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_useOmrDdr)
   SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
+endif
+
+# Adjust JITServer enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  FEATURE_SED_SCRIPT += $(call SedEnable,build_jitserver)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,build_jitserver)
 endif
 
 # Disable windows rebase.
