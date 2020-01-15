@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+# ===========================================================================
+
 # Support macro for PLATFORM_EXTRACT_TARGET_AND_BUILD.
 # Converts autoconf style CPU name to OpenJDK style, into
 # VAR_CPU, VAR_CPU_ARCH, VAR_CPU_BITS and VAR_CPU_ENDIAN.
@@ -111,6 +115,12 @@ AC_DEFUN([PLATFORM_EXTRACT_VARS_FROM_CPU],
     powerpc64le)
       VAR_CPU=ppc64le
       VAR_CPU_ARCH=ppc
+      VAR_CPU_BITS=64
+      VAR_CPU_ENDIAN=little
+      ;;
+    riscv64)
+      VAR_CPU=riscv64
+      VAR_CPU_ARCH=riscv64
       VAR_CPU_BITS=64
       VAR_CPU_ENDIAN=little
       ;;

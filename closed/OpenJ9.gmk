@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -72,15 +72,10 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
   # wrap PATH in quotes as it contains spaces (unix path)
   # INCLUDE, LIB are already wrapped in quotes (windows paths)
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE=$(INCLUDE) LIB=$(LIB)
-  # On Windows, the mingw compiler is used for certain files such as
-  # the bytecode interpreter.
-  # Uncomment the following line to use the default compiler throughout.
-  # EXPORT_NO_USE_MINGW := NO_USE_MINGW=true
   # set the output directory for shared libraries
   OPENJ9_BIN_OR_LIB_DIR := bin
 else
   EXPORT_MSVS_ENV_VARS :=
-  EXPORT_NO_USE_MINGW :=
   OPENJ9_BIN_OR_LIB_DIR := lib
 endif
 
@@ -170,6 +165,12 @@ openj9_add_jdk_lib = $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/lib $(call Fi
 openj9_add_jdk_special = \
 	$(foreach target, $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, java.base), \
 		$(eval $(call openj9_add_jdk_rules, $(target)/$(strip $1), $(OPENJ9_VM_BUILD_DIR)/$(strip $2))))
+
+# jitserver
+
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/bin $(call FindExecutableDirForModule, java.base), jitserver$(EXE_SUFFIX))
+endif
 
 # redirector
 
@@ -363,6 +364,13 @@ else
   SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
 endif
 
+# Adjust JITServer enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  FEATURE_SED_SCRIPT += $(call SedEnable,build_jitserver)
+else
+  FEATURE_SED_SCRIPT += $(call SedDisable,build_jitserver)
+endif
+
 # Disable windows rebase.
 SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
 
@@ -515,9 +523,10 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
   ifeq (true,$(OPENJ9_ENABLE_CUDA))
-    CMAKE_ARGS += -DOMR_OPT_CUDA=ON
+    CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON
     CMAKE_CUDA_ENV := CUDA_BIN_PATH="$(CUDA_HOME)"
   else # OPENJ9_ENABLE_CUDA
+    CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
     CMAKE_CUDA_ENV :=
   endif # OPENJ9_ENABLE_CUDA
 
@@ -579,7 +588,7 @@ endif # OPENJ9_ENABLE_JITSERVER
 
 build-j9 : run-preprocessors-j9
 	@$(ECHO) Compiling OpenJ9 in $(OUTPUTDIR)/vm
-	export OPENJ9_BUILD=true $(EXPORT_NO_USE_MINGW) $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	export OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		&& $(MAKE) -C $(OUTPUTDIR)/vm $(MAKEFLAGS) all
 	@$(ECHO) OpenJ9 compile complete
 

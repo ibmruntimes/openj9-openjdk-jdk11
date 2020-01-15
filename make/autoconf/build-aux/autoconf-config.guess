@@ -61,6 +61,10 @@ timestamp='2012-02-10'
 # You can get the latest version of this script from:
 # http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+# ===========================================================================
+
 me=`echo "$0" | sed -e 's,.*/,,'`
 
 usage="\
@@ -999,6 +1003,9 @@ EOF
 	exit ;;
     ppc:Linux:*:*)
 	echo powerpc-unknown-linux-gnu
+	exit ;;
+    riscv64:Linux:*:*)
+	echo ${UNAME_MACHINE}-unknown-linux-gnu
 	exit ;;
     s390:Linux:*:* | s390x:Linux:*:*)
 	echo ${UNAME_MACHINE}-ibm-linux
