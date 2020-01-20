@@ -533,6 +533,7 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
   endif # OPENJ9_ENABLE_CUDA
 
 $(OUTPUTDIR)/vm/cmake.stamp :
+	@$(MKDIR) -p $(@D)
 	cd $(@D) && $(CMAKE_CUDA_ENV) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
