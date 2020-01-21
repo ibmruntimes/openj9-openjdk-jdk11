@@ -404,6 +404,7 @@ build-openj9-tools :
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) -C $(OPENJ9_TOPDIR)/sourcetools $(MAKEFLAGS) -f buildj9tools.mk \
+		BOOT_JDK=$(BOOT_JDK) \
 		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
 		JAVA_HOME=$(BOOT_JDK) \
 		$(call FixPath,$(JPP_JAR))
