@@ -116,92 +116,106 @@ endef
 openj9_build_jdk : build-j9
 	+$(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk create_build_jdk
 
-# openj9_add_jdk_rules
-# --------------------
-# $1 = target file to create or update
-# $2 = source file to copy
-define openj9_add_jdk_rules
-create_build_jdk : $(strip $1)
-$(strip $1) : $(strip $2)
-	$$(call install-file)
+# openj9_joinall
+# --------------
+# yields all possible concatenations taking one word from each of up to 4 lists
+# e.g. $(call openj9_joinall, A B, 1 2) = A1 A2 B1 B2
+openj9_joinall = \
+	$(if $(firstword $5),$(error openj9_joinall handles at most 4 lists),$(strip \
+	$(if $(firstword $2),$(foreach word, $1,$(addprefix $(word), $(call openj9_joinall,$2,$3,$4))),$1)))
+
+openj9_install_copy = $(call install-file)
+
+define openj9_install_copy_and_sign
+	$(openj9_install_copy)
+	$(if $(CODESIGN),$(CODESIGN) \
+		--sign "$(MACOSX_CODESIGN_IDENTITY)" \
+		--timestamp \
+		--options runtime \
+		--entitlements $(TOPDIR)/make/data/macosxsigning/entitlements.plist \
+		"$@")
 endef
 
-# openj9_add_jdk_basic
+# openj9_install_rule
+# -------------------
+# $1 - suffix of install action macro (copy or copy_and_sign)
+# $2 - source file path
+# $3 - target file path
+define openj9_install_rule
+$3 : $2
+	$$(openj9_install_$1)
+endef
+
+# openj9_install_files
 # --------------------
-# $1 = target directories
-# $2 = source paths (relative to the vm build directory)
-openj9_add_jdk_basic = \
-	$(foreach target, $1, \
-		$(foreach source, $2, \
-			$(eval $(call openj9_add_jdk_rules, \
-				$(target)/$(notdir $(source)), \
-				$(OPENJ9_VM_BUILD_DIR)/$(source)))))
+# $1 - suffix of install action macro (copy or copy_and_sign; default is copy)
+# $2 - sequence of file paths
+openj9_install_files = \
+	$(if $(word 2,$2), \
+		$(eval $(call openj9_install_rule,$(if $1,$(strip $1),copy),$(word 1,$2),$(word 2,$2))) \
+		$(call openj9_install_files,,$(wordlist 2,$(words $2),$2)), \
+		$(eval create_build_jdk : $2) \
+	)
 
-# openj9_add_jdk_bin
-# ------------------
+# openj9_install_exes
+# -------------------
 # $1 = module name
-# $2 = source paths (relative to the vm build directory)
-openj9_add_jdk_bin = \
-	$(call openj9_add_jdk_basic, \
-		$(addsuffix /$(OPENJ9_LIBS_SUBDIR), \
-			$(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, $1)), \
-		$2)
+# $2 = list of executable names without $(EXE_SUFFIX)
+openj9_install_exes = \
+	$(foreach file, $(addsuffix $(EXE_SUFFIX), $2), \
+		$(call openj9_install_files,copy_and_sign, \
+			$(addsuffix /$(file), \
+				$(OPENJ9_VM_BUILD_DIR) \
+				$(call FindExecutableDirForModule, $1) \
+				$(JDK_OUTPUTDIR)/bin)))
 
-# openj9_add_jdk_shlibs
+# openj9_install_shlibs
 # ---------------------
 # $1 = module name
-# $2 = simple library names (relative to the vm build directory)
-openj9_add_jdk_shlibs = \
-	$(call openj9_add_jdk_bin, \
-		$1, \
-		$(foreach lib, $2, \
-			$(patsubst ./%,%,$(dir $(lib))$(call SHARED_LIBRARY,$(notdir $(lib))))))
-
-# openj9_add_jdk_lib
-# ------------------
-# $1 = module name
-# $2 = source paths (relative to the vm build directory)
-openj9_add_jdk_lib = $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/lib $(call FindLibDirForModule, $1), $2)
-
-# openj9_add_jdk_special
-# ----------------------
-# $1 = target file name
-# $2 = source path (relative to the vm build directory)
-openj9_add_jdk_special = \
-	$(foreach target, $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR) $(call FindLibDirForModule, java.base), \
-		$(eval $(call openj9_add_jdk_rules, $(target)/$(strip $1), $(OPENJ9_VM_BUILD_DIR)/$(strip $2))))
+# $2 = list of shared library names without $(LIBRARY_PREFIX) or $(SHARED_LIBRARY_SUFFIX)
+openj9_install_shlibs = \
+	$(foreach file, $(foreach name, $2, $(call SHARED_LIBRARY,$(name))), \
+		$(call openj9_install_files,copy_and_sign, \
+			$(addsuffix /$(file), \
+				$(OPENJ9_VM_BUILD_DIR) \
+				$(call FindLibDirForModule, $1)/$(OPENJ9_LIBS_SUBDIR) \
+				$(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR)/$(OPENJ9_LIBS_SUBDIR))))
 
 # jitserver
 
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
-  $(call openj9_add_jdk_basic, $(JDK_OUTPUTDIR)/bin $(call FindExecutableDirForModule, java.base), jitserver$(EXE_SUFFIX))
+  $(call openj9_install_exes, java.base, jitserver)
 endif
 
 # redirector
 
-$(foreach subdir, j9vm server, \
-	$(call openj9_add_jdk_special, \
-		$(subdir)/$(call SHARED_LIBRARY,jvm), \
-		redirector/$(call SHARED_LIBRARY,jvm)))
+$(call openj9_install_files,copy_and_sign, \
+	$(addsuffix /$(call SHARED_LIBRARY,jvm), \
+		$(OPENJ9_VM_BUILD_DIR)/redirector \
+		$(call openj9_joinall, \
+			$(call FindLibDirForModule, java.base) $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR), \
+			/j9vm /server)))
 
 # jsig
 
-$(foreach subdir, j9vm server, \
-	$(call openj9_add_jdk_special, \
-		$(subdir)/$(call SHARED_LIBRARY,jsig), \
-		$(call SHARED_LIBRARY,jsig)))
+$(call openj9_install_files,copy_and_sign, \
+	$(addsuffix $(call SHARED_LIBRARY,jsig), \
+		$(OPENJ9_VM_BUILD_DIR)/ \
+		$(call openj9_joinall, \
+			$(call FindLibDirForModule, java.base) $(JDK_OUTPUTDIR)/$(OPENJ9_BIN_OR_LIB_DIR), \
+			/ /j9vm/ /server/)))
 
-$(call openj9_add_jdk_special, \
-	$(call SHARED_LIBRARY,jsig), \
-	$(call SHARED_LIBRARY,jsig))
+# CPU targets without JIT support.
+NO_JIT_CPUS := riscv64
 
 # java.base
 
-$(call openj9_add_jdk_shlibs, java.base, \
+$(call openj9_install_shlibs, java.base, \
 	j9dmp29 \
 	j9gc29 \
 	j9gcchk29 \
 	j9hookable29 \
+	$(if $(filter $(NO_JIT_CPUS),$(OPENJDK_TARGET_CPU)),,j9jit29) \
 	j9jnichk29 \
 	j9jvmti29 \
 	j9prt29 \
@@ -216,27 +230,37 @@ $(call openj9_add_jdk_shlibs, java.base, \
 	omrsig \
 	)
 
-ifneq (riscv64, $(OPENJDK_TARGET_CPU))
-  $(call openj9_add_jdk_shlibs, java.base, j9jit29)
-endif
-
 ifeq (windows,$(OPENJDK_TARGET_OS))
-  $(call openj9_add_jdk_lib, java.base, lib/$(call STATIC_LIBRARY,jsig))
-  $(eval $(call openj9_add_jdk_rules, \
-	$(call FindLibDirForModule, java.base)/$(call STATIC_LIBRARY,jvm), \
-	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm)))
-endif
+  $(call openj9_install_files,, \
+	$(addsuffix /$(call STATIC_LIBRARY,jsig), \
+		$(OPENJ9_VM_BUILD_DIR)/lib \
+		$(call FindLibDirForModule, java.base) \
+		$(JDK_OUTPUTDIR)/lib))
 
-$(call openj9_add_jdk_lib, java.base, \
-	$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)) \
-	options.default \
-	)
+  $(call openj9_install_files,, \
+	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm) \
+	$(addsuffix /$(call STATIC_LIBRARY,jvm), \
+		$(call FindLibDirForModule, java.base) \
+		$(JDK_OUTPUTDIR)/lib))
+endif # windows
+
+$(foreach file, \
+		$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)) \
+		options.default, \
+	$(call openj9_install_files,, \
+		$(addsuffix /$(file), \
+			$(OPENJ9_VM_BUILD_DIR) \
+			$(call FindLibDirForModule, java.base) \
+			$(JDK_OUTPUTDIR)/lib)))
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
-$(call openj9_add_jdk_basic, \
-	$(addsuffix /$(OPENJ9_LIBS_SUBDIR), $(JDK_OUTPUTDIR)/lib $(call FindLibDirForModule, java.base)), \
-	j9ddr.dat)
+$(call openj9_install_files,, \
+	$(addsuffix /j9ddr.dat, \
+		$(OPENJ9_VM_BUILD_DIR) \
+		$(addsuffix /$(OPENJ9_LIBS_SUBDIR), \
+			$(call FindLibDirForModule, java.base) \
+			$(JDK_OUTPUTDIR)/lib)))
 
 .PHONY : run-ddrgen
 
@@ -252,24 +276,31 @@ run-ddrgen :
 
 endif # OPENJ9_ENABLE_DDR
 
-$(eval $(call openj9_add_jdk_rules, \
-	$(call FindLibDirForModule, java.base)/openj9-notices.html, \
-	$(TOPDIR)/openj9/longabout.html))
+$(call openj9_install_files,, \
+	$(TOPDIR)/openj9/longabout.html \
+	$(call FindLibDirForModule, java.base)/openj9-notices.html)
 
 # contributions to other modules
-$(call openj9_add_jdk_shlibs, java.management, management management_ext)
-$(call openj9_add_jdk_shlibs, openj9.cuda, cuda4j29)
-$(call openj9_add_jdk_shlibs, openj9.dtfj, j9jextract)
-$(call openj9_add_jdk_shlibs, openj9.sharedclasses, j9shr29)
-$(call openj9_add_jdk_lib, openj9.traceformat, J9TraceFormat.dat OMRTraceFormat.dat)
+$(call openj9_install_shlibs, java.management, management management_ext)
+$(call openj9_install_shlibs, openj9.cuda, cuda4j29)
+$(call openj9_install_shlibs, openj9.dtfj, j9jextract)
+$(call openj9_install_shlibs, openj9.sharedclasses, j9shr29)
+
+$(foreach file, J9TraceFormat.dat OMRTraceFormat.dat, \
+	$(call openj9_install_files,, \
+		$(addsuffix /$(file), \
+			$(OPENJ9_VM_BUILD_DIR) \
+			$(call FindLibDirForModule, openj9.traceformat) \
+			$(JDK_OUTPUTDIR)/lib)))
 
 # openj9_test_image_rules
 # -----------------------
 # $1 = absolute library path
 define openj9_test_image_rules
-openj9_test_image : $(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1))
-$(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1)) : $(strip $1)
-	$$(call install-file)
+  openj9_test_image : $(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1))
+
+  $(TEST_IMAGE_DIR)/openj9/$(notdir $(strip $1)) : $(strip $1)
+	$$(openj9_install_copy_and_sign)
 endef
 
 $(foreach file, \
