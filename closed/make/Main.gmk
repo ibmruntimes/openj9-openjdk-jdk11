@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -22,6 +22,7 @@ CLEAN_DIRS += vm
 
 .PHONY : \
 	j9vm-build \
+	openj9-create-main-targets-include \
 	openssl-build \
 	test-image-openj9 \
 	#
@@ -36,6 +37,18 @@ PHASE_MAKEDIRS := $(TOPDIR)/closed/make/closed_make $(PHASE_MAKEDIRS)
 
 OPENJ9_MAKE := $(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk SPEC=$(SPEC)
 OPENSSL_MAKE := $(MAKE) -f $(TOPDIR)/closed/openssl.gmk SPEC=$(SPEC)
+
+# An early part of the build process involves computing the list of main targets.
+# Those targets include {module}-java, {module}-jmod, etc. which requires that the
+# set of module names be known. We must build and run the preprocessor to ensure the
+# modules specific to OpenJ9 will be found and included in that set. The next two
+# rules make that happen.
+
+create-main-targets-include : openj9-create-main-targets-include
+
+openj9-create-main-targets-include :
+	+$(OPENJ9_MAKE) build-openj9-tools
+	+$(OPENJ9_MAKE) generate-j9jcl-sources
 
 openssl-build : buildtools-langtools
 	+$(OPENSSL_MAKE)

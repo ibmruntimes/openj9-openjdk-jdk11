@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -139,14 +139,6 @@ build_jar :
 
 else # DDR_GENSRC_DIR
 
-# Compile the stub classes.
-$(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
-	SETUP := GENERATE_USINGJDKBYTECODE, \
-	BIN := $(DDR_STUBS_BIN), \
-	CLASSPATH := $(JDK_OUTPUTDIR)/modules/java.base, \
-	SRC := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src_stubs \
-	))
-
 # We depend upon class files from these modules.
 DDR_CLASSPATH := \
 	$(addprefix $(JDK_OUTPUTDIR)/modules/, \
@@ -156,8 +148,30 @@ DDR_CLASSPATH := \
 		openj9.traceformat \
 	)
 
+ifeq (zos,$(OPENJDK_TARGET_OS))
+
+BUILD_DDR_STUBS :=
+
+# Finally, on z/OS we depend upon the com.ibm.jzos module.
+DDR_CLASSPATH += \
+	$(addprefix $(JDK_OUTPUTDIR)/modules/, \
+		com.ibm.jzos \
+	)
+
+else # OPENJDK_TARGET_OS
+
+# Compile the stub classes.
+$(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
+	SETUP := GENERATE_USINGJDKBYTECODE, \
+	BIN := $(DDR_STUBS_BIN), \
+	CLASSPATH := $(JDK_OUTPUTDIR)/modules/java.base, \
+	SRC := $(OPENJ9_TOPDIR)/jcl/src/com.ibm.jzos/share/classes \
+	))
+
 # Finally, we depend upon the stub classes.
 DDR_CLASSPATH += $(DDR_STUBS_BIN)
+
+endif # OPENJDK_TARGET_OS
 
 # Packages to be excluded from compilation.
 DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
