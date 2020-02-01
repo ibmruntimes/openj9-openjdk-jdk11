@@ -1,11 +1,11 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
 #
-# IBM designates this particular file as subject to the "Classpath" exception 
+# IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
@@ -67,13 +67,13 @@ OPENJDK_SHA             := @OPENJDK_SHA@
 
 include $(TOPDIR)/closed/openjdk-tag.gmk
 
-# J9JDK_EXT_VERSION       := ${VERSION_NUMBER_FOUR_POSITIONS}
+J9JDK_EXT_VERSION       := ${VERSION_NUMBER_FOUR_POSITIONS}
 J9JDK_EXT_VERSION       := HEAD
 J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
 # required by CMake
-export CMAKE                := @CMAKE@
-export OPENJ9_ENABLE_CMAKE  := @OPENJ9_ENABLE_CMAKE@
+export CMAKE               := @CMAKE@
+export OPENJ9_ENABLE_CMAKE := @OPENJ9_ENABLE_CMAKE@
 
 # required by UMA
 FREEMARKER_JAR          := @FREEMARKER_JAR@
@@ -112,12 +112,23 @@ ifeq ($(OPENJDK_BUILD_OS), macosx)
   LDFLAGS_JDKEXE += -pagezero_size 0x1000
 endif
 
+# Usage: $(call CodesignFile, files ...)
+ifeq (,$(CODESIGN))
+  CodesignFile =
+else
+  CodesignFile = $(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" \
+	--entitlements $(TOPDIR)/make/data/macosxsigning/entitlements.plist \
+	--options runtime \
+	--timestamp \
+	$1
+endif
+
 # OPENSSL
-BUILD_OPENSSL:=@BUILD_OPENSSL@
-OPENSSL_BUNDLE_LIB_PATH:=@OPENSSL_BUNDLE_LIB_PATH@
-OPENSSL_CFLAGS:=@OPENSSL_CFLAGS@
-OPENSSL_DIR:=@OPENSSL_DIR@
-WITH_OPENSSL:=@WITH_OPENSSL@
+BUILD_OPENSSL           := @BUILD_OPENSSL@
+OPENSSL_BUNDLE_LIB_PATH := @OPENSSL_BUNDLE_LIB_PATH@
+OPENSSL_CFLAGS          := @OPENSSL_CFLAGS@
+OPENSSL_DIR             := @OPENSSL_DIR@
+WITH_OPENSSL            := @WITH_OPENSSL@
 
 ifeq (true,$(OPENJ9_ENABLE_CMAKE))
   OPENJ9_VM_BUILD_DIR := $(OUTPUTDIR)/vm/runtime
