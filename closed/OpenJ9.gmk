@@ -126,12 +126,7 @@ openj9_install_copy = $(call install-file)
 
 define openj9_install_copy_and_sign
 	$(openj9_install_copy)
-	$(if $(CODESIGN),$(CODESIGN) \
-		--sign "$(MACOSX_CODESIGN_IDENTITY)" \
-		--timestamp \
-		--options runtime \
-		--entitlements $(TOPDIR)/make/data/macosxsigning/entitlements.plist \
-		"$@")
+	$(call CodesignFile,"$@")
 endef
 
 # openj9_install_rule
