@@ -1,7 +1,6 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2019, 2020 All Rights Reserved
 # ===========================================================================
-#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
@@ -17,7 +16,6 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-#
 # ===========================================================================
 
 include LauncherCommon.gmk
@@ -48,7 +46,7 @@ $(eval $(call SetupBuildLauncher, jstack, \
 ))
 
 $(eval $(call SetupBuildLauncher, jstat, \
-	    MAIN_MODULE := jdk.jcmd, \
-	    MAIN_CLASS := openj9.tools.attach.diagnostics.tools.Jstat, \
-	    CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
-	))
+    MAIN_MODULE := jdk.jcmd, \
+    MAIN_CLASS := openj9.tools.attach.diagnostics.tools.Jstat, \
+    CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
+))

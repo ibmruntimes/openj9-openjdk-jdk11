@@ -33,7 +33,7 @@ JVM_TOOLS_TARGETS :=
 JVM_DOCS_TARGETS :=
 JVM_TEST_IMAGE_TARGETS :=
 DEFAULT_JMOD_DEPS := j9vm-build
-PHASE_MAKEDIRS := $(TOPDIR)/closed/make/closed_make $(PHASE_MAKEDIRS)
+PHASE_MAKEDIRS := $(TOPDIR)/closed/make $(PHASE_MAKEDIRS)
 
 OPENJ9_MAKE := $(MAKE) -f $(TOPDIR)/closed/OpenJ9.gmk SPEC=$(SPEC)
 OPENSSL_MAKE := $(MAKE) -f $(TOPDIR)/closed/openssl.gmk SPEC=$(SPEC)
@@ -76,10 +76,10 @@ ifeq (true,$(OPENJ9_ENABLE_DDR))
 .PHONY : openj9.dtfj-ddr-gen openj9.dtfj-ddr-jar
 
 openj9.dtfj-ddr-gen : j9vm-build $(addsuffix -java, java.base java.desktop openj9.dtfj openj9.traceformat)
-	+$(MAKE) -f $(TOPDIR)/closed/make/DDR.gmk SPEC=$(SPEC) generate
+	+$(MAKE) -f $(TOPDIR)/closed/DDR.gmk SPEC=$(SPEC) generate
 
 openj9.dtfj-ddr-jar : openj9.dtfj-ddr-gen
-	+$(MAKE) -f $(TOPDIR)/closed/make/DDR.gmk SPEC=$(SPEC) build_jar
+	+$(MAKE) -f $(TOPDIR)/closed/DDR.gmk SPEC=$(SPEC) build_jar
 
 openj9.dtfj-launchers : openj9.dtfj-ddr-jar
 

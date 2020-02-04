@@ -270,7 +270,7 @@ run-ddrgen :
 endif # OPENJ9_ENABLE_DDR
 
 $(call openj9_install_files,, \
-	$(TOPDIR)/openj9/longabout.html \
+	$(OPENJ9_TOPDIR)/longabout.html \
 	$(call FindLibDirForModule, java.base)/openj9-notices.html)
 
 # contributions to other modules
