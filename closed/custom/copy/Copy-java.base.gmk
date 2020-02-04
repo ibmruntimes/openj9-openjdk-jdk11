@@ -38,14 +38,14 @@ endif
 
 # redirector
 
-$(call openj9_copy_files,and_sign, \
+$(call openj9_copy_files_and_debuginfos, \
 	$(addsuffix $(call SHARED_LIBRARY,jvm), \
 		$(OPENJ9_VM_BUILD_DIR)/redirector/ \
 		$(addprefix $(LIB_DST_DIR), /j9vm/ /server/)))
 
 # jsig
 
-$(call openj9_copy_files,and_sign, \
+$(call openj9_copy_files_and_debuginfos, \
 	$(addsuffix $(call SHARED_LIBRARY,jsig), \
 		$(OPENJ9_VM_BUILD_DIR)/ \
 		$(addprefix $(LIB_DST_DIR), / /j9vm/ /server/)))
