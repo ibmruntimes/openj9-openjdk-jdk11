@@ -54,9 +54,19 @@ openssl-build : buildtools-langtools
 	+$(OPENSSL_MAKE)
 
 j9vm-build : openssl-build
-	+$(OPENJ9_MAKE) openj9_build_jdk
+	+$(OPENJ9_MAKE) build-j9
 
-java.base-copy : j9vm-build
+# Modules with content created by j9vm-build:
+OPENJ9_VM_MODULES := \
+	java.base \
+	java.management \
+	openj9.cuda \
+	openj9.dtfj \
+	openj9.sharedclasses \
+	openj9.traceformat \
+	#
+
+$(addsuffix -copy, $(OPENJ9_VM_MODULES)) : j9vm-build
 
 java.base-libs : java.base-copy
 

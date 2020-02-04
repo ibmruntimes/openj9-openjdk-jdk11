@@ -1,0 +1,73 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+ifeq ($(origin LIB_DST_DIR),undefined)
+include CopyCommon.gmk
+endif
+
+EXE_DST_DIR := $(call FindExecutableDirForModule, $(MODULE))
+
+define openj9_copy_only
+	$(call install-file)
+endef
+
+define openj9_copy_and_sign
+	$(openj9_copy_only)
+	$(call CodesignFile,"$@")
+endef
+
+# openj9_copy_rule
+# ----------------
+# $1 - suffix of install action macro ('only' or 'and_sign')
+# $2 - source file path
+# $3 - target file path
+define openj9_copy_rule
+  TARGETS += $2
+  $3 : $2
+	$$(openj9_copy_$1)
+endef
+
+# openj9_copy_files
+# -----------------
+# $1 - suffix of install action macro ('only' or 'and_sign'; default is 'only')
+# $2 - sequence of file paths
+openj9_copy_files = \
+	$(eval $(call openj9_copy_rule,$(if $1,$(strip $1),only),$(word 1,$2),$(word 2,$2))) \
+	$(if $(word 2,$2),$(call openj9_copy_files,,$(wordlist 2,$(words $2),$2)))
+
+# openj9_copy_exes
+# ----------------
+# $1 = list of executable names without $(EXE_SUFFIX)
+openj9_copy_exes = \
+	$(foreach file, $1, \
+		$(call openj9_copy_files,and_sign, \
+			$(addsuffix /$(file)$(EXE_SUFFIX), \
+				$(OPENJ9_VM_BUILD_DIR) \
+				$(EXE_DST_DIR))))
+
+# openj9_copy_shlibs
+# ------------------
+# $1 = list of shared library names without $(LIBRARY_PREFIX) or $(SHARED_LIBRARY_SUFFIX)
+openj9_copy_shlibs = \
+	$(foreach name, $1, \
+		$(call openj9_copy_files,and_sign, \
+			$(addsuffix /$(call SHARED_LIBRARY,$(name)), \
+				$(OPENJ9_VM_BUILD_DIR) \
+				$(LIB_DST_DIR)/$(OPENJ9_LIBS_SUBDIR))))
