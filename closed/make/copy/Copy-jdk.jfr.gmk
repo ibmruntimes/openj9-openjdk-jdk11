@@ -1,7 +1,6 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
-#
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.  
@@ -17,13 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
 # ===========================================================================
 
-include LauncherCommon.gmk
-
-$(eval $(call SetupBuildLauncher, traceformat, \
-    MAIN_MODULE := openj9.traceformat, \
-    MAIN_CLASS := com.ibm.jvm.traceformat.TraceFormat, \
-    CFLAGS := -DEXPAND_CLASSPATH_WILDCARDS, \
-))
+# This overrides make/copy/Copy-jdk.jfr.gmk and should copy the OpenJ9
+# JFR metadata and config when/if we have one.
