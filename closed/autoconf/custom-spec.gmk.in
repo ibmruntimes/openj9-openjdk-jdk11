@@ -25,8 +25,7 @@
 # $1 the name of the makefile
 define IncludeCustomExtension
   ifndef OPENJDK
-    custom_dir := closed/make
-    custom_include_file := $$(TOPDIR)/$$(custom_dir)/$(strip $1)
+    custom_include_file := $(TOPDIR)/closed/custom/$(strip $1)
     ifneq ($$(wildcard $$(custom_include_file)), )
       include $$(custom_include_file)
     endif

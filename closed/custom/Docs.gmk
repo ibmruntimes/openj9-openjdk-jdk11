@@ -1,12 +1,11 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
 # ===========================================================================
-# 
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
-# IBM designates this particular file as subject to the "Classpath" exception 
+# IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
@@ -17,7 +16,6 @@
 #
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
-# 
 # ===========================================================================
 
 JVMTI_HTML := $(TOPDIR)/closed/variant-server/gensrc/jvmtifiles/jvmti.html
@@ -56,7 +54,7 @@ OPENJ9_SUBST_COMMAND = $(SED) -e '\''s|$(JAVADOC_BOTTOM_REGEX)|$(OPENJ9_JAVADOC_
 
 ################################################################################
 # Define a javadoc Group for the OpenJ9 specific modules
-# Module names are added to DOCS_MODULES in closed/make/common/Modules.gmk
+# Module names are added to DOCS_MODULES in closed/custom/common/Modules.gmk
 OPENJ9_GROUP_NAME := OpenJ9
 OPENJ9_GROUP_MODULES := openj9.*
 OPENJ9_GROUP_DESCRIPTION := \
@@ -91,7 +89,7 @@ OPENJ9_JAVADOC_TEMP  := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_temp.html
 # 3. The com/ibm/xxxx packages, including the javadoc generated files such as
 #    enum class pages, module-summary.html, package-summary.html etc.)
 # A temporary script file is used to avoid xargs command line length issues
-# on some platforms. 
+# on some platforms.
 
 OPENJ9_JAVADOC_SCRIPT_BODY = \
     for path in "$$@" ; do \
