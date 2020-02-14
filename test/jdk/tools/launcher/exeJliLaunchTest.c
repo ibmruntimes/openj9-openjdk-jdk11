@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,27 +23,22 @@
  * questions.
  */
 
-package jdk.internal.misc;
 
-import java.io.IOException;
-import java.net.URL;
-import java.security.CodeSource;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
+/*
+ * This file contains the main entry point into the launcher code
+ * this is the only file which will be repeatedly compiled by other
+ * tools. The rest of the files will be linked in.
+ */
 
-public interface JavaUtilJarAccess {
-    public boolean jarFileHasClassPathAttribute(JarFile jar) throws IOException;
-    public CodeSource[] getCodeSources(JarFile jar, URL url);
-    public CodeSource getCodeSource(JarFile jar, URL url, String name);
-    public Enumeration<String> entryNames(JarFile jar, CodeSource[] cs);
-    public Enumeration<JarEntry> entries2(JarFile jar);
-    public void setEagerValidation(JarFile jar, boolean eager);
-    public List<Object> getManifestDigests(JarFile jar);
-    public Attributes getTrustedAttributes(Manifest man, String name);
-    public void ensureInitialization(JarFile jar);
-    public boolean isInitializing();
+#include "java.h"
+
+int
+main(int argc, char **argv)
+{
+    return JLI_Launch(argc, argv,
+                   0, NULL,
+                   0, NULL,
+                   "1", "0",
+                   *argv, *argv,
+                   0, 0, 0, 0);
 }
