@@ -59,7 +59,7 @@ j9vm-build : openssl-build
 # Modules with content created by j9vm-build:
 OPENJ9_VM_MODULES := \
 	java.base \
-	java.management \
+	jdk.management \
 	openj9.cuda \
 	openj9.dtfj \
 	openj9.sharedclasses \
