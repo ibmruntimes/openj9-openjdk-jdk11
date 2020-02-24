@@ -18,16 +18,98 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-TARGETS += \
-	$(INCLUDE_TARGET_DIR)/jvmti.h \
-	$(INCLUDE_TARGET_DIR)/ibmjvmti.h \
-	#
+include $(TOPDIR)/closed/CopySupport.gmk
 
-$(INCLUDE_TARGET_DIR)/jvmti.h : $(OPENJ9_VM_BUILD_DIR)/include/jvmti.h
-	$(call install-file)
+# header files
 
-$(INCLUDE_TARGET_DIR)/ibmjvmti.h : $(TOPDIR)/openj9/runtime/include/ibmjvmti.h
-	$(call install-file)
+$(call openj9_copy_files,, \
+	$(OPENJ9_TOPDIR)/runtime/include/ibmjvmti.h \
+	$(INCLUDE_TARGET_DIR)/ibmjvmti.h)
+
+$(call openj9_copy_files,, \
+	$(OPENJ9_VM_BUILD_DIR)/include/jvmti.h \
+	$(INCLUDE_TARGET_DIR)/jvmti.h)
+
+# jitserver
+
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+$(call openj9_copy_exes, jitserver)
+endif
+
+# redirector
+
+$(call openj9_copy_files,and_sign, \
+	$(addsuffix $(call SHARED_LIBRARY,jvm), \
+		$(OPENJ9_VM_BUILD_DIR)/redirector/ \
+		$(addprefix $(LIB_DST_DIR), /j9vm/ /server/)))
+
+# jsig
+
+$(call openj9_copy_files,and_sign, \
+	$(addsuffix $(call SHARED_LIBRARY,jsig), \
+		$(OPENJ9_VM_BUILD_DIR)/ \
+		$(addprefix $(LIB_DST_DIR), / /j9vm/ /server/)))
+
+# CPU targets without JIT support.
+NO_JIT_CPUS := riscv64
+
+$(call openj9_copy_shlibs, \
+	j9dmp29 \
+	j9gc29 \
+	j9gcchk29 \
+	j9hookable29 \
+	$(if $(filter $(NO_JIT_CPUS),$(OPENJDK_TARGET_CPU)),,j9jit29) \
+	j9jnichk29 \
+	j9jvmti29 \
+	j9prt29 \
+	j9thr29 \
+	j9trc29 \
+	j9vm29 \
+	j9vmchk29 \
+	j9vrb29 \
+	j9zlib29 \
+	jclse29 \
+	jvm \
+	omrsig \
+	)
+
+# static libraries that are needed on some platforms
+
+ifneq (,$(filter windows zos,$(OPENJDK_TARGET_OS)))
+
+$(call openj9_copy_files,, \
+	$(addsuffix /$(call STATIC_LIBRARY,jsig), \
+		$(OPENJ9_VM_BUILD_DIR)/lib \
+		$(LIB_DST_DIR)))
+
+$(call openj9_copy_files,, \
+	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm) \
+	$(LIB_DST_DIR)/$(call STATIC_LIBRARY,jvm))
+
+endif # OPENJDK_TARGET_OS
+
+# properties files, etc.
+
+$(foreach file, \
+		$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)) \
+		options.default, \
+	$(call openj9_copy_files,, \
+		$(addsuffix /$(file), \
+			$(OPENJ9_VM_BUILD_DIR) \
+			$(LIB_DST_DIR))))
+
+$(call openj9_copy_files,, \
+	$(OPENJ9_TOPDIR)/longabout.html \
+	$(LEGAL_DST_DIR)/openj9-notices.html)
+
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+
+$(call openj9_copy_files,, \
+	$(addsuffix /j9ddr.dat, \
+		$(OPENJ9_VM_BUILD_DIR) \
+		$(LIB_DST_DIR)/$(OPENJ9_LIBS_SUBDIR)))
+
+endif # OPENJ9_ENABLE_DDR
 
 ##########################################################################################
 # Optionally copy OpenSSL Crypto Lbrary
@@ -47,8 +129,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   else ifeq ($(OPENJDK_TARGET_OS), aix)
     # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way)
     # instead of 'libcrypto.so' files.
-    # For reference, corresponding OpenSSL PR is
-    #     https://github.com/openssl/openssl/pull/6487
+    # See https://github.com/openssl/openssl/pull/6487.
     LIBCRYPTO_NAMES := libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
   else
     LIBCRYPTO_NAMES := libcrypto.so
