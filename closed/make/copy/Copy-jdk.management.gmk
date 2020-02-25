@@ -20,4 +20,4 @@
 
 include $(TOPDIR)/closed/CopySupport.gmk
 
-$(call openj9_copy_shlibs, management management_ext)
+$(call openj9_copy_shlibs, management_ext)
