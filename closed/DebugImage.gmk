@@ -25,9 +25,7 @@ all :
 include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
 
-ifeq (false,$(COPY_DEBUG_SYMBOLS))
-  DEBUG_SYMBOL_SUFFIX :=
-else ifeq (true,$(ZIP_EXTERNAL_DEBUG_SYMBOLS))
+ifeq (true,$(ZIP_EXTERNAL_DEBUG_SYMBOLS))
   DEBUG_SYMBOL_SUFFIX := .diz
 else ifeq (macosx,$(OPENJDK_TARGET_OS))
   DEBUG_SYMBOL_SUFFIX := .dSYM
@@ -36,8 +34,6 @@ else ifeq (windows,$(OPENJDK_TARGET_OS))
 else
   DEBUG_SYMBOL_SUFFIX := .debuginfo
 endif
-
-ifneq (,$(DEBUG_SYMBOL_SUFFIX))
 
 DEBUG_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/debug-image
 
@@ -75,5 +71,3 @@ $(call openj9_copy_files, $(SUPPORT_OUTPUTDIR)/modules_cmds, $(DEBUG_IMAGE_DIR)/
 
 # copy debug information files for shared libraries
 $(call openj9_copy_files, $(SUPPORT_OUTPUTDIR)/modules_libs, $(DEBUG_IMAGE_DIR)/lib)
-
-endif # DEBUG_SYMBOL_SUFFIX
