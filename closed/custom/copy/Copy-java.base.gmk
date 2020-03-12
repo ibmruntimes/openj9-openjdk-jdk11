@@ -101,6 +101,9 @@ $(foreach file, \
 $(call openj9_copy_files,, \
 	$(OPENJ9_TOPDIR)/longabout.html \
 	$(LEGAL_DST_DIR)/openj9-notices.html)
+$(call openj9_copy_files,, \
+        $(TOPDIR)/openj9-openjdk-notices \
+        $(LEGAL_DST_DIR)/openj9-openjdk-notices)
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
