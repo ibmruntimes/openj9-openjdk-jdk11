@@ -54,17 +54,20 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 [
   AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
     [
-      if test "x$with_cmake" != x ; then
-        CMAKE=$with_cmake
+      if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
+        with_cmake=cmake
       fi
-      with_cmake=yes
+      if test "x$with_cmake" != xno ; then
+        if AS_EXECUTABLE_P(["$with_cmake"]) ; then
+          CMAKE="$with_cmake"
+        else
+          BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
+        fi
+        with_cmake=yes
+      fi
     ],
     [with_cmake=no])
   if test "$with_cmake" == yes ; then
-    AC_PATH_PROG([CMAKE], [cmake])
-    if test "x$CMAKE" == x ; then
-      AC_MSG_ERROR([Could not find CMake])
-    fi
     OPENJ9_ENABLE_CMAKE=true
   else
     OPENJ9_ENABLE_CMAKE=false
@@ -450,10 +453,11 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
   # check 3rd party library requirement for UMA
   AC_ARG_WITH(freemarker-jar, [AS_HELP_STRING([--with-freemarker-jar],
       [path to freemarker.jar (used to build OpenJ9 build tools)])])
+
   FREEMARKER_JAR=
-  if test "x$with_cmake" == x ; then
+  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
     AC_MSG_CHECKING([that freemarker location is set])
-    if test "x$with_freemarker_jar" == x ; then
+    if test "x$with_freemarker_jar" == x -o "x$with_freemarker_jar" == xno ; then
       AC_MSG_RESULT([no])
       printf "\n"
       printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
@@ -468,7 +472,6 @@ AC_DEFUN_ONCE([OPENJ9_THIRD_PARTY_REQUIREMENTS],
       printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
       printf "\n"
 
-      AC_MSG_NOTICE([Could not find freemarker.jar])
       AC_MSG_ERROR([Cannot continue])
     else
       AC_MSG_RESULT([yes])
@@ -644,7 +647,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
           fi
         fi
       else
-        #openssl is not found in user specified location. Abort.
+        # openssl is not found in user specified location. Abort.
         AC_MSG_RESULT([no])
         AC_MSG_ERROR([Unable to find openssl in specified location $OPENSSL_DIR])
       fi
@@ -653,7 +656,6 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 
     AC_MSG_CHECKING([if we should bundle openssl])
     AC_MSG_RESULT([$BUNDLE_OPENSSL])
-
   fi
 
   AC_SUBST(OPENSSL_BUNDLE_LIB_PATH)
