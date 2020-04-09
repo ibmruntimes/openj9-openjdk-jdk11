@@ -185,6 +185,7 @@ DDR_ALIAS_FILES := \
 # Compile the Java sources.
 $(eval $(call SetupJavaCompilation,BUILD_J9DDR_MAIN_CLASSES, \
 	SETUP := GENERATE_JDKBYTECODE, \
+	ADD_JAVAC_FLAGS := --upgrade-module-path $(JDK_OUTPUTDIR)/modules, \
 	BIN := $(DDR_MAIN_BIN), \
 	CLASSPATH := $(DDR_CLASSPATH), \
 	SRC := $(DDR_VM_SRC_ROOT) $(DDR_GENSRC_DIR), \
@@ -197,6 +198,7 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_MAIN_CLASSES, \
 # as they would be dynamically generated from the blob.
 $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	SETUP := GENERATE_JDKBYTECODE, \
+	ADD_JAVAC_FLAGS := --upgrade-module-path $(JDK_OUTPUTDIR)/modules, \
 	BIN := $(DDR_TEST_BIN), \
 	CLASSPATH := $(DDR_CLASSES_BIN) $(DDR_CLASSPATH), \
 	SRC := $(DDR_VM_SRC_ROOT), \
