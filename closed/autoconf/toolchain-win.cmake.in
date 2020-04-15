@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2019, 2020 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -35,12 +35,14 @@ if("@OPENJDK_TARGET_CPU_BITS@" EQUAL "64")
 else()
 	set(CMAKE_ASM_MASM_COMPILER "${tool_dir}/ml" CACHE FILEPATH "")
 endif()
+set(CMAKE_ASM_NASM_COMPILER "${tool_dir}/nasm" CACHE FILEPATH "")
 
-set(Java_JAR_EXECUTABLE "${tool_dir}/jar" CACHE FILEPATH "")
-set(Java_JAVA_EXECUTABLE "${tool_dir}/java" CACHE FILEPATH "")
-set(Java_JAVAC_EXECUTABLE "${tool_dir}/javac" CACHE FILEPATH "")
+set(CMAKE_Java_AR "${tool_dir}/jar" CACHE FILEPATH "")
+set(CMAKE_Java_RUNTIME "${tool_dir}/java" CACHE FILEPATH "")
+set(CMAKE_Java_COMPILER "${tool_dir}/javac" CACHE FILEPATH "")
 
-set(OMR_EXE_LAUNCHER "@FIXPATH_BIN@;-c" CACHE STRING "")
+separate_arguments(FIXPATH UNIX_COMMAND "@FIXPATH@")
+set(OMR_EXE_LAUNCHER "${FIXPATH}" CACHE STRING "")
 
 # CMake will test to see if compiler works by getting it to compile files in
 # /usr/lib, which fixpath wont translate
