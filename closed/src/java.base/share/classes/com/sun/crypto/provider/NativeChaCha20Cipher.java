@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
  * ===========================================================================
  */
 package com.sun.crypto.provider;
@@ -160,10 +160,11 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      * Get the output size based on an input length.  In simple stream-cipher
      * mode, the output size will equal the input size.  For ChaCha20-Poly1305
      * for encryption the output size will be the sum of the input length
-     * and tag length.  For decryption, the output size will be the input
-     * length less the tag length or zero, whichever is larger.
+     * and tag length.  For decryption, the output size will be the sum of
+     * 1. The input length less the tag length or zero, whichever is larger.
+     * 2. The unprocessed input length.
      *
-     * @param inputLen the length in bytes of the input
+     * @param inputLen the length in bytes of the input.
      *
      * @return the output length in bytes.
      */
@@ -174,9 +175,12 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         if (mode == MODE_NONE) {
             outLen = inputLen;
         } else if (mode == MODE_AEAD) {
-            outLen = (direction == Cipher.ENCRYPT_MODE) ?
-                    Math.addExact(inputLen, TAG_LENGTH) :
-                    Integer.max(inputLen - TAG_LENGTH, 0);
+            if (direction == Cipher.ENCRYPT_MODE) {
+                outLen = Math.addExact(inputLen, TAG_LENGTH);
+            } else {
+                outLen = Integer.max(inputLen, TAG_LENGTH) - TAG_LENGTH;
+                outLen = Math.addExact(outLen, engine.getCipherBufferLength());
+            }
         }
 
         return outLen;
@@ -849,6 +853,15 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
          */
         int doFinal(byte[] in, int inOff, int inLen, byte[] out, int outOff)
                 throws ShortBufferException, AEADBadTagException, KeyException;
+
+        /**
+        * Returns the length of the unprocessed input.
+        * Only used in EngineAEADDec since AEADDec does not process input in doUpdate().
+        * In other engines, the function should return zero.
+        *
+        * @return the number of unprocessed bytes left.
+        */
+        int getCipherBufferLength();
     }
 
     private final class EngineStreamOnly implements ChaChaEngine {
@@ -890,6 +903,11 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
             } else {
                 return inLen;
             }
+        }
+
+        @Override
+        public int getCipherBufferLength() {
+            return 0;
         }
     }
 
@@ -954,6 +972,11 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
             }
             aadDone = false;
             return Math.addExact(inLen, TAG_LENGTH);
+        }
+
+        @Override
+        public int getCipherBufferLength() {
+            return 0;
         }
     }
 
@@ -1046,6 +1069,11 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
             }
 
             return ctLen;
+        }
+
+        @Override
+        public int getCipherBufferLength() {
+            return cipherBuf.size();
         }
     }
 
