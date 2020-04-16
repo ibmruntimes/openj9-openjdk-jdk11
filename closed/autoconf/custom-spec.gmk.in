@@ -138,6 +138,11 @@ endif
 ifeq (riscv64,$(OPENJDK_TARGET_CPU))
   ifeq (cross,$(COMPILE_TYPE))
     export SYSROOT_CFLAGS
+    # Change the prefix of the cross toolchain if the corresponding
+    # software package is installed on the host system.
+    ifeq (install,$(RISCV_TOOLCHAIN_TYPE))
+      export RISCV_CROSSTOOLS_PREFIX := riscv64-linux-gnu
+    endif
   else
     JAVA_FLAGS += -DserverStartupTimeout=36000
   endif
