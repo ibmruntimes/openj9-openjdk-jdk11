@@ -152,10 +152,10 @@ ifeq (zos,$(OPENJDK_TARGET_OS))
 
 BUILD_DDR_STUBS :=
 
-# Finally, on z/OS we depend upon the com.ibm.jzos module.
+# Finally, on z/OS we depend upon the ibm.jzos module.
 DDR_CLASSPATH += \
 	$(addprefix $(JDK_OUTPUTDIR)/modules/, \
-		com.ibm.jzos \
+		ibm.jzos \
 	)
 
 else # OPENJDK_TARGET_OS
@@ -165,7 +165,7 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_STUBS, \
 	SETUP := GENERATE_USINGJDKBYTECODE, \
 	BIN := $(DDR_STUBS_BIN), \
 	CLASSPATH := $(JDK_OUTPUTDIR)/modules/java.base, \
-	SRC := $(OPENJ9_TOPDIR)/jcl/src/com.ibm.jzos/share/classes \
+	SRC := $(OPENJ9_TOPDIR)/jcl/src/ibm.jzos/share/classes \
 	))
 
 # Finally, we depend upon the stub classes.
