@@ -218,13 +218,19 @@ grant codeBase "jrt:/jdk.zipfs" {
 };
 
 grant codeBase "jrt:/openj9.cuda" {
-    permission java.util.PropertyPermission "com.ibm.oti.vm.library.version", "read";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.vm";
     permission java.lang.RuntimePermission "loadLibrary.cuda4j29";
+    permission java.lang.RuntimePermission "modifyThread";
+    permission java.lang.RuntimePermission "modifyThreadGroup";
+    permission java.util.PropertyPermission "com.ibm.oti.vm.library.version", "read";
 };
 
 grant codeBase "jrt:/openj9.gpu" {
-    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.gpu.spi";
     permission com.ibm.gpu.GPUPermission "access";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.gpu.spi";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.vm";
+    permission java.lang.RuntimePermission "modifyThread";
+    permission java.lang.RuntimePermission "modifyThreadGroup";
     permission java.util.PropertyPermission "com.ibm.gpu.verbose", "read";
     permission java.util.PropertyPermission "com.ibm.gpu.enforce", "read";
     permission java.util.PropertyPermission "com.ibm.gpu.enable", "read";
