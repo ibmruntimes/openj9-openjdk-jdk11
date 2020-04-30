@@ -287,7 +287,7 @@ AC_DEFUN_ONCE([JDKOPT_DETECT_INTREE_EC],
 AC_DEFUN_ONCE([JDKOPT_SETUP_DEBUG_SYMBOLS],
 [
   #
-  # NATIVE_DEBUG_SYMBOLS
+  # Native debug symbols.
   # This must be done after the toolchain is setup, since we're looking at objcopy.
   #
   AC_MSG_CHECKING([what type of native debug symbols to use])
@@ -308,18 +308,17 @@ AC_DEFUN_ONCE([JDKOPT_SETUP_DEBUG_SYMBOLS],
           with_native_debug_symbols="external"
         fi
       ])
-  NATIVE_DEBUG_SYMBOLS=$with_native_debug_symbols
-  AC_MSG_RESULT([$NATIVE_DEBUG_SYMBOLS])
+  AC_MSG_RESULT([$with_native_debug_symbols])
 
-  if test "x$NATIVE_DEBUG_SYMBOLS" = xnone; then
+  if test "x$with_native_debug_symbols" = xnone; then
     COMPILE_WITH_DEBUG_SYMBOLS=false
     COPY_DEBUG_SYMBOLS=false
     ZIP_EXTERNAL_DEBUG_SYMBOLS=false
-  elif test "x$NATIVE_DEBUG_SYMBOLS" = xinternal; then
+  elif test "x$with_native_debug_symbols" = xinternal; then
     COMPILE_WITH_DEBUG_SYMBOLS=true
     COPY_DEBUG_SYMBOLS=false
     ZIP_EXTERNAL_DEBUG_SYMBOLS=false
-  elif test "x$NATIVE_DEBUG_SYMBOLS" = xexternal; then
+  elif test "x$with_native_debug_symbols" = xexternal; then
 
     if test "x$OPENJDK_TARGET_OS" = xsolaris || test "x$OPENJDK_TARGET_OS" = xlinux; then
       if test "x$OBJCOPY" = x; then
@@ -332,7 +331,7 @@ AC_DEFUN_ONCE([JDKOPT_SETUP_DEBUG_SYMBOLS],
     COMPILE_WITH_DEBUG_SYMBOLS=true
     COPY_DEBUG_SYMBOLS=true
     ZIP_EXTERNAL_DEBUG_SYMBOLS=false
-  elif test "x$NATIVE_DEBUG_SYMBOLS" = xzipped; then
+  elif test "x$with_native_debug_symbols" = xzipped; then
 
     if test "x$OPENJDK_TARGET_OS" = xsolaris || test "x$OPENJDK_TARGET_OS" = xlinux; then
       if test "x$OBJCOPY" = x; then
@@ -362,6 +361,33 @@ AC_DEFUN_ONCE([JDKOPT_SETUP_DEBUG_SYMBOLS],
   AC_SUBST(COMPILE_WITH_DEBUG_SYMBOLS)
   AC_SUBST(COPY_DEBUG_SYMBOLS)
   AC_SUBST(ZIP_EXTERNAL_DEBUG_SYMBOLS)
+
+  # Should we add external native debug symbols to the shipped bundles?
+  AC_MSG_CHECKING([if we should add external native debug symbols to the shipped bundles])
+  AC_ARG_WITH([external-symbols-in-bundles],
+      [AS_HELP_STRING([--with-external-symbols-in-bundles],
+      [which type of external native debug symbol information shall be shipped in product bundles (none, public, full)
+      (e.g. ship full/stripped pdbs on Windows) @<:@none@:>@])])
+
+  if test "x$with_external_symbols_in_bundles" = x || test "x$with_external_symbols_in_bundles" = xnone ; then
+    AC_MSG_RESULT([no])
+  elif test "x$with_external_symbols_in_bundles" = xfull || test "x$with_external_symbols_in_bundles" = xpublic ; then
+    if test "x$OPENJDK_TARGET_OS" != xwindows ; then
+      AC_MSG_ERROR([--with-external-symbols-in-bundles currently only works on windows!])
+    elif test "x$COPY_DEBUG_SYMBOLS" != xtrue ; then
+      AC_MSG_ERROR([--with-external-symbols-in-bundles only works when --with-native-debug-symbols=external is used!])
+    elif test "x$with_external_symbols_in_bundles" = xfull ; then
+      AC_MSG_RESULT([full])
+      SHIP_DEBUG_SYMBOLS=full
+    else
+      AC_MSG_RESULT([public])
+      SHIP_DEBUG_SYMBOLS=public
+    fi
+  else
+    AC_MSG_ERROR([$with_external_symbols_in_bundles is an unknown value for --with-external-symbols-in-bundles])
+  fi
+
+  AC_SUBST(SHIP_DEBUG_SYMBOLS)
 ])
 
 ################################################################################
