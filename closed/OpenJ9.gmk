@@ -338,6 +338,9 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     else
       CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(ac_cv_prog_CXX)"
     endif
+    ifneq (,$(NASM))
+      CMAKE_ARGS += -DCMAKE_ASM_NASM_COMPILER="$(NASM)"
+    endif
   endif # windows
 
   ifneq (,$(CCACHE))
