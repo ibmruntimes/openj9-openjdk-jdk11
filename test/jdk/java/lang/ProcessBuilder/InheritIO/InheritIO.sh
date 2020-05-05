@@ -74,7 +74,7 @@ do
     fi
 
     ERR_EXPECTED='exit value: 0'
-    ERR_RECEIVED=`cat stderr.txt`
+    ERR_RECEIVED=`tail -n 1 stderr.txt`
     if [ "x${ERR_RECEIVED}" != "x${ERR_EXPECTED}" ]; then
         echo "FAIL: unexpected '${ERR_RECEIVED}' in stderr"
         exit 1
