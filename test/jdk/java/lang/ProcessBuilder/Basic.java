@@ -80,6 +80,10 @@ public class Basic {
     /* used for AIX only */
     static final String libpath = System.getenv("LIBPATH");
 
+    /* Used for regex String matching for long error messages */
+    static final String PERMISSION_DENIED_ERROR_MSG = "(Permission denied|error=13)";
+    static final String NO_SUCH_FILE_ERROR_MSG = "(No such file|error=2)";
+
     /**
      * Returns the number of milliseconds since time given by
      * startNanoTime, which must have been previously returned from a
@@ -311,7 +315,7 @@ public class Basic {
         } catch (IOException e) {
             String m = e.getMessage();
             if (EnglishUnix.is() &&
-                ! matches(m, "Permission denied"))
+                ! matches(m, PERMISSION_DENIED_ERROR_MSG))
                 unexpected(e);
         } catch (Throwable t) { unexpected(t); }
     }
@@ -421,7 +425,7 @@ public class Basic {
                         } catch (IOException e) {
                             String m = e.getMessage();
                             if (EnglishUnix.is() &&
-                                ! matches(m, "No such file"))
+                                ! matches(m, NO_SUCH_FILE_ERROR_MSG))
                                 unexpected(e);
                         } catch (Throwable t) { unexpected(t); }
 
@@ -434,7 +438,7 @@ public class Basic {
                         } catch (IOException e) {
                             String m = e.getMessage();
                             if (EnglishUnix.is() &&
-                                ! matches(m, "No such file"))
+                                ! matches(m, NO_SUCH_FILE_ERROR_MSG))
                                 unexpected(e);
                         } catch (Throwable t) { unexpected(t); }
 
@@ -1992,7 +1996,7 @@ public class Basic {
         } catch (IOException e) {
             String m = e.getMessage();
             if (EnglishUnix.is() &&
-                ! matches(m, "No such file or directory"))
+                ! matches(m, NO_SUCH_FILE_ERROR_MSG))
                 unexpected(e);
         } catch (Throwable t) { unexpected(t); }
 
@@ -2008,8 +2012,8 @@ public class Basic {
                 String m = e.getMessage();
                 Pattern p = Pattern.compile(programName);
                 if (! matches(m, programName)
-                    || (EnglishUnix.is()
-                        && ! matches(m, "No such file or directory")))
+                    || (EnglishUnix.is() &&
+                        ! matches(m, NO_SUCH_FILE_ERROR_MSG)))
                     unexpected(e);
             } catch (Throwable t) { unexpected(t); }
 
@@ -2025,7 +2029,7 @@ public class Basic {
             String m = e.getMessage();
             if (! matches(m, "in directory")
                 || (EnglishUnix.is() &&
-                    ! matches(m, "No such file or directory")))
+                    ! matches(m, NO_SUCH_FILE_ERROR_MSG)))
                 unexpected(e);
         } catch (Throwable t) { unexpected(t); }
 
@@ -2287,7 +2291,7 @@ public class Basic {
             new File("./emptyCommand").delete();
             String m = e.getMessage();
             if (EnglishUnix.is() &&
-                ! matches(m, "Permission denied"))
+                ! matches(m, PERMISSION_DENIED_ERROR_MSG))
                 unexpected(e);
         } catch (Throwable t) { unexpected(t); }
 
