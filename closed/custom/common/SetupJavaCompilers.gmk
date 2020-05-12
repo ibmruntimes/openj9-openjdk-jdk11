@@ -18,5 +18,18 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-# OpenJ9 requires more lenient javac warnings
-JAVAC_WARNINGS := -Xlint:-removal
+# OpenJ9 requires more lenient javac warnings for these modules.
+WARNING_MODULES := \
+	java.base \
+	jdk.management \
+	openj9.dataaccess \
+	openj9.dtfj \
+	openj9.dtfjview \
+	openj9.jvm \
+	openj9.sharedclasses \
+	openj9.traceformat \
+	#
+
+ifneq (,$(filter $(WARNING_MODULES),$(MODULE)))
+  JAVAC_WARNINGS := -Xlint:-removal
+endif
