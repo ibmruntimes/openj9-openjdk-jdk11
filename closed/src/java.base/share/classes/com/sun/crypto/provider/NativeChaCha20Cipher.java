@@ -636,7 +636,12 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
     protected byte[] engineUpdate(byte[] in, int inOfs, int inLen) {
         byte[] out = new byte[inLen];
         try {
-            engine.doUpdate(in, inOfs, inLen, out, 0);
+            int size = engine.doUpdate(in, inOfs, inLen, out, 0);
+            // Special case for EngineAEADDec, doUpdate only buffers the input
+            // So the output array must be empty since no encryption happened yet
+            if (size == 0) {
+                return new byte[0];
+            }
         } catch (ShortBufferException | KeyException exc) {
             throw new RuntimeException(exc);
         }
