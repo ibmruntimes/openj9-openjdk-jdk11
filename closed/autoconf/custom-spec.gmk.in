@@ -117,7 +117,7 @@ ifeq (,$(CODESIGN))
   CodesignFile =
 else
   CodesignFile = $(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" \
-	--entitlements $(TOPDIR)/make/data/macosxsigning/entitlements.plist \
+	--entitlements $(TOPDIR)/make/data/macosxsigning/default.plist \
 	--options runtime \
 	--timestamp \
 	$1
