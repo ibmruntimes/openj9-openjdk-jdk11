@@ -754,7 +754,10 @@ public class Basic {
      * Remove it from the list of env variables
      */
     private static String removeAixExpectedVars(String vars) {
-        return vars.replace("AIXTHREAD_GUARDPAGES=0,", "");
+        String cleanedVars = vars.replace("AIXTHREAD_GUARDPAGES=0,", "");
+        // OpenJ9 adds MALLOCOPTIONS
+        cleanedVars = cleanedVars.replace("MALLOCOPTIONS=multiheap,considersize,", "");
+        return cleanedVars;
     }
 
     private static String sortByLinesWindowsly(String text) {
