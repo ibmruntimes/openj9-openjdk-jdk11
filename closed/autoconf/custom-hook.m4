@@ -57,21 +57,26 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
       if test "x$with_cmake" == xyes -o "x$with_cmake" == x ; then
         with_cmake=cmake
       fi
-      if test "x$with_cmake" != xno ; then
-        if AS_EXECUTABLE_P(["$with_cmake"]) ; then
-          CMAKE="$with_cmake"
-        else
-          BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
-        fi
-        with_cmake=yes
-      fi
     ],
-    [with_cmake=no])
-  if test "$with_cmake" == yes ; then
-    OPENJ9_ENABLE_CMAKE=true
-  else
+    [
+      if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+        with_cmake=cmake
+      else
+        with_cmake=no
+      fi
+    ])
+  # at this point with_cmake should either be no, or the name of the cmake command
+  if test "x$with_cmake" = xno ; then
     OPENJ9_ENABLE_CMAKE=false
+  else
+    OPENJ9_ENABLE_CMAKE=true
+    if AS_EXECUTABLE_P(["$with_cmake"]) ; then
+      CMAKE="$with_cmake"
+    else
+      BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
+    fi
   fi
+
   AC_SUBST(OPENJ9_ENABLE_CMAKE)
 ])
 
