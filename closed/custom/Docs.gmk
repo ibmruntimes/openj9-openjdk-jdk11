@@ -25,10 +25,11 @@ JVMTI_HTML := $(TOPDIR)/closed/variant-server/gensrc/jvmtifiles/jvmti.html
 
 OPENJ9_BASE_URL := https://www.eclipse.org/openj9/
 OPENJ9_BUG_SUBMIT_URL := https://github.com/eclipse/openj9/issues
-OPENJ9_JAVADOC_BOTTOM = \
-    <a href="$(OPENJ9_BASE_URL)" target="_blank">Eclipse OpenJ9 website.</a><br> \
-    To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)" target="_blank">Eclipse Openj9 issue.</a><br> \
-    Copyright &copy; 1998, $(COPYRIGHT_YEAR), IBM Corp. and others.
+OPENJ9_FULL_COMPANY_NAME := IBM Corp
+OPENJ9_JAVADOC_BOTTOM := \
+    <a href="$(OPENJ9_BASE_URL)">Link</a> to Eclipse OpenJ9 documentation.<br> \
+    To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)">Eclipse Openj9 issue.</a><br> \
+    Copyright &copy; 1998, $(COPYRIGHT_YEAR), $(OPENJ9_FULL_COMPANY_NAME). All rights reserved.
 
 ##############################################################################
 # The javadoc tool only allows for a single setting for headers and footers
@@ -48,7 +49,8 @@ OPENJ9_JAVADOC_BOTTOM = \
 
 JAVADOC_DOCROOT := \(\.\./\)*\.\.
 JAVADOC_BOTTOM_REGEX = $(subst {@docroot},$(JAVADOC_DOCROOT),$(subst .,\.,$(JAVADOC_BOTTOM)))
-OPENJ9_SUBST_COMMAND = $(SED) -e '\''s|$(JAVADOC_BOTTOM_REGEX)|$(subst &,\&,$(OPENJ9_JAVADOC_BOTTOM))|g'\''
+OPENJ9_JAVADOC_BOTTOM := $(subst &,\&,$(OPENJ9_JAVADOC_BOTTOM))
+OPENJ9_SUBST_COMMAND = $(SED) -e '\''s|$(JAVADOC_BOTTOM_REGEX)|$(OPENJ9_JAVADOC_BOTTOM)|g'\''
 
 ################################################################################
 # Define a javadoc Group for the OpenJ9 specific modules
@@ -92,7 +94,7 @@ OPENJ9_JAVADOC_TEMP  := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_temp.html
 OPENJ9_JAVADOC_SCRIPT_BODY = \
     for path in "$$@" ; do \
       if [ -f "$(DOCS_OUTPUTDIR)/api/$$path" ] ; then \
-        $(CP) -f "$(DOCS_OUTPUTDIR)/api/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
+        $(CP) "$(DOCS_OUTPUTDIR)/api/$$path" "$(OPENJ9_JAVADOC_TEMP)" ; \
         $(OPENJ9_SUBST_COMMAND) < "$(OPENJ9_JAVADOC_TEMP)" > "$(DOCS_OUTPUTDIR)/api/$$path" ; \
         $(RM) "$(OPENJ9_JAVADOC_TEMP)" ; \
       fi ; \
@@ -110,195 +112,7 @@ $(OPENJ9_JAVADOC_MARKER) : $(OPENJDK_JAVADOC_MARKER)
 			| $(SED) -e 's|/[^/]\+/classes/|/|' -e 's|\.java$$|.html|' \
 			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)
 	$(CD) $(DOCS_OUTPUTDIR)/api ; \
-		$(FIND) . -type f '(' -path '*/openj9*/*.html' -o -path '*/com/ibm/*.html' ')' \
+		$(FIND) . -type f '(' -path '*/openj9*/*.html' ')' -o '(' -path '*/com/ibm/*.html' ')' \
 			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)
 	$(RM) -f $(OPENJ9_JAVADOC_SCRIPT)
-	$(TOUCH) $@
-
-##############################################################################
-# Create javadoc for only the OpenJ9 extensions and modifications.
-#
-# javadoc automatically retrieves module and package descriptions from the
-# module-info.java, package-info.java and package.html files and uses the
-# information as part of the module-summary.html and package-summary.html
-# files. The module-info.java, package-info.java and package.html files
-# used would be from the openjdk project source files if they were not
-# overridden by openj9.
-# The text taken from these files is replaced by creating a package-info.java
-# stub file for each package without a package-info.java file provided by
-# openj9, or by removing the text directly from the generated
-# module-summary.html file.
-
-JAVASE_BASE_URL := https://docs.oracle.com/en/java/javase/$(VERSION_SPECIFICATION)/docs/api
-
-OPENJ9_ONLY_JAVADOC_MARKER := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_only_exec.marker
-OPENJ9_ONLY_JAVADOC_SCRIPT := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_only_replace.sh
-OPENJ9_ONLY_JAVADOC_TEMP  := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_temp.html
-JDK_API_CUSTOM_TARGETS += $(OPENJ9_ONLY_JAVADOC_MARKER)
-
-OPENJ9_ONLY_JDK_NAME := OpenJ9 JDK $(VERSION_SPECIFICATION)
-OPENJ9_ONLY_DOCDIR := $(IMAGES_OUTPUTDIR)/openj9-docs/api
-OPENJ9_ONLY_INDEX_HTML := $(IMAGES_OUTPUTDIR)/openj9-docs/api/index.html
-
-# Create lists of all the openj9 source files and those for which javadoc
-# is required.
-# javadoc is required for the openj9.xxxx packages and the jdk management
-# packages with public methods which are openj9 specific extensions or
-# which modify the openjdk implementation behaviour.
-# javadoc is not generated for the classes  which are replaced by openj9
-# but are functionally identical to the openjdk implementations
-# (e.g. java.lang.String), since the openjdk javadoc is still applicable.
-# 
-# The list of source files is passed explicitly (via OPENJ9_ONLY_JAVADOC_FILES)
-# to the javadoc tool on the command line and used as dependencies
-# (via OPENJ9_ONLY_JAVADOC_FILELIST) to identify when the javadoc needs
-# regenerating.
-
-OPENJ9_ONLY_FILELIST := $(shell $(FIND) $(SUPPORT_OUTPUTDIR)/j9jcl_sources -type f)
-OPENJ9_ONLY_JAVADOC_FILELIST := $(shell $(FIND) $(SUPPORT_OUTPUTDIR)/j9jcl_sources -type f  '(' -path '*/openj9.*/*.java' -o -path '*/jdk.management/*.java' ')')
-OPENJ9_ONLY_JAVADOC_FILES := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_files.txt
-
-# Set up the javadoc command line options.
-# Use  -linkoffline to redirect the links to the documentation for the classes
-# from the openjdk project source files to the# online Oracle documentation.
-# See the  javadoc documentation for details of the linkoffline option - e.g.
-# https://docs.oracle.com/en/java/javase/14/javadoc/javadoc.html
-# Deferred expansion is required for variables because this file is included
-# by make/Docs.gmk before variables such as JAVADOC_OPTIONS and JAVADOC_TAGS
-# have been defined.
-OPENJ9_ONLY_JAVADOC_OPTIONS = $(filter-out --expand-requires transitive,$(JAVADOC_OPTIONS))
-OPENJ9_ONLY_JAVADOC_OPTIONS += -linkoffline $(JAVASE_BASE_URL)/ $(DOCS_OUTPUTDIR)/api/
-OPENJ9_ONLY_JAVADOC_OPTIONS += $(JAVADOC_TAGS)
-OPENJ9_ONLY_JAVADOC_OPTIONS += --module-source-path $(OPENJ9_STUBS_DIR)$(PATH_SEP)$(MODULES_SOURCE_PATH)
-OPENJ9_ONLY_JAVADOC_OPTIONS += -Xdoclint:all,$(call CommaList, $(addprefix -, $(JAVADOC_DISABLED_DOCLINT)))
-
-OPENJ9_DOC_TITLE = $(JDK_LONG_NAME)<br>Version $(VERSION_SPECIFICATION)
-OPENJ9_WINDOW_TITLE = $(subst &amp;,&,$(JDK_SHORT_NAME))
-OPENJ9_HEADER_TITLE = <div $(HEADER_STYLE)><strong>$(JDK_SHORT_NAME)</strong></div>
-
-OPENJ9_ONLY_JAVADOC_OPTIONS += -doctitle '$(OPENJ9_ONLY_JDK_NAME)'
-OPENJ9_ONLY_JAVADOC_OPTIONS += -windowtitle '$(OPENJ9_ONLY_JDK_NAME)'
-OPENJ9_ONLY_JAVADOC_OPTIONS += -header '<div $(HEADER_STYLE)><strong>$(OPENJ9_ONLY_JDK_NAME)</strong></div>'
-OPENJ9_ONLY_JAVADOC_OPTIONS += -bottom '$(OPENJ9_JAVADOC_BOTTOM)'
-
-ifneq ($(LOG_LEVEL), trace)
-  OPENJ9_ONLY_JAVADOC_OPTIONS += -quiet
-else
-  OPENJ9_ONLY_JAVADOC_OPTIONS += -verbose
-endif
-
-OPENJ9_ONLY_JAVADOC_JAVA_ARGS = -Djava.awt.headless=true -Dextlink.spec.version=$(VERSION_SPECIFICATION) -Djspec.version=$(VERSION_SPECIFICATION)
-OPENJ9_ONLY_JAVADOC_CMD = $(JAVA) $(OPENJ9_ONLY_JAVADOC_JAVA_ARGS) $(NEW_JAVADOC)
-
-OPENJDK_MODULE_REFERENCE_TEXT := \
-  These are the OpenJ9 extensions to this module. Refer to <a href="$(JAVASE_BASE_URL)">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.
-
-MODULE_DESCRIPTION_FIRST_LINE  := <section role="region">
-MODULE_DESCRIPTION_SECOND_LINE := MODULE DESCRIPTION
-MODULE_DESCRIPTION_MARKER_TEXT := javadoc_marker_text
-MODULE_DESCRIPTION_LAST_LINE   := </section>
-MODULE_DESCRIPTION_REPLACE_TEXT := \
-  <section class="module-description" id="module.description"> \
-    <div class="block"> \
-      <dl class="notes"> \
-        <dd>$(OPENJDK_MODULE_REFERENCE_TEXT)</dd> \
-      </dl> \
-    </div> \
-  </section>
-
-OPENJDK_JDK_MANAGEMENT_SUMMARY := Defines JDK-specific management interfaces for the JVM.
-OPENJDK_JDK_MANAGEMENT_SUMMARY_ERROR_TEXT := \
-Error: cannot find text '$(OPENJDK_JDK_MANAGEMENT_SUMMARY)' to replace in generated javadoc file $(OPENJ9_ONLY_INDEX_HTML). \
-Check the openjdk jdk.management/module.info.java file and adjust closed/custom/Docs.gmk as required.
-
-# sed_replace_block Replaces a multiline block with replacement text.
-# sed matching  is greedy.
-# $1 should be unique (otherwise all lines from the first occurrence of $1 are deleted).
-sed_replace_block = $(SED) '/$(subst /,\/,$(1))/,/$(subst /,\/,$(2))/{/$(subst /,\/,$(2))/ s/.*/$(subst /,\/,$(3))/; t; d}'
-
-# sed_replace_regex replaces a regex found anywhere in the input with the replacement
-# text (use to replace matches over multiple lines).
-# $1 is the regex to search for, $2 is the replacement text.
-sed_replace_regex = $(SED) -n '1h;1!H;$${g;s/$(subst /,\/,$(1))/$(subst /,\/,$(2))/;p}'
-
-# sed_replace_first is a simple string replace, first occurrence only
-sed_replace_first = $(SED) 's/$(subst /,\/,$(1))/$(subst /,\/,$(2))/'
-
-# sed_replace_all is a simple string replace, all occurrences
-sed_replace_all = $(SED) 's/$(subst /,\/,$(1))/$(subst /,\/,$(2))/g'
-
-ALL_PACKAGE_INFO_FILELIST := $(call FindFiles, $(TOP_SRC_DIRS),package-info.java)
-ALL_PACKAGE_INFO_FILELIST += $(call FindFiles, $(TOP_SRC_DIRS),package.html)
-OPENJ9_ONLY_PACKAGE_INFO_FILELIST  := $(filter %package-info.java, $(OPENJ9_ONLY_FILELIST))
-OPENJDK_ONLY_PACKAGE_INFO_FILELIST := $(filter-out $(OPENJ9_ONLY_PACKAGE_INFO_FILELIST),$(ALL_PACKAGE_INFO_FILELIST))
-OPENJDK_ONLY_PKGLIST := $(subst /package.html,,$(subst /package-info.java,,$(subst /share/classes,,$(subst $(TOPDIR)/src/,,$(OPENJDK_ONLY_PACKAGE_INFO_FILELIST)))))
-
-OPENJ9_STUBS_DIR := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_stub_files
-OPENJ9_ONLY_PACKAGE_STUB_DESC := \
-  /** These are the classes within this package modified by OpenJ9. Refer to <a href="$(JAVASE_BASE_URL)">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.*/
-
-# This shell script replaces the text which came from the openjdk module-info.java files
-# with a link to the same file in the Oracle online documentation.
-# 1. Find all the module-summary.html files in the generated javadoc.
-# 2. For each file, look for a corresponding module-info.java file in the openj9 source tree.
-# 3. If there is no corresponding module-info.java file, replace the module description in the
-#    html file with the redirection text.
-# 4. Find and replace the summary text also in the top level index.html file.
-
-OPENJ9_ONLY_JAVADOC_SCRIPT_BODY = \
-    for file in `$(FIND) $(OPENJ9_ONLY_DOCDIR) -type f` ; do \
-      $(CP) -f "$$file" "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-      $(call sed_replace_all,class="externalLink",class="externalLink" target="_blank") <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$$file" ; \
-    done ; \
-    for file in `cd $(OPENJ9_ONLY_DOCDIR) ; $(FIND) . -type f -name module-summary.html | $(SED) -e 's|^\./||'` ; do \
-      fullpath=$(OPENJ9_ONLY_DOCDIR)/$$file ; \
-      dir="$${file%/*}" ; \
-      topdir="$${file%%/*}" ; \
-      excepttopdir="$${file\#*/}" ; \
-      excepttopdir=`$(SED) 's|-summary.html$$|-info.java|' <<<$$excepttopdir` ; \
-      regex="$$topdir/.*$$excepttopdir" ; \
-      if ! $(GREP) -qe "$$regex" $(OPENJ9_ONLY_JAVADOC_FILES) ; then \
-        $(CP) -f "$$fullpath" "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-        $(call sed_replace_block,$(MODULE_DESCRIPTION_SECOND_LINE),$(MODULE_DESCRIPTION_LAST_LINE),$(MODULE_DESCRIPTION_MARKER_TEXT)) <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$$fullpath" ; \
-        $(CP) -f "$$fullpath" "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-        $(call sed_replace_regex,$(MODULE_DESCRIPTION_FIRST_LINE).*$(MODULE_DESCRIPTION_MARKER_TEXT),$(MODULE_DESCRIPTION_REPLACE_TEXT)) <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$$fullpath" ; \
-        $(RM) "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-      fi ; \
-    done ; \
-    if ! $(GREP) -q '$(OPENJDK_JDK_MANAGEMENT_SUMMARY)' $(OPENJ9_ONLY_INDEX_HTML) ; then \
-      $(ECHO) "$$0: $(OPENJDK_JDK_MANAGEMENT_SUMMARY_ERROR_TEXT)" ; \
-      exit 1 ; \
-    else \
-      $(CP) -f "$(OPENJ9_ONLY_INDEX_HTML)" "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-      $(call sed_replace_first,$(OPENJDK_JDK_MANAGEMENT_SUMMARY),$(OPENJDK_MODULE_REFERENCE_TEXT)) <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$(OPENJ9_ONLY_INDEX_HTML)" ; \
-      $(RM) "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-    fi ; \
-    #
-
-OPENJ9_ONLY_JAVADOC_SCRIPT_BODY_ESC = $(subst ','\'',$(OPENJ9_ONLY_JAVADOC_SCRIPT_BODY))
-
-# Create a stub package-info.java file for each package with source files in
-# j9jcl_sources but no package-info.java file. This is then used by javadoc
-# instead of the openjdk version to direct the user to the Oracle online
-# documentation for that package.
-
-# The dependency on $(OPENJDK_JAVADOC_MARKER) ensures that the docs/api/element-list
-# file which is created during the full jdk javadoc generation exists before running
-# javadoc for just the openj9 files.
-
-$(OPENJ9_ONLY_JAVADOC_MARKER) : $(OPENJDK_JAVADOC_MARKER) $(OPENJ9_ONLY_FILELIST)
-	$(call LogWarn, Generating javadoc for openj9 source files)
-	$(eval $(call ListPathsSafely,OPENJ9_ONLY_JAVADOC_FILELIST,$(OPENJ9_ONLY_JAVADOC_FILES)))
-	for dir in $(OPENJDK_ONLY_PKGLIST) ; do \
- 		$(MKDIR) -p $(OPENJ9_STUBS_DIR)/$${dir} ; \
-		$(ECHO) '$(OPENJ9_ONLY_PACKAGE_STUB_DESC)' >$(OPENJ9_STUBS_DIR)/$${dir}/package-info.java ; \
-		topdir="$${dir%%/*}" ; \
-		excepttopdir="$${dir#*/}" ; \
-		package=`$(SED) 's|/|.|g' <<<$${excepttopdir}` ; \
-		$(ECHO) "package $${package};" >>$(OPENJ9_STUBS_DIR)/$${dir}/package-info.java ; \
-	done
-	$(OPENJ9_ONLY_JAVADOC_CMD) -d $(OPENJ9_ONLY_DOCDIR) $(OPENJ9_ONLY_JAVADOC_OPTIONS) @$(OPENJ9_ONLY_JAVADOC_FILES)
-	$(ECHO) '$(OPENJ9_ONLY_JAVADOC_SCRIPT_BODY_ESC)' >$(OPENJ9_ONLY_JAVADOC_SCRIPT)
-	$(BASH) $(OPENJ9_ONLY_JAVADOC_SCRIPT)
-	$(RM) -rf $(OPENJ9_ONLY_JAVADOC_SCRIPT) $(OPENJ9_ONLY_JAVADOC_FILES) $(OPENJ9_STUBS_DIR)
 	$(TOUCH) $@
