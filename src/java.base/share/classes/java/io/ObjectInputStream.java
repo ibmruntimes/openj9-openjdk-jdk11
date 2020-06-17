@@ -726,6 +726,10 @@ public class ObjectInputStream
         if (ctx == null) {
             throw new NotActiveException("not in call to readObject");
         }
+
+        /* LUDCL will need to be refreshed since this call comes from outside this class. */
+        refreshLudcl = true;
+
         Object curObj = ctx.getObj();
         ObjectStreamClass curDesc = ctx.getDesc();
         bin.setBlockDataMode(false);
@@ -769,6 +773,8 @@ public class ObjectInputStream
         if (ctx == null) {
             throw new NotActiveException("not in call to readObject");
         }
+        /* LUDCL will need to be refreshed since this call comes from outside this class. */
+        refreshLudcl = true;
         ctx.checkAndSetUsed();
         ObjectStreamClass curDesc = ctx.getDesc();
         bin.setBlockDataMode(false);
@@ -852,6 +858,13 @@ public class ObjectInputStream
      *          be found.
      */
     protected Class<?> resolveClass(ObjectStreamClass desc)
+        throws IOException, ClassNotFoundException
+    {
+        refreshLudcl = true;
+        return resolveClassInternal(desc);
+    }
+
+    private Class<?> resolveClassInternal(ObjectStreamClass desc)
         throws IOException, ClassNotFoundException
     {
         String name = desc.getName();
@@ -1070,6 +1083,13 @@ public class ObjectInputStream
      * @since 1.3
      */
     protected ObjectStreamClass readClassDescriptor()
+        throws IOException, ClassNotFoundException
+    {
+        refreshLudcl = true;
+        return readClassDescriptorInternal();
+    }
+
+    private ObjectStreamClass readClassDescriptorInternal() 
         throws IOException, ClassNotFoundException
     {
         ObjectStreamClass desc = new ObjectStreamClass();
@@ -2073,7 +2093,7 @@ public class ObjectInputStream
 
         ObjectStreamClass readDesc;
         try {
-            readDesc = readClassDescriptor();
+            readDesc = readClassDescriptorInternal();
         } catch (ClassNotFoundException ex) {
             throw (IOException) new InvalidClassException(
                 "failed to read class descriptor").initCause(ex);
@@ -2084,7 +2104,7 @@ public class ObjectInputStream
         bin.setBlockDataMode(true);
         final boolean checksRequired = isCustomSubclass();
         try {
-            if ((cl = resolveClass(readDesc)) == null) {
+            if ((cl = resolveClassInternal(readDesc)) == null) {
                 resolveEx = new ClassNotFoundException("null class");
             } else if (checksRequired) {
                 ReflectUtil.checkPackageAccess(cl);
