@@ -8,7 +8,7 @@
 # under the terms of the GNU General Public License version 2 only, as
 # published by the Free Software Foundation.
 #
-# IBM designates this particular file as subject to the "Classpath" exception 
+# IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
 #
 # This code is distributed in the hope that it will be useful, but WITHOUT
@@ -141,10 +141,12 @@ for i in "${!git_urls[@]}" ; do
 		fi
 		cd - > /dev/null
 	else
-		if [ ${references[$i]+_} ] ; then
-			reference="--reference ${references[$i]}"
+		if [ -n "${references[$i]+_}" ] ; then
+			reference=" --reference ${references[$i]}"
+		else
+			reference=""
 		fi
-		git_clone_command="git clone ${reference} --recursive -b ${branch} ${git_urls[$i]} ${i}"
+		git_clone_command="git clone${reference} --recursive -b ${branch} ${git_urls[$i]} ${i}"
 		commands[$i]=$git_clone_command
 
 		echo
@@ -199,4 +201,3 @@ for i in "${!git_urls[@]}" ; do
 		cd - > /dev/null
 	fi
 done
-
