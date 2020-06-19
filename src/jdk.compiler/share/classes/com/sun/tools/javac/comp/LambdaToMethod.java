@@ -23,6 +23,12 @@
  * questions.
  */
 
+ /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved.
+ * ===========================================================================
+ */
+
 package com.sun.tools.javac.comp;
 
 import com.sun.tools.javac.tree.*;
@@ -2464,7 +2470,8 @@ public class LambdaToMethod extends TreeTranslator {
 
         @Override
         protected void append(byte[] ba) {
-            sb.append(new String(ba));
+            Name name = names.fromUtf(ba);
+            sb.append(name.toString());
         }
 
         @Override
