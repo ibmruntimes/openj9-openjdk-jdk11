@@ -59,11 +59,14 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
       fi
     ],
     [
-      if test "x$OPENJDK_BUILD_OS" = xmacosx ; then
-        with_cmake=cmake
-      else
-        with_cmake=no
-      fi
+      case "$OPENJ9_PLATFORM_CODE" in
+        oa64|xa64)
+          with_cmake=cmake
+          ;;
+        *)
+          with_cmake=no
+          ;;
+      esac
     ])
   # at this point with_cmake should either be no, or the name of the cmake command
   if test "x$with_cmake" = xno ; then
