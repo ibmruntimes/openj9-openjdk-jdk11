@@ -26,13 +26,13 @@ include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
 
 ifeq (true,$(ZIP_EXTERNAL_DEBUG_SYMBOLS))
-  DEBUG_SYMBOL_SUFFIX := .diz
+  DEBUG_SUFFIX_LIST := .diz
 else ifeq (macosx,$(OPENJDK_TARGET_OS))
-  DEBUG_SYMBOL_SUFFIX := .dSYM
+  DEBUG_SUFFIX_LIST := .dSYM
 else ifeq (windows,$(OPENJDK_TARGET_OS))
-  DEBUG_SYMBOL_SUFFIX := .pdb
+  DEBUG_SUFFIX_LIST := .map .pdb
 else
-  DEBUG_SYMBOL_SUFFIX := .debuginfo
+  DEBUG_SUFFIX_LIST := .debuginfo
 endif
 
 DEBUG_IMAGE_DIR := $(IMAGES_OUTPUTDIR)/debug-image
@@ -50,7 +50,7 @@ endef
 # openj9_list_files
 # -----------------
 # $1 - source file path
-ifeq (.dSYM,$(DEBUG_SYMBOL_SUFFIX))
+ifeq (macosx,$(OPENJDK_TARGET_OS))
   openj9_list_files = $(wildcard $1/Contents/Info.plist $1/Contents/Resources/DWARF/*)
 else
   openj9_list_files = $1
@@ -62,7 +62,7 @@ endif
 # $2 - target folder
 openj9_copy_files = \
 	$(foreach module, $(wildcard $(strip $1)/*), \
-		$(foreach path,$(wildcard $(patsubst %,$(module)/%$(DEBUG_SYMBOL_SUFFIX),* */*)), \
+		$(foreach path, $(wildcard $(foreach prefix, $(addprefix $(module)/, * */*), $(addprefix $(prefix), $(DEBUG_SUFFIX_LIST)))), \
 			$(foreach file,$(call openj9_list_files,$(path)), \
 				$(eval $(call openj9_copy_rule,$(file),$(strip $2)/$(patsubst $(module)/%,%,$(file)))))))
 
