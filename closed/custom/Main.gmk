@@ -100,3 +100,14 @@ openj9.dtfj-ddr-jar : openj9.dtfj-ddr-gen
 openj9.dtfj-launchers : openj9.dtfj-ddr-jar
 
 endif # OPENJ9_ENABLE_DDR
+
+clean-docs : clean-openj9-only-docs
+.PHONY : clean-openj9-only-docs
+clean-openj9-only-docs :
+	@$(PRINTF) "Cleaning $(SUPPORT_OUTPUTDIR)/openj9-docs ...\n"
+	$(RM) -rf $(SUPPORT_OUTPUTDIR)/openj9-docs
+	@$(PRINTF) "Cleaning $(IMAGES_OUTPUTDIR)/openj9-docs ...\n"
+	$(RM) -rf $(IMAGES_OUTPUTDIR)/openj9-docs
+	@$(PRINTF) " done\n"
+
+ALL_TARGETS += clean-openj9-only-docs
