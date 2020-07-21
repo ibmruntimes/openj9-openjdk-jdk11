@@ -91,12 +91,19 @@ endif # OPENJDK_TARGET_OS
 # properties files, etc.
 
 $(foreach file, \
-		$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)) \
-		options.default, \
+		$(notdir $(wildcard $(OPENJ9_VM_BUILD_DIR)/java*.properties)), \
 	$(call openj9_copy_files,, \
 		$(addsuffix /$(file), \
 			$(OPENJ9_VM_BUILD_DIR) \
 			$(LIB_DST_DIR))))
+
+$(call openj9_copy_files,, \
+	$(firstword $(wildcard \
+		$(addprefix $(OPENJ9_VM_BUILD_DIR)/, \
+			options.default-$(VERSION_FEATURE)-$(OPENJDK_TARGET_OS) \
+			options.default-$(VERSION_FEATURE) \
+			options.default))) \
+	$(LIB_DST_DIR)/options.default)
 
 $(call openj9_copy_files,, \
 	$(OPENJ9_TOPDIR)/longabout.html \
