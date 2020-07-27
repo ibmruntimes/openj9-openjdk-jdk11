@@ -204,7 +204,7 @@ MODULE_DESCRIPTION_REPLACE_TEXT := \
     </div> \
   </section> \
   \$(NEWLINE)<!-- ============ PACKAGES SUMMARY =========== -->
- 
+
 OPENJDK_JDK_MANAGEMENT_SUMMARY := Defines JDK-specific management interfaces for the JVM.
 OPENJDK_JDK_MANAGEMENT_SUMMARY_ERROR_TEXT := \
 Error: cannot find text '$(OPENJDK_JDK_MANAGEMENT_SUMMARY)' to replace in generated javadoc file $(OPENJ9_ONLY_INDEX_HTML). \
