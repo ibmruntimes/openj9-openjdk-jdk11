@@ -61,7 +61,11 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     [
       case "$OPENJ9_PLATFORM_CODE" in
         oa64|xa64|xl64|xr64|xz64)
-          with_cmake=cmake
+          if test "x$COMPILE_TYPE" != xcross ; then
+            with_cmake=cmake
+          else
+            with_cmake=no
+          fi
           ;;
         *)
           with_cmake=no
