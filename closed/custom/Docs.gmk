@@ -57,7 +57,7 @@ OPENJ9_GROUP_NAME := OpenJ9
 OPENJ9_GROUP_MODULES := openj9.*
 OPENJ9_GROUP_DESCRIPTION := \
     Modules whose names start with {@code openj9.} contain APIs provided by the \
-    <a href="$(OPENJ9_JAVADOC_BASE_URL)">Eclipse OpenJ9</a> project. \
+    <a href="$(OPENJ9_JAVADOC_BASE_URL)" target="_blank">Eclipse OpenJ9</a> project. \
     These APIs can only be used with a JDK which includes the OpenJ9 virtual machine. \
     #
 JDK_GROUPS += OPENJ9
@@ -191,12 +191,10 @@ OPENJ9_ONLY_JAVADOC_JAVA_ARGS = -Djava.awt.headless=true -Dextlink.spec.version=
 OPENJ9_ONLY_JAVADOC_CMD = $(JAVA) $(OPENJ9_ONLY_JAVADOC_JAVA_ARGS) $(NEW_JAVADOC)
 
 OPENJDK_MODULE_REFERENCE_TEXT := \
-  These are the OpenJ9 extensions to this module. Refer to <a href="$(JAVASE_BASE_URL)">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.
+  These are the OpenJ9 extensions to this module. Refer to <a href="$(JAVASE_BASE_URL)" target="_blank">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.
 
 MODULE_DESCRIPTION_FIRST_LINE  := <section role="region">
-MODULE_DESCRIPTION_SECOND_LINE := MODULE DESCRIPTION
-MODULE_DESCRIPTION_MARKER_TEXT := javadoc_marker_text
-MODULE_DESCRIPTION_LAST_LINE   := </section>
+MODULE_DESCRIPTION_LAST_LINE   := <!-- ============ PACKAGES SUMMARY =========== -->
 MODULE_DESCRIPTION_REPLACE_TEXT := \
   <section class="module-description" id="module.description"> \
     <div class="block"> \
@@ -204,7 +202,8 @@ MODULE_DESCRIPTION_REPLACE_TEXT := \
         <dd>$(OPENJDK_MODULE_REFERENCE_TEXT)</dd> \
       </dl> \
     </div> \
-  </section>
+  </section> \
+  \$(NEWLINE)<!-- ============ PACKAGES SUMMARY =========== -->
 
 OPENJDK_JDK_MANAGEMENT_SUMMARY := Defines JDK-specific management interfaces for the JVM.
 OPENJDK_JDK_MANAGEMENT_SUMMARY_ERROR_TEXT := \
@@ -215,11 +214,6 @@ Check the openjdk jdk.management/module.info.java file and adjust closed/custom/
 # sed matching  is greedy.
 # $1 should be unique (otherwise all lines from the first occurrence of $1 are deleted).
 sed_replace_block = $(SED) '/$(subst /,\/,$(1))/,/$(subst /,\/,$(2))/{/$(subst /,\/,$(2))/ s/.*/$(subst /,\/,$(3))/; t; d}'
-
-# sed_replace_regex replaces a regex found anywhere in the input with the replacement
-# text (use to replace matches over multiple lines).
-# $1 is the regex to search for, $2 is the replacement text.
-sed_replace_regex = $(SED) -n '1h;1!H;$${g;s/$(subst /,\/,$(1))/$(subst /,\/,$(2))/;p}'
 
 # sed_replace_first is a simple string replace, first occurrence only
 sed_replace_first = $(SED) 's/$(subst /,\/,$(1))/$(subst /,\/,$(2))/'
@@ -235,7 +229,7 @@ OPENJDK_ONLY_PKGLIST := $(subst /package.html,,$(subst /package-info.java,,$(sub
 
 OPENJ9_STUBS_DIR := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_stub_files
 OPENJ9_ONLY_PACKAGE_STUB_DESC := \
-  /** These are the classes within this package modified by OpenJ9. Refer to <a href="$(JAVASE_BASE_URL)">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.*/
+  /** These are the classes within this package modified by OpenJ9. Refer to <a href="$(JAVASE_BASE_URL)" target="_blank">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.*/
 
 # This shell script replaces the text which came from the openjdk module-info.java files
 # with a link to the same file in the Oracle online documentation.
@@ -259,9 +253,7 @@ OPENJ9_ONLY_JAVADOC_SCRIPT_BODY = \
       regex="$$topdir/.*$$excepttopdir" ; \
       if ! $(GREP) -qe "$$regex" $(OPENJ9_ONLY_JAVADOC_FILES) ; then \
         $(CP) -f "$$fullpath" "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-        $(call sed_replace_block,$(MODULE_DESCRIPTION_SECOND_LINE),$(MODULE_DESCRIPTION_LAST_LINE),$(MODULE_DESCRIPTION_MARKER_TEXT)) <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$$fullpath" ; \
-        $(CP) -f "$$fullpath" "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
-        $(call sed_replace_regex,$(MODULE_DESCRIPTION_FIRST_LINE).*$(MODULE_DESCRIPTION_MARKER_TEXT),$(MODULE_DESCRIPTION_REPLACE_TEXT)) <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$$fullpath" ; \
+        $(call sed_replace_block,$(MODULE_DESCRIPTION_FIRST_LINE),$(MODULE_DESCRIPTION_LAST_LINE),$(MODULE_DESCRIPTION_REPLACE_TEXT)) <"$(OPENJ9_ONLY_JAVADOC_TEMP)" >"$$fullpath" ; \
         $(RM) "$(OPENJ9_ONLY_JAVADOC_TEMP)" ; \
       fi ; \
     done ; \
