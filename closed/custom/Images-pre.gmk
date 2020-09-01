@@ -18,4 +18,8 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-JRE_MODULES += openj9.cuda openj9.gpu
+JRE_MODULES += \
+	openj9.cuda \
+	openj9.dataaccess \
+	openj9.gpu \
+	#
