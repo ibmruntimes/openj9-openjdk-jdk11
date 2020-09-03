@@ -30,6 +30,12 @@ $(call openj9_copy_files,, \
 	$(OPENJ9_VM_BUILD_DIR)/include/jvmti.h \
 	$(INCLUDE_TARGET_DIR)/jvmti.h)
 
+ifeq ($(OPENJDK_TARGET_OS), zos)
+$(call openj9_copy_files,, \
+	$(OPENJ9_VM_BUILD_DIR)/include/jni_convert.h \
+	$(INCLUDE_TARGET_DIR)/jni_convert.h)
+endif
+
 # jitserver
 
 ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
@@ -54,10 +60,12 @@ $(call openj9_copy_files_and_debuginfos, \
 NO_JIT_CPUS := riscv64
 
 $(call openj9_copy_shlibs, \
+	$(if $(filter zos,$(OPENJDK_TARGET_OS)),j9a2e) \
 	j9dmp29 \
 	j9gc29 \
 	j9gcchk29 \
 	j9hookable29 \
+	$(if $(filter zos,$(OPENJDK_TARGET_OS)),j9ifa29) \
 	$(if $(filter $(NO_JIT_CPUS),$(OPENJDK_TARGET_CPU)),,j9jit29) \
 	j9jnichk29 \
 	j9jvmti29 \
@@ -75,7 +83,7 @@ $(call openj9_copy_shlibs, \
 
 # static libraries that are needed on some platforms
 
-ifneq (,$(filter windows zos,$(OPENJDK_TARGET_OS)))
+ifeq ($(OPENJDK_TARGET_OS), windows)
 
 $(call openj9_copy_files,, \
 	$(addsuffix /$(call STATIC_LIBRARY,jsig), \
@@ -85,6 +93,18 @@ $(call openj9_copy_files,, \
 $(call openj9_copy_files,, \
 	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm) \
 	$(LIB_DST_DIR)/$(call STATIC_LIBRARY,jvm))
+
+else ifeq ($(OPENJDK_TARGET_OS), zos)
+
+$(call openj9_copy_files,, \
+	$(addsuffix /libjsig.x, \
+		$(OPENJ9_VM_BUILD_DIR)/lib \
+		$(LIB_DST_DIR)))
+
+$(call openj9_copy_files,, \
+	$(addsuffix /libjvm.x, \
+		$(OPENJ9_VM_BUILD_DIR)/lib/redirector \
+		$(LIB_DST_DIR)))
 
 endif # OPENJDK_TARGET_OS
 
