@@ -224,6 +224,15 @@ else
   FEATURE_SED_SCRIPT += $(call SedDisable,opt_jitserver)
 endif
 
+# Adjust OpenJDK MethodHandles enablement flags.
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_openjdkMethodhandle)
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_methodHandle)
+else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+  FEATURE_SED_SCRIPT += $(call SedEnable,opt_methodHandle)
+  FEATURE_SED_SCRIPT += $(call SedDisable,opt_openjdkMethodhandle)
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
 # Disable windows rebase.
 SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
 
@@ -384,6 +393,14 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
   endif # OPENJ9_ENABLE_CUDA
 
+  ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+    CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=ON
+    CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=OFF
+  else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+    CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=ON
+    CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=OFF
+  endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
 $(OUTPUTDIR)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
 	cd $(@D) && $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
@@ -465,6 +482,12 @@ AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
 JPP_DEST := $(SUPPORT_OUTPUTDIR)/j9jcl_sources
 
+JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
+
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  JPP_TAGS := $(JPP_TAGS);OPENJDK_METHODHANDLES
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
 $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 	@$(ECHO) Generating J9JCL sources
 	@$(BOOT_JDK)/bin/java \
@@ -478,7 +501,7 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
 			-macro:define "com.ibm.oti.vm.library.version=29" \
-			-tag:define "PLATFORM-$(OPENJ9_PLATFORM_CODE)"
+			-tag:define "$(JPP_TAGS)"
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
 
