@@ -126,8 +126,11 @@ $(call openj9_copy_files,, \
 	$(LIB_DST_DIR)/options.default)
 
 $(call openj9_copy_files,, \
-	$(OPENJ9_TOPDIR)/longabout.html \
-	$(LEGAL_DST_DIR)/openj9-notices.html)
+	$(OPENJ9_TOPDIR)/LICENSE \
+	$(LEGAL_DST_DIR)/openj9-notices)
+$(call openj9_copy_files,, \
+	$(OPENJ9_TOPDIR)/epl-2.0.html \
+	$(LEGAL_DST_DIR)/epl-2.0.html)
 $(call openj9_copy_files,, \
         $(TOPDIR)/openj9-openjdk-notices \
         $(LEGAL_DST_DIR)/openj9-openjdk-notices)
