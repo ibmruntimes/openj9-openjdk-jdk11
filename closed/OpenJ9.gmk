@@ -503,7 +503,6 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
-			-macro:define "com.ibm.oti.vm.library.version=29" \
 			-tag:define "$(JPP_TAGS)"
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
