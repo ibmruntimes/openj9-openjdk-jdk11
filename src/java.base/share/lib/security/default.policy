@@ -226,7 +226,6 @@ grant codeBase "jrt:/openj9.cuda" {
     permission java.lang.RuntimePermission "loadLibrary.cuda4j29";
     permission java.lang.RuntimePermission "modifyThread";
     permission java.lang.RuntimePermission "modifyThreadGroup";
-    permission java.util.PropertyPermission "com.ibm.oti.vm.library.version", "read";
 };
 
 grant codeBase "jrt:/openj9.gpu" {

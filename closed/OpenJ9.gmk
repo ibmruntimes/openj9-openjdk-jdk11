@@ -465,7 +465,7 @@ endif # OPENJ9_ENABLE_JITSERVER
 ifneq (true,$(OPENJ9_ENABLE_DDR))
   DDR_COMMAND :=
 else ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-  DDR_COMMAND := $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
+  DDR_COMMAND := $(EXPORT_MSVS_ENV_VARS) $(MAKE) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
 else
   DDR_COMMAND := export CC="$(CC)" CXX="$(CXX)" $(EXPORT_MSVS_ENV_VARS) \
 	&& $(MAKE) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
@@ -503,7 +503,6 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-srcRoot jcl/ \
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(JPP_DEST))" \
-			-macro:define "com.ibm.oti.vm.library.version=29" \
 			-tag:define "$(JPP_TAGS)"
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
