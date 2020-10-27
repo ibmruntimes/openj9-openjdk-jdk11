@@ -19,6 +19,7 @@
 # ===========================================================================
 
 COMPANY_NAME := Eclipse OpenJ9
-OPENJ9OMR_SHA := $(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
-OPENJ9_SHA := $(shell git -C $(OPENJ9_TOPDIR)  rev-parse --short HEAD)
-SOURCE_REVISION = OpenJDK:$(OPENJDK_SHA) OpenJ9:$(OPENJ9_SHA) OMR:$(OPENJ9OMR_SHA)
+
+SOURCE_REVISION := OpenJDK:$(shell git -C $(TOPDIR) rev-parse --short HEAD)
+SOURCE_REVISION += OpenJ9:$(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
+SOURCE_REVISION += OMR:$(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
