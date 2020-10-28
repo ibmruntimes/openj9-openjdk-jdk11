@@ -65,8 +65,6 @@ OPENJ9_ENABLE_OPENJDK_METHODHANDLES := @OPENJ9_ENABLE_OPENJDK_METHODHANDLES@
 
 # for constructing version output
 COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
-USERNAME                := @USERNAME@
-OPENJDK_SHA             := @OPENJDK_SHA@
 
 include $(TOPDIR)/closed/openjdk-tag.gmk
 
