@@ -1,13 +1,13 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
  * published by the Free Software Foundation.
  *
- * IBM designates this particular file as subject to the "Classpath" exception 
+ * IBM designates this particular file as subject to the "Classpath" exception
  * as provided by IBM in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
@@ -28,7 +28,7 @@
 #define J9PRODUCT_NAME            "@PRODUCT_NAME@"
 #define J9TARGET_CPU_BITS         "@OPENJDK_TARGET_CPU_BITS@"
 #define J9TARGET_CPU_OSARCH       "@OPENJDK_TARGET_CPU_OSARCH@"
-#define J9TARGET_OS               "@HOTSPOT_TARGET_OS@"
+#define J9TARGET_OS               "@OPENJDK_TARGET_OS@"
 #define J9USERNAME                "@USERNAME@"
 #define J9VERSION_STRING          "@VERSION_STRING@"
 #define OPENJDK_SHA               "@OPENJDK_SHA@"
