@@ -86,21 +86,15 @@ ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
 endif
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
-  # convert unix path to windows path
-  FixPath = $(shell $(CYGPATH) -m $1)
   # convert windows path to unix path
   UnixPath = $(shell $(CYGPATH) -u $1)
   # set Visual Studio environment
   # wrap PATH in quotes as it contains spaces (unix path)
   # INCLUDE, LIB are already wrapped in quotes (windows paths)
   EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE=$(INCLUDE) LIB=$(LIB)
-  # set the output directory for shared libraries
-  OPENJ9_BIN_OR_LIB_DIR := bin
 else
-  FixPath = $1
   UnixPath = $1
   EXPORT_MSVS_ENV_VARS :=
-  OPENJ9_BIN_OR_LIB_DIR := lib
 endif
 
 .PHONY : \
@@ -108,7 +102,6 @@ endif
 	clean-j9 \
 	clean-j9-dist \
 	clean-openj9-thirdparty-binaries \
-	generate-j9jcl-sources \
 	run-preprocessors-j9 \
 	stage-j9 \
 	#
@@ -324,7 +317,6 @@ $(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING : $(call DependOnVariable, OPENJ9O
 	$(ECHO) '#define OMR_VERSION_STRING "$(OPENJ9OMR_SHA)"' > $@
 
 run-preprocessors-j9 : \
-	generate-j9jcl-sources \
 	$(OPENJ9_VM_BUILD_DIR)/omr/OMR_VERSION_STRING \
 	$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
 	$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h
@@ -490,44 +482,6 @@ build-j9 : run-preprocessors-j9
 		$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm all
 	@$(ECHO) OpenJ9 compile complete
 	+$(DDR_COMMAND)
-
-J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl_sources.done
-
-recur_wildcard = $(foreach dir,$(wildcard $1/*),$(call recur_wildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
-AllJclSource   = $(call recur_wildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
-
-JPP_DEST := $(SUPPORT_OUTPUTDIR)/j9jcl_sources
-JPP_JAR  := $(J9TOOLS_DIR)/jpp.jar
-JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
-
-ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
-  JPP_TAGS += OPENJDK_METHODHANDLES
-endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
-
-$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
-	@$(ECHO) Building OpenJ9 Java Preprocessor
-	@$(MKDIR) -p $(J9TOOLS_DIR)
-	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
-		BOOT_JDK=$(BOOT_JDK) \
-		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
-		JAVA_HOME=$(BOOT_JDK) \
-		$(call FixPath,$(JPP_JAR))
-	@$(ECHO) Generating J9JCL sources
-	@$(BOOT_JDK)/bin/java \
-		-cp "$(call FixPath,$(JPP_JAR))" \
-		-Dfile.encoding=US-ASCII \
-		com.ibm.jpp.commandline.CommandlineBuilder \
-			-verdict \
-			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
-			-config JAVA11 \
-			-srcRoot jcl/ \
-			-xml jpp_configuration.xml \
-			-dest "$(call FixPath,$(JPP_DEST))" \
-			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
-	@$(MKDIR) -p $(@D)
-	@$(TOUCH) $@
-
-generate-j9jcl-sources : $(J9JCL_SOURCES_DONEFILE)
 
 clean-j9 : clean-openj9-thirdparty-binaries
 	+$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm clean

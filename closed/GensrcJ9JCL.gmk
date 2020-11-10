@@ -1,0 +1,63 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+.PHONY : all
+
+all :
+
+include $(SPEC)
+include $(TOPDIR)/make/common/MakeBase.gmk
+
+J9TOOLS_DIR := $(SUPPORT_OUTPUTDIR)/j9tools
+JPP_JAR     := $(J9TOOLS_DIR)/jpp.jar
+
+RecursiveWildcard = $(foreach dir,$(wildcard $1/*),$(call RecursiveWildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
+AllJclSource = $(call RecursiveWildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
+
+JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
+
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  JPP_TAGS += OPENJDK_METHODHANDLES
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
+$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
+	@$(ECHO) Building OpenJ9 Java Preprocessor
+	@$(MKDIR) -p $(J9TOOLS_DIR)
+	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
+		BOOT_JDK=$(BOOT_JDK) \
+		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
+		JAVA_HOME=$(BOOT_JDK) \
+		$(call FixPath,$(JPP_JAR))
+	@$(ECHO) Generating J9JCL sources
+	@$(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-verdict \
+			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
+			-config JAVA$(VERSION_FEATURE) \
+			-srcRoot jcl/ \
+			-xml jpp_configuration.xml \
+			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR))" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+	@$(MKDIR) -p $(@D)
+	@$(TOUCH) $@
+
+all : $(J9JCL_SOURCES_DONEFILE)

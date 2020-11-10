@@ -69,13 +69,12 @@ DOCS_MODULES += $(OPENJ9_MODULES)
 
 OPENJDK_JAVADOC_MARKER := $(DOCS_OUTPUTDIR)/api/index.html
 OPENJ9_JAVADOC_MARKER := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_JDK_API_openj9.marker
-JDK_API_CUSTOM_TARGETS += $(OPENJ9_JAVADOC_MARKER)
-
 OPENJ9_JAVADOC_SCRIPT := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_openj9_footer_replace.sh
 OPENJ9_JAVADOC_TEMP  := $(SUPPORT_OUTPUTDIR)/docs/_javadoc_temp.html
+JDK_API_CUSTOM_TARGETS += $(OPENJ9_JAVADOC_MARKER)
 
 ################################################################################
-# The OpenJ9 classes are built from the j9jcl_sources and closed/src
+# The OpenJ9 classes are built from the $(J9JCL_SOURCES_DIR) and closed/src
 # directories.
 # The packages are beneath directories called /share/classes (or /unix/classes,
 # /windows/classes etc.) which do not appear in the javadoc tree structure.
@@ -101,7 +100,7 @@ OPENJ9_JAVADOC_SCRIPT_BODY = \
 
 $(OPENJ9_JAVADOC_MARKER) : $(OPENJDK_JAVADOC_MARKER)
 	$(ECHO) '$(OPENJ9_JAVADOC_SCRIPT_BODY)' >$(OPENJ9_JAVADOC_SCRIPT)
-	$(CD) $(SUPPORT_OUTPUTDIR)/j9jcl_sources ; \
+	$(CD) $(J9JCL_SOURCES_DIR) ; \
 		$(FIND) . -type f -name '*.java' \
 			| $(SED) -e 's|/[^/]\+/classes/|/|' -e 's|\.java$$|.html|' \
 			| $(XARGS) $(BASH) $(OPENJ9_JAVADOC_SCRIPT)
@@ -133,7 +132,7 @@ JAVASE_BASE_URL := https://docs.oracle.com/en/java/javase/$(VERSION_SPECIFICATIO
 
 OPENJ9_ONLY_JAVADOC_MARKER := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_only_exec.marker
 OPENJ9_ONLY_JAVADOC_SCRIPT := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_only_replace.sh
-OPENJ9_ONLY_JAVADOC_TEMP  := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_temp.html
+OPENJ9_ONLY_JAVADOC_TEMP := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_temp.html
 JDK_API_CUSTOM_TARGETS += $(OPENJ9_ONLY_JAVADOC_MARKER)
 
 OPENJ9_ONLY_JDK_NAME := OpenJ9 JDK $(VERSION_SPECIFICATION)
@@ -148,14 +147,14 @@ OPENJ9_ONLY_INDEX_HTML := $(IMAGES_OUTPUTDIR)/openj9-docs/api/index.html
 # javadoc is not generated for the classes  which are replaced by openj9
 # but are functionally identical to the openjdk implementations
 # (e.g. java.lang.String), since the openjdk javadoc is still applicable.
-# 
+#
 # The list of source files is passed explicitly (via OPENJ9_ONLY_JAVADOC_FILES)
 # to the javadoc tool on the command line and used as dependencies
 # (via OPENJ9_ONLY_JAVADOC_FILELIST) to identify when the javadoc needs
 # regenerating.
 
-OPENJ9_ONLY_FILELIST := $(shell $(FIND) $(SUPPORT_OUTPUTDIR)/j9jcl_sources -type f)
-OPENJ9_ONLY_JAVADOC_FILELIST := $(shell $(FIND) $(SUPPORT_OUTPUTDIR)/j9jcl_sources -type f  '(' -path '*/openj9.*/*.java' -o -path '*/jdk.management/*.java' ')')
+OPENJ9_ONLY_FILELIST := $(shell $(FIND) $(J9JCL_SOURCES_DIR) -type f)
+OPENJ9_ONLY_JAVADOC_FILELIST := $(shell $(FIND) $(J9JCL_SOURCES_DIR) -type f  '(' -path '*/openj9.*/*.java' -o -path '*/jdk.management/*.java' ')')
 OPENJ9_ONLY_JAVADOC_FILES := $(SUPPORT_OUTPUTDIR)/openj9-docs/_javadoc_openj9_files.txt
 
 # Set up the javadoc command line options.
@@ -193,8 +192,8 @@ OPENJ9_ONLY_JAVADOC_CMD = $(JAVA) $(OPENJ9_ONLY_JAVADOC_JAVA_ARGS) $(NEW_JAVADOC
 OPENJDK_MODULE_REFERENCE_TEXT := \
   These are the OpenJ9 extensions to this module. Refer to <a href="$(JAVASE_BASE_URL)" target="_blank">$(JAVASE_BASE_URL)</a> for the reference implementation documentation.
 
-MODULE_DESCRIPTION_FIRST_LINE  := <section role="region">
-MODULE_DESCRIPTION_LAST_LINE   := <!-- ============ PACKAGES SUMMARY =========== -->
+MODULE_DESCRIPTION_FIRST_LINE := <section role="region">
+MODULE_DESCRIPTION_LAST_LINE := <!-- ============ PACKAGES SUMMARY =========== -->
 MODULE_DESCRIPTION_REPLACE_TEXT := \
   <section class="module-description" id="module.description"> \
     <div class="block"> \
@@ -270,7 +269,7 @@ OPENJ9_ONLY_JAVADOC_SCRIPT_BODY = \
 OPENJ9_ONLY_JAVADOC_SCRIPT_BODY_ESC = $(subst ','\'',$(OPENJ9_ONLY_JAVADOC_SCRIPT_BODY))
 
 # Create a stub package-info.java file for each package with source files in
-# j9jcl_sources but no package-info.java file. This is then used by javadoc
+# $(J9JCL_SOURCES_DIR) but no package-info.java file. This is then used by javadoc
 # instead of the openjdk version to direct the user to the Oracle online
 # documentation for that package.
 
