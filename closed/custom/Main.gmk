@@ -22,7 +22,6 @@ CLEAN_DIRS += vm
 
 .PHONY : \
 	debug-image \
-	generate-j9jcl-sources \
 	j9vm-build \
 	test-image-openj9 \
 	#
@@ -44,9 +43,6 @@ OPENJ9_MAKE := $(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/OpenJ9.gmk
 # rules make that happen.
 
 create-main-targets-include java.base-gensrc : generate-j9jcl-sources
-
-generate-j9jcl-sources :
-	@+$(OPENJ9_MAKE) $@
 
 j9vm-build : buildtools-langtools
   ifeq ($(BUILD_OPENSSL),yes)

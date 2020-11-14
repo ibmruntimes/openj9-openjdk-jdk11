@@ -36,5 +36,18 @@ MODULES_FILTER += \
 
 TOP_SRC_DIRS += \
     $(TOPDIR)/closed/src \
-    $(SUPPORT_OUTPUTDIR)/j9jcl_sources \
+    $(J9JCL_SOURCES_DIR) \
     #
+
+.PHONY : generate-j9jcl-sources
+
+generate-j9jcl-sources $(J9JCL_SOURCES_DONEFILE) :
+	@+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/GensrcJ9JCL.gmk
+
+# When building multiple configurations at once (e.g. 'make CONF= images')
+# the 'create-main-targets-include' target will only be considered for the
+# first configuration; J9JCL source generation will be delayed for other
+# configurations. In order to produce a complete module-deps.gmk, we need
+# to ensure that the J9JCL source has been generated.
+
+-include $(J9JCL_SOURCES_DONEFILE)
