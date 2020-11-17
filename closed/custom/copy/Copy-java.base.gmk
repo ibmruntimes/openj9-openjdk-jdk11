@@ -32,7 +32,7 @@ $(call openj9_copy_files,, \
 
 ifeq ($(OPENJDK_TARGET_OS), zos)
 $(call openj9_copy_files,, \
-	$(OPENJ9_VM_BUILD_DIR)/include/jni_convert.h \
+	$(OPENJ9_TOPDIR)/runtime/include/jni_convert.h \
 	$(INCLUDE_TARGET_DIR)/jni_convert.h)
 endif
 
