@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# ===========================================================================
+
 ###############################################################################
 #
 # Setup version numbers
@@ -68,6 +72,7 @@ AC_DEFUN_ONCE([JDKVER_SETUP_JDK_VERSION_NUMBERS],
 
   # Source the version numbers file
   . $AUTOCONF_DIR/version-numbers
+  . $TOPDIR/closed/autoconf/version-numbers
 
   # Some non-version number information is set in that file
   AC_SUBST(LAUNCHER_NAME)

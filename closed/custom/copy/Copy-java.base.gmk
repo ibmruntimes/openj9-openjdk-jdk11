@@ -32,7 +32,7 @@ $(call openj9_copy_files,, \
 
 ifeq ($(OPENJDK_TARGET_OS), zos)
 $(call openj9_copy_files,, \
-	$(OPENJ9_VM_BUILD_DIR)/include/jni_convert.h \
+	$(OPENJ9_TOPDIR)/runtime/include/jni_convert.h \
 	$(INCLUDE_TARGET_DIR)/jni_convert.h)
 endif
 
@@ -63,7 +63,9 @@ $(call openj9_copy_shlibs, \
 	$(if $(filter zos,$(OPENJDK_TARGET_OS)),j9a2e) \
 	j9dmp29 \
 	j9gc29 \
+	$(if $(filter static,$(OMR_MIXED_REFERENCES_MODE)),j9gc_full29) \
 	j9gcchk29 \
+	$(if $(filter static,$(OMR_MIXED_REFERENCES_MODE)),j9gcchk_full29) \
 	j9hookable29 \
 	$(if $(filter zos,$(OPENJDK_TARGET_OS)),j9ifa29) \
 	$(if $(filter $(NO_JIT_CPUS),$(OPENJDK_TARGET_CPU)),,j9jit29) \
