@@ -23,6 +23,13 @@ BOOT_MODULES += \
     openj9.sharedclasses \
     #
 
+PLATFORM_MODULES += \
+	openj9.cuda \
+	openj9.dataaccess \
+	openj9.gpu \
+	openj9.zosconditionhandling \
+	#
+
 MODULES_FILTER += \
     jdk.aot \
     jdk.hotspot.agent \
