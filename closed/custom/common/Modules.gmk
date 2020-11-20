@@ -19,9 +19,9 @@
 # ===========================================================================
 
 BOOT_MODULES += \
-    openj9.jvm \
-    openj9.sharedclasses \
-    #
+	openj9.jvm \
+	openj9.sharedclasses \
+	#
 
 PLATFORM_MODULES += \
 	openj9.cuda \
@@ -31,20 +31,20 @@ PLATFORM_MODULES += \
 	#
 
 MODULES_FILTER += \
-    jdk.aot \
-    jdk.hotspot.agent \
-    jdk.internal.vm.ci \
-    jdk.internal.vm.compiler \
-    jdk.internal.vm.compiler.management \
-    jdk.jfr \
-    jdk.jstatd \
-    jdk.management.jfr \
-    #
+	jdk.aot \
+	jdk.hotspot.agent \
+	jdk.internal.vm.ci \
+	jdk.internal.vm.compiler \
+	jdk.internal.vm.compiler.management \
+	jdk.jfr \
+	jdk.jstatd \
+	jdk.management.jfr \
+	#
 
 TOP_SRC_DIRS += \
-    $(TOPDIR)/closed/src \
-    $(J9JCL_SOURCES_DIR) \
-    #
+	$(TOPDIR)/closed/src \
+	$(J9JCL_SOURCES_DIR) \
+	#
 
 .PHONY : generate-j9jcl-sources
 
