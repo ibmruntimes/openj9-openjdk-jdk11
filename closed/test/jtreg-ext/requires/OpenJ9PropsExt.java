@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2020 All Rights Reserved
  * ===========================================================================
  * 
  * This code is free software; you can redistribute it and/or modify it
@@ -35,10 +35,27 @@ public class OpenJ9PropsExt implements Callable<Map<String, String>> {
     public Map<String, String> call() {
 
         Map<String, String> map = new HashMap<>();
-        map.put("vm.graal.enabled", "false");
- 
+        try {
+            map.put("vm.graal.enabled", "false");
+            map.put("vm.bits", vmBits());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        } 
         return map;
     }
 
+    /**
+     * @return VM bitness, the value of the "sun.arch.data.model" property.
+     */
+    protected String vmBits() throws Exception {
+        String dataModel = System.getProperty("sun.arch.data.model");
+        if (dataModel != null) {
+            return dataModel;
+        } else {
+            throw new Exception("Can't get 'sun.arch.data.model' property");
+        }
+    }
 }
 
