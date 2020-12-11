@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 1997, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 1997, 2020 All Rights Reserved
  * ===========================================================================
  */
 
@@ -76,11 +76,12 @@ import java.util.zip.ZipFile;
 import jdk.internal.misc.JavaNetURLAccess;
 import jdk.internal.misc.JavaUtilZipFileAccess;
 import jdk.internal.misc.SharedSecrets;
+import jdk.internal.misc.VM;                                    //OpenJ9-shared_classes_misc
 import jdk.internal.util.jar.InvalidJarIndexError;
 import jdk.internal.util.jar.JarIndex;
 import sun.net.util.URLUtil;
 import sun.net.www.ParseUtil;
-import com.ibm.sharedclasses.spi.SharedClassProvider;
+import com.ibm.sharedclasses.spi.SharedClassProvider;           //OpenJ9-shared_classes_misc
 
 import sun.security.action.GetPropertyAction;
 
@@ -204,11 +205,11 @@ public class URLClassPath {
     }                                                                           //OpenJ9-shared_classes_misc
     
     /* Method to set SharedClassProvider and loaderURLs */                      //OpenJ9-shared_classes_misc
-    public void setSharedClassProvider(SharedClassProvider helper) {            //OpenJ9-shared_classes_misc
+    public synchronized void setSharedClassProvider(SharedClassProvider helper) {            //OpenJ9-shared_classes_misc
         if (null == sharedClassServiceProvider) {                               //OpenJ9-shared_classes_misc
             sharedClassServiceProvider = helper;                                //OpenJ9-shared_classes_misc
         }                                                                       //OpenJ9-shared_classes_misc
-        if (usingSharedClasses()) {                                             //OpenJ9-shared_classes_misc
+        if (usingSharedClasses() && null == loaderURLs) {                       //OpenJ9-shared_classes_misc
             loaderURLs = new ArrayList(path.size());                            //OpenJ9-shared_classes_misc
         }                                                                       //OpenJ9-shared_classes_misc
     }                                                                           //OpenJ9-shared_classes_misc
@@ -569,11 +570,24 @@ public class URLClassPath {
             // Finally, add the Loader to the search path.
             loaders.add(loader);
             lmap.put(urlNoFragString, loader);
-           if (usingSharedClasses()) {                                          //OpenJ9-shared_classes_misc
-               /* update search path URLs */                                    //OpenJ9-shared_classes_misc
-               loaderURLs.add(url);                                             //OpenJ9-shared_classes_misc
-           }                                                                    //OpenJ9-shared_classes_misc
-                                                                                //OpenJ9-shared_classes_misc
+
+            if (usingSharedClasses()) {                                                  //OpenJ9-shared_classes_misc
+                /* update search path URLs */                                            //OpenJ9-shared_classes_misc
+                loaderURLs.add(url);                                                     //OpenJ9-shared_classes_misc
+            } else {                                                                     //OpenJ9-shared_classes_misc
+                if (!VM.isModuleSystemInited()) {                                        //OpenJ9-shared_classes_misc
+                    /**                                                                  //OpenJ9-shared_classes_misc
+                     * usingSharedClasses() is false. If Module System is not            //OpenJ9-shared_classes_misc
+                     * initialized yet, it is likely that BuiltinClassLoader             //OpenJ9-shared_classes_misc
+                     * hasn't called setSharedClassProvider(). We still nedd to          //OpenJ9-shared_classes_misc
+                     * update loaderURLs in this case.                                   //OpenJ9-shared_classes_misc
+                     */                                                                  //OpenJ9-shared_classes_misc
+                    if (null == loaderURLs) {                                            //OpenJ9-shared_classes_misc
+                        loaderURLs = new ArrayList(path.size());                         //OpenJ9-shared_classes_misc
+                    }                                                                    //OpenJ9-shared_classes_misc
+                    loaderURLs.add(url);                                                 //OpenJ9-shared_classes_misc
+                }                                                                        //OpenJ9-shared_classes_misc
+            }                                                                            //OpenJ9-shared_classes_misc
         }
         return loaders.get(index);
     }
