@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -18,11 +18,11 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-java.base_COPY += ExternalMessages.properties
+include GensrcCommonJdk.gmk
 
-jdk.jcmd_EXCLUDES += sun
+ifeq (true,$(OPENJ9_ENABLE_DDR))
 
-openj9.dtfj_COPY     += StructureAliases29.dat StructureAliases29-edg.dat
-openj9.dtfj_EXCLUDES += com/ibm/j9ddr/tools/ant
+all :
+	@+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/DDR.gmk generate
 
-openj9.gpu_COPY += ibm_gpu_thresholds.properties
+endif # OPENJ9_ENABLE_DDR
