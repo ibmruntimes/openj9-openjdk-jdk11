@@ -129,7 +129,14 @@ $(DDR_VM_MARKER) : $(call FindFiles,$(DDR_VM_SRC_ROOT))
 	$(CP) -rf $(DDR_VM_SRC_ROOT)/. $(DDR_GENSRC_DIR)
 	@$(TOUCH) $@
 
-generate : $(DDR_CLASSES_MARKER) $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER) $(DDR_VM_MARKER)
+# The occasional build has been seen to fail when $(CP) thinks it must create
+# a directory only to discover that another process (i.e. PointerGenerator
+# or StructureStubGenerator) has already done so:
+#   /usr/bin/cp: cannot create directory 'support/gensrc/openj9.dtfj/com/ibm/j9ddr/vm29': File exists
+# To avoid that problem, we insist that $(CP) runs before the other tasks.
+$(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER) : $(DDR_VM_MARKER)
+
+generate : $(DDR_CLASSES_MARKER) $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER)
 
 #############################################################################
 

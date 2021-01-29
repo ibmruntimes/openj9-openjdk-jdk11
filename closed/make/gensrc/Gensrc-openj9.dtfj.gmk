@@ -20,9 +20,7 @@
 
 include GensrcCommonJdk.gmk
 
-ifeq (true,$(OPENJ9_ENABLE_DDR))
-
 all :
+ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/DDR.gmk generate
-
 endif # OPENJ9_ENABLE_DDR
