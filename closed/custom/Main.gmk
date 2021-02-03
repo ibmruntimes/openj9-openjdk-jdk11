@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -84,15 +84,14 @@ ALL_TARGETS += test-image-openj9
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
-.PHONY : openj9.dtfj-ddr-gen openj9.dtfj-ddr-jar
+.PHONY : openj9.dtfj-gensrc-src openj9.dtfj-compile_check
 
-openj9.dtfj-ddr-gen : j9vm-build $(addsuffix -java, java.base java.desktop openj9.dtfj openj9.traceformat)
-	+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/DDR.gmk generate
+openj9.dtfj-gensrc-src : j9vm-build
 
-openj9.dtfj-ddr-jar : openj9.dtfj-ddr-gen
-	+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/DDR.gmk build_jar
+openj9.dtfj-compile_check : openj9.dtfj-java
+	+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/DDR.gmk compile_check
 
-openj9.dtfj-launchers : openj9.dtfj-ddr-jar
+openj9.dtfj-jmod : openj9.dtfj-compile_check
 
 endif # OPENJ9_ENABLE_DDR
 
