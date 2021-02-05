@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
  * ===========================================================================
  */
 package com.sun.crypto.provider;
@@ -193,7 +193,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      */
     @Override
     protected byte[] engineGetIV() {
-        return nonce.clone();
+        return (nonce == null)? null : nonce.clone();
     }
 
     /**
@@ -211,13 +211,14 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
     @Override
     protected AlgorithmParameters engineGetParameters() {
         AlgorithmParameters params = null;
+        byte[] nonceData = (initialized || nonce != null) ? nonce : createRandomNonce(null);
         if (mode == MODE_AEAD) {
             try {
                 // Force the 12-byte nonce into a DER-encoded OCTET_STRING
-                byte[] derNonce = new byte[nonce.length + 2];
+                byte[] derNonce = new byte[nonceData.length + 2];
                 derNonce[0] = 0x04;                 // OCTET_STRING tag
-                derNonce[1] = (byte)nonce.length;   // 12-byte length;
-                System.arraycopy(nonce, 0, derNonce, 2, nonce.length);
+                derNonce[1] = (byte)nonceData.length;   // 12-byte length;
+                System.arraycopy(nonceData, 0, derNonce, 2, nonceData.length);
                 params = AlgorithmParameters.getInstance("ChaCha20-Poly1305");
                 params.init(derNonce);
             } catch (NoSuchAlgorithmException | IOException exc) {
