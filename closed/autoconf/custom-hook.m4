@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -684,7 +684,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 
 # Create a tool wrapper for use by cmake.
 # Consists of a shell script which wraps commands with an invocation of a wrapper command.
-# OPENJ9_GENERATE_TOOL_WRAPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
+# OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
 AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPER],
 [
   tool_file="$OPENJ9_TOOL_DIR/$1"
