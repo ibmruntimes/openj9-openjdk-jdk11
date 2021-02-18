@@ -193,7 +193,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      */
     @Override
     protected byte[] engineGetIV() {
-        return (nonce == null)? null : nonce.clone();
+        return (nonce != null) ? nonce.clone() : null;
     }
 
     /**
@@ -211,7 +211,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
     @Override
     protected AlgorithmParameters engineGetParameters() {
         AlgorithmParameters params = null;
-        byte[] nonceData = (initialized || nonce != null) ? nonce : createRandomNonce(null);
+        byte[] nonceData = (nonce != null) ? nonce : createRandomNonce(null);
         if (mode == MODE_AEAD) {
             try {
                 // Force the 12-byte nonce into a DER-encoded OCTET_STRING
@@ -225,7 +225,6 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
                 throw new RuntimeException(exc);
             }
         }
-
         return params;
     }
 
