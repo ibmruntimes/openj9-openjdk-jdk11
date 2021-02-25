@@ -1,0 +1,29 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+ifeq ($(MODULE),openj9.dtfj)
+  # All the classes in com.ibm.j9ddr.vm29.structure are ignored at runtime
+  # (they're derived from the blob in the related core file), so they can
+  # be excluded from the module. We can't exclude the entire package; this
+  # pattern matches everything except 'DDRAlgorithmVersions.class', so it
+  # will be the only retained class (it was chosen because it's guaranteed
+  # to be present and because it's relatively small).
+  JMOD_FLAGS += --exclude 'regex:com/ibm/j9ddr/vm29/structure/.*(?<!/DDRAlgorithmVersions\.class)$$'
+endif
