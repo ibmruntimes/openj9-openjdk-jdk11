@@ -223,6 +223,21 @@ grant codeBase "jrt:/jdk.zipfs" {
     permission java.util.PropertyPermission "os.name", "read";
 };
 
+grant codeBase "jrt:/ibm.healthcenter" {
+    permission java.io.FilePermission "<<ALL FILES>>", "read";
+    permission java.lang.management.ManagementPermission "monitor";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.sun.jndi.url.rmi";
+    permission java.lang.RuntimePermission "accessDeclaredMembers";
+    permission java.lang.RuntimePermission "getStackTrace";
+    permission java.lang.RuntimePermission "loadLibrary.*";
+    permission java.net.SocketPermission "*", "accept,connect,listen,resolve";
+    permission java.util.logging.LoggingPermission "control";
+    permission java.util.PropertyPermission "*", "read,write";
+    permission javax.management.MBeanPermission "com.ibm.java.diagnostics.healthcenter.agent.mbean.HealthCenter#-[IBM:type=HCMBeanServer]", "registerMBean";
+    permission javax.management.MBeanServerPermission "createMBeanServer";
+    permission javax.management.MBeanTrustPermission "register";
+};
+
 grant codeBase "jrt:/openj9.cuda" {
     permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.vm";
     permission java.lang.RuntimePermission "loadLibrary.cuda4j29";
