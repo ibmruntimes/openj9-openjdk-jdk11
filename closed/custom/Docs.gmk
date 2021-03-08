@@ -57,7 +57,7 @@ OPENJ9_GROUP_NAME := OpenJ9
 OPENJ9_GROUP_MODULES := openj9.*
 OPENJ9_GROUP_DESCRIPTION := \
     Modules whose names start with {@code openj9.} contain APIs provided by the \
-    <a href="$(OPENJ9_JAVADOC_BASE_URL)" target="_blank">Eclipse OpenJ9</a> project. \
+    <a href="$(OPENJ9_BASE_URL)" target="_blank">Eclipse OpenJ9</a> project. \
     These APIs can only be used with a JDK which includes the OpenJ9 virtual machine. \
     #
 JDK_GROUPS += OPENJ9
