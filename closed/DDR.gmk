@@ -65,7 +65,6 @@ DDR_GENSRC_DIR := $(SUPPORT_OUTPUTDIR)/gensrc/openj9.dtfj
 DDR_CLASSES_MARKER := $(DDR_SUPPORT_DIR)/classes.done
 DDR_POINTERS_MARKER := $(DDR_SUPPORT_DIR)/gensrc-pointers.done
 DDR_STRUCTURES_MARKER := $(DDR_SUPPORT_DIR)/gensrc-structures.done
-DDR_TOOLS_MARKER := $(DDR_SUPPORT_DIR)/tools.done
 DDR_VM_MARKER := $(DDR_SUPPORT_DIR)/debugtools.done
 
 #############################################################################
@@ -94,12 +93,15 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_TOOLS, \
 
 #############################################################################
 
+# Patch the DDR tools if present in the boot jdk.
+DDR_TOOLS_OPTIONS := --patch-module=openj9.dtfj=$(DDR_TOOLS_BIN)
+
 # When StructureReader opens the blob, it must be able to find StructureAliases*.dat,
 # which requires that $(DDR_VM_SRC_ROOT) be on the classpath.
 $(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(BUILD_DDR_TOOLS)
 	@$(ECHO) Generating DDR pointer and structure class files
 	@$(RM) -rf $(DDR_CLASSES_BIN)
-	@$(JAVA) -cp "$(DDR_TOOLS_BIN)$(PATH_SEP)$(DDR_VM_SRC_ROOT)" \
+	@$(JAVA) -cp "$(DDR_TOOLS_BIN)$(PATH_SEP)$(DDR_VM_SRC_ROOT)" $(DDR_TOOLS_OPTIONS) \
 		com.ibm.j9ddr.tools.ClassGenerator \
 			--blob=$(DDR_BLOB_FILE) \
 			--out=$(DDR_CLASSES_BIN)
@@ -107,7 +109,7 @@ $(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(BUILD_DDR_TOOLS)
 
 $(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(BUILD_DDR_TOOLS)
 	@$(ECHO) Generating DDR pointer class source files
-	@$(JAVA) -cp $(DDR_TOOLS_BIN) com.ibm.j9ddr.tools.PointerGenerator \
+	@$(JAVA) -cp $(DDR_TOOLS_BIN) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.PointerGenerator \
 		-f $(dir $(DDR_SUPERSET_FILE)) \
 		-s $(notdir $(DDR_SUPERSET_FILE)) \
 		-p com.ibm.j9ddr.vm29.pointer.generated \
@@ -115,12 +117,19 @@ $(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(BUILD_DDR_TOOLS)
 		-o $(DDR_GENSRC_DIR)
 	@$(TOUCH) $@
 
-$(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(BUILD_DDR_TOOLS)
+# Any new references to constants must be paired with additions to the compatibility
+# list unless those constants were defined long ago.
+DDR_COMPATIBILITY_FILE := $(DDR_VM_SRC_ROOT)/com/ibm/j9ddr/CompatibilityConstants29.dat
+DDR_RESTRICT_FILE := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/data/superset-constants.dat
+
+$(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_RESTRICT_FILE) $(DDR_COMPATIBILITY_FILE) $(BUILD_DDR_TOOLS)
 	@$(ECHO) Generating DDR structure stub source files
-	@$(JAVA) -cp $(DDR_TOOLS_BIN) com.ibm.j9ddr.tools.StructureStubGenerator \
+	@$(JAVA) -cp $(DDR_TOOLS_BIN) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.StructureStubGenerator \
 		-f $(dir $(DDR_SUPERSET_FILE)) \
 		-s $(notdir $(DDR_SUPERSET_FILE)) \
 		-p com.ibm.j9ddr.vm29.structure \
+		-r $(DDR_RESTRICT_FILE) \
+		-c $(DDR_COMPATIBILITY_FILE) \
 		-o $(DDR_GENSRC_DIR)
 	@$(TOUCH) $@
 
