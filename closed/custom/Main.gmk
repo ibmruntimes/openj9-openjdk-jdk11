@@ -104,3 +104,8 @@ clean-openj9-only-docs :
 	$(RM) -rf $(IMAGES_OUTPUTDIR)/openj9-docs $(SUPPORT_OUTPUTDIR)/openj9-docs
 
 ALL_TARGETS += clean-openj9-only-docs
+
+ifneq (,$(HEALTHCENTER_JAR))
+  # The content must be extracted before module-info can be compiled.
+  ibm.healthcenter-java : ibm.healthcenter-copy
+endif # HEALTHCENTER_JAR

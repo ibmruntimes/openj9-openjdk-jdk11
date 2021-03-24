@@ -1,0 +1,86 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+include $(TOPDIR)/closed/CopySupport.gmk
+
+ifneq (,$(HEALTHCENTER_JAR))
+
+# Extract the contents of HEALTHCENTER_JAR to HEALTHCENTER_HOME.
+
+HEALTHCENTER_HOME := $(SUPPORT_OUTPUTDIR)/healthcenter
+HEALTHCENTER_EXTRACT := $(HEALTHCENTER_HOME)/extract_marker
+
+$(HEALTHCENTER_EXTRACT) : $(HEALTHCENTER_JAR)
+	@$(ECHO) Extracting contents of $(HEALTHCENTER_JAR)
+	@$(RM) -rf $(@D)
+	$(call MakeDir, $(@D))
+	$(UNZIP) -q $< -d $(@D)
+	@$(TOUCH) $@
+
+# Copy the properties file, changing the default transport to jrmp.
+
+TRANSPORT_PROPERTY_NAME       := com.ibm.java.diagnostics.healthcenter.agent.transport
+TRANSPORT_PROPERTY_REGEX      := $(subst .,\.,$(TRANSPORT_PROPERTY_NAME))
+TRANSPORT_PROPERTY_SED_SCRIPT := -e 's|$(TRANSPORT_PROPERTY_REGEX)\s*=.*|$(TRANSPORT_PROPERTY_NAME)=jrmp|'
+
+# Extract the content from jars.
+
+HEALTHCENTER_COPY := $(JDK_OUTPUTDIR)/modules/$(MODULE)/_the.$(MODULE)_copy_marker
+
+HEALTHCENTER_JARS := \
+	$(HEALTHCENTER_HOME)/healthcenter.jar \
+	$(HEALTHCENTER_HOME)/monitoring-api.jar \
+	#
+
+HEALTHCENTER_EXCLUDED_PACKAGES := \
+	com.ibm.jvm \
+	com.ibm.tools.attach \
+	com.sun.tools.attach \
+	#
+
+HEALTHCENTER_EXCLUSIONS := \
+	"META-INF/MANIFEST.MF" \
+	"deps/*TraceFormat*.dat" \
+	$(foreach package, $(HEALTHCENTER_EXCLUDED_PACKAGES), "$(subst .,/,$(package))/*")
+
+# Not all components are available on all platforms, hence the use of $(wildcard).
+# Also note that evaluation must be delayed, so we use '=' instead of ':='.
+HEALTHCENTER_LIBRARIES = \
+	$(HEALTHCENTER_HOME)/$(call SHARED_LIBRARY,healthcenter) \
+	$(HEALTHCENTER_HOME)/plugins/$(call SHARED_LIBRARY,hcapiplugin) \
+	$(wildcard $(HEALTHCENTER_HOME)/plugins/$(call SHARED_LIBRARY,hcmqtt))
+
+$(HEALTHCENTER_COPY) : $(HEALTHCENTER_EXTRACT)
+	$(call MakeDir, $(LIB_DST_DIR))
+	@$(ECHO) Copying healthcenter.properties
+	$(SED) $(TRANSPORT_PROPERTY_SED_SCRIPT) \
+		< $(HEALTHCENTER_HOME)/healthcenter.properties \
+		> $(LIB_DST_DIR)/healthcenter.properties
+	$(CP) -f $(HEALTHCENTER_LIBRARIES) $(LIB_DST_DIR)/
+	$(call MakeDir, $(@D))
+	$(foreach jar, $(HEALTHCENTER_JARS), \
+		@$(ECHO) Extracting contents of $(notdir $(jar)) $(NEWLINE) \
+		$(UNZIP) -o -q $(jar) -d $(@D) -x $(HEALTHCENTER_EXCLUSIONS) $(NEWLINE) \
+	)
+	@$(TOUCH) $@
+
+TARGETS += $(HEALTHCENTER_COPY)
+
+endif # HEALTHCENTER_JAR

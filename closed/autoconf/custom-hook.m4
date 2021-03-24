@@ -42,6 +42,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_COMPILERS
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
+  OPENJ9_CONFIGURE_HEALTHCENTER
   OPENJ9_CONFIGURE_NUMA
   OPENJ9_CONFIGURE_WARNINGS
   OPENJ9_CONFIGURE_JITSERVER
@@ -60,7 +61,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     ],
     [
       case "$OPENJ9_PLATFORM_CODE" in
-        ap64|oa64|xa64|xl64|wa64|xr64|xz64)
+        ap64|oa64|wa64|xa64|xl64|xr64|xz64)
           if test "x$COMPILE_TYPE" != xcross ; then
             with_cmake=cmake
           else
@@ -264,6 +265,34 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
   fi
 
   AC_SUBST(OPENJ9_ENABLE_DDR)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_HEALTHCENTER],
+[
+  HEALTHCENTER_JAR=
+  AC_ARG_WITH(healthcenter, [AS_HELP_STRING([--with-healthcenter], [import healthcenter artifacts from this archive])],
+    [
+      if test "x$with_healthcenter" != xno ; then
+        healthcenter_jar="$with_healthcenter"
+        BASIC_FIXUP_PATH(healthcenter_jar)
+        AC_MSG_CHECKING([healthcenter])
+        if ! test -f "$healthcenter_jar" ; then
+          AC_MSG_ERROR([healthcenter archive not found at $with_healthcenter])
+        else
+          if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
+            # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+            healthcenter_jar="`$CYGPATH -m $healthcenter_jar`"
+          fi
+          if test "$healthcenter_jar" = "$with_healthcenter" ; then
+            AC_MSG_RESULT([$with_healthcenter])
+          else
+            AC_MSG_RESULT([$with_healthcenter @<:@$healthcenter_jar@:>@])
+          fi
+          HEALTHCENTER_JAR=$healthcenter_jar
+        fi
+      fi
+    ])
+  AC_SUBST(HEALTHCENTER_JAR)
 ])
 
 AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
