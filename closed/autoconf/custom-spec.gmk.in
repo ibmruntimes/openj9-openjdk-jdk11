@@ -127,6 +127,9 @@ else
 	$1
 endif
 
+# Archive from which to import Health Center content.
+HEALTHCENTER_JAR := @HEALTHCENTER_JAR@
+
 # OpenSSL
 BUILD_OPENSSL           := @BUILD_OPENSSL@
 OPENSSL_BUNDLE_LIB_PATH := @OPENSSL_BUNDLE_LIB_PATH@
