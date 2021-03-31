@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -29,6 +29,12 @@ PLATFORM_MODULES += \
 	openj9.gpu \
 	openj9.zosconditionhandling \
 	#
+
+ifneq (,$(HEALTHCENTER_JAR))
+  PLATFORM_MODULES += ibm.healthcenter
+else
+  MODULES_FILTER   += ibm.healthcenter
+endif
 
 MODULES_FILTER += \
 	jdk.aot \

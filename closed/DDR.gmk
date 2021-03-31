@@ -75,9 +75,11 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_TOOLS, \
 	BIN := $(DDR_TOOLS_BIN), \
 	CLASSPATH := $(JDK_OUTPUTDIR)/modules/java.base, \
 	SRC := $(DDR_VM_SRC_ROOT), \
+	COPY := StructureAliases29.dat, \
 	INCLUDE_FILES := \
 		com/ibm/j9ddr/BytecodeGenerator.java \
 		com/ibm/j9ddr/CTypeParser.java \
+		com/ibm/j9ddr/StructureAliases29.dat \
 		com/ibm/j9ddr/StructureHeader.java \
 		com/ibm/j9ddr/StructureReader.java \
 		com/ibm/j9ddr/StructureTypeManager.java \
