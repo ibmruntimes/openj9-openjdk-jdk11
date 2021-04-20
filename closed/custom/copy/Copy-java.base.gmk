@@ -100,14 +100,14 @@ $(call openj9_copy_files,, \
 else ifeq ($(OPENJDK_TARGET_OS), zos)
 
 $(call openj9_copy_files,, \
-	$(addsuffix /libjsig.x, \
-		$(OPENJ9_VM_BUILD_DIR)/lib \
-		$(LIB_DST_DIR)))
+	$(addsuffix libjsig.x, \
+		$(OPENJ9_VM_BUILD_DIR)/lib/ \
+		$(addprefix $(LIB_DST_DIR), / /j9vm/ /server/)))
 
 $(call openj9_copy_files,, \
-	$(addsuffix /libjvm.x, \
-		$(OPENJ9_VM_BUILD_DIR)/lib/redirector \
-		$(LIB_DST_DIR)))
+	$(addsuffix libjvm.x, \
+		$(OPENJ9_VM_BUILD_DIR)/lib/redirector/ \
+		$(addprefix $(LIB_DST_DIR), /j9vm/ /server/)))
 
 endif # OPENJDK_TARGET_OS
 
@@ -148,7 +148,7 @@ $(call openj9_copy_files,, \
 endif # OPENJ9_ENABLE_DDR
 
 ##########################################################################################
-# Optionally copy OpenSSL Crypto Lbrary
+# Optionally copy OpenSSL Crypto Library
 # To bundle first search for openssl 1.1.x library, if not found, search for 1.0.x
 ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   ifeq ($(OPENJDK_TARGET_OS), linux)
