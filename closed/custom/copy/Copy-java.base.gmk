@@ -148,7 +148,7 @@ $(call openj9_copy_files,, \
 endif # OPENJ9_ENABLE_DDR
 
 ##########################################################################################
-# Optionally copy OpenSSL Crypto Lbrary
+# Optionally copy OpenSSL Crypto Library
 # To bundle first search for openssl 1.1.x library, if not found, search for 1.0.x
 ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   ifeq ($(OPENJDK_TARGET_OS), linux)
