@@ -1,10 +1,10 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
-# published by the Free Software Foundation.  
+# published by the Free Software Foundation.
 #
 # IBM designates this particular file as subject to the "Classpath" exception
 # as provided by IBM in the LICENSE file that accompanied this code.
@@ -24,5 +24,5 @@
 
 COMPANY_NAME="Eclipse OpenJ9"
 VENDOR_URL="http://www.eclipse.org/openj9"
-VENDOR_URL_BUG="https://github.com/eclipse/openj9/issues/new?labels=userRaised&template=user-problem.md"
-VENDOR_URL_VM_BUG="https://github.com/eclipse/openj9/issues/new?labels=userRaised&template=user-problem.md"
+VENDOR_URL_BUG="https://github.com/eclipse-openj9/openj9/issues/new?labels=userRaised&template=user-problem.md"
+VENDOR_URL_VM_BUG="https://github.com/eclipse-openj9/openj9/issues/new?labels=userRaised&template=user-problem.md"
