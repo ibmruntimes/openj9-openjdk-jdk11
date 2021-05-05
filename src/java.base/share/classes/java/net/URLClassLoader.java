@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
  * ===========================================================================
  */
 package java.net;
@@ -189,9 +189,9 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
      */                                                                          //OpenJ9-shared_classes_misc
 	private synchronized void initializeSharedClassesSupport(URL[] initialClassPath) {        //OpenJ9-shared_classes_misc
 	   if (null == sharedClassServiceProvider) {
-			ServiceLoader<SharedClassProvider> sl = ServiceLoader.load(SharedClassProvider.class); 
-			for (SharedClassProvider p : sl) {												
-				if (null != p) {	
+			ServiceLoader<SharedClassProvider> sl = ServiceLoader.load(SharedClassProvider.class);
+			for (SharedClassProvider p : sl) {
+				if (null != p) {
 					if (null != p.initializeProvider(this, initialClassPath, false, false)){
 						sharedClassServiceProvider = p;
 						break;
@@ -237,7 +237,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         }
         initializeSharedClassesSupport(urls);                                    //OpenJ9-shared_classes_misc
         this.acc = AccessController.getContext();
-        ucp = new URLClassPath(urls, null, this.acc, sharedClassServiceProvider);       //OpenJ9-shared_classes_misc        
+        ucp = new URLClassPath(urls, null, this.acc, sharedClassServiceProvider);       //OpenJ9-shared_classes_misc
     }
 
     URLClassLoader(String name, URL[] urls, ClassLoader parent,
@@ -250,7 +250,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
         }
         initializeSharedClassesSupport(urls);                                    //OpenJ9-shared_classes_misc
         this.acc = acc;
-        ucp = new URLClassPath(urls, null, this.acc, sharedClassServiceProvider);       //OpenJ9-shared_classes_misc        
+        ucp = new URLClassPath(urls, null, this.acc, sharedClassServiceProvider);       //OpenJ9-shared_classes_misc
     }
 
     /**
@@ -583,7 +583,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
             if (usingSharedClasses()) {                                         //OpenJ9-shared_classes_misc
             	SharedClassIndexHolder sharedClassIndexHolder = new SharedClassIndexHolder(); /*ibm@94142*/ //OpenJ9-shared_classes_misc
 				IntConsumer consumer = (i)->sharedClassIndexHolder.setIndex(i); //OpenJ9-shared_classes_misc
-                byte[] sharedClazz = sharedClassServiceProvider.findSharedClassURLClasspath(name, consumer); //OpenJ9-shared_classes_misc                                             
+                byte[] sharedClazz = sharedClassServiceProvider.findSharedClassURLClasspath(name, consumer); //OpenJ9-shared_classes_misc
                 if (sharedClazz != null) {                                      //OpenJ9-shared_classes_misc
                     int indexFoundData = sharedClassIndexHolder.index;          //OpenJ9-shared_classes_misc
                     SharedClassMetaData metadata = sharedClassMetaDataCache.getSharedClassMetaData(indexFoundData);  //OpenJ9-shared_classes_misc
@@ -741,7 +741,7 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                       definePackage(pkgname, null, null, null, null, null, null, null); //OpenJ9-shared_classes_misc
                     }                                                          //OpenJ9-shared_classes_misc
                 } catch (IllegalArgumentException iae) {                       //OpenJ9-shared_classes_misc
-                    // https://github.com/eclipse/openj9/issues/3038           //OpenJ9-shared_classes_misc
+                    // https://github.com/eclipse-openj9/openj9/issues/3038           //OpenJ9-shared_classes_misc
                     // Detect and ignore race between two threads defining different classes in the same package. //OpenJ9-shared_classes_misc
                     if (getAndVerifyPackage(pkgname, man, url) == null) {      //OpenJ9-shared_classes_misc
                         // Should never happen                                 //OpenJ9-shared_classes_misc
