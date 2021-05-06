@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -91,7 +91,12 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
   # set Visual Studio environment
   # wrap PATH in quotes as it contains spaces (unix path)
   # INCLUDE, LIB are already wrapped in quotes (windows paths)
-  EXPORT_MSVS_ENV_VARS := PATH="$(PATH)" INCLUDE=$(INCLUDE) LIB=$(LIB)
+  EXPORT_COMPILER_ENV_VARS := PATH="$(PATH)" INCLUDE=$(INCLUDE) LIB=$(LIB)
+
+else ifeq (zos,$(OPENJDK_TARGET_OS))
+  UnixPath = $1
+  # Allow options to follow the input file name
+  EXPORT_COMPILER_ENV_VARS := _CC_CCMODE=1 _C89_CCMODE=1 _CXX_CCMODE=1
 else
   UnixPath = $1
   EXPORT_MSVS_ENV_VARS :=
@@ -411,7 +416,7 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 
 $(OUTPUTDIR)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
-	cd $(@D) && $(EXPORT_MSVS_ENV_VARS) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
+	cd $(@D) && $(EXPORT_COMPILER_ENV_VARS) $(CMAKE) $(CMAKE_ARGS) $(OPENJ9_TOPDIR)
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUTDIR)/vm/cmake.stamp
@@ -420,7 +425,7 @@ else # OPENJ9_ENABLE_CMAKE
 
 run-preprocessors-j9 : stage-j9
 	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
-	+BOOT_JDK=$(BOOT_JDK) $(EXPORT_MSVS_ENV_VARS) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
+	+BOOT_JDK=$(BOOT_JDK) $(EXPORT_COMPILER_ENV_VARS) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 		$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
 			DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
@@ -469,9 +474,9 @@ endif # OPENJ9_ENABLE_JITSERVER
 ifneq (true,$(OPENJ9_ENABLE_DDR))
   DDR_COMMAND :=
 else ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-  DDR_COMMAND := $(EXPORT_MSVS_ENV_VARS) $(MAKE) $(MAKE_ARGS) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
+  DDR_COMMAND := $(EXPORT_COMPILER_ENV_VARS) $(MAKE) $(MAKE_ARGS) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
 else
-  DDR_COMMAND := CC="$(CC)" CXX="$(CXX)" $(EXPORT_MSVS_ENV_VARS) \
+  DDR_COMMAND := CC="$(CC)" CXX="$(CXX)" $(EXPORT_COMPILER_ENV_VARS) \
 	$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
 endif # OPENJ9_ENABLE_DDR
 
@@ -481,7 +486,7 @@ build-j9 : run-preprocessors-j9
 	@$(ECHO) "    openjdk - $(OPENJDK_SHA)"
 	@$(ECHO) "    openj9  - $(OPENJ9_SHA)"
 	@$(ECHO) "    omr     - $(OPENJ9OMR_SHA)"
-	+OPENJ9_BUILD=true $(EXPORT_MSVS_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	+OPENJ9_BUILD=true $(EXPORT_COMPILER_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm all
 	@$(ECHO) OpenJ9 compile complete
 	+$(DDR_COMMAND)
