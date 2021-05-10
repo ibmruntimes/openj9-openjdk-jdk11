@@ -92,14 +92,13 @@ ifeq (windows,$(OPENJDK_TARGET_OS))
   # wrap PATH in quotes as it contains spaces (unix path)
   # INCLUDE, LIB are already wrapped in quotes (windows paths)
   EXPORT_COMPILER_ENV_VARS := PATH="$(PATH)" INCLUDE=$(INCLUDE) LIB=$(LIB)
-
 else ifeq (zos,$(OPENJDK_TARGET_OS))
   UnixPath = $1
   # Allow options to follow the input file name
   EXPORT_COMPILER_ENV_VARS := _CC_CCMODE=1 _C89_CCMODE=1 _CXX_CCMODE=1
 else
   UnixPath = $1
-  EXPORT_MSVS_ENV_VARS :=
+  EXPORT_COMPILER_ENV_VARS :=
 endif
 
 .PHONY : \
