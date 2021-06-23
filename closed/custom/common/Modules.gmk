@@ -24,6 +24,7 @@ BOOT_MODULES += \
 	#
 
 PLATFORM_MODULES += \
+	openj9.criu \
 	openj9.cuda \
 	openj9.dataaccess \
 	openj9.gpu \
