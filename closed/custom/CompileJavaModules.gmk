@@ -23,6 +23,5 @@ java.base_COPY += ExternalMessages.properties
 jdk.jcmd_EXCLUDES += sun
 
 openj9.dtfj_COPY += .dat
-openj9.dtfj_EXCLUDES += com/ibm/j9ddr/tools/ant
 
 openj9.gpu_COPY += ibm_gpu_thresholds.properties
