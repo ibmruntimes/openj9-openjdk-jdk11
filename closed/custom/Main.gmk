@@ -54,6 +54,7 @@ j9vm-build : buildtools-langtools
 OPENJ9_VM_MODULES := \
 	java.base \
 	jdk.management \
+	openj9.criu \
 	openj9.cuda \
 	openj9.dtfj \
 	openj9.sharedclasses \
