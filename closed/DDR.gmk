@@ -153,9 +153,6 @@ generate : $(DDR_CLASSES_MARKER) $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER)
 
 ifneq (,$(wildcard $(DDR_GENSRC_DIR)))
 
-# Packages to be excluded from compilation.
-DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
-
 # Compile DDR code again, to ensure compatibility with class files
 # as they would be dynamically generated from the blob.
 $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
@@ -167,8 +164,7 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 		--system none, \
 	BIN := $(DDR_TEST_BIN), \
 	CLASSPATH := $(DDR_CLASSES_BIN), \
-	SRC := $(J9JCL_SOURCES_DIR)/openj9.dtfj/share/classes, \
-	EXCLUDES := $(DDR_SRC_EXCLUDES) \
+	SRC := $(J9JCL_SOURCES_DIR)/openj9.dtfj/share/classes \
 	))
 
 .PHONY : compile_check
