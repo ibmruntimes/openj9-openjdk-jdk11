@@ -23,10 +23,6 @@
 # questions.
 #
 
-# ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
-# ===========================================================================
-
 # When you read this source. Remember that $(sort ...) has the side effect
 # of removing duplicates. It is actually this side effect that is
 # desired whenever sort is used below!
