@@ -25,7 +25,6 @@
 #     * generate java pointer source files
 #     * generate java structure stub source files
 #     * generate pointer and structure stub class files
-#     * add copy of DDR_VM source to gensrc/openj9.dtfj
 # - compile_check
 #     * compile DDR_VM source with the generated class files from above
 # ===========================================================================
@@ -65,7 +64,6 @@ DDR_GENSRC_DIR := $(SUPPORT_OUTPUTDIR)/gensrc/openj9.dtfj
 DDR_CLASSES_MARKER := $(DDR_SUPPORT_DIR)/classes.done
 DDR_POINTERS_MARKER := $(DDR_SUPPORT_DIR)/gensrc-pointers.done
 DDR_STRUCTURES_MARKER := $(DDR_SUPPORT_DIR)/gensrc-structures.done
-DDR_VM_MARKER := $(DDR_SUPPORT_DIR)/debugtools.done
 
 #############################################################################
 
@@ -139,17 +137,12 @@ $(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_RESTRICT_FILE) $(DDR_COMPA
 		-o $(DDR_GENSRC_DIR)
 	@$(TOUCH) $@
 
-$(DDR_VM_MARKER) : $(call FindFiles,$(DDR_VM_SRC_ROOT))
-	@$(ECHO) Adding DDR_VM source files to openj9.dtfj
-	$(CP) -rf $(DDR_VM_SRC_ROOT)/. $(DDR_GENSRC_DIR)
-	@$(TOUCH) $@
-
 # The occasional build has been seen to fail when $(CP) thinks it must create
 # a directory only to discover that another process (i.e. PointerGenerator
 # or StructureStubGenerator) has already done so:
 #   /usr/bin/cp: cannot create directory 'support/gensrc/openj9.dtfj/com/ibm/j9ddr/vm29': File exists
 # To avoid that problem, we insist that $(CP) runs before the other tasks.
-$(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER) : $(DDR_VM_MARKER)
+$(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER) : $(call FindFiles,$(DDR_VM_SRC_ROOT))
 
 generate : $(DDR_CLASSES_MARKER) $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER)
 
@@ -160,29 +153,18 @@ generate : $(DDR_CLASSES_MARKER) $(DDR_POINTERS_MARKER) $(DDR_STRUCTURES_MARKER)
 
 ifneq (,$(wildcard $(DDR_GENSRC_DIR)))
 
-# We depend upon class files from these modules.
-DDR_CLASSPATH := \
-	$(addprefix $(JDK_OUTPUTDIR)/modules/, \
-		java.base \
-		java.desktop \
-		openj9.dtfj \
-		openj9.traceformat \
-		$(if $(filter zos,$(OPENJDK_TARGET_OS)),ibm.jzos) \
-	)
-
-# Packages to be excluded from compilation.
-DDR_SRC_EXCLUDES := com/ibm/j9ddr/tools/ant
-
 # Compile DDR code again, to ensure compatibility with class files
 # as they would be dynamically generated from the blob.
 $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 	SETUP := GENERATE_JDKBYTECODE, \
 	DEPENDS := $(DDR_CLASSES_MARKER), \
-	ADD_JAVAC_FLAGS := --upgrade-module-path $(JDK_OUTPUTDIR)/modules --system none, \
+	ADD_JAVAC_FLAGS := \
+		--patch-module openj9.dtfj=$(DDR_CLASSES_BIN) \
+		--upgrade-module-path $(JDK_OUTPUTDIR)/modules \
+		--system none, \
 	BIN := $(DDR_TEST_BIN), \
-	CLASSPATH := $(DDR_CLASSES_BIN) $(DDR_CLASSPATH), \
-	SRC := $(DDR_VM_SRC_ROOT), \
-	EXCLUDES := $(DDR_SRC_EXCLUDES) \
+	CLASSPATH := $(DDR_CLASSES_BIN), \
+	SRC := $(J9JCL_SOURCES_DIR)/openj9.dtfj/share/classes \
 	))
 
 .PHONY : compile_check
