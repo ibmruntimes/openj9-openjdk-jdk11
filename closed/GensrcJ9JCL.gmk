@@ -31,13 +31,23 @@ JPP_JAR     := $(J9TOOLS_DIR)/jpp.jar
 RecursiveWildcard = $(foreach dir,$(wildcard $1/*),$(call RecursiveWildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
 AllJclSource = $(call RecursiveWildcard,$(OPENJ9_TOPDIR)/jcl/src,*.java)
 
+ifeq (true,$(OPENJ9_ENABLE_DDR))
+  AllDdrSource = $(call RecursiveWildcard,$(OPENJ9_TOPDIR)/debugtools/DDR_VM/src,*.java)
+else
+  AllDdrSource =
+endif # OPENJ9_ENABLE_DDR
+
 JPP_TAGS := PLATFORM-$(OPENJ9_PLATFORM_CODE)
+
+ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
+  JPP_TAGS += CRIU_SUPPORT
+endif # OPENJ9_ENABLE_CRIU_SUPPORT
 
 ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   JPP_TAGS += OPENJDK_METHODHANDLES
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
-$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
+$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource) $(AllDdrSource)
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
@@ -57,6 +67,23 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource)
 			-xml jpp_configuration.xml \
 			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR))" \
 			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+  ifeq (true,$(OPENJ9_ENABLE_DDR))
+	@$(ECHO) Generating DDR_VM sources
+	@$(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-includeIfUnsure \
+			-noWarnIncludeIf \
+			-verdict \
+			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR)/debugtools)/" \
+			-config DDR_VM \
+			-srcRoot DDR_VM/ \
+			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)/" \
+			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR)/openj9.dtfj/share/classes)" \
+			-macro:define "JAVA_SPEC_VERSION=$(VERSION_FEATURE)" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+  endif # OPENJ9_ENABLE_DDR
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
 

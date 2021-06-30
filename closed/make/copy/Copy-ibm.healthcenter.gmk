@@ -32,6 +32,9 @@ $(HEALTHCENTER_EXTRACT) : $(HEALTHCENTER_JAR)
 	@$(RM) -rf $(@D)
 	$(call MakeDir, $(@D))
 	$(UNZIP) -q $< -d $(@D)
+  ifeq (zos,$(OPENJDK_TARGET_OS))
+	$(CHTAG) -c ISO8859-1 -t $(HEALTHCENTER_HOME)/healthcenter.properties
+  endif
 	@$(TOUCH) $@
 
 # Copy the properties file, changing the default transport to jrmp.
@@ -67,11 +70,19 @@ HEALTHCENTER_LIBRARIES = \
 	$(HEALTHCENTER_HOME)/plugins/$(call SHARED_LIBRARY,hcapiplugin) \
 	$(wildcard $(HEALTHCENTER_HOME)/plugins/$(call SHARED_LIBRARY,hcmqtt))
 
+# User-configurable .properties files should be encoded in EBCDIC on z/OS.
+ifeq (zos,$(OPENJDK_TARGET_OS))
+  FIX_ENCODING := | $(ICONV) -f ISO8859-1 -t IBM-1047
+else
+  FIX_ENCODING :=
+endif
+
 $(HEALTHCENTER_COPY) : $(HEALTHCENTER_EXTRACT)
 	$(call MakeDir, $(LIB_DST_DIR))
 	@$(ECHO) Copying healthcenter.properties
 	$(SED) $(TRANSPORT_PROPERTY_SED_SCRIPT) \
 		< $(HEALTHCENTER_HOME)/healthcenter.properties \
+		$(FIX_ENCODING) \
 		> $(LIB_DST_DIR)/healthcenter.properties
 	$(CP) -f $(HEALTHCENTER_LIBRARIES) $(LIB_DST_DIR)/
 	$(call MakeDir, $(@D))

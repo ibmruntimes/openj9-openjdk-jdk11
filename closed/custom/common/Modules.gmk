@@ -19,6 +19,7 @@
 # ===========================================================================
 
 BOOT_MODULES += \
+	$(if $(call equals, $(OPENJ9_ENABLE_CRIU_SUPPORT), true), openj9.criu) \
 	openj9.jvm \
 	openj9.sharedclasses \
 	#

@@ -23,10 +23,6 @@
 # questions.
 #
 
-# ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
-# ===========================================================================
-
 # When you read this source. Remember that $(sort ...) has the side effect
 # of removing duplicates. It is actually this side effect that is
 # desired whenever sort is used below!
@@ -1025,9 +1021,6 @@ define SetupNativeCompilationBody
               $$($1_OUTPUT_DIR)/$$($1_BASENAME).dSYM/Contents/Resources/DWARF/$$($1_BASENAME)
           $1_CREATE_DEBUGINFO_CMDS := \
               $(DSYMUTIL) --out $$($1_OUTPUT_DIR)/$$($1_BASENAME).dSYM $$($1_TARGET)
-        else ifeq ($(OPENJDK_TARGET_OS), aix)
-          $1_DEBUGINFO_FILES := $$($1_OUTPUT_DIR)/$$($1_NOSUFFIX).debuginfo
-          $1_CREATE_DEBUGINFO_CMDS := $(CP) -f $$($1_TARGET) $$($1_DEBUGINFO_FILES)
         endif # OPENJDK_TARGET_OS
 
         # Since the link rule creates more than one file that we want to track,
