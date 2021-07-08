@@ -550,9 +550,9 @@ public class ObjectInputStream
             throw new AssertionError("internal error");
 
         ClassLoader oldCachedLudcl = null;
-	boolean setCached = false;
+        boolean setCached = false;
 
-	if (((null == curContext) || refreshLudcl) && (isClassCachingEnabled)) {
+        if (((null == curContext) || refreshLudcl) && (isClassCachingEnabled)) {
             oldCachedLudcl = cachedLudcl;
 
             // If caller is not provided, follow the standard path to get the cachedLudcl.
@@ -866,13 +866,22 @@ public class ObjectInputStream
         throws IOException, ClassNotFoundException
     {
         String name = desc.getName();
+        ClassLoader oldCachedLudcl = null;
+        boolean setCached = false;
+
         try {
             if (null == classCache) {
                 return Class.forName(name, false, latestUserDefinedLoader());
             } else {
                 if (refreshLudcl) {
+                    oldCachedLudcl = cachedLudcl;
                     cachedLudcl = latestUserDefinedLoader();
+
+                    setCached = true;
                     refreshLudcl = false;
+                    if (null == startingLudclObject) {
+                        startingLudclObject = this;
+                    }
                 }
                 return classCache.get(name, cachedLudcl);
             }
@@ -882,6 +891,15 @@ public class ObjectInputStream
                 return cl;
             } else {
                 throw ex;
+            }
+        } finally {
+            /* Back to the start, refresh ludcl cache on next call. */
+            if (this == startingLudclObject) {
+                refreshLudcl = true;
+                startingLudclObject = null;
+            }
+            if (setCached) {
+                cachedLudcl = oldCachedLudcl;
             }
         }
     }
