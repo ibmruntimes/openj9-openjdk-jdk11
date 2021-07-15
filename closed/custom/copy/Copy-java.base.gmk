@@ -60,7 +60,6 @@ $(call openj9_copy_files_and_debuginfos, \
 NO_JIT_CPUS := riscv64
 
 $(call openj9_copy_shlibs, \
-	$(if $(filter zos,$(OPENJDK_TARGET_OS)),j9a2e) \
 	j9dmp29 \
 	j9gc29 \
 	$(if $(filter static,$(OMR_MIXED_REFERENCES_MODE)),j9gc_full29) \
@@ -84,7 +83,7 @@ $(call openj9_copy_shlibs, \
 	omrsig \
 	)
 
-# static libraries that are needed on some platforms
+# static and shared libraries that are needed on some platforms
 
 ifeq ($(OPENJDK_TARGET_OS), windows)
 
@@ -98,6 +97,11 @@ $(call openj9_copy_files,, \
 	$(LIB_DST_DIR)/$(call STATIC_LIBRARY,jvm))
 
 else ifeq ($(OPENJDK_TARGET_OS), zos)
+
+$(call openj9_copy_files_and_debuginfos, \
+	$(addsuffix /$(call SHARED_LIBRARY,j9a2e), \
+		$(OPENJ9_VM_BUILD_DIR) \
+		$(LIB_DST_DIR)))
 
 $(call openj9_copy_files,, \
 	$(addsuffix libjsig.x, \
