@@ -27,7 +27,9 @@ module ibm.healthcenter {
   requires java.logging;
   requires java.management;
   requires java.naming;
+  requires java.prefs;
   requires java.rmi;
+  requires openj9.traceformat;
   exports com.ibm.java.diagnostics.healthcenter.agent.mbean;
   exports com.ibm.java.diagnostics.healthcenter.api;
   exports com.ibm.java.diagnostics.healthcenter.api.classes;
