@@ -135,6 +135,19 @@ AC_DEFUN_ONCE([JDKVER_SETUP_JDK_VERSION_NUMBERS],
     PRODUCT_NAME="$with_product_name"
   fi
 
+  # The product suffix, if any
+  AC_ARG_WITH(product-suffix, [AS_HELP_STRING([--with-product-suffix],
+      [Set product suffix. Among other uses, contributes to the 'java.runtime.name' system property. @<:@not specified@:>@])])
+  if test "x$with_product_suffix" = xyes; then
+    AC_MSG_ERROR([--with-product-suffix must have a value])
+  elif [ ! [[ $with_product_suffix =~ ^[[:print:]]*$ ]] ]; then
+    AC_MSG_ERROR([--with-product-suffix contains non-printing characters: $with_product_suffix])
+  elif test "x$with_product_suffix" != x -a "x$with_product_suffix" != xno; then
+    # Only set PRODUCT_SUFFIX if '--with-product-suffix' was used and is not empty.
+    # Otherwise we will use the value from "version-numbers" included above.
+    PRODUCT_SUFFIX="$with_product_suffix"
+  fi
+
   # Set the JDK RC name
   AC_ARG_WITH(jdk-rc-name, [AS_HELP_STRING([--with-jdk-rc-name],
       [Set JDK RC name. This is used for FileDescription and ProductName properties
