@@ -91,12 +91,14 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_TOOLS, \
 
 #############################################################################
 
-DDR_TOOLS_OPTIONS := -cp $(DDR_TOOLS_BIN)
-
 # When StructureReader opens the blob, it must be able to find AuxFieldInfo29.dat
-# and StructureAliases*.dat, but we don't want to use old versions that might be
-# included in the bootjdk. Patching openj9.dtfj fixes that.
-DDR_TOOLS_OPTIONS += --patch-module=openj9.dtfj=$(call PathList, $(DDR_TOOLS_BIN) $(DDR_VM_SRC_ROOT))
+# and StructureAliases*.dat, so they must be on the classpath for a non-openj9
+# bootjdk. When using an openj9 bootjdk, we don't want to use old versions that
+# might be included: Patching openj9.dtfj fixes that.
+DDR_TOOLS_PATHLIST := $(call PathList, $(DDR_TOOLS_BIN) $(DDR_VM_SRC_ROOT))
+DDR_TOOLS_OPTIONS := \
+	-cp $(DDR_TOOLS_PATHLIST) \
+	--patch-module=openj9.dtfj=$(DDR_TOOLS_PATHLIST)
 
 # Only fields listed in this file can be directly accessed by hand-written DDR code;
 # its contents influence the generated class files.
