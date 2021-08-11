@@ -60,7 +60,6 @@ HEALTHCENTER_EXCLUDED_PACKAGES := \
 
 HEALTHCENTER_EXCLUSIONS := \
 	"META-INF/MANIFEST.MF" \
-	"deps/*TraceFormat*.dat" \
 	$(foreach package, $(HEALTHCENTER_EXCLUDED_PACKAGES), "$(subst .,/,$(package))/*")
 
 # Not all components are available on all platforms, hence the use of $(wildcard).
