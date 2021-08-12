@@ -74,7 +74,7 @@ requires.properties= \
 requires.extraPropDefns = [../../../closed/test/jtreg-ext/requires/OpenJ9PropsExt.java]
 
 # Minimum jtreg version
-requiredVersion=4.2 b13
+requiredVersion=5.1 b1
 
 # Path to libraries in the topmost test directory. This is needed so @library
 # does not need ../../../ notation to reach them
