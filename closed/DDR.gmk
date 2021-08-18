@@ -91,27 +91,30 @@ $(eval $(call SetupJavaCompilation,BUILD_DDR_TOOLS, \
 
 #############################################################################
 
-# Patch the DDR tools if present in the boot jdk.
-DDR_TOOLS_OPTIONS := --patch-module=openj9.dtfj=$(DDR_TOOLS_BIN)
+# When StructureReader opens the blob, it must be able to find AuxFieldInfo29.dat
+# and StructureAliases*.dat, so they must be on the classpath for a non-openj9
+# bootjdk. When using an openj9 bootjdk, we don't want to use old versions that
+# might be included: Patching openj9.dtfj fixes that.
+DDR_TOOLS_PATHLIST := $(call PathList, $(DDR_TOOLS_BIN) $(DDR_VM_SRC_ROOT))
+DDR_TOOLS_OPTIONS := \
+	-cp $(DDR_TOOLS_PATHLIST) \
+	--patch-module=openj9.dtfj=$(DDR_TOOLS_PATHLIST)
 
 # Only fields listed in this file can be directly accessed by hand-written DDR code;
 # its contents influence the generated class files.
 DDR_FIELDS_FILE := $(DDR_VM_SRC_ROOT)/com/ibm/j9ddr/AuxFieldInfo29.dat
 
-# When StructureReader opens the blob, it must be able to find StructureAliases*.dat,
-# which requires that $(DDR_VM_SRC_ROOT) be on the classpath.
 $(DDR_CLASSES_MARKER) : $(DDR_BLOB_FILE) $(DDR_FIELDS_FILE) $(BUILD_DDR_TOOLS)
 	@$(ECHO) Generating DDR pointer and structure class files
 	@$(RM) -rf $(DDR_CLASSES_BIN)
-	@$(JAVA) -cp $(call PathList, $(DDR_TOOLS_BIN) $(DDR_VM_SRC_ROOT)) $(DDR_TOOLS_OPTIONS) \
-		com.ibm.j9ddr.tools.ClassGenerator \
-			--blob=$(DDR_BLOB_FILE) \
-			--out=$(DDR_CLASSES_BIN)
+	@$(JAVA) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.ClassGenerator \
+		--blob=$(DDR_BLOB_FILE) \
+		--out=$(DDR_CLASSES_BIN)
 	@$(TOUCH) $@
 
 $(DDR_POINTERS_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_FIELDS_FILE) $(BUILD_DDR_TOOLS)
 	@$(ECHO) Generating DDR pointer class source files
-	@$(JAVA) -cp $(DDR_TOOLS_BIN) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.PointerGenerator \
+	@$(JAVA) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.PointerGenerator \
 		-a $(DDR_FIELDS_FILE) \
 		-f $(dir $(DDR_SUPERSET_FILE)) \
 		-s $(notdir $(DDR_SUPERSET_FILE)) \
@@ -127,7 +130,7 @@ DDR_RESTRICT_FILE := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/data/superset-constants.
 
 $(DDR_STRUCTURES_MARKER) : $(DDR_SUPERSET_FILE) $(DDR_RESTRICT_FILE) $(DDR_COMPATIBILITY_FILE) $(DDR_FIELDS_FILE) $(BUILD_DDR_TOOLS)
 	@$(ECHO) Generating DDR structure stub source files
-	@$(JAVA) -cp $(DDR_TOOLS_BIN) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.StructureStubGenerator \
+	@$(JAVA) $(DDR_TOOLS_OPTIONS) com.ibm.j9ddr.tools.StructureStubGenerator \
 		-f $(dir $(DDR_SUPERSET_FILE)) \
 		-s $(notdir $(DDR_SUPERSET_FILE)) \
 		-p com.ibm.j9ddr.vm29.structure \
