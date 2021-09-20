@@ -71,8 +71,7 @@ COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
 
 include $(TOPDIR)/closed/openjdk-tag.gmk
 
-J9JDK_EXT_VERSION       := $(VERSION_NUMBER_FOUR_POSITIONS)
-J9JDK_EXT_VERSION       := HEAD
+J9JDK_EXT_VERSION       := $(VERSION_NUMBER_FOUR_POSITIONS)-ea
 J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
 # required by CMake
