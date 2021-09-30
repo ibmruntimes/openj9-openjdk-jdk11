@@ -416,6 +416,16 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
     CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=OFF
   endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
+  # Propagate configure option '--disable-warnings-as-errors-omr' to OMR.
+  ifeq (false,$(WARNINGS_AS_ERRORS_OMR))
+    CMAKE_ARGS += -DOMR_WARNINGS_AS_ERRORS=OFF
+  endif
+
+  # Propagate configure option '--disable-warnings-as-errors-openj9' to OpenJ9.
+  ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
+    CMAKE_ARGS += -DJ9VM_WARNINGS_AS_ERRORS=OFF
+ endif
+
   # Do this last so extra args take precedence.
   CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
