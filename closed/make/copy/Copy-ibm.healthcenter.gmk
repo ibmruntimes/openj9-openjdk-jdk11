@@ -77,12 +77,13 @@ else
 endif
 
 $(HEALTHCENTER_COPY) : $(HEALTHCENTER_EXTRACT)
+	$(call MakeDir, $(CONF_DST_DIR))
 	$(call MakeDir, $(LIB_DST_DIR))
 	@$(ECHO) Copying healthcenter.properties
 	$(SED) $(TRANSPORT_PROPERTY_SED_SCRIPT) \
 		< $(HEALTHCENTER_HOME)/healthcenter.properties \
 		$(FIX_ENCODING) \
-		> $(LIB_DST_DIR)/healthcenter.properties
+		> $(CONF_DST_DIR)/healthcenter.properties
 	$(CP) -f $(HEALTHCENTER_LIBRARIES) $(LIB_DST_DIR)/
 	$(call MakeDir, $(@D))
 	$(foreach jar, $(HEALTHCENTER_JARS), \
