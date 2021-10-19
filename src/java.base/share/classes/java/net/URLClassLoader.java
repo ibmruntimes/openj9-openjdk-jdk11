@@ -1085,14 +1085,20 @@ final class ClassFinder implements PrivilegedExceptionAction<Class<?>>          
         this.classloader = loader;                                               //OpenJ9-shared_classes_misc
      }                                                                           //OpenJ9-shared_classes_misc
                                                                                  //OpenJ9-shared_classes_misc
-     public Class<?> run() throws ClassNotFoundException {                         //OpenJ9-shared_classes_misc
-	String path = name.replace('.', '/').concat(".class");                   //OpenJ9-shared_classes_misc
-        try {                                                                    //OpenJ9-shared_classes_misc
-            Resource res = ucp.getResource(path, false, classloader);            //OpenJ9-shared_classes_misc
-            if (res != null)                                                     //OpenJ9-shared_classes_misc
+     public Class<?> run() throws ClassNotFoundException {                       //OpenJ9-shared_classes_misc
+        String path = name.replace('.', '/').concat(".class");                   //OpenJ9-shared_classes_misc
+        Resource res = ucp.getResource(path, false, classloader);                //OpenJ9-shared_classes_misc
+        if (res != null) {                                                       //OpenJ9-shared_classes_misc
+            try {                                                                //OpenJ9-shared_classes_misc
                 return defineClass(name, res);                                   //OpenJ9-shared_classes_misc
-        } catch (IOException e) {                                                //OpenJ9-shared_classes_misc
+             } catch (IOException e) {                                           //OpenJ9-shared_classes_misc
                 throw new ClassNotFoundException(name, e);                       //OpenJ9-shared_classes_misc
+             } catch (ClassFormatError e2) {                                     //OpenJ9-shared_classes_misc
+                if (res.getDataError() != null) {                                //OpenJ9-shared_classes_misc
+                    e2.addSuppressed(res.getDataError());                        //OpenJ9-shared_classes_misc
+                }                                                                //OpenJ9-shared_classes_misc
+                throw e2;                                                        //OpenJ9-shared_classes_misc
+            }                                                                    //OpenJ9-shared_classes_misc
         }                                                                        //OpenJ9-shared_classes_misc
         return null;                                                             //OpenJ9-shared_classes_misc
      }                                                                           //OpenJ9-shared_classes_misc
