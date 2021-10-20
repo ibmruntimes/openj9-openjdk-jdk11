@@ -71,7 +71,7 @@ COMPILER_VERSION_STRING := @COMPILER_VERSION_STRING@
 
 include $(TOPDIR)/closed/openjdk-tag.gmk
 
-J9JDK_EXT_VERSION       := 11.0.13.0-ea
+J9JDK_EXT_VERSION       := 11.0.13.0
 #J9JDK_EXT_VERSION       := HEAD
 J9JDK_EXT_NAME          := Extensions for OpenJDK for Eclipse OpenJ9
 
