@@ -107,7 +107,7 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   export MSVC_VERSION := @TOOLCHAIN_VERSION@
 endif
 
-ifeq ($(OPENJDK_BUILD_OS), macosx)
+ifeq ($(OPENJDK_TARGET_OS), macosx)
   # MACOSX_DEPLOYMENT_TARGET acts similar to -mmacosx-version-min=version
   # compiler option. If both the compiler option is specified and the
   # environment variable is set, then the compiler option will take
@@ -117,8 +117,10 @@ ifeq ($(OPENJDK_BUILD_OS), macosx)
   # is not applied.
   export MACOSX_DEPLOYMENT_TARGET := @MACOSX_VERSION_MIN@
 
-  # Set page zero size to 4KB for mapping memory below 4GB.
-  LDFLAGS_JDKEXE += -pagezero_size 0x1000
+  ifneq ($(OPENJDK_TARGET_CPU), aarch64)
+    # Set page zero size to 4KB for mapping memory below 4GB.
+    LDFLAGS_JDKEXE += -pagezero_size 0x1000
+  endif
 endif
 
 # Usage: $(call CodesignFile, files ...)

@@ -63,7 +63,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     ],
     [
       case "$OPENJ9_PLATFORM_CODE" in
-        ap64|mz64|oa64|wa64|xa64|xl64|xr64|xz64)
+        ap64|mz64|oa64|or64|wa64|xa64|xl64|xr64|xz64)
           if test "x$COMPILE_TYPE" != xcross ; then
             with_cmake=cmake
           else
@@ -253,7 +253,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_DDR],
     OPENJ9_ENABLE_DDR=false
   elif test "x$enable_ddr" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      ap64|mz64|oa64|rv64|wa64|xa64|xl64|xr64|xz64)
+      ap64|mz64|oa64|or64|rv64|wa64|xa64|xl64|xr64|xz64)
         AC_MSG_RESULT([yes (default for $OPENJ9_PLATFORM_CODE)])
         OPENJ9_ENABLE_DDR=true
         ;;
@@ -444,16 +444,16 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
   fi
 
   if test "x$OPENJ9_CPU" = xx86-64 ; then
-    if test "x$OPENJ9_BUILD_OS" = xlinux ; then
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xa64
-    elif test "x$OPENJ9_BUILD_OS" = xwindows ; then
+    elif test "x$OPENJDK_BUILD_OS" = xwindows ; then
       OPENJ9_PLATFORM_CODE=wa64
       OPENJ9_BUILD_OS=win
-    elif test "x$OPENJ9_BUILD_OS" = xmacosx ; then
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
       OPENJ9_PLATFORM_CODE=oa64
       OPENJ9_BUILD_OS=osx
     else
-      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJ9_BUILD_OS}!])
+      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
     fi
   elif test "x$OPENJ9_CPU" = xppc-64_le ; then
     OPENJ9_PLATFORM_CODE=xl64
@@ -474,9 +474,16 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     OPENJ9_BUILD_MODE_ARCH=arm_linaro
     OPENJ9_LIBS_SUBDIR=default
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
-    OPENJ9_PLATFORM_CODE=xr64
-    if test "x$COMPILE_TYPE" = xcross ; then
-      OPENJ9_BUILD_MODE_ARCH="${OPENJ9_BUILD_MODE_ARCH}_cross"
+    if test "x$OPENJDK_BUILD_OS" = xlinux ; then
+      OPENJ9_PLATFORM_CODE=xr64
+      if test "x$COMPILE_TYPE" = xcross ; then
+        OPENJ9_BUILD_MODE_ARCH="${OPENJ9_BUILD_MODE_ARCH}_cross"
+      fi
+    elif test "x$OPENJDK_BUILD_OS" = xmacosx ; then
+      OPENJ9_PLATFORM_CODE=or64
+      OPENJ9_BUILD_OS=osx
+    else
+      AC_MSG_ERROR([Unsupported OpenJ9 platform ${OPENJDK_BUILD_OS}!])
     fi
   elif test "x$OPENJ9_CPU" = xriscv64 ; then
     OPENJ9_PLATFORM_CODE=rv64

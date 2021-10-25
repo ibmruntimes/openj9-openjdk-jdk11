@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "java.h"
 #include "jvm_md.h"
 #include <dirent.h>
@@ -208,7 +214,7 @@ static InvocationFunctions *GetExportedJNIFunctions() {
     if (preferredJVM == NULL) {
 #if defined(__i386__)
         preferredJVM = "client";
-#elif defined(__x86_64__)
+#elif defined(__aarch64__) || defined(__x86_64__)
         preferredJVM = "server";
 #else
 #error "Unknown architecture - needs definition"
