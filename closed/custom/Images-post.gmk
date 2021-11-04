@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -17,6 +17,13 @@
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
+
+ifeq (true,$(OPENJ9_ENABLE_DEMOS))
+  # demos are wanted
+else ifneq (,$(filter jdk, $(MAKECMDGOALS)))
+  # don't include demos in jdk image
+  JDK_TARGETS := $(filter-out $(JDK_COPY_DEMOS), $(JDK_TARGETS))
+endif
 
 # Omit man pages for launchers not provided by OpenJ9 or that describe
 # behavior that differs from the OpenJ9 implementation.
