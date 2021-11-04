@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -35,7 +35,8 @@ include $(SPEC)
 #     For Linux x64, it is linux-x86_64
 #     For Windows x64, it is VC-WIN64A
 #     For Windows x32, it is VC-WIN32
-#     For Mac OSX, it is darwin64-x86_64-cc
+#     For Mac OSX x64, it is darwin64-x86_64-cc
+#     For Mac OSX aarch64, it is darwin64-arm64-cc
 build_openssl :
 ifeq ($(BUILD_OPENSSL), yes)
 	$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR)
@@ -50,7 +51,11 @@ ifeq ($(BUILD_OPENSSL), yes)
 	($(CD) $(OPENSSL_DIR) && ./config shared && $(MAKE))
     endif
   else ifeq ($(OPENJDK_TARGET_OS), macosx)
-	($(CD) $(OPENSSL_DIR) && ./Configure darwin64-x86_64-cc shared  && $(MAKE))
+    ifeq ($(OPENJDK_TARGET_CPU), x86_64)
+	($(CD) $(OPENSSL_DIR) && ./Configure darwin64-x86_64-cc shared && $(MAKE))
+    else
+	($(CD) $(OPENSSL_DIR) && ./Configure darwin64-arm64-cc shared && $(MAKE))
+    endif
   else ifeq ($(OPENJDK_TARGET_OS), windows)
     ifeq ($(OPENJDK_TARGET_CPU), x86_64)
 	($(CD) $(OPENSSL_DIR) && ./Configure VC-WIN64A shared && $(MAKE))
