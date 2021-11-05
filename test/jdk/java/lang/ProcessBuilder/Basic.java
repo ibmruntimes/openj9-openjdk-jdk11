@@ -2125,12 +2125,10 @@ public class Basic {
                     switch (action & 0x1) {
                         case 0:
                             childArgs.set(1, "-XX:+DisplayVMOutputToStderr");
-                            childArgs.add(2, "-Xlog:all=warning:stderr");
                             pb.redirectError(INHERIT);
                             break;
                         case 1:
                             childArgs.set(1, "-XX:+DisplayVMOutputToStdout");
-                            childArgs.add(2, "-Xlog:all=warning:stdout");
                             pb.redirectOutput(INHERIT);
                             break;
                         default:
