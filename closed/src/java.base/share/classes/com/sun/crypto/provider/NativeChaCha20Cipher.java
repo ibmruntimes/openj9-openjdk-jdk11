@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
@@ -46,6 +47,7 @@ import javax.crypto.*;
 import sun.security.util.DerValue;
 
 import jdk.crypto.jniprovider.NativeCrypto;
+import jdk.internal.ref.CleanerFactory;
 
 /**
  * Implementation of the ChaCha20 cipher, as described in RFC 7539.
@@ -87,13 +89,31 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
     // The underlying engine for doing the ChaCha20/Poly1305 work
     private ChaChaEngine engine;
 
-    private static NativeCrypto nativeCrypto;
-    private long context;
+    private static final NativeCrypto nativeCrypto;
+    private static final Cleaner contextCleaner;
+    private final long context;
 
     private final ByteArrayOutputStream aadBuf;
 
     static {
         nativeCrypto = NativeCrypto.getNativeCrypto();
+        contextCleaner = CleanerFactory.cleaner();
+    }
+
+    private static final class ChaCha20CleanerRunnable implements Runnable {
+        private final long context;
+
+        public ChaCha20CleanerRunnable(long context) {
+            this.context = context;
+        }
+
+        @Override
+        public void run() {
+            /*
+             * Release the ChaCha20 context.
+             */
+            nativeCrypto.DestroyContext(context);
+        }
     }
 
     /**
@@ -101,6 +121,12 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      */
     protected NativeChaCha20Cipher() {
         context = nativeCrypto.CreateContext();
+
+        if (context == -1) {
+            throw new ProviderException("Error in NativeChaCha20Cipher - CreateContext");
+        }
+        contextCleaner.register(this, new ChaCha20CleanerRunnable(this.context));
+
         aadBuf = new ByteArrayOutputStream();
     }
 
@@ -1092,13 +1118,5 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         public ChaCha20Poly1305() {
             super(MODE_AEAD);
         }
-    }
-
-    @Override
-    public void finalize() {
-        if (context != -1) {
-            nativeCrypto.DestroyContext(context);
-        }
-        context = -1;
     }
 }
