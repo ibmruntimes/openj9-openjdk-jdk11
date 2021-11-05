@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2021, Azul Systems, Inc. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -26,6 +27,10 @@
 # properly detect 64 bit systems on all platforms. Instead of patching the
 # autoconf system (which might easily get lost in a future update), we wrap it
 # and fix the broken property, if needed.
+
+# ===========================================================================
+# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# ===========================================================================
 
 DIR=`dirname $0`
 OUT=`. $DIR/autoconf-config.guess`
@@ -103,6 +108,19 @@ if [ "x$OUT" = x ]; then
     if [ `uname -m` = loongarch64 ]; then
       OUT=loongarch64-unknown-linux-gnu
     fi
+  fi
+fi
+
+
+# Test and fix cpu on macos-aarch64, uname -p reports arm, buildsys expects aarch64
+echo $OUT | grep arm-apple-darwin > /dev/null 2> /dev/null
+if test $? != 0; then
+  # The GNU version of uname may be on the PATH which reports arm64 instead
+  echo $OUT | grep arm64-apple-darwin > /dev/null 2> /dev/null
+fi
+if test $? = 0; then
+  if [ `uname -m` = arm64 ]; then
+    OUT=aarch64`echo $OUT | sed -e 's/[^-]*//'`
   fi
 fi
 
