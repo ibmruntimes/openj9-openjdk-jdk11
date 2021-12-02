@@ -30,7 +30,7 @@ $(call openj9_copy_files,, \
 	$(OPENJ9_VM_BUILD_DIR)/include/jvmti.h \
 	$(INCLUDE_TARGET_DIR)/jvmti.h)
 
-ifeq ($(OPENJDK_TARGET_OS), zos)
+ifeq (zos,$(OPENJDK_TARGET_OS))
 $(call openj9_copy_files,, \
 	$(OPENJ9_TOPDIR)/runtime/include/jni_convert.h \
 	$(INCLUDE_TARGET_DIR)/jni_convert.h)
@@ -50,7 +50,7 @@ $(call openj9_copy_files,, \
 $(call openj9_copy_files,, \
 	$(INCLUDE31_SOURCE_DIR)/jniport.h \
 	$(INCLUDE31_TARGET_DIR)/jniport.h)
-endif # OPENJDK_TARGET_OS == zOS
+endif # zos
 
 # jitserver
 
@@ -102,7 +102,7 @@ $(call openj9_copy_shlibs, \
 
 # static and shared libraries that are needed on some platforms
 
-ifeq ($(OPENJDK_TARGET_OS), windows)
+ifeq (windows,$(OPENJDK_TARGET_OS))
 
 $(call openj9_copy_files,, \
 	$(addsuffix /$(call STATIC_LIBRARY,jsig), \
@@ -113,7 +113,7 @@ $(call openj9_copy_files,, \
 	$(OPENJ9_VM_BUILD_DIR)/redirector/$(call STATIC_LIBRARY,redirector_jvm) \
 	$(LIB_DST_DIR)/$(call STATIC_LIBRARY,jvm))
 
-else ifeq ($(OPENJDK_TARGET_OS), zos)
+else ifeq (zos,$(OPENJDK_TARGET_OS))
 
 $(call openj9_copy_files_and_debuginfos, \
 	$(addsuffix /$(call SHARED_LIBRARY,j9a2e), \
@@ -182,18 +182,18 @@ endif # OPENJ9_ENABLE_DDR
 # Optionally copy OpenSSL Crypto Library
 # To bundle first search for openssl 1.1.x library, if not found, search for 1.0.x
 ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
-  ifeq ($(OPENJDK_TARGET_OS), linux)
+  ifeq (linux,$(OPENJDK_TARGET_OS))
     LIBCRYPTO_NAMES := libcrypto.so.1.1 libcrypto.so.1.0.0
-  else ifeq ($(OPENJDK_TARGET_OS), macosx)
+  else ifeq (macosx,$(OPENJDK_TARGET_OS))
     LIBCRYPTO_NAMES := libcrypto.1.1.dylib libcrypto.1.0.0.dylib
-  else ifeq ($(OPENJDK_TARGET_OS), windows)
+  else ifeq (windows,$(OPENJDK_TARGET_OS))
     ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
       LIBCRYPTO_NAMES := libcrypto-1_1-x64.dll
     else
       LIBCRYPTO_NAMES := libcrypto-1_1.dll
     endif
     LIBCRYPTO_NAMES += libeay32.dll
-  else ifeq ($(OPENJDK_TARGET_OS), aix)
+  else ifeq (aix,$(OPENJDK_TARGET_OS))
     # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way)
     # instead of 'libcrypto.so' files.
     # See https://github.com/openssl/openssl/pull/6487.
@@ -210,16 +210,16 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   TARGETS += $(LIBCRYPTO_TARGET_LIB)
   $(LIBCRYPTO_TARGET_LIB) : $(LIBCRYPTO_PATH)
 	$(call install-file)
-  ifeq ($(OPENJDK_TARGET_OS), macosx)
+  ifeq (macosx,$(OPENJDK_TARGET_OS))
     # update @rpath of the crypto library as the default is /usr/local/lib/
 	install_name_tool -id "@rpath/$(@F)" $@
-  else ifeq ($(OPENJDK_TARGET_OS), windows)
+  else ifeq (windows,$(OPENJDK_TARGET_OS))
 	$(CHMOD) a+rx $@
   endif
 	$(call CodesignFile,"$@")
 
   ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
-    ifeq ($(OPENJDK_TARGET_OS), linux)
+    ifeq (linux,$(OPENJDK_TARGET_OS))
       LIBSSL_NAMES := libssl.so.1.1 libssl.so.1.0.0
       LIBSSL_PATH := $(firstword $(wildcard $(addprefix $(OPENSSL_BUNDLE_LIB_PATH)/, $(LIBSSL_NAMES))))
 
