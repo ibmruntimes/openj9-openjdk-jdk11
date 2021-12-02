@@ -34,7 +34,23 @@ ifeq ($(OPENJDK_TARGET_OS), zos)
 $(call openj9_copy_files,, \
 	$(OPENJ9_TOPDIR)/runtime/include/jni_convert.h \
 	$(INCLUDE_TARGET_DIR)/jni_convert.h)
-endif
+
+# Customized z/OS 31/64-bit interoperability JNI header files.
+# These files are generated as part of an OpenJ9 build.
+INCLUDE31_SOURCE_DIR := $(OPENJ9_VM_BUILD_DIR)/include31
+INCLUDE31_TARGET_DIR := $(INCLUDE_TARGET_DIR)/jni31
+$(call openj9_copy_files,, \
+	$(INCLUDE31_SOURCE_DIR)/jni.h \
+	$(INCLUDE31_TARGET_DIR)/jni.h)
+
+$(call openj9_copy_files,, \
+	$(INCLUDE31_SOURCE_DIR)/jni_convert.h \
+	$(INCLUDE31_TARGET_DIR)/jni_convert.h)
+
+$(call openj9_copy_files,, \
+	$(INCLUDE31_SOURCE_DIR)/jniport.h \
+	$(INCLUDE31_TARGET_DIR)/jniport.h)
+endif # OPENJDK_TARGET_OS == zOS
 
 # jitserver
 
@@ -114,6 +130,16 @@ $(call openj9_copy_files,, \
 		$(OPENJ9_VM_BUILD_DIR)/lib/redirector/ \
 		$(addprefix $(LIB_DST_DIR), /j9vm/ /server/)))
 
+# 31/64-bit interoperability shim library and side deck files.
+$(call openj9_copy_files_and_debuginfos, \
+	$(addsuffix $(call SHARED_LIBRARY,jvm31), \
+		$(OPENJ9_VM_BUILD_DIR)/ \
+		$(addprefix $(LIB_DST_DIR), /j9vm/ /server/)))
+
+$(call openj9_copy_files,, \
+	$(addsuffix libjvm31.x, \
+		$(OPENJ9_VM_BUILD_DIR)/lib/ \
+		$(addprefix $(LIB_DST_DIR), /j9vm/ /server/)))
 endif # OPENJDK_TARGET_OS
 
 # properties files, etc.
