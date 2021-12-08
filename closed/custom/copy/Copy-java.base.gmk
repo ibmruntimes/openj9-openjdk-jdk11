@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -73,7 +73,7 @@ $(call openj9_copy_files_and_debuginfos, \
 		$(addprefix $(LIB_DST_DIR), / /j9vm/ /server/)))
 
 # Target platforms without JIT support.
-NO_JIT_PLATFORMS := linux_riscv64 macosx_aarch64
+NO_JIT_PLATFORMS := linux_riscv64
 TARGET_PLATFORM := $(OPENJDK_TARGET_OS)_$(OPENJDK_TARGET_CPU)
 
 $(call openj9_copy_shlibs, \
