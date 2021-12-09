@@ -22,5 +22,6 @@ JRE_MODULES += \
 	$(if $(call equals, $(OPENJ9_ENABLE_CRIU_SUPPORT), true), openj9.criu) \
 	openj9.cuda \
 	openj9.dataaccess \
+	openj9.dtfj \
 	openj9.gpu \
 	#
