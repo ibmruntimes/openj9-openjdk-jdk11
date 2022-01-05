@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2021, 2022 All Rights Reserved
  * ===========================================================================
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -29,6 +29,7 @@ module ibm.healthcenter {
   requires java.naming;
   requires java.prefs;
   requires java.rmi;
+  requires jdk.attach;
   requires openj9.traceformat;
   exports com.ibm.java.diagnostics.healthcenter.agent.mbean;
   exports com.ibm.java.diagnostics.healthcenter.api;
