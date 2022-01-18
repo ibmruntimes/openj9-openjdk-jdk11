@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -534,7 +534,6 @@ AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
       [NASM_VERSION=`$NASM -v | $SED -e 's/^.* \([2-9]\.[0-9][0-9]\.[0-9][0-9]\).*$/\1/'`]
       AC_MSG_ERROR([nasm version detected: $NASM_VERSION; required version 2.11+])
     fi
-    AC_SUBST([NASM])
   fi
 ])
 
@@ -599,10 +598,10 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
 
   if test "x$OPENJDK_BUILD_OS" = xwindows ; then
     OPENJ9_TOOL_DIR="$OUTPUTDIR/tools"
-    AC_SUBST([OPENJ9_TOOL_DIR])
+    AC_SUBST(OPENJ9_TOOL_DIR)
     OPENJ9_GENERATE_TOOL_WRAPPERS
   fi
-  AC_SUBST([SYSROOT])
+  AC_SUBST(SYSROOT)
   AC_CONFIG_FILES([$OUTPUTDIR/toolchain.cmake:$CLOSED_AUTOCONF_DIR/toolchain.cmake.in])
 ])
 
@@ -626,11 +625,6 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     fi
     # Process --with-openssl=fetched
     if test "x$with_openssl" = xfetched ; then
-      if test "x$OPENJDK_BUILD_OS" = xwindows ; then
-        AC_MSG_RESULT([no])
-        printf "On Windows, value of \"fetched\" is currently not supported with --with-openssl. Please build OpenSSL using VisualStudio outside cygwin and specify the path with --with-openssl\n"
-        AC_MSG_ERROR([Cannot continue])
-      fi
       if test -d "$TOPDIR/openssl" ; then
         OPENSSL_DIR="$TOPDIR/openssl"
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
@@ -643,6 +637,8 @@ AC_DEFUN([CONFIGURE_OPENSSL],
           OPENSSL_BUNDLE_LIB_PATH="${OPENSSL_DIR}"
         fi
         AC_MSG_RESULT([yes])
+        # perl is required to build openssl
+        BASIC_REQUIRE_PROGS(PERL, perl)
       else
         AC_MSG_RESULT([no])
         printf "$TOPDIR/openssl is not found.\n"
