@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -28,7 +28,7 @@ OPENJ9_BUG_SUBMIT_URL := https://github.com/eclipse-openj9/openj9/issues
 OPENJ9_JAVADOC_BOTTOM = \
     <a href="$(OPENJ9_BASE_URL)" target="_blank">Eclipse OpenJ9 website.</a><br> \
     To raise a bug report or suggest an improvement create an <a href="$(OPENJ9_BUG_SUBMIT_URL)" target="_blank">Eclipse Openj9 issue.</a><br> \
-    Copyright &copy; 1998, $(COPYRIGHT_YEAR), IBM Corp. and others.
+    Copyright &copy; 1998, $(COPYRIGHT_YEAR) IBM Corp. and others.
 
 ##############################################################################
 # The javadoc tool only allows for a single setting for headers and footers
