@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+# ===========================================================================
+
 m4_include([flags-cflags.m4])
 m4_include([flags-ldflags.m4])
 m4_include([flags-other.m4])
@@ -116,7 +120,11 @@ AC_DEFUN([FLAGS_SETUP_MACOSX_VERSION],
     # of the OS. It currently has a hard coded value. Setting this also limits
     # exposure to API changes in header files. Bumping this is likely to
     # require code changes to build.
-    MACOSX_VERSION_MIN=10.9.0
+    if test "x$OPENJDK_TARGET_CPU_ARCH" = xaarch64; then
+      MACOSX_VERSION_MIN=11.00.00
+    else
+      MACOSX_VERSION_MIN=10.9.0
+    fi
     MACOSX_VERSION_MIN_NODOTS=${MACOSX_VERSION_MIN//\./}
 
     AC_SUBST(MACOSX_VERSION_MIN)
