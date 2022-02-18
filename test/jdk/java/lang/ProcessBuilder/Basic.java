@@ -23,7 +23,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2020, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -294,7 +294,8 @@ public class Basic {
         environment = new TreeMap<>(environment);
         for (Map.Entry<String,String> e : environment.entrySet())
             // Ignore magic environment variables added by the launcher
-            if (! e.getKey().equals("LD_LIBRARY_PATH"))
+            if (! e.getKey().equals("LD_LIBRARY_PATH") &&
+                ! e.getKey().equals("OPENJ9_JAVA_COMMAND_LINE"))
                 sb.append(e.getKey())
                     .append('=')
                     .append(e.getValue())
