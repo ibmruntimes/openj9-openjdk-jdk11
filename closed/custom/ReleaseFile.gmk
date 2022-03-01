@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -18,6 +18,6 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-SOURCE_REVISION := OpenJDK:$(shell git -C $(TOPDIR) rev-parse --short HEAD)
-SOURCE_REVISION += OpenJ9:$(shell git -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
-SOURCE_REVISION += OMR:$(shell git -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
+SOURCE_REVISION := OpenJDK:$(shell $(GIT) -C $(TOPDIR) rev-parse --short HEAD)
+SOURCE_REVISION += OpenJ9:$(shell $(GIT) -C $(OPENJ9_TOPDIR) rev-parse --short HEAD)
+SOURCE_REVISION += OMR:$(shell $(GIT) -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
