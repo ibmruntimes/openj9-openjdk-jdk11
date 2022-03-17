@@ -38,7 +38,7 @@ else
   PLATFORM_MODULES += \
 	ibm.healthcenter \
 	jdk.attach \
-	jdk.internal.jvmstat
+	#
 endif
 
 MODULES_FILTER += \

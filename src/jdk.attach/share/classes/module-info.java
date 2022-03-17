@@ -22,9 +22,10 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -37,8 +38,6 @@
  * @since 9
  */
 module jdk.attach {
-    requires jdk.internal.jvmstat;
-
     exports com.sun.tools.attach;
     exports com.sun.tools.attach.spi;
 
