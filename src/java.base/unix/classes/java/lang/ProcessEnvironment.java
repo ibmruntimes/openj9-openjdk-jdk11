@@ -1,3 +1,4 @@
+/*[INCLUDE-IF JAVA_SPEC_VERSION >= 8]*/
 /*
  * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -62,21 +63,29 @@ package java.lang;
 
 import java.io.*;
 import java.util.*;
+/*[IF CRIU_SUPPORT]*/
 import openj9.internal.criu.InternalCRIUSupport;
+/*[ENDIF] CRIU_SUPPORT*/
 
 final class ProcessEnvironment
 {
     private static final HashMap<Variable,Value> theEnvironment;
     private static final Map<String,String> theUnmodifiableEnvironment;
+    static final int MIN_NAME_LENGTH = 0;
+/*[IF CRIU_SUPPORT]*/
     // CRIU enable flag
     private static final boolean isCRIUEnabled;
     // 1 - prints a message if the env var was set but not in the immutable list
     // 2 - throws an exception
     private static final int tracePrunedEnvVarsValue;
     private static final Map<String,String> theOriginalUnmodifiableEnvironment;
-    static final int MIN_NAME_LENGTH = 0;
+/*[ENDIF] CRIU_SUPPORT*/
 
     static {
+        // We cache the C environment.  This means that subsequent calls
+        // to putenv/setenv from C will not be visible from Java code.
+        byte[][] environ = environ();
+/*[IF CRIU_SUPPORT]*/
         isCRIUEnabled = InternalCRIUSupport.isCRIUSupportEnabled();
         HashMap<Variable,Value> origEnvironment = null;
         HashMap<Variable,Value> criuEnvironment = null;
@@ -103,22 +112,21 @@ final class ProcessEnvironment
         } else {
             tracePrunedEnvVarsValue = 0;
         }
-        // We cache the C environment.  This means that subsequent calls
-        // to putenv/setenv from C will not be visible from Java code.
-        byte[][] environ = environ();
         origEnvironment = new HashMap<>(environ.length/2 + 3);
+/*[ELSE] CRIU_SUPPORT*/
+        theEnvironment = new HashMap<>(environ.length/2 + 3);
+/*[ENDIF] CRIU_SUPPORT*/
         // Read environment variables back to front,
         // so that earlier variables override later ones.
-        Variable tmpKeyVar;
         for (int i = environ.length-1; i > 0; i-=2)
+/*[IF CRIU_SUPPORT]*/
         {
-            tmpKeyVar = Variable.valueOf(environ[i-1]);
+            Variable tmpKeyVar = Variable.valueOf(environ[i-1]);
             if (isCRIUEnabled && criuImmutableEnvVarList.contains(tmpKeyVar.toString())) {
                 criuEnvironment.put(tmpKeyVar, Value.valueOf(environ[i]));
             }
             origEnvironment.put(tmpKeyVar, Value.valueOf(environ[i]));
         }
-
         if (isCRIUEnabled) {
             theOriginalUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(origEnvironment));
             theUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(criuEnvironment));
@@ -128,10 +136,19 @@ final class ProcessEnvironment
             theOriginalUnmodifiableEnvironment = null;
             theEnvironment = origEnvironment;
         }
+/*[ELSE] CRIU_SUPPORT*/
+            theEnvironment.put(Variable.valueOf(environ[i-1]),
+                               Value.valueOf(environ[i]));
+
+        theUnmodifiableEnvironment
+            = Collections.unmodifiableMap
+            (new StringEnvironment(theEnvironment));
+/*[ENDIF] CRIU_SUPPORT*/
     }
 
     /* Only for use by System.getenv(String) */
     static String getenv(String name) {
+/*[IF CRIU_SUPPORT]*/
         String currentValue = theUnmodifiableEnvironment.get(name);
         if (isCRIUEnabled && (currentValue == null)) {
             String origValue = theOriginalUnmodifiableEnvironment.get(name);
@@ -145,6 +162,9 @@ final class ProcessEnvironment
             }
         }
         return currentValue;
+/*[ELSE] CRIU_SUPPORT*/
+        return theUnmodifiableEnvironment.get(name);
+/*[ENDIF] CRIU_SUPPORT*/
     }
 
     /* Only for use by System.getenv() */
