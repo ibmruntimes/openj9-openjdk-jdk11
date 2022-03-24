@@ -105,6 +105,8 @@ grant codeBase "jrt:/jdk.accessibility" {
 
 grant codeBase "jrt:/jdk.attach" {
     permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.util";
+    permission java.lang.RuntimePermission "accessClassInPackage.com.ibm.oti.vm";
+    permission java.lang.RuntimePermission "accessClassInPackage.jdk.internal.misc";
     permission java.lang.RuntimePermission "accessClassInPackage.openj9.internal.tools.attach.target";
     permission java.lang.RuntimePermission "accessClassInPackage.openj9.internal.tools.attach.diagnostics.base";
     permission java.util.PropertyPermission "com.ibm.tools.attach.*", "read";
