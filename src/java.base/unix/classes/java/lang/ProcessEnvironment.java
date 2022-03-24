@@ -52,37 +52,99 @@
  * @since   1.5
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.lang;
 
 import java.io.*;
 import java.util.*;
-
+import openj9.internal.criu.InternalCRIUSupport;
 
 final class ProcessEnvironment
 {
     private static final HashMap<Variable,Value> theEnvironment;
     private static final Map<String,String> theUnmodifiableEnvironment;
+    // CRIU enable flag
+    private static final boolean isCRIUEnabled;
+    // 1 - prints a message if the env var was set but not in the immutable list
+    // 2 - throws an exception
+    private static final int tracePrunedEnvVarsValue;
+    private static final Map<String,String> theOriginalUnmodifiableEnvironment;
     static final int MIN_NAME_LENGTH = 0;
 
     static {
+        isCRIUEnabled = InternalCRIUSupport.isCRIUSupportEnabled();
+        HashMap<Variable,Value> origEnvironment = null;
+        HashMap<Variable,Value> criuEnvironment = null;
+        Set<String> criuImmutableEnvVarList = null;
+        if (isCRIUEnabled) {
+            String strTracePrunedEnvVars = System.internalGetProperties().getProperty("org.eclipse.openj9.criu.TracePrunedEnvVars");
+            if (strTracePrunedEnvVars != null) {
+                tracePrunedEnvVarsValue = Integer.valueOf(strTracePrunedEnvVars);
+                if (tracePrunedEnvVarsValue > 2 || tracePrunedEnvVarsValue < 1) {
+                    throw new InternalError("CRIU: org.eclipse.openj9.criu.TracePrunedEnvVars unexpected value: " + String.valueOf(tracePrunedEnvVarsValue));
+                }
+            } else {
+                tracePrunedEnvVarsValue = 0;
+            }
+            // CRIU immutable env var list
+            String propImmutableEnvVars = System.internalGetProperties().getProperty("org.eclipse.openj9.criu.ImmutableEnvVars");
+            String[] immutableEnvVarArray = (propImmutableEnvVars == null) ? new String[] {} : propImmutableEnvVars.split(",");
+            criuImmutableEnvVarList = new HashSet<String>(Arrays.asList(immutableEnvVarArray));
+            // hardcoded list
+            criuImmutableEnvVarList.add("LANG");
+            criuImmutableEnvVarList.add("LC_ALL");
+            criuImmutableEnvVarList.add("LC_CTYPE");
+            criuEnvironment = new HashMap<>(criuImmutableEnvVarList.size() + 3);
+        } else {
+            tracePrunedEnvVarsValue = 0;
+        }
         // We cache the C environment.  This means that subsequent calls
         // to putenv/setenv from C will not be visible from Java code.
         byte[][] environ = environ();
-        theEnvironment = new HashMap<>(environ.length/2 + 3);
+        origEnvironment = new HashMap<>(environ.length/2 + 3);
         // Read environment variables back to front,
         // so that earlier variables override later ones.
+        Variable tmpKeyVar;
         for (int i = environ.length-1; i > 0; i-=2)
-            theEnvironment.put(Variable.valueOf(environ[i-1]),
-                               Value.valueOf(environ[i]));
+        {
+            tmpKeyVar = Variable.valueOf(environ[i-1]);
+            if (isCRIUEnabled && criuImmutableEnvVarList.contains(tmpKeyVar.toString())) {
+                criuEnvironment.put(tmpKeyVar, Value.valueOf(environ[i]));
+            }
+            origEnvironment.put(tmpKeyVar, Value.valueOf(environ[i]));
+        }
 
-        theUnmodifiableEnvironment
-            = Collections.unmodifiableMap
-            (new StringEnvironment(theEnvironment));
+        if (isCRIUEnabled) {
+            theOriginalUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(origEnvironment));
+            theUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(criuEnvironment));
+            theEnvironment = criuEnvironment;
+        } else {
+            theUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(origEnvironment));
+            theOriginalUnmodifiableEnvironment = null;
+            theEnvironment = origEnvironment;
+        }
     }
 
     /* Only for use by System.getenv(String) */
     static String getenv(String name) {
-        return theUnmodifiableEnvironment.get(name);
+        String currentValue = theUnmodifiableEnvironment.get(name);
+        if (isCRIUEnabled && (currentValue == null)) {
+            String origValue = theOriginalUnmodifiableEnvironment.get(name);
+            if (origValue != null) {
+                String errMsg = "The env var (" + name + ") is not in CRIU immutable list but was set to : " + origValue;
+                if (tracePrunedEnvVarsValue == 1) {
+                    System.err.println(errMsg);
+                } else if (tracePrunedEnvVarsValue == 2) {
+                    throw new InternalError(errMsg);
+                }
+            }
+        }
+        return currentValue;
     }
 
     /* Only for use by System.getenv() */
