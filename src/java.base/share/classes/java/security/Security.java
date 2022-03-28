@@ -1,3 +1,4 @@
+/*[INCLUDE-IF CRIU_SUPPORT]*/
 /*
  * Copyright (c) 1996, 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -23,6 +24,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.security;
 
 import java.util.*;
@@ -38,6 +45,10 @@ import sun.security.util.Debug;
 import sun.security.util.PropertyExpander;
 
 import sun.security.jca.*;
+
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.InternalCRIUSupport;
+/*[ENDIF] CRIU_SUPPORT*/
 
 /**
  * <p>This class centralizes all security properties and common security
@@ -191,6 +202,13 @@ public final class Security {
                         "-- using defaults");
             }
         }
+
+/*[IF CRIU_SUPPORT]*/
+        // Check if CRIU checkpoint mode is enabled, if it is then reconfigure the security providers.
+        if (InternalCRIUSupport.isCheckpointAllowed()) {
+            CRIUConfigurator.setCRIUSecMode(props);
+        }
+/*[ENDIF] CRIU_SUPPORT*/
 
     }
 
