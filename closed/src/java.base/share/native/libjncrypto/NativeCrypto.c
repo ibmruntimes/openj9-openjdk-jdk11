@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,6 +38,9 @@
 
 #define OPENSSL_VERSION_1_0 "OpenSSL 1.0."
 #define OPENSSL_VERSION_1_1 "OpenSSL 1.1."
+/* Per new OpenSSL naming convention starting from OpenSSL 3, all major versions are ABI and API compatible. */
+#define OPENSSL_VERSION_3_X "OpenSSL 3."
+
 /* needed for OpenSSL 1.0.2 Thread handling routines */
 # define CRYPTO_LOCK 1
 
@@ -47,12 +50,12 @@
 # include <pthread.h>
 #endif /* defined(WINDOWS) */
 
-/* Header for RSA algorithm using 1.0.2 OpenSSL */
+/* Header for RSA algorithm using 1.0.2 OpenSSL. */
 int OSSL102_RSA_set0_key(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 int OSSL102_RSA_set0_factors(RSA *, BIGNUM *, BIGNUM *);
 int OSSL102_RSA_set0_crt_params(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 
-/* Define literals from OpenSSL 1.1.x so that it compiles with OpenSSL 1.0.x */
+/* Define literals from OpenSSL 1.1.x so that it compiles with OpenSSL 1.0.x. */
 #ifndef EVP_CTRL_AEAD_GET_TAG
 # define EVP_CTRL_AEAD_GET_TAG     EVP_CTRL_GCM_GET_TAG
 #endif
@@ -65,7 +68,7 @@ int OSSL102_RSA_set0_crt_params(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 # define EVP_CTRL_AEAD_SET_TAG     EVP_CTRL_GCM_SET_TAG
 #endif
 
-/* Type definitions of function pointers */
+/* Type definitions of function pointers. */
 typedef char * OSSL_error_string_n_t(unsigned long, char *, size_t);
 typedef char * OSSL_error_string_t(unsigned long, char *);
 typedef unsigned long OSSL_get_error_t();
@@ -123,7 +126,7 @@ OSSL_error_string_n_t* OSSL_error_string_n;
 OSSL_error_string_t* OSSL_error_string;
 OSSL_get_error_t* OSSL_get_error;
 
-/* Define pointers for OpenSSL 1.0.2 threading routines */
+/* Define pointers for OpenSSL 1.0.2 threading routines. */
 static OSSL_CRYPTO_num_locks_t* OSSL_CRYPTO_num_locks = NULL;
 static OSSL_CRYPTO_THREADID_set_numeric_t* OSSL_CRYPTO_THREADID_set_numeric = NULL;
 static OSSL_OPENSSL_malloc_t* OSSL_OPENSSL_malloc = NULL;
@@ -181,13 +184,13 @@ OSSL_BN_free_t* OSSL_BN_free;
 OSSL_cipher_t* OSSL_chacha20;
 OSSL_cipher_t* OSSL_chacha20_poly1305;
 
-/* Structure for OpenSSL Digest context */
+/* Structure for OpenSSL Digest context. */
 typedef struct OpenSSLMDContext {
     EVP_MD_CTX *ctx;
     const EVP_MD *digestAlg;
 } OpenSSLMDContext;
 
-/* Handle errors from OpenSSL calls */
+/* Handle errors from OpenSSL calls. */
 static void printErrors(void) {
     unsigned long errCode = 0;
 
@@ -205,10 +208,11 @@ static void *crypto_library = NULL;
 /*
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    loadCrypto
- * Signature: ()V
+ * Signature: (Z)V
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
-  (JNIEnv *env, jclass thisObj){
+  (JNIEnv *env, jclass thisObj, jboolean traceEnabled)
+{
 
     char *error;
     typedef const char* OSSL_version_t(int);
@@ -219,18 +223,20 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     int ossl_ver;
 
     /* Load OpenSSL Crypto library */
-    crypto_library = load_crypto_library();
+    crypto_library = load_crypto_library(traceEnabled);
     if (NULL == crypto_library) {
-        /* fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n"); */
-        /* fflush(stderr); */
+        if (traceEnabled) {
+            fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
+            fflush(stderr);
+        }
         return -1;
     }
 
     /*
-     * Different symbols are used by OpenSSL with 1.0 and 1.1.
-     * The symbol 'OpenSSL_version' is used by OpenSSL 1.1 where as
+     * Different symbols are used by OpenSSL with 1.0 and 1.1 and later.
+     * The symbol 'OpenSSL_version' is used by OpenSSL 1.1 and later where as
      * the symbol "SSLeay_version" is used by OpenSSL 1.0.
-     * Currently only openssl 1.0.x and 1.1.x are supported.
+     * Currently only openssl 1.0.x, 1.1.x and 3.x.x are supported.
      */
     OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "OpenSSL_version");
 
@@ -238,8 +244,10 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "SSLeay_version");
 
         if (NULL == OSSL_version)  {
-            /* fprintf(stderr, "Only openssl 1.0.x and 1.1.x are supported\n"); */
-            /* fflush(stderr); */
+            if (traceEnabled) {
+                fprintf(stderr, "Only OpenSSL 1.0.x, 1.1.x and 3.x are supported\n");
+                fflush(stderr);
+            }
             unload_crypto_library(crypto_library);
             crypto_library = NULL;
             return -1;
@@ -247,8 +255,10 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
             openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
             /* Ensure the OpenSSL version is "OpenSSL 1.0.x" */
             if (0 != strncmp(openssl_version, OPENSSL_VERSION_1_0, strlen(OPENSSL_VERSION_1_0))) {
-                /* fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version); */
-                /* fflush(stderr); */
+                if (traceEnabled) {
+                    fprintf(stderr, "Unsupported OpenSSL version: %s\n", openssl_version);
+                    fflush(stderr);
+                }
                 unload_crypto_library(crypto_library);
                 crypto_library = NULL;
                 return -1;
@@ -257,15 +267,24 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         }
     } else {
         openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
-        /* Ensure the OpenSSL version is "OpenSSL 1.1.x". */
-        if (0 != strncmp(openssl_version, OPENSSL_VERSION_1_1, strlen(OPENSSL_VERSION_1_1))) {
-            /* fprintf(stderr, "Incompatable OpenSSL version: %s\n", openssl_version); */
-            /* fflush(stderr); */
+        /* Ensure the OpenSSL version is "OpenSSL 1.1.x" or "OpenSSL 3.x.x". */
+        if ((0 != strncmp(openssl_version, OPENSSL_VERSION_1_1, strlen(OPENSSL_VERSION_1_1)))
+        && (0 != strncmp(openssl_version, OPENSSL_VERSION_3_X, strlen(OPENSSL_VERSION_3_X)))
+        ) {
+            if (traceEnabled) {
+                fprintf(stderr, "Unsupported OpenSSL version: %s\n", openssl_version);
+                fflush(stderr);
+            }
             unload_crypto_library(crypto_library);
             crypto_library = NULL;
             return -1;
         }
         ossl_ver = 1;
+    }
+
+    if (traceEnabled) {
+        fprintf(stderr, "Supported OpenSSL version: %s\n", openssl_version);
+        fflush(stderr);
     }
 
     /* Load the function symbols for OpenSSL errors. */
