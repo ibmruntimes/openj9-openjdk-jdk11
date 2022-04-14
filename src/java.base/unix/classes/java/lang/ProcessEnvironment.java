@@ -73,8 +73,8 @@ final class ProcessEnvironment
     private static final Map<String,String> theUnmodifiableEnvironment;
     static final int MIN_NAME_LENGTH = 0;
 /*[IF CRIU_SUPPORT]*/
-    // CRIU enable flag
-    private static final boolean isCRIUEnabled;
+    // CRIU capable flag
+    private static final boolean isCRIUCapable;
     // 1 - prints a message if the env var was set but not in the immutable list
     // 2 - throws an exception
     private static final int tracePrunedEnvVarsValue;
@@ -86,11 +86,11 @@ final class ProcessEnvironment
         // to putenv/setenv from C will not be visible from Java code.
         byte[][] environ = environ();
 /*[IF CRIU_SUPPORT]*/
-        isCRIUEnabled = InternalCRIUSupport.isCRIUSupportEnabled();
+        isCRIUCapable = InternalCRIUSupport.isCRIUCapable();
         HashMap<Variable,Value> origEnvironment = null;
         HashMap<Variable,Value> criuEnvironment = null;
         Set<String> criuImmutableEnvVarList = null;
-        if (isCRIUEnabled) {
+        if (isCRIUCapable) {
             String strTracePrunedEnvVars = System.internalGetProperties().getProperty("org.eclipse.openj9.criu.TracePrunedEnvVars");
             if (strTracePrunedEnvVars != null) {
                 tracePrunedEnvVarsValue = Integer.valueOf(strTracePrunedEnvVars);
@@ -122,12 +122,12 @@ final class ProcessEnvironment
 /*[IF CRIU_SUPPORT]*/
         {
             Variable tmpKeyVar = Variable.valueOf(environ[i-1]);
-            if (isCRIUEnabled && criuImmutableEnvVarList.contains(tmpKeyVar.toString())) {
+            if (isCRIUCapable && criuImmutableEnvVarList.contains(tmpKeyVar.toString())) {
                 criuEnvironment.put(tmpKeyVar, Value.valueOf(environ[i]));
             }
             origEnvironment.put(tmpKeyVar, Value.valueOf(environ[i]));
         }
-        if (isCRIUEnabled) {
+        if (isCRIUCapable) {
             theOriginalUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(origEnvironment));
             theUnmodifiableEnvironment = Collections.unmodifiableMap(new StringEnvironment(criuEnvironment));
             theEnvironment = criuEnvironment;
@@ -150,7 +150,10 @@ final class ProcessEnvironment
     static String getenv(String name) {
 /*[IF CRIU_SUPPORT]*/
         String currentValue = theUnmodifiableEnvironment.get(name);
-        if (isCRIUEnabled && (currentValue == null)) {
+        if (isCRIUCapable
+            && (currentValue == null)
+            && (tracePrunedEnvVarsValue != 0)
+        ) {
             String origValue = theOriginalUnmodifiableEnvironment.get(name);
             if (origValue != null) {
                 String errMsg = "The env var (" + name + ") is not in CRIU immutable list but was set to : " + origValue;
