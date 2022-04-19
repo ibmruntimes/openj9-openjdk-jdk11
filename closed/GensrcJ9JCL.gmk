@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -47,7 +47,29 @@ ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   JPP_TAGS += OPENJDK_METHODHANDLES
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
-$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource) $(AllDdrSource)
+# OpenJ9 CRIU only supports Linux, so we only need to consider the unix sub-directory.
+OPENJDK_SOURCE_PROCESS_ENVIRONMENT := $(TOPDIR)/src/java.base/unix/classes/java/lang/ProcessEnvironment.java
+OPENJDK_STAGED_PROCESS_ENVIRONMENT := $(patsubst $(TOPDIR)/%,$(SUPPORT_OUTPUTDIR)/overlay/%,$(OPENJDK_SOURCE_PROCESS_ENVIRONMENT))
+
+$(OPENJDK_STAGED_PROCESS_ENVIRONMENT) : $(OPENJDK_SOURCE_PROCESS_ENVIRONMENT)
+	$(call install-file)
+
+# invoke JPP to generate J9JCL sources
+define jpp_generate_sources
+	@$(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-verdict \
+			-baseDir "$(call FixPath,$1)/" \
+			-config JAVA$(VERSION_FEATURE) \
+			-srcRoot $2/ \
+			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)" \
+			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR))" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+endef
+
+$(J9JCL_SOURCES_DONEFILE) : $(AllJclSource) $(AllDdrSource) $(OPENJDK_STAGED_PROCESS_ENVIRONMENT)
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
@@ -56,17 +78,8 @@ $(J9JCL_SOURCES_DONEFILE) : $(AllJclSource) $(AllDdrSource)
 		JAVA_HOME=$(BOOT_JDK) \
 		preprocessor
 	@$(ECHO) Generating J9JCL sources
-	@$(BOOT_JDK)/bin/java \
-		-cp "$(call FixPath,$(JPP_JAR))" \
-		-Dfile.encoding=US-ASCII \
-		com.ibm.jpp.commandline.CommandlineBuilder \
-			-verdict \
-			-baseDir "$(call FixPath,$(OPENJ9_TOPDIR))/" \
-			-config JAVA$(VERSION_FEATURE) \
-			-srcRoot jcl/ \
-			-xml jpp_configuration.xml \
-			-dest "$(call FixPath,$(J9JCL_SOURCES_DIR))" \
-			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))"
+	$(call jpp_generate_sources,$(call FixPath,$(OPENJ9_TOPDIR)),jcl)
+	$(call jpp_generate_sources,$(call FixPath,$(SUPPORT_OUTPUTDIR)),overlay)
   ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@$(ECHO) Generating DDR_VM sources
 	@$(BOOT_JDK)/bin/java \
