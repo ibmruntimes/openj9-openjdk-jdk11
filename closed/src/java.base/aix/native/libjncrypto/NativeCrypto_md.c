@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -30,7 +30,7 @@
 #include "NativeCrypto_md.h"
 
 /* Load the crypto library (return NULL on error) */
-void * load_crypto_library() {
+void * load_crypto_library(jboolean traceEnabled) {
     void * result = NULL;
     const char *libname111 = "libcrypto.a(libcrypto64.so.1.1)";
     const char *libname110 = "libcrypto.so.1.1";
