@@ -23,10 +23,6 @@
 # questions.
 #
 
-# ===========================================================================
-# (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
-# ===========================================================================
-
 m4_include([flags-cflags.m4])
 m4_include([flags-ldflags.m4])
 m4_include([flags-other.m4])
