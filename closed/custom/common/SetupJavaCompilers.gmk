@@ -21,7 +21,6 @@
 # OpenJ9 requires more lenient javac warnings for these modules.
 WARNING_MODULES := \
 	java.base \
-	jdk.management \
 	openj9.dtfj \
 	openj9.dtfjview \
 	openj9.traceformat \
