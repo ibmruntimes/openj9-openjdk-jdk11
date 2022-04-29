@@ -46,12 +46,14 @@ ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
   JPP_TAGS += OPENJDK_METHODHANDLES
 endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
 
-# OpenJ9 CRIU only supports Linux, so we only need to consider the unix sub-directory.
-OPENJDK_SOURCE_PROCESS_ENVIRONMENT := $(TOPDIR)/src/java.base/unix/classes/java/lang/ProcessEnvironment.java
-OPENJDK_STAGED_PROCESS_ENVIRONMENT := $(patsubst $(TOPDIR)/%,$(SUPPORT_OUTPUTDIR)/overlay/%,$(OPENJDK_SOURCE_PROCESS_ENVIRONMENT))
-
-$(OPENJDK_STAGED_PROCESS_ENVIRONMENT) : $(OPENJDK_SOURCE_PROCESS_ENVIRONMENT)
-	$(call install-file)
+# OpenJ9 CRIU only supports Linux, so we only need to consider the share and unix sub-directories.
+$(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
+	SRC := $(TOPDIR), \
+	DEST := $(SUPPORT_OUTPUTDIR)/overlay, \
+	FILES := \
+		src/java.base/share/classes/java/security/Security.java \
+		src/java.base/unix/classes/java/lang/ProcessEnvironment.java \
+	))
 
 # invoke JPP to preprocess java source files
 # $1 - configuration
@@ -76,7 +78,7 @@ IncludeIfUnsure := -includeIfUnsure -noWarnIncludeIf
 
 $(J9JCL_SOURCES_DONEFILE) : \
 		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*.java)) \
-		$(OPENJDK_STAGED_PROCESS_ENVIRONMENT)
+		$(COPY_OVERLAY_FILES)
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
