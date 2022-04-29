@@ -85,7 +85,8 @@ $(J9JCL_SOURCES_DONEFILE) : \
 		JAVA_HOME=$(BOOT_JDK) \
 		preprocessor
 	@$(ECHO) Generating J9JCL sources
-	$(call RunJPP, JAVA$(VERSION_FEATURE), $(SUPPORT_OUTPUTDIR)/overlay)
+	$(call RunJPP, JAVA$(VERSION_FEATURE), $(SUPPORT_OUTPUTDIR)/overlay) \
+		$(IncludeIfUnsure)
 	$(call RunJPP, JAVA$(VERSION_FEATURE), $(TOPDIR)/closed) \
 		$(IncludeIfUnsure)
 	$(call RunJPP, JAVA$(VERSION_FEATURE), $(OPENJ9_TOPDIR)/jcl)
