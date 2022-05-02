@@ -94,7 +94,7 @@ $(J9JCL_SOURCES_DONEFILE) : \
 	$(call RunJPP, JAVA$(VERSION_FEATURE), $(OPENJ9_TOPDIR)/jcl)
   ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@$(ECHO) Generating DDR_VM sources
-	$(call RunJPP, DDR_VM, $(OPENJ9_TOPDIR)/debugtools/DDR_VM, /openj9.dtfj/share/classes) \
+	$(call RunJPP, GENERIC, $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, /openj9.dtfj/share/classes) \
 		$(IncludeIfUnsure) \
 		-macro:define JAVA_SPEC_VERSION=$(VERSION_FEATURE)
   endif # OPENJ9_ENABLE_DDR
