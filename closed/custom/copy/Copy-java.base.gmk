@@ -183,21 +183,21 @@ endif # OPENJ9_ENABLE_DDR
 # To bundle first search for openssl 1.1.x library, if not found, search for 1.0.x
 ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
   ifeq (linux,$(OPENJDK_TARGET_OS))
-    LIBCRYPTO_NAMES := libcrypto.so.1.1 libcrypto.so.1.0.0
+    LIBCRYPTO_NAMES := libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0
   else ifeq (macosx,$(OPENJDK_TARGET_OS))
-    LIBCRYPTO_NAMES := libcrypto.1.1.dylib libcrypto.1.0.0.dylib
+    LIBCRYPTO_NAMES := libcrypto.3.dylib libcrypto.1.1.dylib libcrypto.1.0.0.dylib
   else ifeq (windows,$(OPENJDK_TARGET_OS))
     ifeq ($(OPENJDK_TARGET_CPU_BITS), 64)
-      LIBCRYPTO_NAMES := libcrypto-1_1-x64.dll
+      LIBCRYPTO_NAMES := libcrypto-3-x64.dll libcrypto-1_1-x64.dll
     else
-      LIBCRYPTO_NAMES := libcrypto-1_1.dll
+      LIBCRYPTO_NAMES := libcrypto-3.dll libcrypto-1_1.dll
     endif
     LIBCRYPTO_NAMES += libeay32.dll
   else ifeq (aix,$(OPENJDK_TARGET_OS))
     # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way)
     # instead of 'libcrypto.so' files.
     # See https://github.com/openssl/openssl/pull/6487.
-    LIBCRYPTO_NAMES := libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
+    LIBCRYPTO_NAMES := libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
   else
     LIBCRYPTO_NAMES := libcrypto.so
   endif
