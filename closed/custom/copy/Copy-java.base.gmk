@@ -220,7 +220,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
 
   ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
     ifeq (linux,$(OPENJDK_TARGET_OS))
-      LIBSSL_NAMES := libssl.so.1.1 libssl.so.1.0.0
+      LIBSSL_NAMES := libssl.so.3 libssl.so.1.1 libssl.so.1.0.0
       LIBSSL_PATH := $(firstword $(wildcard $(addprefix $(OPENSSL_BUNDLE_LIB_PATH)/, $(LIBSSL_NAMES))))
 
       ifneq ($(LIBSSL_PATH), )
