@@ -43,7 +43,8 @@ javax/management com/sun/awt sun/awt sun/java2d javax/xml/jaxp/testng/validation
 
 # Tests that cannot run concurrently
 exclusiveAccess.dirs=java/rmi/Naming java/util/prefs sun/management/jmxremote sun/tools/jstatd \
-sun/security/mscapi java/util/stream java/util/Arrays/largeMemory java/util/BitSet/stream javax/rmi \
+sun/security/mscapi java/util/stream java/util/Arrays/largeMemory \
+java/util/BitSet/stream javax/rmi java/net/httpclient/websocket \
 sanity/client
 
 # Group definitions
@@ -68,6 +69,7 @@ requires.properties= \
     vm.compiler1.enabled \
     vm.compiler2.enabled \
     vm.cds \
+    vm.musl \
     vm.debug \
     vm.hasSA \
     vm.hasSAandCanAttach \
