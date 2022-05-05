@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+# ===========================================================================
+
 ################################################################################
 #
 # Setup flags for C/C++ compiler
@@ -541,6 +545,15 @@ AC_DEFUN([FLAGS_SETUP_CFLAGS_HELPER],
     TOOLCHAIN_CFLAGS_JVM="-nologo -MD -MP"
     TOOLCHAIN_CFLAGS_JDK="-nologo -MD -Zc:wchar_t-"
   fi
+
+  # -std=c99 is required on AIX with xlc 16
+  if test "x$TOOLCHAIN_TYPE" = xxlc; then
+    # Explicitly set C99.
+    LANGSTD_CFLAGS="-std=c99"
+  else
+    LANGSTD_CFLAGS=""
+  fi
+  TOOLCHAIN_CFLAGS_JDK_CONLY="$LANGSTD_CFLAGS $TOOLCHAIN_CFLAGS_JDK_CONLY"
 
   # CFLAGS WARNINGS STUFF
   # Set JVM_CFLAGS warning handling
