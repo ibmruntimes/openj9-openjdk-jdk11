@@ -152,7 +152,7 @@ final class ClassByNameCache {
         LookupKey key = new LookupKey(className, loader, this);
         Object value = cache.get(key);
         if (value == null) {
-        	value = createEntry(key.createCacheKey());
+            value = createEntry(key.createCacheKey());
         }
 
         if (value instanceof FutureValue) {
