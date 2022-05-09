@@ -130,6 +130,8 @@ grant codeBase "jrt:/jdk.charsets" {
 grant codeBase "jrt:/jdk.crypto.ec" {
     permission java.lang.RuntimePermission
                    "accessClassInPackage.sun.security.*";
+    permission java.lang.RuntimePermission
+                   "accessClassInPackage.openj9.internal.security";
     permission java.lang.RuntimePermission "loadLibrary.sunec";
     permission java.security.SecurityPermission "putProviderProperty.SunEC";
     permission java.security.SecurityPermission "clearProviderProperties.SunEC";
