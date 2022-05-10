@@ -30,7 +30,7 @@
  * ===========================================================================
  */
 
-package com.ibm.security.criu;
+package openj9.internal.criu;
 
 import java.io.*;
 import java.lang.reflect.Method;

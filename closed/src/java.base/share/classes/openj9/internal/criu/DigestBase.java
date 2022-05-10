@@ -30,7 +30,7 @@
  * ===========================================================================
  */
 
-package com.ibm.security.criu;
+package openj9.internal.criu;
 
 import java.security.MessageDigestSpi;
 import java.security.DigestException;
