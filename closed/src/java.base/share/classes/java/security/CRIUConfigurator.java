@@ -62,7 +62,7 @@ public final class CRIUConfigurator {
         for (String provider : oldProviders.keySet()) {
             props.remove(provider);
         }
-        props.put("security.provider.1", "com.ibm.security.criu.CRIUSECProvider");
+        props.put("security.provider.1", "openj9.internal.criu.CRIUSECProvider");
 
         if (debug) {
             System.out.println("CRIUSEC added and all other security providers removed.");
