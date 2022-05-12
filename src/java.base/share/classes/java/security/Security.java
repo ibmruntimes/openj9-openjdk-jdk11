@@ -47,6 +47,7 @@ import sun.security.jca.*;
 
 /*[IF CRIU_SUPPORT]*/
 import openj9.internal.criu.InternalCRIUSupport;
+import openj9.internal.criu.security.CRIUConfigurator;
 /*[ENDIF] CRIU_SUPPORT*/
 
 /**
