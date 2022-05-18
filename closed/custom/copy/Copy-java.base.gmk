@@ -233,4 +233,17 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     endif # OPENJDK_TARGET_OS
   endif # OPENJ9_ENABLE_JITSERVER
 endif # OPENSSL_BUNDLE_LIB_PATH
+
+################################################################################
+# Copy the nss.fips.cfg only on x86 linux
+
+ifeq ($(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU_ARCH), linux-x86)
+  NSS_FIPS_CFG_SRC := $(TOPDIR)/closed/src/java.base/share/conf/security/nss.fips.cfg
+  NSS_FIPS_CFG_DST := $(CONF_DST_DIR)/security/nss.fips.cfg
+
+  $(NSS_FIPS_CFG_DST) : $(NSS_FIPS_CFG_SRC)
+	$(call install-file)
+
+  TARGETS += $(NSS_FIPS_CFG_DST)
+endif
 ################################################################################

@@ -50,6 +50,8 @@ import openj9.internal.criu.InternalCRIUSupport;
 import openj9.internal.criu.security.CRIUConfigurator;
 /*[ENDIF] CRIU_SUPPORT*/
 
+import openj9.internal.security.FIPSConfigurator;
+
 /**
  * <p>This class centralizes all security properties and common security
  * methods. One of its primary uses is to manage providers.
@@ -210,6 +212,17 @@ public final class Security {
         }
 /*[ENDIF] CRIU_SUPPORT*/
 
+        // Load FIPS properties
+        if (loadedProps) {
+            boolean fipsEnabled = FIPSConfigurator.configureFIPS(props);
+            if (sdebug != null) {
+                if (fipsEnabled) {
+                    sdebug.println("FIPS mode enabled.");
+                } else {
+                    sdebug.println("FIPS mode disabled.");
+                }
+            }
+        }
     }
 
     /*

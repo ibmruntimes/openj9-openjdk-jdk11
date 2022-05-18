@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 /**
  * Defines the foundational APIs of the Java SE Platform.
  *
@@ -335,6 +341,8 @@ module java.base {
         java.prefs;
     exports sun.util.resources to
         jdk.localedata;
+    exports openj9.internal.security to
+        jdk.crypto.ec;
 
 
     // the service types defined by the APIs in this module
