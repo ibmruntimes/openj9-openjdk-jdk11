@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -18,5 +18,7 @@
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
 
-# OpenJ9 uses it's own VarHandles implementation
-GENSRC_JAVA_BASE := $(filter-out $(GENSRC_VARHANDLES),$(GENSRC_JAVA_BASE))
+ifneq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  # OpenJ9 uses it's own VarHandles implementation
+  GENSRC_JAVA_BASE := $(filter-out $(GENSRC_VARHANDLES),$(GENSRC_JAVA_BASE))
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
