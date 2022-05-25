@@ -21,6 +21,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 /* @test
  * @bug 4313887 8129632 8129633 8162624 8146215 8162745 8273655
  * @summary Unit test for probeContentType method
@@ -193,5 +199,18 @@ public class Basic {
         }
     }
 
-    record ExType(String extension, List<String> expectedTypes) { }
+    static class ExType {
+        String extension;
+        List<String> expectedTypes;
+        ExType(String ext, List<String> expTypes) {
+            extension = ext;
+            expectedTypes = expTypes;
+        }
+        String extension() {
+                return extension;
+        }
+        List<String> expectedTypes() {
+                return expectedTypes;
+        }
+    }
 }
