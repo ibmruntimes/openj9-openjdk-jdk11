@@ -58,7 +58,7 @@ public final class CRIUSECProvider extends Provider {
      * Resets the security digests.
      */
     public static void resetCRIUSEC() {
-        NativePRNG.clearRNGBuffers();
+        NativePRNG.clearRNGState();
         DigestBase.resetDigests();
     }
 }
