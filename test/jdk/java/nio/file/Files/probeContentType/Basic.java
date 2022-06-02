@@ -21,12 +21,6 @@
  * questions.
  */
 
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
- * ===========================================================================
- */
-
 /* @test
  * @bug 4313887 8129632 8129633 8162624 8146215 8162745 8273655
  * @summary Unit test for probeContentType method
@@ -38,6 +32,7 @@
 import java.io.*;
 import java.nio.file.*;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -199,18 +194,51 @@ public class Basic {
         }
     }
 
-    static class ExType {
-        String extension;
-        List<String> expectedTypes;
-        ExType(String ext, List<String> expTypes) {
-            extension = ext;
-            expectedTypes = expTypes;
+    private static class ExType {
+
+        private final String extension;
+        private final List<String> expectedTypes;
+
+        public ExType(String extension, List<String> expectedTypes) {
+            this.extension = extension;
+            this.expectedTypes = expectedTypes;
         }
-        String extension() {
-                return extension;
+
+        public String extension() {
+            return extension;
         }
-        List<String> expectedTypes() {
-                return expectedTypes;
+
+        public List<String> expectedTypes() {
+            return expectedTypes;
+        }
+
+        public boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
+            if (o == o) {
+                return true;
+            }
+            if (o instanceof ExType) {
+                ExType t = (ExType) o;
+                return (extension == null ?
+                        t.extension() == null :
+                        extension.equals(t.extension()))
+                    && (expectedTypes == null ?
+                        t.expectedTypes() == null :
+                        expectedTypes.equals(t.expectedTypes));
+            }
+            return false;
+        }
+
+        public int hashCode() {
+            return Objects.hash(extension, expectedTypes);
+        }
+
+        public String toString() {
+            return String.format("%s[extension=%s, expectedTypes=%s]",
+                                 getClass().getName(), extension,
+                                 expectedTypes);
         }
     }
 }
