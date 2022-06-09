@@ -52,6 +52,8 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 	DEST := $(SUPPORT_OUTPUTDIR)/overlay, \
 	FILES := \
 		src/java.base/share/classes/java/security/Security.java \
+		src/java.base/share/classes/java/util/Timer.java \
+		src/java.base/share/classes/java/util/TimerTask.java \
 		src/java.base/unix/classes/java/lang/ProcessEnvironment.java \
 	))
 
