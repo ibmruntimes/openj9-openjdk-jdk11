@@ -73,6 +73,9 @@ public final class NativePRNG extends SecureRandomSpi {
     // name of the pure random file (also used for setSeed())
     private static final String NAME_RANDOM = "/dev/random";
 
+    // name of the pseudo random file
+    private static final String NAME_URANDOM = "/dev/urandom";
+
     // singleton instance or null if not available
     private static final RandomIO INSTANCE = initIO();
 
@@ -85,7 +88,7 @@ public final class NativePRNG extends SecureRandomSpi {
                 @Override
                 public RandomIO run() {
                     File seedFile = new File(NAME_RANDOM);
-                    File nextFile = new File(NAME_RANDOM);
+                    File nextFile = new File(NAME_URANDOM);
 
                     if (debug != null) {
                         debug.println("NativePRNG." +
@@ -141,24 +144,14 @@ public final class NativePRNG extends SecureRandomSpi {
         return INSTANCE.implGenerateSeed(numBytes);
     }
 
-    static void clearRNGBuffers() {
-        INSTANCE.clearRNGBuffers();
+    static void clearRNGState() {
+        INSTANCE.clearRNGState();
     }
 
     /**
      * Nested class doing the actual work. Singleton, see INSTANCE above.
      */
     private static final class RandomIO {
-
-        // we buffer data we read from the "next" file for efficiency,
-        // but we limit the lifetime to avoid using stale bits
-        // lifetime in ms, currently 100 ms (0.1 s)
-        private static final long MAX_BUFFER_TIME = 100;
-
-        // size of the "next" buffer
-        private static final int MAX_BUFFER_SIZE = 65536;
-        private static final int MIN_BUFFER_SIZE = 32;
-        private int bufferSize = 256;
 
         // holder for the seedFile, used if we ever add seed material
         private File seedFile;
@@ -170,33 +163,12 @@ public final class NativePRNG extends SecureRandomSpi {
         // flag indicating if we have tried to open seedOut yet
         private boolean seedOutInitialized;
 
-        // buffer for next bits
-        private byte[] nextBuffer;
+        // SHA1PRNG instance for mixing
+        // initialized lazily on demand to avoid problems during startup
+        private volatile SHA1PRNG mixRandom;
 
-        // number of bytes left in nextBuffer
-        private int buffered;
-
-        // time we read the data into the nextBuffer
-        private long lastRead;
-
-        // count for the number of buffer size changes requests
-        // positive value in increase size, negative to lower it
-        private int change_buffer = 0;
-
-        // request limit to trigger an increase in nextBuffer size
-        private static final int REQ_LIMIT_INC = 1000;
-
-        // request limit to trigger a decrease in nextBuffer size
-        private static final int REQ_LIMIT_DEC = -100;
-
-        // mutex lock for nextBytes()
-        private final Object LOCK_GET_BYTES = new Object();
-
-        // mutex lock for generateSeed()
+        // mutex lock for accessing the seed file stream
         private final Object LOCK_GET_SEED = new Object();
-
-        // mutex lock for setSeed()
-        private final Object LOCK_SET_SEED = new Object();
 
         // constructor, called only once from initIO()
         private RandomIO(File seedFile, File nextFile) throws IOException {
@@ -215,25 +187,34 @@ public final class NativePRNG extends SecureRandomSpi {
             }
             this.seedIn = seedStream;
             this.nextIn = nextStream;
-            this.nextBuffer = new byte[bufferSize];
         }
 
+        // get the SHA1PRNG for mixing
+        // initialize if not yet created
+        private SHA1PRNG getMixRandom() {
+            SHA1PRNG prngObj = mixRandom;
+            if (prngObj == null) {
+                synchronized (LOCK_GET_SEED) {
+                    prngObj = mixRandom;
+                    if (prngObj == null) {
+                        try {
+                            prngObj = SHA1PRNG.seedFrom(seedIn);
+                        } catch (IOException e) {
+                            throw new ProviderException("init failed", e);
+                        }
+                        mixRandom = prngObj;
+                    }
+                }
+            }
+            return prngObj;
+        }
         // Read data.length bytes from in.
         // These are not normal files, so we need to loop the read.
         // Just keep trying as long as we are making progress.
         private static void readFully(InputStream in, byte[] data)
                 throws IOException {
             int len = data.length;
-            int ofs = 0;
-            while (len > 0) {
-                int k = in.read(data, ofs, len);
-                if (k <= 0) {
-                    throw new EOFException("File(s) closed?");
-                }
-                ofs += k;
-                len -= k;
-            }
-            if (len > 0) {
+            if (in.readNBytes(data, 0, len) < len) {
                 throw new IOException("Could not read from file(s)");
             }
         }
@@ -253,116 +234,50 @@ public final class NativePRNG extends SecureRandomSpi {
 
         // supply random bytes to the OS
         // write to "seed" if possible
-        private void implSetSeed(byte[] seed) {
-            synchronized (LOCK_SET_SEED) {
-                if (seedOutInitialized == false) {
-                    seedOutInitialized = true;
-                    seedOut = AccessController.doPrivileged(
-                            new PrivilegedAction<>() {
-                        @Override
-                        public OutputStream run() {
-                            try {
-                                return new FileOutputStream(seedFile, true);
-                            } catch (Exception e) {
-                                return null;
-                            }
-                        }
-                    });
-                }
-                if (seedOut != null) {
-                    try {
-                        seedOut.write(seed);
-                    } catch (IOException e) {
-                        // ignored, on Mac OS X, /dev/urandom can be opened
-                        // for write, but actual write is not permitted
-                    }
-                }
-            }
+        // always add the seed to our mixing random
+        private synchronized void implSetSeed(byte[] seed) {
+           if (seedOutInitialized == false) {
+               seedOutInitialized = true;
+               seedOut = AccessController.doPrivileged(
+                       new PrivilegedAction<>() {
+                   @Override
+                   public OutputStream run() {
+                       try {
+                           return new FileOutputStream(seedFile, true);
+                       } catch (IOException e) {
+                           return null;
+                       }
+                   }
+               });
+           }
+           if (seedOut != null) {
+               try {
+                   seedOut.write(seed);
+               } catch (IOException e) {
+                   // ignored, on Mac OS X, /dev/urandom can be opened
+                   // for write, but actual write is not permitted
+               }
+           }
+           getMixRandom().engineSetSeed(seed);
         }
 
-        // ensure that there is at least one valid byte in the buffer
-        // if not, read new bytes
-        private void ensureBufferValid() throws IOException {
-            long time = System.currentTimeMillis();
-            int new_buffer_size = 0;
-
-            // check if buffer has bytes available that are not too old
-            if (buffered > 0) {
-                if ((time - lastRead) < MAX_BUFFER_TIME) {
-                    return;
-                } else {
-                    // byte is old, so subtract from counter to shrink buffer
-                    change_buffer--;
-                }
-            } else {
-                // no bytes available, so add to count to increase buffer
-                change_buffer++;
-            }
-
-            // if counter has hit a limit, increase or decrease size
-            if (change_buffer > REQ_LIMIT_INC) {
-                new_buffer_size = nextBuffer.length * 2;
-            } else if (change_buffer < REQ_LIMIT_DEC) {
-                new_buffer_size = nextBuffer.length / 2;
-            }
-
-            // if buffer size is to be changed, replace nextBuffer
-            if (new_buffer_size > 0) {
-                if ((MIN_BUFFER_SIZE <= new_buffer_size) &&
-                        (new_buffer_size <= MAX_BUFFER_SIZE)) {
-                    nextBuffer = new byte[new_buffer_size];
-                    if (debug != null) {
-                        debug.println("Buffer size changed to " +
-                                new_buffer_size);
-                    }
-                } else {
-                    if (debug != null) {
-                        debug.println("Buffer reached limit: " +
-                                nextBuffer.length);
-                    }
-                }
-                change_buffer = 0;
-            }
-
-            // load fresh random bytes into nextBuffer
-            lastRead = time;
-            readFully(nextIn, nextBuffer);
-            buffered = nextBuffer.length;
-        }
-
-        private void implNextBytes(byte[] data) {
+        private synchronized void implNextBytes(byte[] data) {
+            getMixRandom().engineNextBytes(data);
             try {
-                int data_len = data.length;
-                int ofs = 0;
-
-                while (data_len > 0) {
-                    synchronized (LOCK_GET_BYTES) {
-                        ensureBufferValid();
-                        int buf_pos = nextBuffer.length - buffered;
-                        int len;
-
-                        if (data_len > buffered) {
-                            len = buffered;
-                            buffered = 0;
-                        } else {
-                            len = data_len;
-                            buffered -= len;
-                        }
-
-                        System.arraycopy(nextBuffer, buf_pos, data, ofs, len);
-                        ofs += len;
-                        data_len -= len;
-                    }
+                // read random data from non blocking source
+                byte[] rawData = new byte[data.length];
+                readFully(nextIn, rawData);
+                for (int i = 0; i < data.length; i++) {
+                    data[i] ^= rawData[i];
                 }
             } catch (IOException e) {
                 throw new ProviderException("nextBytes() failed", e);
             }
         }
 
-        private void clearRNGBuffers() {
-            if (this.nextBuffer != null) {
-                Arrays.fill(this.nextBuffer, (byte) 0x00);
-                this.nextBuffer = null;
+        private void clearRNGState() {
+            if (mixRandom != null) {
+                mixRandom.clearState();
             }
         }
     }
