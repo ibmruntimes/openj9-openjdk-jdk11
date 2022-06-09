@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.util;
 
 /**
@@ -83,6 +89,13 @@ public abstract class TimerTask implements Runnable {
      * A value of 0 indicates a non-repeating task.
      */
     long period = 0;
+
+    /*[IF CRIU_SUPPORT]*/
+    /**
+     * Determine if the nextExecutionTime is to be adjusted.
+     */
+    boolean criuAdjustRequired;
+    /*[ENDIF] CRIU_SUPPORT*/
 
     /**
      * Creates a new timer task.
