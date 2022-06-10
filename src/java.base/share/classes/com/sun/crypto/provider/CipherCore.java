@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -70,7 +70,7 @@ final class CipherCore {
      * The property 'jdk.nativeCBC' is used to disable Native CBC alone,
      * 'jdk.nativeGCM' is used to disable Native GCM alone and
      * 'jdk.nativeCrypto' is used to disable all native cryptos (Digest,
-     * CBC, GCM, RSA and ChaCha20).
+     * CBC, GCM, RSA, ChaCha20, and EC).
      */
     private static boolean useNativeCrypto = true;
     private static boolean useNativeCBC = true;
