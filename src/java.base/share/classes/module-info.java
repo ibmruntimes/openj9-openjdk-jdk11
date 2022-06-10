@@ -342,6 +342,7 @@ module java.base {
     exports sun.util.resources to
         jdk.localedata;
     exports openj9.internal.security to
+        jdk.crypto.cryptoki,
         jdk.crypto.ec;
 
 
