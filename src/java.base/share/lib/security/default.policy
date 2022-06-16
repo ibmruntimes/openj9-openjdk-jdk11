@@ -129,6 +129,8 @@ grant codeBase "jrt:/jdk.charsets" {
 
 grant codeBase "jrt:/jdk.crypto.ec" {
     permission java.lang.RuntimePermission
+                   "accessClassInPackage.jdk.crypto.jniprovider";
+    permission java.lang.RuntimePermission
                    "accessClassInPackage.sun.security.*";
     permission java.lang.RuntimePermission
                    "accessClassInPackage.openj9.internal.security";
