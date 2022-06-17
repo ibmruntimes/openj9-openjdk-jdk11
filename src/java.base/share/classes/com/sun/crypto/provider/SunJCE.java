@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
@@ -93,7 +93,7 @@ public final class SunJCE extends Provider {
      * By default, the native crypto is enabled and uses the native library.
      * The property 'jdk.nativeChaCha20' is used to control native ChaCha20 alone
      * and 'jdk.nativeCrypto' is used to control all native crypto implementations
-     * (Digest, CBC, GCM, and ChaCha20).
+     * (Digest, CBC, GCM, ChaCha20, and EC).
      */
     private static final boolean useNativeChaCha20Cipher = nativeChaCha20Init();
 
