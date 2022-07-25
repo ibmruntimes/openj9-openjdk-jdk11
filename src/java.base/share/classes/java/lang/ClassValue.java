@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.lang;
 
 import java.util.WeakHashMap;
@@ -33,6 +39,10 @@ import jdk.internal.misc.Unsafe;
 
 import static java.lang.ClassValue.ClassValueMap.probeHomeLocation;
 import static java.lang.ClassValue.ClassValueMap.probeBackupLocations;
+
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.NotCheckpointSafe;
+/*[ENDIF] CRIU_SUPPORT */
 
 /**
  * Lazily associate a computed value with (potentially) every type.
@@ -372,6 +382,9 @@ public abstract class ClassValue<T> {
 
     private static final Object CRITICAL_SECTION = new Object();
     private static final Unsafe UNSAFE = Unsafe.getUnsafe();
+    /*[IF CRIU_SUPPORT]*/
+    @NotCheckpointSafe
+    /*[ENDIF] CRIU_SUPPORT */
     private static ClassValueMap initializeMap(Class<?> type) {
         ClassValueMap map;
         synchronized (CRITICAL_SECTION) {  // private object to avoid deadlocks
