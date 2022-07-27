@@ -203,7 +203,9 @@ public class Timer {
             throw new IllegalArgumentException("Negative delay.");
         /*[IF CRIU_SUPPORT]*/
         // only tasks scheduled before Checkpoint to be adjusted
-        if (InternalCRIUSupport.getCheckpointRestoreNanoTimeDelta() == 0) {
+        if ((InternalCRIUSupport.getCheckpointRestoreNanoTimeDelta() == 0)
+            && (task != null)
+        ) {
             task.criuAdjustRequired = true;
         }
         /*[ENDIF] CRIU_SUPPORT*/
@@ -264,7 +266,9 @@ public class Timer {
             throw new IllegalArgumentException("Non-positive period.");
         /*[IF CRIU_SUPPORT]*/
         // only tasks scheduled before Checkpoint to be adjusted
-        if (InternalCRIUSupport.getCheckpointRestoreNanoTimeDelta() == 0) {
+        if ((InternalCRIUSupport.getCheckpointRestoreNanoTimeDelta() == 0)
+            && (task != null)
+        ) {
             task.criuAdjustRequired = true;
         }
         /*[ENDIF] CRIU_SUPPORT*/
@@ -350,7 +354,9 @@ public class Timer {
             throw new IllegalArgumentException("Non-positive period.");
         /*[IF CRIU_SUPPORT]*/
         // only tasks scheduled before Checkpoint to be adjusted
-        if (InternalCRIUSupport.getCheckpointRestoreNanoTimeDelta() == 0) {
+        if ((InternalCRIUSupport.getCheckpointRestoreNanoTimeDelta() == 0)
+            && (task != null)
+        ) {
             task.criuAdjustRequired = true;
         }
         /*[ENDIF] CRIU_SUPPORT*/
