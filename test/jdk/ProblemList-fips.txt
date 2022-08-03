@@ -1055,3 +1055,45 @@ sun/security/x509/URICertStore/ExtensionsWithLDAP.java	https://github.com/ibmrun
 
 com/sun/security/auth/module/KeyStoreLoginModule/OptionTest.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
 com/sun/security/auth/module/KeyStoreLoginModule/ReadOnly.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+#
+# Update the exclude tests list for extended.openjdk after jdk_security3 test target enabled
+#
+
+# Fails also for non FIPS mode testing
+
+sun/security/pkcs11/ec/TestECDH.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/pkcs11/ec/TestECDSA.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+# FIPS don't support exporting DES, DSA, secret, tls master keys, only support RSA keys
+
+sun/security/pkcs11/KeyGenerator/DESParity.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/pkcs11/tls/TestKeyMaterial.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/pkcs11/tls/TestMasterSecret.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/provider/certpath/SunCertPathBuilderExceptionTest.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+# Testing unusual curves in FIPS mode
+
+sun/security/pkcs11/ec/TestCurves.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+# FIPS dont support importing DH, EC, DSA, RSA keys - only support Secret keys
+
+sun/security/pkcs11/ec/TestECDSA2.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/pkcs11/ec/TestECDH2.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/pkcs11/Signature/TestDSA.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/pkcs11/tls/TestLeadingZeroesP11.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/provider/DSA/TestMaxLengthDER.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/x509/X509CertImpl/ECSigParamsVerifyWithCert.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+sun/security/ssl/rsa/SignedObjectChain.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+# A mismatch in the error message but the function is correct
+
+sun/security/pkcs11/rsa/TestP11KeyFactoryGetRSAKeySpec.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+# Algorithm not supported in FIPS mode
+
+sun/security/provider/MessageDigest/SHA512.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
+
+# FIPS unexpected provider error - not a FIPS test
+
+sun/security/ssl/HandshakeHash/HandshakeHashCloneExhaustion.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64
