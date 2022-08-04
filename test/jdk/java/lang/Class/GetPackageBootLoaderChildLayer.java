@@ -21,12 +21,18 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 /**
  * @test
  * @requires !vm.graal.enabled
  * @modules jdk.attach
- * @run main/othervm --limit-modules jdk.attach -Djdk.attach.allowAttachSelf
- *    GetPackageBootLoaderChildLayer
+ * @run main/othervm --limit-modules jdk.attach,jdk.crypto.cryptoki
+ *    -Djdk.attach.allowAttachSelf GetPackageBootLoaderChildLayer
  * @summary Exercise Class.getPackage on a class defined to the boot loader
  *    but in a module that is in a child layer rather than the boot layer
  */
