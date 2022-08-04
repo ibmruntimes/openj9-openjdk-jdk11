@@ -58,7 +58,6 @@ requires.properties= \
     vm.cpu.features \
     vm.debug \
     vm.hasSA \
-    vm.hasSAandCanAttach \
     vm.hasJFR \
     vm.rtm.cpu \
     vm.rtm.compiler \
@@ -78,7 +77,7 @@ requires.properties= \
 requires.extraPropDefns = [../../../closed/test/jtreg-ext/requires/OpenJ9PropsExt.java]
 
 # Minimum jtreg version
-requiredVersion=5.1 b1
+requiredVersion=6+1
 
 # Path to libraries in the topmost test directory. This is needed so @library
 # does not need ../../../ notation to reach them
