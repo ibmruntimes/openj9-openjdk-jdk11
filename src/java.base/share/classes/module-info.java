@@ -299,7 +299,8 @@ module java.base {
         jdk.crypto.cryptoki,
         jdk.security.auth;
     exports sun.security.provider.certpath to
-        java.naming;
+        java.naming,
+        jdk.jartool;
     exports sun.security.rsa to
         jdk.crypto.cryptoki;
     exports sun.security.ssl to
