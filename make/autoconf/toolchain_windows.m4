@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011, 2019, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2011, 2020, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -92,6 +92,7 @@ VS_TOOLSET_SUPPORTED_2017=true
 VS_DESCRIPTION_2019="Microsoft Visual Studio 2019"
 VS_VERSION_INTERNAL_2019=141
 VS_MSVCR_2019=vcruntime140.dll
+VS_VCRUNTIME_1_2019=vcruntime140_1.dll
 VS_MSVCP_2019=msvcp140.dll
 VS_ENVVAR_2019="VS160COMNTOOLS"
 VS_USE_UCRT_2019="true"
@@ -306,6 +307,7 @@ AC_DEFUN([TOOLCHAIN_FIND_VISUAL_STUDIO],
     fi
     eval VS_VERSION_INTERNAL="\${VS_VERSION_INTERNAL_${VS_VERSION}}"
     eval MSVCR_NAME="\${VS_MSVCR_${VS_VERSION}}"
+    eval VCRUNTIME_1_NAME="\${VS_VCRUNTIME_1_${VS_VERSION}}"
     eval MSVCP_NAME="\${VS_MSVCP_${VS_VERSION}}"
     eval USE_UCRT="\${VS_USE_UCRT_${VS_VERSION}}"
     eval VS_SUPPORTED="\${VS_SUPPORTED_${VS_VERSION}}"
@@ -353,6 +355,7 @@ AC_DEFUN([TOOLCHAIN_FIND_VISUAL_STUDIO],
       eval VS_DESCRIPTION="\${VS_DESCRIPTION_${VS_VERSION}}"
       eval VS_VERSION_INTERNAL="\${VS_VERSION_INTERNAL_${VS_VERSION}}"
       eval MSVCR_NAME="\${VS_MSVCR_${VS_VERSION}}"
+      eval VCRUNTIME_1_NAME="\${VS_VCRUNTIME_1_${VS_VERSION}}"
       eval MSVCP_NAME="\${VS_MSVCP_${VS_VERSION}}"
       eval USE_UCRT="\${VS_USE_UCRT_${VS_VERSION}}"
       eval VS_SUPPORTED="\${VS_SUPPORTED_${VS_VERSION}}"
@@ -694,6 +697,31 @@ AC_DEFUN([TOOLCHAIN_SETUP_VS_RUNTIME_DLLS],
     fi
     AC_SUBST(MSVCP_DLL)
   fi
+
+  AC_ARG_WITH(vcruntime-1-dll, [AS_HELP_STRING([--with-vcruntime-1-dll],
+      [path to microsoft C++ runtime dll (vcruntime*_1.dll) (Windows x64 only) @<:@probed@:>@])])
+
+  if test "x$VCRUNTIME_1_NAME" != "x" && test "x$OPENJDK_TARGET_CPU" = xx86_64; then
+    if test "x$with_vcruntime_1_dll" != x; then
+      # If given explicitly by user, do not probe. If not present, fail directly.
+      TOOLCHAIN_CHECK_POSSIBLE_MSVC_DLL($VCRUNTIME_1_NAME, [$with_vcruntime_1_dll],
+          [--with-vcruntime-1-dll])
+      if test "x$MSVC_DLL" = x; then
+        AC_MSG_ERROR([Could not find a proper $VCRUNTIME_1_NAME as specified by --with-vcruntime-1-dll])
+      fi
+      VCRUNTIME_1_DLL="$MSVC_DLL"
+    elif test "x$DEVKIT_VCRUNTIME_1_DLL" != x; then
+      TOOLCHAIN_CHECK_POSSIBLE_MSVC_DLL($VCRUNTIME_1_NAME, [$DEVKIT_VCRUNTIME_1_DLL], [devkit])
+      if test "x$MSVC_DLL" = x; then
+        AC_MSG_ERROR([Could not find a proper $VCRUNTIME_1_NAME as specified by devkit])
+      fi
+      VCRUNTIME_1_DLL="$MSVC_DLL"
+    else
+      TOOLCHAIN_SETUP_MSVC_DLL([${VCRUNTIME_1_NAME}])
+      VCRUNTIME_1_DLL="$MSVC_DLL"
+    fi
+  fi
+  AC_SUBST(VCRUNTIME_1_DLL)
 
   AC_ARG_WITH(ucrt-dll-dir, [AS_HELP_STRING([--with-ucrt-dll-dir],
       [path to Microsoft Windows Kit UCRT DLL dir (Windows only) @<:@probed@:>@])])
