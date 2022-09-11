@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -38,6 +38,8 @@ import java.util.*;
 import java.security.*;
 
 import sun.security.util.PropertyExpander;
+
+import openj9.internal.security.RestrictedSecurity;
 
 /**
  * Class representing a configured provider which encapsulates configuration
@@ -168,6 +170,11 @@ final class ProviderConfig {
     // com.sun.net.ssl.internal.ssl.Provider has been deprecated since JDK 9
     @SuppressWarnings("deprecation")
     synchronized Provider getProvider() {
+        if (!RestrictedSecurity.isProviderAllowed(provName)) {
+            // We're in restricted security mode which does not allow this provider,
+            // return without loading.
+            return null;
+        }
         // volatile variable load
         Provider p = provider;
         if (p != null) {

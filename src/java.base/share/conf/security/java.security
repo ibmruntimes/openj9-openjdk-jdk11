@@ -85,6 +85,58 @@ security.provider.tbd=Apple
 security.provider.tbd=SunPKCS11
 #endif
 
+#ifdef linux-x86
+#
+# Java Restricted Security Mode
+#
+RestrictedSecurity1.desc.name = Red Hat Enterprise Linux 8 NSS Cryptographic Module FIPS 140-2
+RestrictedSecurity1.desc.number = Certificate #3946
+RestrictedSecurity1.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/3946
+RestrictedSecurity1.desc.sunsetDate = 2026-06-06
+
+RestrictedSecurity1.tls.disabledNamedCurves =
+RestrictedSecurity1.tls.disabledAlgorithms = X25519, X448, SSLv3, TLSv1, TLSv1.1, \
+    TLS_CHACHA20_POLY1305_SHA256, TLS_DHE_RSA_WITH_AES_256_GCM_SHA384, \
+    TLS_DHE_DSS_WITH_AES_256_GCM_SHA384, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256, \
+    TLS_DHE_DSS_WITH_AES_128_GCM_SHA256, TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, \
+    TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, \
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_DHE_RSA_WITH_AES_256_CBC_SHA, \
+    TLS_DHE_DSS_WITH_AES_256_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, \
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_256_GCM_SHA384, \
+    TLS_RSA_WITH_AES_128_GCM_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256, \
+    TLS_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA, \
+    TLS_RSA_WITH_AES_128_CBC_SHA, TLS_AES_256_GCM_SHA384, \
+    TLS_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, \
+    TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, \
+    TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384, \
+    TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256, \
+    TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+RestrictedSecurity1.tls.ephemeralDHKeySize =
+RestrictedSecurity1.tls.legacyAlgorithms =
+
+RestrictedSecurity1.jce.certpath.disabledAlgorithms =
+RestrictedSecurity1.jce.legacyAlgorithms =
+RestrictedSecurity1.jce.provider.1 = SunPKCS11 ${java.home}/conf/security/nss.fips.cfg
+RestrictedSecurity1.jce.provider.2 = SUN [{CertificateFactory, X.509, ImplementedIn=Software}, \
+    {CertStore, Collection, ImplementedIn=Software}, \
+    {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
+    {Policy, JavaPolicy, *}, {Configuration, JavaLoginConfig, *}, \
+    {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
+    {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}]
+RestrictedSecurity1.jce.provider.3 = SunEC [{KeyFactory, EC, ImplementedIn=Software: \
+    SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
+    KeySize=256}, {AlgorithmParameters, EC, *}]
+RestrictedSecurity1.jce.provider.4 = SunJSSE
+
+RestrictedSecurity1.keystore.type = PKCS11
+RestrictedSecurity1.javax.net.ssl.keyStore = NONE
+
+RestrictedSecurity1.securerandom.provider = SunPKCS11-NSS-FIPS
+RestrictedSecurity1.securerandom.algorithm = PKCS11
+#endif
+
 #
 # A list of preferred providers for specific algorithms. These providers will
 # be searched for matching algorithms before the list of registered providers.
