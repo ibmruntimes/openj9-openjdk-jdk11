@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.util;
 
 import java.io.BufferedReader;
@@ -56,6 +62,9 @@ import jdk.internal.module.ServicesCatalog;
 import jdk.internal.module.ServicesCatalog.ServiceProvider;
 import jdk.internal.reflect.CallerSensitive;
 import jdk.internal.reflect.Reflection;
+
+import openj9.internal.security.RestrictedSecurityConfigurator;
+import openj9.internal.security.RestrictedSecurityProperties;
 
 /**
  * A facility to load implementations of a service.
@@ -884,6 +893,14 @@ public final class ServiceLoader<S>
 
                 @SuppressWarnings("unchecked")
                 Class<? extends S> type = (Class<? extends S>) returnType;
+                // If the restricted security mode is enabled.
+                if (RestrictedSecurityConfigurator.isEnabled()) {
+                    // If the provider is NOT allowed in restricted security mode.
+                    if (!RestrictedSecurityProperties.getInstance().isProviderAllowed(clazz)) {
+                        // Then skip it.
+                        return null;
+                    }
+                }
                 return new ProviderImpl<S>(service, type, factoryMethod, acc);
             }
         }
@@ -897,6 +914,14 @@ public final class ServiceLoader<S>
         Class<? extends S> type = (Class<? extends S>) clazz;
         @SuppressWarnings("unchecked")
         Constructor<? extends S> ctor = (Constructor<? extends S> ) getConstructor(clazz);
+        // If the restricted security mode is enabled.
+        if (RestrictedSecurityConfigurator.isEnabled()) {
+            // If the provider is NOT allowed in restricted security mode.
+            if (!RestrictedSecurityProperties.getInstance().isProviderAllowed(clazz)) {
+                // Then skip it.
+                return null;
+            }
+        }
         return new ProviderImpl<S>(service, type, ctor, acc);
     }
 
@@ -1231,6 +1256,14 @@ public final class ServiceLoader<S>
                         Class<? extends S> type = (Class<? extends S>) clazz;
                         Constructor<? extends S> ctor
                             = (Constructor<? extends S>)getConstructor(clazz);
+                        // If the restricted security mode is enabled.
+                        if (RestrictedSecurityConfigurator.isEnabled()) {
+                            // If the provider is NOT allowed in restricted security mode.
+                            if (!RestrictedSecurityProperties.getInstance().isProviderAllowed(clazz)) {
+                                // Then skip it.
+                                continue;
+                            }
+                        }
                         ProviderImpl<S> p = new ProviderImpl<S>(service, type, ctor, acc);
                         nextProvider = (ProviderImpl<T>) p;
                     } else {

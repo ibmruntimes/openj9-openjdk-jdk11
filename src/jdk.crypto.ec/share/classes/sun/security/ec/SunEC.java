@@ -39,8 +39,6 @@ import sun.security.util.NamedCurve;
 
 import static sun.security.util.SecurityConstants.PROVIDER_VER;
 
-import openj9.internal.security.FIPSConfigurator;
-
 import jdk.crypto.jniprovider.NativeCrypto;
 
 /**
@@ -194,181 +192,128 @@ public final class SunEC extends Provider {
     void putEntries(boolean useFullImplementation) {
         HashMap<String, String> ATTRS = new HashMap<>(3);
 
-        if (FIPSConfigurator.enableFips()) {
-            ATTRS.put("ImplementedIn", "Software");
-            String ecKeyClasses = "java.security.interfaces.ECPublicKey" +
-                    "|java.security.interfaces.ECPrivateKey";
-            ATTRS.put("SupportedKeyClasses", ecKeyClasses);
-            ATTRS.put("KeySize", "256");
+        ATTRS.put("ImplementedIn", "Software");
+        String ecKeyClasses = "java.security.interfaces.ECPublicKey" +
+                "|java.security.interfaces.ECPrivateKey";
+        ATTRS.put("SupportedKeyClasses", ecKeyClasses);
+        ATTRS.put("KeySize", "256");
 
-            /*
-             * Key Factory engine
-             */
-            putService(new ProviderService(this, "KeyFactory",
-                "EC", "sun.security.ec.ECKeyFactory",
-                new String[] { "EllipticCurve" }, ATTRS));
+        /*
+         * Key Factory engine
+         */
+        putService(new ProviderService(this, "KeyFactory",
+            "EC", "sun.security.ec.ECKeyFactory",
+            new String[] { "EllipticCurve" }, ATTRS));
 
-            /*
-             * Algorithm Parameter engine
-             */
-            // "AlgorithmParameters.EC SupportedCurves" prop used by unit test
-            boolean firstCurve = true;
-            StringBuilder names = new StringBuilder();
-            Pattern nameSplitPattern = Pattern.compile(CurveDB.SPLIT_PATTERN);
+        /*
+         * Algorithm Parameter engine
+         */
+        // "AlgorithmParameters.EC SupportedCurves" prop used by unit test
+        boolean firstCurve = true;
+        StringBuilder names = new StringBuilder();
+        Pattern nameSplitPattern = Pattern.compile(CurveDB.SPLIT_PATTERN);
 
-            Collection<? extends NamedCurve> supportedCurves =
-                CurveDB.getSupportedCurves();
-            for (NamedCurve namedCurve : supportedCurves) {
-                if (!firstCurve) {
-                    names.append("|");
-                } else {
-                    firstCurve = false;
-                }
-
-                names.append("[");
-
-                String[] commonNames = nameSplitPattern.split(namedCurve.getName());
-                for (String commonName : commonNames) {
-                    names.append(commonName.trim());
-                    names.append(",");
-                }
-
-                names.append(namedCurve.getObjectId());
-                names.append("]");
+        Collection<? extends NamedCurve> supportedCurves =
+            CurveDB.getSupportedCurves();
+        for (NamedCurve namedCurve : supportedCurves) {
+            if (!firstCurve) {
+                names.append("|");
+            } else {
+                firstCurve = false;
             }
 
-            HashMap<String, String> apAttrs = new HashMap<>(ATTRS);
-            apAttrs.put("SupportedCurves", names.toString());
+            names.append("[");
 
-            putService(new ProviderService(this, "AlgorithmParameters",
+            String[] commonNames = nameSplitPattern.split(namedCurve.getName());
+            for (String commonName : commonNames) {
+                names.append(commonName.trim());
+                names.append(",");
+            }
+
+            names.append(namedCurve.getObjectId());
+            names.append("]");
+        }
+
+        HashMap<String, String> apAttrs = new HashMap<>(ATTRS);
+        apAttrs.put("SupportedCurves", names.toString());
+
+        putService(new ProviderService(this, "AlgorithmParameters",
                 "EC", "sun.security.util.ECParameters",
                 new String[] { "EllipticCurve", "1.2.840.10045.2.1", "OID.1.2.840.10045.2.1" },
                 apAttrs));
 
-        } else {
-            ATTRS.put("ImplementedIn", "Software");
-            String ecKeyClasses = "java.security.interfaces.ECPublicKey" +
-                    "|java.security.interfaces.ECPrivateKey";
-            ATTRS.put("SupportedKeyClasses", ecKeyClasses);
-            ATTRS.put("KeySize", "256");
+        putXDHEntries();
 
-            /*
-             * Key Factory engine
-             */
-            putService(new ProviderService(this, "KeyFactory",
-                "EC", "sun.security.ec.ECKeyFactory",
-                new String[] { "EllipticCurve" }, ATTRS));
+        /*
+         * Register the algorithms below only when the full ECC implementation
+         * is available
+         */
+        if (!useFullImplementation) {
+            return;
+        }
 
-            /*
-             * Algorithm Parameter engine
-             */
-            // "AlgorithmParameters.EC SupportedCurves" prop used by unit test
-            boolean firstCurve = true;
-            StringBuilder names = new StringBuilder();
-            Pattern nameSplitPattern = Pattern.compile(CurveDB.SPLIT_PATTERN);
-
-            Collection<? extends NamedCurve> supportedCurves =
-                CurveDB.getSupportedCurves();
-            for (NamedCurve namedCurve : supportedCurves) {
-                if (!firstCurve) {
-                    names.append("|");
-                } else {
-                    firstCurve = false;
-                }
-
-                names.append("[");
-
-                String[] commonNames = nameSplitPattern.split(namedCurve.getName());
-                for (String commonName : commonNames) {
-                    names.append(commonName.trim());
-                    names.append(",");
-                }
-
-                names.append(namedCurve.getObjectId());
-                names.append("]");
-            }
-
-            HashMap<String, String> apAttrs = new HashMap<>(ATTRS);
-            apAttrs.put("SupportedCurves", names.toString());
-
-            putService(new ProviderService(this, "AlgorithmParameters",
-                "EC", "sun.security.util.ECParameters",
-                new String[] { "EllipticCurve", "1.2.840.10045.2.1", "OID.1.2.840.10045.2.1" },
-                apAttrs));
-
-            putXDHEntries();
-
-            /*
-             * Register the algorithms below only when the full ECC implementation
-             * is available
-             */
-            if (!useFullImplementation) {
-                return;
-            }
-
-            /*
-             * Signature engines
-             */
-            putService(new ProviderService(this, "Signature",
+        /*
+         * Signature engines
+         */
+        putService(new ProviderService(this, "Signature",
                 "NONEwithECDSA", "sun.security.ec.ECDSASignature$Raw",
                 null, ATTRS));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA1withECDSA", "sun.security.ec.ECDSASignature$SHA1",
                 new String[] { "1.2.840.10045.4.1", "OID.1.2.840.10045.4.1" },
                 ATTRS));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA224withECDSA", "sun.security.ec.ECDSASignature$SHA224",
                 new String[] { "1.2.840.10045.4.3.1", "OID.1.2.840.10045.4.3.1"},
                 ATTRS));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA256withECDSA", "sun.security.ec.ECDSASignature$SHA256",
                 new String[] { "1.2.840.10045.4.3.2", "OID.1.2.840.10045.4.3.2"},
                 ATTRS));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA384withECDSA", "sun.security.ec.ECDSASignature$SHA384",
                 new String[] { "1.2.840.10045.4.3.3", "OID.1.2.840.10045.4.3.3" },
                 ATTRS));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA512withECDSA", "sun.security.ec.ECDSASignature$SHA512",
                 new String[] { "1.2.840.10045.4.3.4", "OID.1.2.840.10045.4.3.4" },
                 ATTRS));
 
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "NONEwithECDSAinP1363Format",
                 "sun.security.ec.ECDSASignature$RawinP1363Format"));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA1withECDSAinP1363Format",
                 "sun.security.ec.ECDSASignature$SHA1inP1363Format"));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA224withECDSAinP1363Format",
                 "sun.security.ec.ECDSASignature$SHA224inP1363Format"));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA256withECDSAinP1363Format",
                 "sun.security.ec.ECDSASignature$SHA256inP1363Format"));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA384withECDSAinP1363Format",
                 "sun.security.ec.ECDSASignature$SHA384inP1363Format"));
-            putService(new ProviderService(this, "Signature",
+        putService(new ProviderService(this, "Signature",
                 "SHA512withECDSAinP1363Format",
                 "sun.security.ec.ECDSASignature$SHA512inP1363Format"));
 
-            /*
-             * Key Pair Generator engine
-             */
-            putService(new ProviderService(this, "KeyPairGenerator",
+        /*
+         * Key Pair Generator engine
+         */
+        putService(new ProviderService(this, "KeyPairGenerator",
                 "EC", "sun.security.ec.ECKeyPairGenerator",
                 new String[] { "EllipticCurve" }, ATTRS));
 
-            /*
-             * Key Agreement engine
-             */
-            if (useNativeEC) {
-                putService(new ProviderService(this, "KeyAgreement",
+        /*
+         * Key Agreement engine
+         */
+        if (useNativeEC) {
+            putService(new ProviderService(this, "KeyAgreement",
                     "ECDH", "sun.security.ec.NativeECDHKeyAgreement", null, ATTRS));
-            } else {
-                putService(new ProviderService(this, "KeyAgreement",
+        } else {
+            putService(new ProviderService(this, "KeyAgreement",
                     "ECDH", "sun.security.ec.ECDHKeyAgreement", null, ATTRS));
-            }
         }
     }
 

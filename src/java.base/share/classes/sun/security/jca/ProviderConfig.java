@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.jca;
 
 import java.io.File;
@@ -32,6 +38,9 @@ import java.util.*;
 import java.security.*;
 
 import sun.security.util.PropertyExpander;
+
+import openj9.internal.security.RestrictedSecurityConfigurator;
+import openj9.internal.security.RestrictedSecurityProperties;
 
 /**
  * Class representing a configured provider which encapsulates configuration
@@ -162,6 +171,12 @@ final class ProviderConfig {
     // com.sun.net.ssl.internal.ssl.Provider has been deprecated since JDK 9
     @SuppressWarnings("deprecation")
     synchronized Provider getProvider() {
+        // If provider is not allowed in restricted security mode, return without load.
+        if (RestrictedSecurityConfigurator.isEnabled()) {
+            if (!RestrictedSecurityProperties.getInstance().isProviderAllowed(provName)) {
+                return null;
+            }
+        }
         // volatile variable load
         Provider p = provider;
         if (p != null) {

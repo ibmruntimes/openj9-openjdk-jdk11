@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.security;
 
 import java.io.*;
@@ -34,6 +40,9 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.concurrent.ConcurrentHashMap;
+
+import openj9.internal.security.RestrictedSecurityConfigurator;
+import openj9.internal.security.RestrictedSecurityProperties;
 
 /**
  * This class represents a "provider" for the
@@ -1371,6 +1380,13 @@ public abstract class Provider extends Properties {
         if (s.getProvider() != this) {
             throw new IllegalArgumentException
                     ("service.getProvider() must match this Provider object");
+        }
+        if (RestrictedSecurityConfigurator.isEnabled()) {
+            // If restricted security does not allow this service, then return
+            // without registering.
+            if (!RestrictedSecurityProperties.getInstance().isServiceAllowed(s)) {
+                return;
+            }
         }
         String type = s.getType();
         String algorithm = s.getAlgorithm();
