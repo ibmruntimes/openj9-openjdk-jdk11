@@ -41,7 +41,9 @@ public class DeflateIn_InflateOut {
     private static ByteArrayOutputStream baos;
     private static InflaterOutputStream ios;
 
-    private static void resetStreams() {
+    private static void reset() {
+        new Random(new Date().getTime()).nextBytes(data);
+
         bais = new ByteArrayInputStream(data);
         dis = new DeflaterInputStream(bais);
 
@@ -49,16 +51,11 @@ public class DeflateIn_InflateOut {
         ios = new InflaterOutputStream(baos);
     }
 
-    private static void resetAll() {
-        new Random(new Date().getTime()).nextBytes(data);
-        resetStreams();
-    }
-
     /** Check byte arrays read/write. */
     private static void ArrayReadWrite() throws Throwable {
         byte[] buf = new byte[512];
 
-        resetAll();
+        reset();
         check(dis.available() == 1);
         for (;;) {
             int len = dis.read(buf, 0, buf.length);
@@ -77,7 +74,7 @@ public class DeflateIn_InflateOut {
     private static void ArrayReadByteWrite() throws Throwable {
         byte[] buf = new byte[512];
 
-        resetAll();
+        reset();
         for (;;) {
             int len = dis.read(buf, 0, buf.length);
             if (len <= 0) {
@@ -103,7 +100,7 @@ public class DeflateIn_InflateOut {
         byte[] buf = new byte[8192];
         int off = 0;
 
-        resetAll();
+        reset();
         int datum = dis.read();
         while (datum != -1) {
             if (off == 8192) {
@@ -129,7 +126,7 @@ public class DeflateIn_InflateOut {
         byte[] buf = new byte[512];
         boolean reachEOF = false;
 
-        resetAll();
+        reset();
         while (dis.available() == 1) {
             int datum = dis.read();
             if (datum == -1) {
@@ -152,8 +149,7 @@ public class DeflateIn_InflateOut {
         int numReadable = 0;
 
         // Count number of bytes that are read
-
-        resetAll();
+        reset();
         check(dis.available() == 1);
         for (;;) {
             int count = dis.read(buf, 0, buf.length);
@@ -166,13 +162,7 @@ public class DeflateIn_InflateOut {
         check(dis.available() == 0);
 
         // Verify that skipping the first several bytes works.
-
-        // Different input data even though is of fixed size would lead to
-        // different compressed output. The main intention of this method to
-        // test DeflaterInputStream.skipBytes so keeping the input data fixed
-        // while testing out skipping of different bytes and only need to reset
-        // the input streams.
-        resetStreams();
+        reset();
         int numNotSkipped = 0;
         int numSkipBytes = 2053; // arbitrarily chosen prime
         check(dis.skip(numSkipBytes) == numSkipBytes);
@@ -187,7 +177,7 @@ public class DeflateIn_InflateOut {
         check(numNotSkipped + numSkipBytes == numReadable);
 
         // Verify that skipping some bytes mid-stream works.
-        resetStreams();
+        reset();
         numNotSkipped = 0;
         numSkipBytes = 8887; // arbitrarily chosen prime
         for (int i = 0; ; i++) {
@@ -205,7 +195,7 @@ public class DeflateIn_InflateOut {
         check(numNotSkipped + numSkipBytes == numReadable);
 
         // Verify that skipping the last N bytes works.
-        resetStreams();
+        reset();
         numNotSkipped = 0;
         numSkipBytes = 6449; // arbitrarily chosen prime
         for (int i = 0; ; i++) {
