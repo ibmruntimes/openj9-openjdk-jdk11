@@ -24,11 +24,13 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
 package sun.security.provider;
+
+import jdk.crypto.jniprovider.NativeCrypto;
 
 public final class NativeSHA extends NativeDigest {
 
@@ -36,6 +38,6 @@ public final class NativeSHA extends NativeDigest {
      * Creates a new native SHA object.
      */
     public NativeSHA() {
-        super("SHA-1", 20, 0);
+        super("SHA-1", 20, NativeCrypto.SHA1_160);
     }
 }
