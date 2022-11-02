@@ -77,7 +77,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     if AS_EXECUTABLE_P(["$with_cmake"]) ; then
       CMAKE="$with_cmake"
     else
-      BASIC_REQUIRE_PROGS([CMAKE], [$with_cmake])
+      UTIL_REQUIRE_PROGS([CMAKE], [$with_cmake])
     fi
   fi
 
@@ -86,7 +86,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
 
 AC_DEFUN([OPENJ9_BASIC_SETUP_FUNDAMENTAL_TOOLS],
 [
-  BASIC_REQUIRE_PROGS(M4, m4)
+  UTIL_REQUIRE_PROGS(M4, m4)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_WARNINGS],
@@ -156,7 +156,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_COMPILERS],
     [OPENJ9_DEVELOPER_DIR=$with_openj9_developer_dir],
     [OPENJ9_DEVELOPER_DIR=])
   if test "x$OPENJDK_BUILD_OS" = xwindows ; then
-     BASIC_REQUIRE_PROGS([OPENJ9_CLANG], [clang])
+     UTIL_REQUIRE_PROGS([OPENJ9_CLANG], [clang])
   fi
 
   AC_SUBST(OPENJ9_CC)
@@ -169,11 +169,11 @@ AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
   AC_ARG_WITH(cuda, [AS_HELP_STRING([--with-cuda], [use this directory as CUDA_HOME])],
     [
       cuda_home="$with_cuda"
-      BASIC_FIXUP_PATH(cuda_home)
+      UTIL_FIXUP_PATH(cuda_home)
       AC_MSG_CHECKING([CUDA_HOME])
       if test -f "$cuda_home/include/cuda.h" ; then
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-          # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+          # UTIL_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
           cuda_home="`$CYGPATH -m $cuda_home`"
         fi
         if test "$cuda_home" = "$with_cuda" ; then
@@ -191,11 +191,11 @@ AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
   AC_ARG_WITH(gdk, [AS_HELP_STRING([--with-gdk], [use this directory as GDK_HOME])],
     [
       gdk_home="$with_gdk"
-      BASIC_FIXUP_PATH(gdk_home)
+      UTIL_FIXUP_PATH(gdk_home)
       AC_MSG_CHECKING([GDK_HOME])
       if test -f "$gdk_home/include/nvml.h" ; then
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-          # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+          # UTIL_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
           gdk_home="`$CYGPATH -m $gdk_home`"
         fi
         if test "$gdk_home" = "$with_gdk" ; then
@@ -280,13 +280,13 @@ AC_DEFUN([OPENJ9_CONFIGURE_HEALTHCENTER],
     [
       if test "x$with_healthcenter" != xno ; then
         healthcenter_jar="$with_healthcenter"
-        BASIC_FIXUP_PATH(healthcenter_jar)
+        UTIL_FIXUP_PATH(healthcenter_jar)
         AC_MSG_CHECKING([healthcenter])
         if ! test -f "$healthcenter_jar" ; then
           AC_MSG_ERROR([healthcenter archive not found at $with_healthcenter])
         else
           if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-            # BASIC_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
+            # UTIL_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
             healthcenter_jar="`$CYGPATH -m $healthcenter_jar`"
           fi
           if test "$healthcenter_jar" = "$with_healthcenter" ; then
@@ -505,7 +505,7 @@ AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
   OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU($host_cpu)
 
   if test "x$OPENJ9_CPU" = xx86-64 ; then
-    BASIC_REQUIRE_PROGS([NASM], [nasm])
+    UTIL_REQUIRE_PROGS([NASM], [nasm])
     AC_MSG_CHECKING([whether nasm version requirement is met])
 
     # Require NASM v2.11+. This is checked by trying to build conftest.c
@@ -635,7 +635,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
         fi
         AC_MSG_RESULT([yes])
         # perl is required to build openssl
-        BASIC_REQUIRE_PROGS(PERL, perl)
+        UTIL_REQUIRE_PROGS(PERL, perl)
       else
         AC_MSG_RESULT([no])
         printf "$TOPDIR/openssl is not found.\n"
@@ -668,7 +668,7 @@ AC_DEFUN([CONFIGURE_OPENSSL],
     # path where openssl is installed
     else
       OPENSSL_DIR=$with_openssl
-      BASIC_FIXUP_PATH(OPENSSL_DIR)
+      UTIL_FIXUP_PATH(OPENSSL_DIR)
       if test -s "$OPENSSL_DIR/include/openssl/evp.h" ; then
         OPENSSL_CFLAGS="-I${OPENSSL_DIR}/include"
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then

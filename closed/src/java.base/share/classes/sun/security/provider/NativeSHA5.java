@@ -24,11 +24,13 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2018 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
  * ===========================================================================
  */
 
 package sun.security.provider;
+
+import jdk.crypto.jniprovider.NativeCrypto;
 
 abstract class NativeSHA5 {
 
@@ -38,7 +40,7 @@ abstract class NativeSHA5 {
     public static final class SHA512 extends NativeDigest {
 
         public SHA512() {
-            super("SHA-512", 64, 4);
+            super("SHA-512", 64, NativeCrypto.SHA5_512);
         }
     }
 
@@ -48,7 +50,7 @@ abstract class NativeSHA5 {
     public static final class SHA384 extends NativeDigest {
 
         public SHA384() {
-            super("SHA-384", 48, 3);
+            super("SHA-384", 48, NativeCrypto.SHA5_384);
         }
     }
 }
