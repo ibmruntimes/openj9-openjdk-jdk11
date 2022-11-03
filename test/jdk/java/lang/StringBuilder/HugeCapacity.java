@@ -21,13 +21,19 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 /**
  * @test
  * @bug 8149330
  * @summary Capacity should not get close to Integer.MAX_VALUE unless
  *          necessary
  * @requires (sun.arch.data.model == "64" & os.maxMemory >= 6G)
- * @run main/othervm -Xmx5G HugeCapacity
+ * @run main/othervm -Xmx5G -XX:+CompactStrings HugeCapacity
  */
 
 public class HugeCapacity {
