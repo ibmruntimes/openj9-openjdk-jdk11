@@ -135,6 +135,26 @@ RestrictedSecurity1.javax.net.ssl.keyStore = NONE
 
 RestrictedSecurity1.securerandom.provider = SunPKCS11-NSS-FIPS
 RestrictedSecurity1.securerandom.algorithm = PKCS11
+
+RestrictedSecurity2.desc.name = CRIU
+RestrictedSecurity2.desc.number = 1
+RestrictedSecurity2.desc.policy = Security
+RestrictedSecurity2.desc.sunsetDate = 2030-01-01
+
+RestrictedSecurity2.tls.disabledNamedCurves =
+RestrictedSecurity2.tls.disabledAlgorithms =
+RestrictedSecurity2.tls.ephemeralDHKeySize =
+RestrictedSecurity2.tls.legacyAlgorithms =
+
+RestrictedSecurity2.jce.certpath.disabledAlgorithms =
+RestrictedSecurity2.jce.legacyAlgorithms =
+RestrictedSecurity2.jce.provider.1 = openj9.internal.criu.CRIUSEC
+
+RestrictedSecurity2.keystore.type =
+RestrictedSecurity2.javax.net.ssl.keyStore =
+
+RestrictedSecurity2.securerandom.provider = CRIUSEC
+RestrictedSecurity2.securerandom.algorithm = SHA1PRNG
 #endif
 
 #

@@ -37,6 +37,10 @@ import java.util.Properties;
 
 import sun.security.util.Debug;
 
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.InternalCRIUSupport;
+/*[ENDIF] CRIU_SUPPORT*/
+
 /**
  * Configures the security providers when in restricted security mode.
  */
@@ -72,8 +76,18 @@ public final class RestrictedSecurityConfigurator {
                     }
                 });
         userEnabledFIPS = Boolean.parseBoolean(props[0]);
+        String securitySetting = props[1];
         // If semeru.fips is true, then ignore semeru.restrictedsecurity, use userSecurityNum 1.
-        userSecuritySetting = userEnabledFIPS ? "1" : props[1];
+        if (Boolean.parseBoolean(props[0])) {
+            securitySetting = "1";
+        }
+ /*[IF CRIU_SUPPORT]*/
+        // If CRIU checkpoint mode is enabled, use the 2nd restricted security policy.
+        if (InternalCRIUSupport.isCheckpointAllowed()) {
+            securitySetting = "2";
+        }
+ /*[ENDIF] CRIU_SUPPORT*/
+        userSecuritySetting = securitySetting;
         userEnabledSecurity = !isNullOrBlank(userSecuritySetting);
         isSecuritySupported = "Linux".equalsIgnoreCase(props[2])
                 && supportPlatforms.contains(props[3]);
@@ -86,13 +100,23 @@ public final class RestrictedSecurityConfigurator {
 
     /**
      * Restricted security mode will be enabled only if the semeru.fips system
-     * property is true (default as false).
+     * property is true (default as false), or semeru.restrictedsecurity is set,
+     * or CRIU checkpoint mode is enabled.
      *
      * @return true if restricted security is enabled
      */
     public static boolean isEnabled() {
         return securityEnabled;
     }
+
+/*[IF CRIU_SUPPORT]*/
+    /**
+     * Disables the restricted security mode.
+     */
+    public static void disable() {
+        securityEnabled = false;
+    }
+/*[ENDIF] CRIU_SUPPORT*/
 
     /**
      * Remove the security providers and only add the restricted security providers.
