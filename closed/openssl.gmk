@@ -31,7 +31,7 @@ ifeq ($(OPENJDK_TARGET_OS), windows)
   # paths with backslashes; CONFIGURE_INSIST bypasses that requirement.
   # PERL must be an absolute path that will be usable by nmake (i.e. start with
   # a drive letter and a colon).
-  OPENSSL_CONFIG_SETUP := export CONFIGURE_INSIST=true PERL='$(shell $(CYGPATH) -m $(PERL))' &&
+  OPENSSL_CONFIG_SETUP := export CONFIGURE_INSIST=true PERL='$(shell $(PATHTOOL) -m $(PERL))' &&
 
   # Configure produces a makefile intended for use with nmake.
   OPENSSL_MAKE := nmake
