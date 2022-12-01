@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs11;
 
 import java.io.IOException;
@@ -294,7 +300,15 @@ final class P11ECKeyFactory extends P11KeyFactory {
             try {
                 token.p11.C_GetAttributeValue(session[0].id(), keyID, attributes);
                 ECParameterSpec params = decodeParameters(attributes[1].getByteArray());
-                ECPoint point = decodePoint(attributes[0].getByteArray(), params.getCurve());
+                ECPoint point;
+
+                // If using X963 encoding the curve name is in the CKA_EC_PARAMS attribute.
+                if (token.config.getUseEcX963Encoding()) {
+                    point = decodePoint(attributes[0].getByteArray(), params.getCurve());
+                } else {
+                    // If not using X963 encoding then extract the curve name from the octet string.
+                    point = decodePoint(new DerValue(attributes[0].getByteArray()).getOctetString(), params.getCurve());
+                }
                 return keySpec.cast(new ECPublicKeySpec(point, params));
             } catch (IOException e) {
                 throw new InvalidKeySpecException("Could not parse key", e);
