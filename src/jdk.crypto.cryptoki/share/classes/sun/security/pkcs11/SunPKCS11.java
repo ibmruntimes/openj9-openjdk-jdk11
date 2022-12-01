@@ -78,6 +78,14 @@ public final class SunPKCS11 extends AuthProvider {
     private static final long serialVersionUID = -1354835039035306505L;
 
     static final Debug debug = Debug.getInstance("sunpkcs11");
+
+    // Check if running on z platform.
+    private static final boolean isZ;
+    static {
+        String arch = System.getProperty("os.arch");
+        isZ = "s390".equalsIgnoreCase(arch) || "s390x".equalsIgnoreCase(arch);
+    }
+
     // the PKCS11 object through which we make the native calls
     final PKCS11 p11;
 
@@ -164,6 +172,7 @@ public final class SunPKCS11 extends AuthProvider {
         }
 
         String library = config.getLibrary();
+        String tokenLabel = config.getTokenLabel();
         String functionList = config.getFunctionList();
         long slotID = config.getSlotID();
         int slotListIndex = config.getSlotListIndex();
@@ -372,12 +381,40 @@ public final class SunPKCS11 extends AuthProvider {
                 System.out.println(p11Info);
             }
 
-            if ((slotID < 0) || showInfo) {
+            if ((slotID < 0) || showInfo || (tokenLabel != null)) {
                 long[] slots = p11.C_GetSlotList(false);
                 if (showInfo) {
-                    System.out.println("All slots: " + toString(slots));
-                    slots = p11.C_GetSlotList(true);
-                    System.out.println("Slots with tokens: " + toString(slots));
+                    if (isZ) {
+                        System.out.println("Slots[slotID, tokenName]:");
+                        for (int i = 0; i < slots.length; i++) {
+                            System.out.println("[" + i + ", " + new String(p11.C_GetTokenInfo(slots[i]).label).trim() + "]");
+                        }
+                    } else {
+                        System.out.println("All slots: " + toString(slots));
+                        slots = p11.C_GetSlotList(true);
+                        System.out.println("Slots with tokens: " + toString(slots));
+                    }
+                }
+                /* TokenLabel is only supported on Z architecture platforms. It is null otherwise. */
+                if (tokenLabel != null) {
+                    boolean found = false;
+                    for (int i = 0; i < slots.length; i++) {
+                        try {
+                            String label = new String(p11.C_GetTokenInfo(slots[i]).label).trim();
+                            if (tokenLabel.equalsIgnoreCase(label)) {
+                                slotID = -1;
+                                slotListIndex = i;
+                                found = true;
+                                break;
+                            }
+                        } catch (PKCS11Exception ex) {
+                            // ignore
+                        }
+                    }
+                    if (!found) {
+                        throw new IOException("Invalid Token Label : "
+                                + tokenLabel);
+                    }
                 }
                 if (slotID < 0) {
                     if ((slotListIndex < 0)
