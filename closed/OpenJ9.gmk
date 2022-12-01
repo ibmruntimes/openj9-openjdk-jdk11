@@ -105,11 +105,10 @@ endif
 
 ifeq (windows,$(OPENJDK_TARGET_OS))
   # convert windows path to unix path
-  UnixPath = $(shell $(CYGPATH) -u $1)
+  UnixPath = $(shell $(PATHTOOL) -u $1)
   # set Visual Studio environment
   # wrap PATH in quotes as it contains spaces (unix path)
-  # INCLUDE, LIB are already wrapped in quotes (windows paths)
-  EXPORT_COMPILER_ENV_VARS := PATH="$(PATH)" INCLUDE=$(INCLUDE) LIB=$(LIB)
+  EXPORT_COMPILER_ENV_VARS := PATH="$(PATH)"
 else ifeq (zos,$(OPENJDK_TARGET_OS))
   UnixPath = $1
   # Allow options to follow the input file name
@@ -156,7 +155,7 @@ define openj9_test_image_rules
 endef
 
 $(foreach file, \
-	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/%$(EXE_SUFFIX), \
+	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/%$(EXECUTABLE_SUFFIX), \
 		algotest \
 		bcvunit \
 		cfdump \

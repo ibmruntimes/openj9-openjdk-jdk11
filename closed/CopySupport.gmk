@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2020 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2022 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -110,11 +110,11 @@ openj9_copy_files_and_debuginfos = \
 
 # openj9_copy_exes
 # ----------------
-# $1 = list of executable names without $(EXE_SUFFIX)
+# $1 = list of executable names without $(EXECUTABLE_SUFFIX)
 openj9_copy_exes = \
 	$(foreach file, $1, \
 		$(call openj9_copy_files_and_debuginfos, \
-			$(addsuffix /$(file)$(EXE_SUFFIX), \
+			$(addsuffix /$(file)$(EXECUTABLE_SUFFIX), \
 				$(OPENJ9_VM_BUILD_DIR) \
 				$(EXE_DST_DIR))))
 
