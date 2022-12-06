@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package jdk.javadoc.internal.doclets.formats.html;
 
 import jdk.javadoc.internal.doclets.formats.html.markup.Table;
@@ -143,8 +149,6 @@ public class PackageUseWriter extends SubWriterHolderWriter {
         HtmlTree tree = (configuration.allowTag(HtmlTag.FOOTER))
                 ? HtmlTree.FOOTER()
                 : body;
-        navBar.setUserFooter(getUserHeaderFooter(false));
-        tree.addContent(navBar.getContent(false));
         addBottom(tree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
             body.addContent(tree);

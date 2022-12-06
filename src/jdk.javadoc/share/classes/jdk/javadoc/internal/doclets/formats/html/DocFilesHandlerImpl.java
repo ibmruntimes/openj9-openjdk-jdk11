@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package jdk.javadoc.internal.doclets.formats.html;
 
 import com.sun.source.doctree.AttributeTree;
@@ -190,8 +196,6 @@ public class DocFilesHandlerImpl implements DocFilesHandler {
         docletWriter.addTagsInfo(dfElement, bodyContent);
         htmlContent.addContent(bodyContent);
 
-        navBar.setUserFooter(docletWriter.getUserHeaderFooter(false));
-        htmlContent.addContent(navBar.getContent(false));
         docletWriter.addBottom(htmlContent);
         docletWriter.printHtmlDocument(Collections.emptyList(), false, htmlContent);
         return true;
