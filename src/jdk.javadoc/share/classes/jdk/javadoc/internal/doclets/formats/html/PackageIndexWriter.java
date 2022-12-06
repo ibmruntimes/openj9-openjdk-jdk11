@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package jdk.javadoc.internal.doclets.formats.html;
 
 import jdk.javadoc.internal.doclets.formats.html.markup.Table;
@@ -193,8 +199,6 @@ public class PackageIndexWriter extends AbstractPackageIndexWriter {
      */
     @Override
     protected void addNavigationBarFooter(Content footer) {
-        navBar.setUserFooter(getUserHeaderFooter(false));
-        footer.addContent(navBar.getContent(false));
         addBottom(footer);
     }
 }

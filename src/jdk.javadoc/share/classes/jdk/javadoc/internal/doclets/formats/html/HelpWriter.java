@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package jdk.javadoc.internal.doclets.formats.html;
 
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlConstants;
@@ -102,8 +108,6 @@ public class HelpWriter extends HtmlDocletWriter {
         if (configuration.allowTag(HtmlTag.FOOTER)) {
             htmlTree = HtmlTree.FOOTER();
         }
-        navBar.setUserFooter(getUserHeaderFooter(false));
-        htmlTree.addContent(navBar.getContent(false));
         addBottom(htmlTree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
             body.addContent(htmlTree);
