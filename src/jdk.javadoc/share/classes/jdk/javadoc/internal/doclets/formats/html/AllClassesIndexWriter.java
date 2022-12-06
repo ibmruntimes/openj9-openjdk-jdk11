@@ -22,6 +22,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
 package jdk.javadoc.internal.doclets.formats.html;
 
 import java.util.ArrayList;
@@ -123,8 +129,6 @@ public class AllClassesIndexWriter extends HtmlDocletWriter {
         Content tree = (configuration.allowTag(HtmlTag.FOOTER))
                 ? HtmlTree.FOOTER()
                 : bodyTree;
-        navBar.setUserFooter(getUserHeaderFooter(false));
-        tree.addContent(navBar.getContent(false));
         addBottom(tree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
             bodyTree.addContent(tree);

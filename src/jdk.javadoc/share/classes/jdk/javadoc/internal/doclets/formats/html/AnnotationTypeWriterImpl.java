@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * ===========================================================================
+ */
+
 package jdk.javadoc.internal.doclets.formats.html;
 
 import java.util.List;
@@ -151,8 +157,6 @@ public class AnnotationTypeWriterImpl extends SubWriterHolderWriter
         Content htmlTree = (configuration.allowTag(HtmlTag.FOOTER))
                 ? HtmlTree.FOOTER()
                 : contentTree;
-        navBar.setUserFooter(getUserHeaderFooter(false));
-        htmlTree.addContent(navBar.getContent(false));
         addBottom(htmlTree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
             contentTree.addContent(htmlTree);
