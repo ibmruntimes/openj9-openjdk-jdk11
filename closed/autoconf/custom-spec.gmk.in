@@ -94,8 +94,8 @@ export ac_cv_prog_CXX   := @CXX@
 ifeq ($(OPENJDK_TARGET_OS), windows)
   # Set environment variables for Microsoft Visual Studio toolchain.
   # Note that PATH is set in spec.gmk.
-  export INCLUDE := "@VS_INCLUDE@"
-  export LIB := "@VS_LIB@"
+  export INCLUDE := @OPENJ9_VS_INCLUDE@
+  export LIB := @OPENJ9_VS_LIB@
   export MSVC_VERSION := @TOOLCHAIN_VERSION@
 endif
 

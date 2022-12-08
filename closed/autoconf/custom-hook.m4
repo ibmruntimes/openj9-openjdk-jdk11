@@ -156,7 +156,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_COMPILERS],
     [OPENJ9_DEVELOPER_DIR=$with_openj9_developer_dir],
     [OPENJ9_DEVELOPER_DIR=])
   if test "x$OPENJDK_BUILD_OS" = xwindows ; then
-     UTIL_REQUIRE_PROGS([OPENJ9_CLANG], [clang])
+    UTIL_REQUIRE_PROGS([OPENJ9_CLANG], [clang])
   fi
 
   AC_SUBST(OPENJ9_CC)
@@ -174,7 +174,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
       if test -f "$cuda_home/include/cuda.h" ; then
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
           # UTIL_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
-          cuda_home="`$CYGPATH -m $cuda_home`"
+          cuda_home="`$PATHTOOL -m $cuda_home`"
         fi
         if test "$cuda_home" = "$with_cuda" ; then
           AC_MSG_RESULT([$with_cuda])
@@ -196,7 +196,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CUDA],
       if test -f "$gdk_home/include/nvml.h" ; then
         if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
           # UTIL_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
-          gdk_home="`$CYGPATH -m $gdk_home`"
+          gdk_home="`$PATHTOOL -m $gdk_home`"
         fi
         if test "$gdk_home" = "$with_gdk" ; then
           AC_MSG_RESULT([$with_gdk])
@@ -287,7 +287,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_HEALTHCENTER],
         else
           if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
             # UTIL_FIXUP_PATH yields a Unix-style path, but we need a mixed-mode path
-            healthcenter_jar="`$CYGPATH -m $healthcenter_jar`"
+            healthcenter_jar="`$PATHTOOL -m $healthcenter_jar`"
           fi
           if test "$healthcenter_jar" = "$with_healthcenter" ; then
             AC_MSG_RESULT([$with_healthcenter])
@@ -571,7 +571,7 @@ AC_DEFUN([OPENJ9_THIRD_PARTY_REQUIREMENTS],
     fi
 
     if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-      FREEMARKER_JAR=`$CYGPATH -m "$with_freemarker_jar"`
+      FREEMARKER_JAR=`$PATHTOOL -m "$with_freemarker_jar"`
     else
       FREEMARKER_JAR=$with_freemarker_jar
     fi
@@ -597,6 +597,13 @@ AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],
     OPENJ9_TOOL_DIR="$OUTPUTDIR/tools"
     AC_SUBST(OPENJ9_TOOL_DIR)
     OPENJ9_GENERATE_TOOL_WRAPPERS
+
+    # We used to rely on VS_INCLUDE and VS_LIB directly, but those are no longer available
+    # for substitutions, and they're not Windows-style paths: Convert them for our use.
+    OPENJ9_VS_INCLUDE=`$PATHTOOL -p -w "$VS_INCLUDE"`
+    OPENJ9_VS_LIB=`$PATHTOOL -p -w "$VS_LIB"`
+    AC_SUBST(OPENJ9_VS_INCLUDE)
+    AC_SUBST(OPENJ9_VS_LIB)
   fi
   AC_SUBST(SYSROOT)
   AC_CONFIG_FILES([$OUTPUTDIR/toolchain.cmake:$CLOSED_AUTOCONF_DIR/toolchain.cmake.in])
@@ -750,39 +757,36 @@ AC_DEFUN([CONFIGURE_OPENSSL],
 ])
 
 # Create a tool wrapper for use by cmake.
-# Consists of a shell script which wraps commands with an invocation of a wrapper command.
-# OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_output>, <name_of_wrapper>, <command_to_call>)
+# Consists of a shell script which wraps commands with an invocation of fixpath.
+# OPENJ9_GENERATE_TOOL_WRAPPER(<name_of_wrapper>, <command_to_call>)
 AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPER],
 [
   tool_file="$OPENJ9_TOOL_DIR/$1"
 
-  echo "#!/bin/sh" > $tool_file
-  # We need to insert an empty string ([]), to stop M4 treating "$@" as a
-  # variable reference
-  printf '%s "%s" "$[]@"\n' "$2" "$3" >> $tool_file
+  # Separate $ and @ so m4 won't see a variable reference.
+  printf '#!/bin/sh\n%s "$''@"\n' "$2" > $tool_file
   chmod +x $tool_file
 ])
 
 # Generate all the tool wrappers required for cmake on windows
 AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPERS],
 [
-  MSVC_BIN_DIR=$($DIRNAME $CC)
-  SDK_BIN_DIR=$($DIRNAME $RC)
-  FIXPATH2="$TOPDIR/closed/fixpath2.sh"
-
   mkdir -p "$OPENJ9_TOOL_DIR"
-  OPENJ9_GENERATE_TOOL_WRAPPER([cl], [$FIXPATH2], [$CC])
-  OPENJ9_GENERATE_TOOL_WRAPPER([clang], [$FIXPATH2], [$OPENJ9_CLANG])
-  OPENJ9_GENERATE_TOOL_WRAPPER([lib], [$FIXPATH2], [$AR])
-  OPENJ9_GENERATE_TOOL_WRAPPER([link], [$FIXPATH2], [$LD])
-  OPENJ9_GENERATE_TOOL_WRAPPER([mc], [$FIXPATH2], [$SDK_BIN_DIR/mc])
-  OPENJ9_GENERATE_TOOL_WRAPPER([ml], [$FIXPATH2], [$MSVC_BIN_DIR/ml])
-  OPENJ9_GENERATE_TOOL_WRAPPER([ml64], [$FIXPATH2], [$MSVC_BIN_DIR/ml64])
-  OPENJ9_GENERATE_TOOL_WRAPPER([nasm], [$FIXPATH2], [$NASM])
-  OPENJ9_GENERATE_TOOL_WRAPPER([rc], [$FIXPATH2], [$RC])
 
-  # fixpath2 can't handle classpaths, or @<file_name> arguments
-  OPENJ9_GENERATE_TOOL_WRAPPER([jar], [$FIXPATH], [$JAR])
-  OPENJ9_GENERATE_TOOL_WRAPPER([java], [$FIXPATH], [$JAVA])
-  OPENJ9_GENERATE_TOOL_WRAPPER([javac], [$FIXPATH],[$JAVAC])
+  UTIL_REQUIRE_TOOLCHAIN_PROGS(MC, mc)
+  # Note: the assembler found by OpenJDK macros is 'ml', which is the 32-bit assembler.
+  UTIL_REQUIRE_TOOLCHAIN_PROGS(ML64, ml64)
+
+  OPENJ9_GENERATE_TOOL_WRAPPER([cl], [$CC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([clang], [$OPENJ9_CLANG])
+  OPENJ9_GENERATE_TOOL_WRAPPER([jar], [$JAR])
+  OPENJ9_GENERATE_TOOL_WRAPPER([java], [$JAVA])
+  OPENJ9_GENERATE_TOOL_WRAPPER([javac], [$JAVAC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([lib], [$AR])
+  OPENJ9_GENERATE_TOOL_WRAPPER([link], [$LD])
+  OPENJ9_GENERATE_TOOL_WRAPPER([mc], [$MC])
+  OPENJ9_GENERATE_TOOL_WRAPPER([ml], [$AS])
+  OPENJ9_GENERATE_TOOL_WRAPPER([ml64], [$ML64])
+  OPENJ9_GENERATE_TOOL_WRAPPER([nasm], [$NASM])
+  OPENJ9_GENERATE_TOOL_WRAPPER([rc], [$RC])
 ])

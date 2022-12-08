@@ -98,8 +98,10 @@ DDR_COMPATIBILITY_FILE := $(DDR_VM_SRC_ROOT)/com/ibm/j9ddr/CompatibilityConstant
 # When StructureReader opens the blob, it must be able to find AuxFieldInfo29.dat
 # and StructureAliases*.dat, so they must be on the classpath for a non-openj9
 # bootjdk. When using an openj9 bootjdk, we don't want to use old versions that
-# might be included: Patching openj9.dtfj fixes that.
-DDR_TOOLS_PATHLIST := $(call PathList, $(DDR_TOOLS_BIN) $(DDR_VM_SRC_ROOT))
+# might be included: Patching openj9.dtfj fixes that. We use FixPath because
+# fixpath.sh would only fix the first entry of the path.
+DDR_PATH_SEP := $(if $(filter $(OPENJDK_BUILD_OS),windows),;,:)
+DDR_TOOLS_PATHLIST := "$(call FixPath,$(DDR_TOOLS_BIN))$(DDR_PATH_SEP)$(call FixPath,$(DDR_VM_SRC_ROOT))"
 DDR_TOOLS_OPTIONS := \
 	-cp $(DDR_TOOLS_PATHLIST) \
 	--patch-module=openj9.dtfj=$(DDR_TOOLS_PATHLIST)
