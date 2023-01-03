@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -35,8 +35,6 @@ import java.io.*;
 import java.util.*;
 
 import java.security.*;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.interfaces.*;
 import java.util.function.Consumer;
 
@@ -489,8 +487,9 @@ public final class SunPKCS11 extends AuthProvider {
         }
     }
 
-    long importKey(long hSession, CK_ATTRIBUTE[] attributes) throws PKCS11Exception {
-        long unwrappedKeyId, keyClass = 0, keyType = 0;
+    public long importKey(long hSession, CK_ATTRIBUTE[] attributes) throws PKCS11Exception {
+        long keyClass = 0;
+        long keyType = 0;
         byte[] keyBytes = null;
         // Extract key information.
         for (CK_ATTRIBUTE attr : attributes) {
@@ -530,7 +529,7 @@ public final class SunPKCS11 extends AuthProvider {
 
                 // Unwrap the secret key.
                 CK_ATTRIBUTE[] unwrapAttributes = token.getAttributes(TemplateManager.O_IMPORT, keyClass, keyType, attributes);
-                unwrappedKeyId = token.p11.C_UnwrapKey(hSession, wrapMechanism, wrapKeyId, wrappedBytes, unwrapAttributes);
+                return token.p11.C_UnwrapKey(hSession, wrapMechanism, wrapKeyId, wrappedBytes, unwrapAttributes);
             } catch (PKCS11Exception | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeyException | IllegalBlockSizeException e) {
                 throw new PKCS11Exception(CKR_GENERAL_ERROR);
             } finally {
@@ -540,7 +539,6 @@ public final class SunPKCS11 extends AuthProvider {
             // Unsupported key type or invalid bytes.
             throw new PKCS11Exception(CKR_GENERAL_ERROR);
         }
-        return Long.valueOf(unwrappedKeyId);
     }
 
     private static final class Descriptor {

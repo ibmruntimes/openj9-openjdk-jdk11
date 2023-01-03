@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -384,8 +384,8 @@ abstract class P11Key implements Key, Length {
             new CK_ATTRIBUTE(CKA_SENSITIVE),
             new CK_ATTRIBUTE(CKA_EXTRACTABLE),
         });
-        if (attributes[1].getBoolean() || (attributes[2].getBoolean() == false)) {
-            if ((SunPKCS11.mysunpkcs11 != null) && "RSA".equals(algorithm)) {
+        if ((SunPKCS11.mysunpkcs11 != null) && "RSA".equals(algorithm)) {
+            if (attributes[0].getBoolean() || attributes[1].getBoolean() || (attributes[2].getBoolean() == false)) {
                 try {
                     byte[] key = SunPKCS11.mysunpkcs11.exportKey(session.id(), attributes, keyID);
                     RSAPrivateKey rsaPrivKey = RSAPrivateCrtKeyImpl.newKey(key);
@@ -398,6 +398,8 @@ abstract class P11Key implements Key, Length {
                     // Attempt failed, create a P11PrivateKey object.
                 }
             }
+        }
+        if (attributes[1].getBoolean() || (attributes[2].getBoolean() == false)) {
             return new P11PrivateKey
                 (session, keyID, algorithm, keyLength, attributes);
         } else {

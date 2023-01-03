@@ -47,7 +47,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -55,8 +55,6 @@ package sun.security.pkcs11.wrapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -172,15 +170,10 @@ public class PKCS11 {
         // Overriding the JNI method C_CreateObject so that first check if FIPS mode is on and the object is a
         // secret key, in which case invoke the importKey method in SunPKCS11 provider to import the secret key
         // into the PKCS11 device.
+        @Override
         public synchronized long C_CreateObject(long hSession, CK_ATTRIBUTE[] pTemplate) throws PKCS11Exception {
             if ((mysunpkcs11 != null) && isKey(pTemplate)) {
-                try {
-                    Method method = mysunpkcs11.getClass().getDeclaredMethod("importKey", long.class, CK_ATTRIBUTE[].class);
-                    method.setAccessible(true);
-                    return (Long)method.invoke(mysunpkcs11, hSession, pTemplate);
-                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                    throw new PKCS11Exception(CKR_GENERAL_ERROR);
-                }
+                return mysunpkcs11.importKey(hSession, pTemplate);
             }
             return super.C_CreateObject(hSession, pTemplate);
         }
@@ -1744,13 +1737,7 @@ static class SynchronizedPKCS11 extends PKCS11 {
     public synchronized long C_CreateObject(long hSession,
             CK_ATTRIBUTE[] pTemplate) throws PKCS11Exception {
         if ((mysunpkcs11 != null) && isKey(pTemplate)) {
-            try {
-                Method method = mysunpkcs11.getClass().getMethod("importKey", long.class, CK_ATTRIBUTE[].class);
-                method.setAccessible(true);
-                return (Long)method.invoke(mysunpkcs11, hSession, pTemplate);
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
-                throw new PKCS11Exception(CKR_GENERAL_ERROR);
-            }
+            return mysunpkcs11.importKey(hSession, pTemplate);
         }
         return super.C_CreateObject(hSession, pTemplate);
     }
