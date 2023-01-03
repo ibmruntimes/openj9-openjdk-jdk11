@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2023 All Rights Reserved
  * ===========================================================================
  * 
  * This code is free software; you can redistribute it and/or modify it
@@ -36,6 +36,7 @@ public class OpenJ9PropsExt implements Callable<Map<String, String>> {
 
         Map<String, String> map = new HashMap<>();
         try {
+            map.put("docker.support", "true");
             map.put("vm.bits", vmBits());
             map.put("vm.graal.enabled", "false");
             map.put("vm.hasJFR", "false");
