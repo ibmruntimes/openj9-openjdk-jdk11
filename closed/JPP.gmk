@@ -1,0 +1,63 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+J9TOOLS_DIR := $(SUPPORT_OUTPUTDIR)/j9tools
+JPP_JAR     := $(J9TOOLS_DIR)/jpp.jar
+JPP_TAGS    := PLATFORM-$(OPENJ9_PLATFORM_CODE)
+
+ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
+  JPP_TAGS += CRIU_SUPPORT
+endif # OPENJ9_ENABLE_CRIU_SUPPORT
+
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  JPP_TAGS += OPENJDK_METHODHANDLES
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
+# invoke JPP to preprocess java source files
+# $1 - configuration
+# $2 - source directory
+# $3 - destination subdirectory
+# $4 - more options (optional)
+define RunJPP
+	@$(ECHO) $(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-verdict \
+			-config $1 \
+			-baseDir "$(call FixPath,$(dir $2))" \
+			-srcRoot $(notdir $2)/ \
+			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)" \
+			-dest "$(call FixPath,$(SUPPORT_OUTPUTDIR)$(strip $3))" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))" \
+			$4
+	@$(BOOT_JDK)/bin/java \
+		-cp "$(call FixPath,$(JPP_JAR))" \
+		-Dfile.encoding=US-ASCII \
+		com.ibm.jpp.commandline.CommandlineBuilder \
+			-verdict \
+			-config $1 \
+			-baseDir "$(call FixPath,$(dir $2))" \
+			-srcRoot $(notdir $2)/ \
+			-xml "$(call FixPath,$(OPENJ9_TOPDIR)/jcl/jpp_configuration.xml)" \
+			-dest "$(call FixPath,$(SUPPORT_OUTPUTDIR)$(strip $3))" \
+			-tag:define "$(subst $(SPACE),;,$(sort $(JPP_TAGS)))" \
+			$4
+endef # RunJPP

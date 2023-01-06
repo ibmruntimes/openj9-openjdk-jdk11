@@ -23,11 +23,18 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+# ===========================================================================
+
 ################################################################################
 #
 # Generate StandardCharsets.java and individul sun.nio.cs charset class using
 # the charsetmapping tool
 #
+
+include $(TOPDIR)/closed/JPP.gmk
+
 CHARSET_DATA_DIR := $(TOPDIR)/make/data/charsetmapping
 CHARSET_EXTSRC_DIR := $(TOPDIR)/src/jdk.charsets/share/classes/sun/nio/cs/ext
 CHARSET_GENSRC_JAVA_DIR_BASE := $(SUPPORT_OUTPUTDIR)/gensrc/java.base/sun/nio/cs
@@ -51,6 +58,10 @@ $(CHARSET_DONE_BASE)-stdcs: $(CHARSET_DATA_DIR)/charsets \
 	    $(CHARSET_STANDARD_JAVA_TEMPLATES) $(CHARSET_EXTSRC_DIR) \
 	    $(CHARSET_COPYRIGHT_HEADER) \
             $(LOG_DEBUG)
+	$(MKDIR) -p $(SUPPORT_OUTPUTDIR)/overlay-gensrc/src/java.base/sun/nio/cs
+	$(CP) $(CHARSET_GENSRC_JAVA_DIR_BASE)/StandardCharsets.java $(SUPPORT_OUTPUTDIR)/overlay-gensrc/src/java.base/sun/nio/cs/
+	$(call RunJPP, JAVA$(VERSION_FEATURE), $(SUPPORT_OUTPUTDIR)/overlay-gensrc, /overlay-result, -includeIfUnsure -noWarnIncludeIf)
+	$(CP) $(SUPPORT_OUTPUTDIR)/overlay-result/java.base/sun/nio/cs/StandardCharsets.java $(CHARSET_GENSRC_JAVA_DIR_BASE)/
 	$(TOUCH) '$@'
 
 GENSRC_JAVA_BASE += $(CHARSET_DONE_BASE)-stdcs
