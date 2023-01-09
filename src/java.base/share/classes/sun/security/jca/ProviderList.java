@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.jca;
 
 import java.util.*;
@@ -91,6 +97,10 @@ public final class ProviderList {
         return AccessController.doPrivileged(
                         new PrivilegedAction<ProviderList>() {
             public ProviderList run() {
+/*[IF CRIU_SUPPORT]*/
+                // ensure the providers are reloaded from scratch
+                ProviderConfig.reloadServices();
+/*[ENDIF] CRIU_SUPPORT */
                 return new ProviderList();
             }
         });
