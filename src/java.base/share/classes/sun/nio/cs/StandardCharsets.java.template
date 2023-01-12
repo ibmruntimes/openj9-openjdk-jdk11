@@ -25,6 +25,12 @@
  *
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 // -- This file was mechanically generated: Do not edit! -- //
 
 package sun.nio.cs;
@@ -36,6 +42,10 @@ import java.util.Map;
 import java.util.Set;
 import jdk.internal.vm.annotation.Stable;
 import sun.security.action.GetPropertyAction;
+
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.NotCheckpointSafe;
+/*[ENDIF] CRIU_SUPPORT */
 
 public class StandardCharsets extends CharsetProvider {
 
@@ -168,6 +178,9 @@ public class StandardCharsets extends CharsetProvider {
         return cs;
     }
 
+    /*[IF CRIU_SUPPORT]*/
+    @NotCheckpointSafe
+    /*[ENDIF] CRIU_SUPPORT */
     public final Charset charsetForName(String charsetName) {
         synchronized (this) {
             return lookup(charsetName);
