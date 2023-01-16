@@ -1,4 +1,4 @@
-## JSZip v3.7.1
+## JSZip v3.10.1
 
 JSZip is dual licensed. You may use it under the MIT license *or* the GPLv3
 license.
