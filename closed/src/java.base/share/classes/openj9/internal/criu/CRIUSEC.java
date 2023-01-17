@@ -28,21 +28,21 @@ package openj9.internal.criu;
 import java.security.Provider;
 
 /**
- * The CRIUSECProvider is a security provider that is used as follows when CRIU
- * is enabled. During the checkpoint phase, all other security providers are
- * removed, except CRIUSECProvider, and the digests are cleared, to ensure that
- * no state is saved during checkpoint that is then restored during the restore
- * phase. During the resore phase, CRIUSECProvider is removed and the other
- * security providers are added back.
+ * The CRIUSEC is a security provider that is used as follows when CRIU is
+ * enabled. During the checkpoint phase, all other security providers are
+ * removed, except CRIUSEC, and the digests are cleared, to ensure that no
+ * state is saved during checkpoint that is then restored during the restore
+ * phase. During the resore phase, CRIUSEC is removed and the other security
+ * providers are added back.
  */
-public final class CRIUSECProvider extends Provider {
+public final class CRIUSEC extends Provider {
 
     private static final long serialVersionUID = -3240458633432287743L;
 
-    public CRIUSECProvider() {
+    public CRIUSEC() {
         super("CRIUSEC", "1", "CRIUSEC Provider");
 
-        String packageName = CRIUSECProvider.class.getPackage().getName() + ".";
+        String packageName = CRIUSEC.class.getPackage().getName() + ".";
 
         String[] aliases = new String[] { "SHA",
                                           "SHA1",

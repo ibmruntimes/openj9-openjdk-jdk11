@@ -155,7 +155,7 @@ public class PKCS11 {
 
     // This is the SunPKCS11 provider instance
     // there can only be a single PKCS11 provider in
-    // FIPS mode.
+    // restricted security mode.
     private static SunPKCS11 mysunpkcs11;
 
     private static final class InnerPKCS11 extends PKCS11 implements Consumer<SunPKCS11> {
@@ -163,15 +163,15 @@ public class PKCS11 {
             super(pkcs11ModulePath, functionListName);
         }
 
-        // Set PKCS11 instance to FIPS mode, called by SunPKCS11 provider.
+        // Set PKCS11 instance to restricted security mode, called by SunPKCS11 provider.
         @Override
         public void accept(SunPKCS11 sunpkcs11) {
             mysunpkcs11 = sunpkcs11;
         }
 
-        // Overriding the JNI method C_CreateObject so that first check if FIPS mode is on and the object is a
-        // secret key, in which case invoke the importKey method in SunPKCS11 provider to import the secret key
-        // into the PKCS11 device.
+        // Overriding the JNI method C_CreateObject so that first check if restricted security mode is on and the
+        // object is a secret key, in which case invoke the importKey method in SunPKCS11 provider to import the
+        // secret key into the PKCS11 device.
         public synchronized long C_CreateObject(long hSession, CK_ATTRIBUTE[] pTemplate) throws PKCS11Exception {
             if ((mysunpkcs11 != null) && isKey(pTemplate)) {
                 try {

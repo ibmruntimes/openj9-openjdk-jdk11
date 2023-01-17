@@ -50,7 +50,7 @@ import openj9.internal.criu.InternalCRIUSupport;
 import openj9.internal.criu.security.CRIUConfigurator;
 /*[ENDIF] CRIU_SUPPORT*/
 
-import openj9.internal.security.FIPSConfigurator;
+import openj9.internal.security.RestrictedSecurityConfigurator;
 
 /**
  * <p>This class centralizes all security properties and common security
@@ -212,14 +212,14 @@ public final class Security {
         }
 /*[ENDIF] CRIU_SUPPORT*/
 
-        // Load FIPS properties
+        // Load restricted security mode properties.
         if (loadedProps) {
-            boolean fipsEnabled = FIPSConfigurator.configureFIPS(props);
+            boolean enabled = RestrictedSecurityConfigurator.configure(props);
             if (sdebug != null) {
-                if (fipsEnabled) {
-                    sdebug.println("FIPS mode enabled.");
+                if (enabled) {
+                    sdebug.println("Restricted security mode enabled.");
                 } else {
-                    sdebug.println("FIPS mode disabled.");
+                    sdebug.println("Restricted security mode disabled.");
                 }
             }
         }
