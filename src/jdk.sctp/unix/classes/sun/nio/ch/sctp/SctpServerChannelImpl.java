@@ -22,6 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+*/
+
 package sun.nio.ch.sctp;
 
 import java.net.SocketAddress;
@@ -265,11 +272,11 @@ public class SctpServerChannelImpl extends SctpServerChannel
     @Override
     public void implCloseSelectableChannel() throws IOException {
         synchronized (stateLock) {
-            SctpNet.preClose(fdVal);
             if (thread != 0)
                 NativeThread.signal(thread);
             if (!isRegistered())
                 kill();
+            SctpNet.preClose(fdVal);
         }
     }
 
