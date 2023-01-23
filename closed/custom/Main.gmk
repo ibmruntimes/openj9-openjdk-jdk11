@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -76,7 +76,7 @@ ALL_TARGETS += debug-image
 test-image-openj9 : exploded-image
 	@+$(OPENJ9_MAKE) openj9_test_image
 ifneq ($(COMPILE_TYPE), cross)
-	$(JDK_OUTPUTDIR)/bin/java -version 2>&1 | $(TEE) $(TEST_IMAGE_DIR)/openj9/java-version.txt
+	rc=0; $(JDK_OUTPUTDIR)/bin/java -version >$(TEST_IMAGE_DIR)/openj9/java-version.txt 2>&1 || rc="$$?"; $(CAT) $(TEST_IMAGE_DIR)/openj9/java-version.txt; exit "$$rc"
 endif
 
 ALL_TARGETS += test-image-openj9
