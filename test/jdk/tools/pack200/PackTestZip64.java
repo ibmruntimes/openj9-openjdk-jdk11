@@ -20,6 +20,12 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,8 +91,15 @@ public class PackTestZip64 {
         cmdsList.add(unpackedFile.getName());
         Utils.runExec(cmdsList);
 
-        // Compare files binary
-        compareTwoFiles(testFile, unpackedFile);
+        if (!testFile.exists()) {
+            throw new IOException("File " + testFile.getName() + " does not exist!");
+        }
+
+        if (!unpackedFile.exists()) {
+            throw new IOException("File " + unpackedFile.getName() + " does not exist!");
+        }
+        // Compare two Jar files
+        compareTwoJarFiles(new JarFile(testFile), new JarFile(unpackedFile));
 
         // Cleaning up generated files
         testFile.delete();
@@ -94,34 +107,48 @@ public class PackTestZip64 {
         unpackedFile.delete();
     }
 
-    static void compareTwoFiles(File src, File dst) throws IOException {
-        if (!src.exists()) {
-            throw new IOException("File " + src.getName() + " does not exist!");
-        }
-
-        if(!dst.exists()) {
-            throw new IOException("File " + dst.getName() + " does not exist!");
-        }
-
-        BufferedInputStream srcis, dstis;
-        srcis = new BufferedInputStream(new FileInputStream(src));
-        dstis = new BufferedInputStream(new FileInputStream(dst));
-
-        int s = 0, d, pos = 0;
-        while (s != -1) { // Checking of just one result for EOF is enough
-            s = srcis.read();
-            d = dstis.read();
-
-            if (s != d) {
-                throw new IOException("Files are differ starting at position: "
-                + Integer.toHexString(pos));
+    static void compareTwoJarFiles(JarFile srcJar, JarFile dstJar) throws IOException {
+        for (Enumeration<JarEntry> srcEntries = srcJar.entries(); srcEntries.hasMoreElements();) {
+            JarEntry srcEntry = srcEntries.nextElement();
+            JarEntry dstEntry = dstJar.getJarEntry(srcEntry.getName());
+            if (dstEntry == null) {
+                throw new IOException("Jar Entry " + srcEntry.getName() + " does not exist in " + dstJar.getName());
             }
 
-            pos++;
+            BufferedInputStream srcis = new BufferedInputStream(srcJar.getInputStream(srcEntry));
+            BufferedInputStream dstis = new BufferedInputStream(dstJar.getInputStream(dstEntry));
+
+            for (int pos = 0;; ++pos) {
+                int s = srcis.read();
+                int d = dstis.read();
+
+                if (s != d) {
+                    throw new IOException("Files differ starting at position: 0x"
+                            + Integer.toHexString(pos));
+                }
+                // Bytes read from srcis and dstis are same, checking if we reached
+                // end of stream for this jar entry to terminate the loop.
+                if (s == -1) {
+                    break;
+                }
+            }
+
+            srcis.close();
+            dstis.close();
         }
 
-        srcis.close();
-        dstis.close();
+        // Previous loop will check for all the entries from source jar file and
+        // look for corresponding entry in destination jar to compare. It might
+        // be possible that destination jar file may contain more entries in
+        // which case, the test should fail as well.
+        for (Enumeration<JarEntry> dstEntries = dstJar.entries(); dstEntries.hasMoreElements();) {
+            JarEntry dstEntry = dstEntries.nextElement();
+            if (srcJar.getJarEntry(dstEntry.getName()) == null) {
+                throw new IOException("Jar Entry " + dstEntry.getName() + " does not exist in " + srcJar.getName());
+            }
+        }
+        srcJar.close();
+        dstJar.close();
     }
 
     static void generateLargeJar(File result, File source) throws IOException {
