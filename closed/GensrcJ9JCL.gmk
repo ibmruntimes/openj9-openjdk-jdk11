@@ -50,7 +50,7 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 IncludeIfUnsure := -includeIfUnsure -noWarnIncludeIf
 
 $(J9JCL_SOURCES_DONEFILE) : \
-		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*.java)) \
+		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*)) \
 		$(COPY_OVERLAY_FILES)
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)
