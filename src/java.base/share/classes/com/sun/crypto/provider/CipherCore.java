@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -204,7 +204,7 @@ final class CipherCore {
              * Check whether native CBC is enabled and instantiate
              * the NativeCipherBlockChaining class.
              */
-            if (useNativeCBC && blockSize == 16) {
+            if (useNativeCBC && (blockSize == 16) && NativeCrypto.isAllowedAndLoaded()) {
                 cipher = new NativeCipherBlockChaining(rawImpl);
             } else {
                 cipher = new CipherBlockChaining(rawImpl);
@@ -232,7 +232,7 @@ final class CipherCore {
              * Check whether native GCM is enabled and instantiate
              * the NativeGaloisCounterMode class.
              */
-            if (useNativeGCM) {
+            if (useNativeGCM && NativeCrypto.isAllowedAndLoaded()) {
                 cipher = new NativeGaloisCounterMode(rawImpl);
             } else {
                 cipher = new GaloisCounterMode(rawImpl);
@@ -362,8 +362,8 @@ final class CipherCore {
         switch (cipherMode) {
         case GCM_MODE:
             if (isDoFinal) {
-                int tagLen = 0;
-                 if (useNativeGCM) {
+                int tagLen;
+                if (cipher instanceof NativeGaloisCounterMode) {
                     tagLen = ((NativeGaloisCounterMode) cipher).getTagLen();
                 } else {
                     tagLen = ((GaloisCounterMode) cipher).getTagLen();
@@ -446,14 +446,13 @@ final class CipherCore {
         if (cipherMode == GCM_MODE) {
             algName = "GCM";
 
-            if (useNativeGCM) {
-                spec = new GCMParameterSpec
-                        (((NativeGaloisCounterMode) cipher).getTagLen()*8, iv);
+            int tagLen;
+            if (cipher instanceof NativeGaloisCounterMode) {
+                tagLen = ((NativeGaloisCounterMode) cipher).getTagLen();
             } else {
-                spec = new GCMParameterSpec
-                        (((GaloisCounterMode) cipher).getTagLen()*8, iv);
+                tagLen = ((GaloisCounterMode) cipher).getTagLen();
             }
-
+            spec = new GCMParameterSpec(tagLen * 8, iv);
         } else {
            if (algName.equals("RC2")) {
                RC2Crypt rawImpl = (RC2Crypt) cipher.getEmbeddedCipher();
@@ -633,7 +632,7 @@ final class CipherCore {
                 lastEncKey = keyBytes;
             }
 
-            if (useNativeGCM) {
+            if (cipher instanceof NativeGaloisCounterMode) {
                 ((NativeGaloisCounterMode) cipher).init
                         (decrypting, algorithm, keyBytes, ivBytes, tagLen);
             } else {

@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -70,7 +70,7 @@ import sun.security.pkcs.PKCS8Key;
 public final class ECPrivateKeyImpl extends PKCS8Key implements ECPrivateKey {
 
     private static final long serialVersionUID = 88695385615075129L;
-    private static final NativeCrypto nativeCrypto = NativeCrypto.getNativeCrypto();
+    private static NativeCrypto nativeCrypto;
 
     private BigInteger s;       // private value
     private byte[] arrayS;      // private value as a little-endian array
@@ -245,6 +245,9 @@ public final class ECPrivateKeyImpl extends PKCS8Key implements ECPrivateKey {
                     byte[] n = this.params.getOrder().toByteArray();
                     byte[] h = BigInteger.valueOf(this.params.getCofactor()).toByteArray();
                     long nativePointer;
+                    if (nativeCrypto == null) {
+                        nativeCrypto = NativeCrypto.getNativeCrypto();
+                    }
                     if (field instanceof ECFieldFp) {
                         byte[] p = ((ECFieldFp)field).getP().toByteArray();
                         nativePointer = nativeCrypto.ECEncodeGFp(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);

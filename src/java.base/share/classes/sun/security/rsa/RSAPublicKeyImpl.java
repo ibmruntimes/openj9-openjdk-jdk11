@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -73,10 +73,6 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
     private AlgorithmParameterSpec keyParams;
 
     private static NativeCrypto nativeCrypto;
-
-    static {
-        nativeCrypto = nativeCrypto.getNativeCrypto();
-    }
 
     /**
      * Generate a new RSAPublicKey from the specified encoding.
@@ -227,6 +223,9 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
         byte[] n_2c = n.toByteArray();
         byte[] e_2c = e.toByteArray();
 
+        if (nativeCrypto == null) {
+            nativeCrypto = NativeCrypto.getNativeCrypto();
+        }
         return nativeCrypto.createRSAPublicKey(n_2c, n_2c.length, e_2c, e_2c.length);
     }
 
@@ -244,9 +243,11 @@ public final class RSAPublicKeyImpl extends X509Key implements RSAPublicKey {
 
     @Override
     public void finalize() {
-        Long itr;
-        while ((itr = keyQ.poll()) != null) {
-            nativeCrypto.destroyRSAKey(itr);
+        if (nativeCrypto != null) {
+            Long itr;
+            while ((itr = keyQ.poll()) != null) {
+                nativeCrypto.destroyRSAKey(itr);
+            }
         }
     }
 }

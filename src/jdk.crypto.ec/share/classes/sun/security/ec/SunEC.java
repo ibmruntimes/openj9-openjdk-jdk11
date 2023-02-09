@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -158,7 +158,7 @@ public final class SunEC extends Provider {
                     }
                 } else  if (type.equals("KeyAgreement")) {
                     if (algo.equals("ECDH")) {
-                        if (useNativeEC) {
+                        if (useNativeEC && NativeCrypto.isAllowedAndLoaded()) {
                             return new NativeECDHKeyAgreement();
                         } else {
                             return new ECDHKeyAgreement();
@@ -362,7 +362,7 @@ public final class SunEC extends Provider {
             /*
              * Key Agreement engine
              */
-            if (useNativeEC) {
+            if (useNativeEC && NativeCrypto.isAllowedAndLoaded()) {
                 putService(new ProviderService(this, "KeyAgreement",
                     "ECDH", "sun.security.ec.NativeECDHKeyAgreement", null, ATTRS));
             } else {

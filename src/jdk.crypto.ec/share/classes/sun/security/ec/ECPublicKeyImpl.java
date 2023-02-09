@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -54,7 +54,7 @@ import sun.security.x509.*;
 public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
 
     private static final long serialVersionUID = -2462037275160462289L;
-    private static final NativeCrypto nativeCrypto = NativeCrypto.getNativeCrypto();
+    private static NativeCrypto nativeCrypto;
 
     private ECPoint w;
     private ECParameterSpec params;
@@ -167,6 +167,9 @@ public final class ECPublicKeyImpl extends X509Key implements ECPublicKey {
                     byte[] h = BigInteger.valueOf(this.params.getCofactor()).toByteArray();
                     long nativePointer;
                     int fieldType = 0;
+                    if (nativeCrypto == null) {
+                        nativeCrypto = NativeCrypto.getNativeCrypto();
+                    }
                     if (field instanceof ECFieldFp) {
                         byte[] p = ((ECFieldFp)field).getP().toByteArray();
                         nativePointer = nativeCrypto.ECEncodeGFp(a, a.length, b, b.length, p, p.length, gx, gx.length, gy, gy.length, n, n.length, h, h.length);
