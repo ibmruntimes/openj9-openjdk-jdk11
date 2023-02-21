@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -64,7 +64,7 @@ final class PKCS12PBECipherCore {
 
     private static final int DEFAULT_SALT_LENGTH = 20;
     private static final int DEFAULT_COUNT = 1024;
-    private static final NativeCrypto nativeCrypto = NativeCrypto.getNativeCrypto();
+    private static NativeCrypto nativeCrypto;
     private static final boolean nativeCryptTrace = NativeCrypto.isTraceEnabled();
     /* The property 'jdk.nativePBE' is used to control enablement of the native
      * PBE implementation.
@@ -102,7 +102,7 @@ final class PKCS12PBECipherCore {
         }
         byte[] key = new byte[n];
 
-        if (useNativePBE) {
+        if (useNativePBE && NativeCrypto.isAllowedAndLoaded()) {
             boolean hashSupported = true;
             int hashIndex = 0;
             if (hashAlgo.equals("SHA") || hashAlgo.equals("SHA1") || hashAlgo.equals("SHA-1")) {
@@ -119,6 +119,9 @@ final class PKCS12PBECipherCore {
                 hashSupported = false;
             }
             if (hashSupported) {
+                if (nativeCrypto == null) {
+                    nativeCrypto = NativeCrypto.getNativeCrypto();
+                }
                 if (nativeCrypto.PBEDerive(passwd, passwd.length, salt, salt.length, key, ic, n, type, hashIndex) != -1) {
                     return key;
                 } else if (nativeCryptTrace) {

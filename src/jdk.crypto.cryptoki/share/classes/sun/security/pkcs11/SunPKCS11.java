@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -35,8 +35,6 @@ import java.io.*;
 import java.util.*;
 
 import java.security.*;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.interfaces.*;
 import java.util.function.Consumer;
 
@@ -78,6 +76,14 @@ public final class SunPKCS11 extends AuthProvider {
     private static final long serialVersionUID = -1354835039035306505L;
 
     static final Debug debug = Debug.getInstance("sunpkcs11");
+
+    // Check if running on z platform.
+    private static final boolean isZ;
+    static {
+        String arch = System.getProperty("os.arch");
+        isZ = "s390".equalsIgnoreCase(arch) || "s390x".equalsIgnoreCase(arch);
+    }
+
     // the PKCS11 object through which we make the native calls
     final PKCS11 p11;
 
@@ -164,6 +170,7 @@ public final class SunPKCS11 extends AuthProvider {
         }
 
         String library = config.getLibrary();
+        String tokenLabel = config.getTokenLabel();
         String functionList = config.getFunctionList();
         long slotID = config.getSlotID();
         int slotListIndex = config.getSlotListIndex();
@@ -372,12 +379,40 @@ public final class SunPKCS11 extends AuthProvider {
                 System.out.println(p11Info);
             }
 
-            if ((slotID < 0) || showInfo) {
+            if ((slotID < 0) || showInfo || (tokenLabel != null)) {
                 long[] slots = p11.C_GetSlotList(false);
                 if (showInfo) {
-                    System.out.println("All slots: " + toString(slots));
-                    slots = p11.C_GetSlotList(true);
-                    System.out.println("Slots with tokens: " + toString(slots));
+                    if (isZ) {
+                        System.out.println("Slots[slotID, tokenName]:");
+                        for (int i = 0; i < slots.length; i++) {
+                            System.out.println("[" + i + ", " + new String(p11.C_GetTokenInfo(slots[i]).label).trim() + "]");
+                        }
+                    } else {
+                        System.out.println("All slots: " + toString(slots));
+                        slots = p11.C_GetSlotList(true);
+                        System.out.println("Slots with tokens: " + toString(slots));
+                    }
+                }
+                /* TokenLabel is only supported on Z architecture platforms. It is null otherwise. */
+                if (tokenLabel != null) {
+                    boolean found = false;
+                    for (int i = 0; i < slots.length; i++) {
+                        try {
+                            String label = new String(p11.C_GetTokenInfo(slots[i]).label).trim();
+                            if (tokenLabel.equalsIgnoreCase(label)) {
+                                slotID = -1;
+                                slotListIndex = i;
+                                found = true;
+                                break;
+                            }
+                        } catch (PKCS11Exception ex) {
+                            // ignore
+                        }
+                    }
+                    if (!found) {
+                        throw new IOException("Invalid Token Label : "
+                                + tokenLabel);
+                    }
                 }
                 if (slotID < 0) {
                     if ((slotListIndex < 0)
@@ -489,8 +524,9 @@ public final class SunPKCS11 extends AuthProvider {
         }
     }
 
-    long importKey(long hSession, CK_ATTRIBUTE[] attributes) throws PKCS11Exception {
-        long unwrappedKeyId, keyClass = 0, keyType = 0;
+    public long importKey(long hSession, CK_ATTRIBUTE[] attributes) throws PKCS11Exception {
+        long keyClass = 0;
+        long keyType = 0;
         byte[] keyBytes = null;
         // Extract key information.
         for (CK_ATTRIBUTE attr : attributes) {
@@ -530,7 +566,7 @@ public final class SunPKCS11 extends AuthProvider {
 
                 // Unwrap the secret key.
                 CK_ATTRIBUTE[] unwrapAttributes = token.getAttributes(TemplateManager.O_IMPORT, keyClass, keyType, attributes);
-                unwrappedKeyId = token.p11.C_UnwrapKey(hSession, wrapMechanism, wrapKeyId, wrappedBytes, unwrapAttributes);
+                return token.p11.C_UnwrapKey(hSession, wrapMechanism, wrapKeyId, wrappedBytes, unwrapAttributes);
             } catch (PKCS11Exception | NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | InvalidAlgorithmParameterException | InvalidKeyException | IllegalBlockSizeException e) {
                 throw new PKCS11Exception(CKR_GENERAL_ERROR);
             } finally {
@@ -540,7 +576,6 @@ public final class SunPKCS11 extends AuthProvider {
             // Unsupported key type or invalid bytes.
             throw new PKCS11Exception(CKR_GENERAL_ERROR);
         }
-        return Long.valueOf(unwrappedKeyId);
     }
 
     private static final class Descriptor {

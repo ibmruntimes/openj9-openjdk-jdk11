@@ -23,6 +23,11 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 package sun.security.pkcs11;
 
 import java.io.IOException;
@@ -147,6 +152,16 @@ final class P11Signature extends SignatureSpi {
     // XXX PKCS#11 v2.20 says "should not be longer than 1024 bits",
     // but this is a little arbitrary
     private final static int RAW_ECDSA_MAX = 128;
+
+    // Check if running on z platform.
+    private static final boolean isZ;
+    static {
+        String arch = System.getProperty("os.arch");
+        isZ = "s390".equalsIgnoreCase(arch) || "s390x".equalsIgnoreCase(arch);
+    }
+
+    // Elliptic Curve key size in bits.
+    private int ecKeySize;
 
     P11Signature(Token token, String algorithm, long mechanism)
             throws NoSuchAlgorithmException, PKCS11Exception {
@@ -440,7 +455,7 @@ final class P11Signature extends SignatureSpi {
             padding = RSAPadding.getInstance
                 (RSAPadding.PAD_BLOCKTYPE_1, (len + 7) >> 3);
         } catch (InvalidAlgorithmParameterException iape) {
-            throw new InvalidKeyException(iape.getMessage());
+            throw new InvalidKeyException(iape.getMessage(), iape);
         }
         int maxDataSize = padding.getMaxDataSize();
         int encodedLength;
@@ -474,6 +489,14 @@ final class P11Signature extends SignatureSpi {
         if (publicKey == null) {
             throw new InvalidKeyException("Key must not be null");
         }
+
+        // Check if the public key is EC public key to keep its key size.
+        if (publicKey instanceof ECPublicKey) {
+            ecKeySize = ((ECPublicKey)publicKey).getParams().getCurve().getField().getFieldSize();
+        } else {
+            ecKeySize = 0; // Otherwise reset the ecKeySize parameter.
+        }
+
         // Need to check key length whenever a new key is set
         if (publicKey != p11Key) {
             checkKeySize(keyAlgorithm, publicKey);
@@ -801,7 +824,7 @@ final class P11Signature extends SignatureSpi {
             DerValue result = new DerValue(DerValue.tag_Sequence,
                                            outseq.toByteArray());
             return result.toByteArray();
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Internal error", e);
         }
     }
@@ -852,7 +875,12 @@ final class P11Signature extends SignatureSpi {
             // trim leading zeroes
             byte[] br = KeyUtil.trimZeroes(r.toByteArray());
             byte[] bs = KeyUtil.trimZeroes(s.toByteArray());
-            int k = Math.max(br.length, bs.length);
+            int k;
+            if (isZ && (ecKeySize > 0)) {
+                k = (ecKeySize + 7) / 8;
+            } else {
+                k = Math.max(br.length, bs.length);
+            }
             // r and s each occupy half the array
             byte[] res = new byte[k << 1];
             System.arraycopy(br, 0, res, k - br.length, br.length);

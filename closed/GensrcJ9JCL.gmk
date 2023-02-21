@@ -44,13 +44,15 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 		src/java.base/share/classes/java/util/Timer.java \
 		src/java.base/share/classes/java/util/TimerTask.java \
 		src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java \
+		src/java.base/share/classes/sun/security/jca/ProviderConfig.java \
+		src/java.base/share/classes/sun/security/jca/ProviderList.java \
 		src/java.base/unix/classes/java/lang/ProcessEnvironment.java \
 	))
 
 IncludeIfUnsure := -includeIfUnsure -noWarnIncludeIf
 
 $(J9JCL_SOURCES_DONEFILE) : \
-		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*.java)) \
+		$(foreach dir, $(JppSourceDirs), $(call RecursiveWildcard,$(dir),*)) \
 		$(COPY_OVERLAY_FILES)
 	@$(ECHO) Building OpenJ9 Java Preprocessor
 	@$(MKDIR) -p $(J9TOOLS_DIR)

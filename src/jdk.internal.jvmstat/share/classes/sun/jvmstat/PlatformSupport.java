@@ -56,16 +56,7 @@ public class PlatformSupport {
     }
 
     public static PlatformSupport getInstance() {
-        try {
-            Class<?> c = Class.forName("sun.jvmstat.PlatformSupportImpl");
-            @SuppressWarnings("unchecked")
-            Constructor<PlatformSupport> cntr = (Constructor<PlatformSupport>) c.getConstructor();
-            return cntr.newInstance();
-        } catch (ClassNotFoundException e) {
-            return new PlatformSupport();
-        } catch (ReflectiveOperationException e) {
-            throw new InternalError(e);
-        }
+        return new PlatformSupport();
     }
 
     // package-private
