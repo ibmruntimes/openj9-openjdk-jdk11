@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -118,12 +118,26 @@ endif
 # Usage: $(call CodesignFile, files ...)
 ifeq (,$(CODESIGN))
   CodesignFile =
+else ifeq (debug, $(MACOSX_CODESIGN_MODE))
+  define CodesignFile
+	$(CODESIGN) --remove-signature $1
+	$(CODESIGN) --sign - \
+		--entitlements $(TOPDIR)/make/data/macosxsigning/default-debug.plist \
+		--force \
+		$1
+  endef
+else ifeq (hardened, $(MACOSX_CODESIGN_MODE))
+  define CodesignFile
+	$(CODESIGN) --remove-signature $1
+	$(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" \
+		--entitlements $(TOPDIR)/make/data/macosxsigning/default.plist \
+		--force \
+		--options runtime \
+		--timestamp \
+		$1
+  endef
 else
-  CodesignFile = $(CODESIGN) --sign "$(MACOSX_CODESIGN_IDENTITY)" \
-	--entitlements $(TOPDIR)/make/data/macosxsigning/default.plist \
-	--options runtime \
-	--timestamp \
-	$1
+  CodesignFile =
 endif
 
 # Archive from which to import Health Center content.
