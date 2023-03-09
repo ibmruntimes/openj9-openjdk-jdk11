@@ -137,7 +137,8 @@ RestrictedSecurity1.jce.provider.2 = SUN [{CertificateFactory, X.509, Implemente
     {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
     {Policy, JavaPolicy, *}, {Configuration, JavaLoginConfig, *}, \
     {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
-    {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}]
+    {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
+    {KeyStore, PKCS12, *}]
 RestrictedSecurity1.jce.provider.3 = SunEC [{KeyFactory, EC, ImplementedIn=Software: \
     SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
     KeySize=256}, {AlgorithmParameters, EC, *}]
