@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package sun.security.pkcs11;
 
@@ -97,6 +102,13 @@ final class P11TlsRsaPremasterSecretGenerator extends KeyGeneratorSpi {
                     ("Only" + (supportSSLv3? " SSL 3.0,": "") +
                      " TLS 1.0, TLS 1.1 and TLS 1.2 are supported (" +
                      tlsVersion + ")");
+        }
+        // Change mechanism to CKM_TLS_PRE_MASTER_KEY_GEN if version is 3.01, 3.02, 3.03.
+        // Only version 3.00 needs mechanism of CKM_SSL3_PRE_MASTER_KEY_GEN.
+        if (tlsVersion == 0x0300) {
+            mechanism = CKM_SSL3_PRE_MASTER_KEY_GEN;
+        } else {
+            mechanism = CKM_TLS_PRE_MASTER_KEY_GEN;
         }
         this.spec = spec;
     }
