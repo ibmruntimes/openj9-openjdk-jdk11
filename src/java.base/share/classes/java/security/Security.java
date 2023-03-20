@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -69,6 +69,9 @@ public final class Security {
     /* Are we debugging? -- for developers */
     private static final Debug sdebug =
                         Debug.getInstance("properties");
+    /*[IF CRIU_SUPPORT]*/
+    private static final boolean criuDebug = Boolean.getBoolean("enable.j9internal.checkpoint.security.api.debug");
+    /*[ENDIF] CRIU_SUPPORT */
 
     /* The java.security properties */
     private static Properties props;
@@ -205,12 +208,12 @@ public final class Security {
             }
         }
 
-/*[IF CRIU_SUPPORT]*/
+        /*[IF CRIU_SUPPORT]*/
         // Check if CRIU checkpoint mode is enabled, if it is then reconfigure the security providers.
         if (InternalCRIUSupport.isCheckpointAllowed()) {
             CRIUConfigurator.setCRIUSecMode(props);
         }
-/*[ENDIF] CRIU_SUPPORT*/
+        /*[ENDIF] CRIU_SUPPORT */
 
         // Load FIPS properties
         if (loadedProps) {
@@ -391,6 +394,11 @@ public final class Security {
      */
     public static synchronized int insertProviderAt(Provider provider,
             int position) {
+
+        /*[IF CRIU_SUPPORT]*/
+        CRIUConfigurator.invalidateAlgorithmCache();
+        /*[ENDIF] CRIU_SUPPORT */
+
         String providerName = provider.getName();
         checkInsertProvider(providerName);
         ProviderList list = Providers.getFullProviderList();
@@ -472,6 +480,10 @@ public final class Security {
      * @see #addProvider
      */
     public static synchronized void removeProvider(String name) {
+        /*[IF CRIU_SUPPORT]*/
+        CRIUConfigurator.invalidateAlgorithmCache();
+        /*[ENDIF] CRIU_SUPPORT */
+
         check("removeProvider." + name);
         ProviderList list = Providers.getFullProviderList();
         ProviderList newList = ProviderList.remove(list, name);
@@ -1100,6 +1112,20 @@ public final class Security {
      * @since 1.4
      **/
     public static Set<String> getAlgorithms(String serviceName) {
+
+        /*[IF CRIU_SUPPORT]*/
+        // Check if the CRIU algorithm cache is ready/valid and contains data. If true use that cached data.
+        if (CRIUConfigurator.isCachedAlgorithmsPresentAndReady()) {
+            if (criuDebug) {
+                System.out.println("Use CRIU cache for getAlgorithms()");
+            }
+            return CRIUConfigurator.getAlgorithms(serviceName);
+        } else {
+            if (criuDebug) {
+                System.out.println("Do not use CRIU cache for getAlgorithms()");
+            }
+        }
+        /*[ENDIF] CRIU_SUPPORT */
 
         if ((serviceName == null) || (serviceName.isEmpty()) ||
             (serviceName.endsWith("."))) {
