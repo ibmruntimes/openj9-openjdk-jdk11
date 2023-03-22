@@ -48,6 +48,10 @@ public class NativeCrypto {
     public static final int SHA5_384 = 3;
     public static final int SHA5_512 = 4;
 
+    public static final long OPENSSL_VERSION_1_0_0 = 0x1_00_00_000L;
+    public static final long OPENSSL_VERSION_1_1_0 = 0x1_01_00_000L;
+    public static final long OPENSSL_VERSION_3_0_0 = 0x3_00_00_000L;
+
     private static final Cleaner ECKeyCleaner = CleanerFactory.cleaner();
 
     private static final boolean useNativeCrypto = Boolean.parseBoolean(
@@ -60,14 +64,13 @@ public class NativeCrypto {
         private static final NativeCrypto instance = new NativeCrypto();
     }
 
-    //ossl_vers:
+    //ossl_vers will be either:
     // -1 : library load failed
-    //  0 : openssl 1.0.x
-    //  1 : openssl 1.1.x or newer
-    private final int ossl_ver;
+    // or one of the OPENSSL_VERSION_x_x_x constants
+    private final long ossl_ver;
 
-    private static int loadCryptoLibraries() {
-        int osslVersion;
+    private static long loadCryptoLibraries() {
+        long osslVersion;
 
         try {
             // load jncrypto JNI library
@@ -91,7 +94,7 @@ public class NativeCrypto {
 
     @SuppressWarnings("removal")
     private NativeCrypto() {
-        ossl_ver = AccessController.doPrivileged((PrivilegedAction<Integer>) () -> loadCryptoLibraries()).intValue();
+        ossl_ver = AccessController.doPrivileged((PrivilegedAction<Long>) () -> loadCryptoLibraries()).longValue();
     }
 
     /**
@@ -112,7 +115,7 @@ public class NativeCrypto {
      *
      * @return the OpenSSL library version if it is available
      */
-    public static final int getVersionIfAvailable() {
+    public static final long getVersionIfAvailable() {
 /*[IF CRIU_SUPPORT]*/
         if (InternalCRIUSupport.isCheckpointAllowed()) {
             return -1;
@@ -185,7 +188,8 @@ public class NativeCrypto {
     }
 
     /* Native digest interfaces */
-    private static final native int loadCrypto(boolean traceEnabled);
+
+    private static final native long loadCrypto(boolean trace);
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
@@ -208,6 +212,7 @@ public class NativeCrypto {
     public final native void DigestReset(long context);
 
     /* Native interfaces shared by CBC and ChaCha20 */
+
     public final native long CreateContext();
 
     public final native int DestroyContext(long context);
@@ -236,6 +241,7 @@ public class NativeCrypto {
                                              int outputOffset);
 
     /* Native GCM interfaces */
+
     public final native int GCMEncrypt(byte[] key,
                                        int keylen,
                                        byte[] iv,
@@ -263,6 +269,7 @@ public class NativeCrypto {
                                        int tagLen);
 
     /* Native RSA interfaces */
+
     public final native long createRSAPublicKey(byte[] n,
                                                 int nLen,
                                                 byte[] e,
