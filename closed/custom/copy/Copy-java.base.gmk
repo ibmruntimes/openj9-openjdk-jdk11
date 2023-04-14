@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -161,13 +161,16 @@ $(call openj9_copy_files,, \
 
 $(call openj9_copy_files,, \
 	$(OPENJ9_TOPDIR)/LICENSE \
-	$(LEGAL_DST_DIR)/openj9-notices)
+	$(LEGAL_DST_DIR)/openj9-licenses)
+$(call openj9_copy_files,, \
+	$(OPENJ9_TOPDIR)/NOTICES.md \
+	$(LEGAL_DST_DIR)/openj9-notices.md)
 $(call openj9_copy_files,, \
 	$(OPENJ9_TOPDIR)/epl-2.0.html \
 	$(LEGAL_DST_DIR)/epl-2.0.html)
 $(call openj9_copy_files,, \
-        $(TOPDIR)/openj9-openjdk-notices \
-        $(LEGAL_DST_DIR)/openj9-openjdk-notices)
+	$(TOPDIR)/openj9-openjdk-notices \
+	$(LEGAL_DST_DIR)/openj9-openjdk-notices)
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 
