@@ -158,6 +158,11 @@ else
   OPENJ9_VM_BUILD_DIR = $(OUTPUTDIR)/vm
 endif
 
+# Enable use of j9cfg.h in openjdk native code.
+$(foreach var, \
+	CFLAGS_JDKEXE CFLAGS_JDKLIB CXXFLAGS_JDKEXE CXXFLAGS_JDKLIB, \
+	$(eval $(var) += -I$(SUPPORT_OUTPUTDIR)/openj9_include))
+
 J9JCL_SOURCES_DIR      := $(SUPPORT_OUTPUTDIR)/j9jcl
 J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl.done
 
