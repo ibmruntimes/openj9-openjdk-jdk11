@@ -21,7 +21,6 @@
 # ===========================================================================
 #
 # exclude build directories
-/build
 /.build
 # exclude all source directories
 /omr
@@ -33,3 +32,22 @@
 # ignore derived artifacts created when configure option '--with-freetype-src' is used
 /freetype.bat
 /freetype.log
+
+# openjdk gitignore
+/build/
+/dist/
+/.idea/
+nbproject/private/
+/webrev
+/.src-rev
+/.jib/
+.DS_Store
+.metadata/
+.recommenders/
+test/nashorn/script/external
+test/nashorn/lib
+NashornProfile.txt
+**/JTreport/**
+**/JTwork/**
+/compile_commands.json
+/.cache

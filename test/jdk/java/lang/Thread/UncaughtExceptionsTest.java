@@ -69,7 +69,12 @@ public class UncaughtExceptionsTest {
         OutputAnalyzer outputAnalyzer = ProcessTools.executeCommand(processBuilder);
         outputAnalyzer.shouldHaveExitValue(exitValue);
         outputAnalyzer.stderrShouldMatch(stdErrMatch);
-        outputAnalyzer.stdoutShouldMatch(stdOutMatch);
+        try {
+            outputAnalyzer.stdoutShouldMatch(stdOutMatch);
+        } catch (RuntimeException e) {
+            com.ibm.jvm.Dump.SystemDump();
+            throw e;
+        }
     }
 
 }
