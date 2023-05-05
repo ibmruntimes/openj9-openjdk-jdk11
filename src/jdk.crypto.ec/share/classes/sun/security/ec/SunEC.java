@@ -65,10 +65,21 @@ public final class SunEC extends Provider {
     // (when native library is absent then fewer EC algorithms are available)
     private static boolean useFullImplementation = true;
 
+    private static final boolean nativeCryptTrace = NativeCrypto.isTraceEnabled();
+
+    // Flag indicating whether the operating system is AIX.
+    private static final boolean isAIX = "AIX".equals(System.getProperty("os.name"));
+
     /* The property 'jdk.nativeEC' is used to control enablement of the native
-     * EC implementation.
+     * ECDH implementation.
      */
-    private static final boolean useNativeEC = NativeCrypto.isAlgorithmEnabled("jdk.nativeEC", "SunEC");
+    private static final boolean useNativeECDH = NativeCrypto.isAlgorithmEnabled("jdk.nativeEC", "SunEC");
+
+    /* The property 'jdk.nativeECKeyGen' is used to control enablement of the native
+     * ECKeyGeneration implementation.
+     * OpenSSL 1.1.0 or above is required for EC key generation support.
+     */
+    private static final boolean useNativeECKeyGen = NativeCrypto.isAlgorithmEnabled("jdk.nativeECKeyGen", "SunEC");
 
     static {
         try {
@@ -146,6 +157,23 @@ public final class SunEC extends Provider {
                     }
                 } else  if (type.equals("KeyPairGenerator")) {
                     if (algo.equals("EC")) {
+                        if (useNativeECKeyGen) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_1_1_0) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("EC KeyPair Generation - Not using OpenSSL integration due to older version of OpenSSL (<1.1.0).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("EC KeyPair Generation - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("EC KeyPair Generation - Using OpenSSL integration.");
+                                }
+                                return new NativeECKeyPairGenerator();
+                            }
+                        }
                         return new ECKeyPairGenerator();
                     } else if (algo.equals("XDH")) {
                         return new XDHKeyPairGenerator();
@@ -156,7 +184,7 @@ public final class SunEC extends Provider {
                     }
                 } else  if (type.equals("KeyAgreement")) {
                     if (algo.equals("ECDH")) {
-                        if (useNativeEC && NativeCrypto.isAllowedAndLoaded()) {
+                        if (useNativeECDH && NativeCrypto.isAllowedAndLoaded()) {
                             return new NativeECDHKeyAgreement();
                         } else {
                             return new ECDHKeyAgreement();
@@ -300,14 +328,24 @@ public final class SunEC extends Provider {
         /*
          *  Key Pair Generator engine
          */
-        putService(new ProviderService(this, "KeyPairGenerator",
-            "EC", "sun.security.ec.ECKeyPairGenerator",
-            new String[] { "EllipticCurve" }, ATTRS));
+        /* Disabling OpenSSL usage in AIX due to perfomance regression observed */
+        if (useNativeECKeyGen
+            && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_1_1_0)
+            && !isAIX
+        ) {
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "EC", "sun.security.ec.NaticeECKeyPairGenerator",
+                new String[] { "EllipticCurve" }, ATTRS));
+        } else {
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "EC", "sun.security.ec.ECKeyPairGenerator",
+                new String[] { "EllipticCurve" }, ATTRS));
+        }
 
         /*
          * Key Agreement engine
          */
-        if (useNativeEC && NativeCrypto.isAllowedAndLoaded()) {
+        if (useNativeECDH && NativeCrypto.isAllowedAndLoaded()) {
             putService(new ProviderService(this, "KeyAgreement",
                 "ECDH", "sun.security.ec.NativeECDHKeyAgreement", null, ATTRS));
         } else {
