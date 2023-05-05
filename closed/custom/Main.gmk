@@ -49,6 +49,7 @@ j9vm-build : buildtools-langtools
 	@+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/openssl.gmk
   endif # BUILD_OPENSSL
 	@+$(OPENJ9_MAKE) build-j9
+	@+$(OPENJ9_MAKE) openj9-config-headers
 
 # Modules with content created by j9vm-build:
 OPENJ9_VM_MODULES := \
