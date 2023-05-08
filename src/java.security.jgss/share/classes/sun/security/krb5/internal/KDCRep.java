@@ -138,20 +138,22 @@ public class KDCRep {
                         " req type is " + req_type);
 
                 System.out.println(">>> KDCRep: Message in bytes is =>");
-                byte[] dataBytes = encoding.getDataBytes();
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < dataBytes.length; i++) {
-                    if ((i % 16) == 0) {
-                        sb.append(String.format("%06X", i));
+                byte[] dataBytes = encoding.getData().toByteArray();
+                if (dataBytes != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < dataBytes.length; i++) {
+                        if ((i % 16) == 0) {
+                            sb.append(String.format("%06X", i));
+                        }
+                        sb.append(String.format(" %02X", dataBytes[i] & 0xFF));
+                        if ((i % 16) == 15) {
+                            System.out.println(sb.toString());
+                            sb.setLength(0);
+                        }
                     }
-                    sb.append(String.format(" %02X", dataBytes[i] & 0xFF));
-                    if ((i % 16) == 15) {
+                    if (sb.length() > 0) {
                         System.out.println(sb.toString());
-                        sb.setLength(0);
                     }
-                }
-                if (sb.length() > 0) {
-                    System.out.println(sb.toString());
                 }
             }
             throw new Asn1Exception(Krb5.ASN1_BAD_ID);
