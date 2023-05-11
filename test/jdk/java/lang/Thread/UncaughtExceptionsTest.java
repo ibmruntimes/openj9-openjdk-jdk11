@@ -67,9 +67,9 @@ public class UncaughtExceptionsTest {
     public void test(String className, int exitValue, String stdOutMatch, String stdErrMatch) throws Throwable {
         ProcessBuilder processBuilder = ProcessTools.createJavaProcessBuilder(String.format("UncaughtExitSimulator$%s",className));
         OutputAnalyzer outputAnalyzer = ProcessTools.executeCommand(processBuilder);
-        outputAnalyzer.shouldHaveExitValue(exitValue);
-        outputAnalyzer.stderrShouldMatch(stdErrMatch);
         try {
+            outputAnalyzer.shouldHaveExitValue(exitValue);
+            outputAnalyzer.stderrShouldMatch(stdErrMatch);
             outputAnalyzer.stdoutShouldMatch(stdOutMatch);
         } catch (RuntimeException e) {
             com.ibm.jvm.Dump.SystemDump();
