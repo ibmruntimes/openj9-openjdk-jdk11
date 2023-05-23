@@ -1,72 +1,34 @@
 #ifndef OT_LAYOUT_GPOS_MARKLIGPOSFORMAT1_HH
 #define OT_LAYOUT_GPOS_MARKLIGPOSFORMAT1_HH
 
+#include "LigatureArray.hh"
+
 namespace OT {
 namespace Layout {
 namespace GPOS_impl {
 
-typedef AnchorMatrix LigatureAttach;    /* component-major--
-                                         * in order of writing direction--,
-                                         * mark-minor--
-                                         * ordered by class--zero-based. */
 
-/* Array of LigatureAttach tables ordered by LigatureCoverage Index */
-struct LigatureArray : List16OfOffset16To<LigatureAttach>
-{
-  template <typename Iterator,
-            hb_requires (hb_is_iterator (Iterator))>
-  bool subset (hb_subset_context_t *c,
-               Iterator             coverage,
-               unsigned             class_count,
-               const hb_map_t      *klass_mapping) const
-  {
-    TRACE_SUBSET (this);
-    const hb_set_t &glyphset = *c->plan->glyphset_gsub ();
-
-    auto *out = c->serializer->start_embed (this);
-    if (unlikely (!c->serializer->extend_min (out)))  return_trace (false);
-
-    for (const auto _ : + hb_zip (coverage, *this)
-                  | hb_filter (glyphset, hb_first))
-    {
-      auto *matrix = out->serialize_append (c->serializer);
-      if (unlikely (!matrix)) return_trace (false);
-
-      const LigatureAttach& src = (this + _.second);
-      auto indexes =
-          + hb_range (src.rows * class_count)
-          | hb_filter ([=] (unsigned index) { return klass_mapping->has (index % class_count); })
-          ;
-      matrix->serialize_subset (c,
-                                _.second,
-                                this,
-                                src.rows,
-                                indexes);
-    }
-    return_trace (this->len);
-  }
-};
-
-struct MarkLigPosFormat1
+template <typename Types>
+struct MarkLigPosFormat1_2
 {
   protected:
   HBUINT16      format;                 /* Format identifier--format = 1 */
-  Offset16To<Coverage>
+  typename Types::template OffsetTo<Coverage>
                 markCoverage;           /* Offset to Mark Coverage table--from
                                          * beginning of MarkLigPos subtable */
-  Offset16To<Coverage>
+  typename Types::template OffsetTo<Coverage>
                 ligatureCoverage;       /* Offset to Ligature Coverage
                                          * table--from beginning of MarkLigPos
                                          * subtable */
   HBUINT16      classCount;             /* Number of defined mark classes */
-  Offset16To<MarkArray>
+  typename Types::template OffsetTo<MarkArray>
                 markArray;              /* Offset to MarkArray table--from
                                          * beginning of MarkLigPos subtable */
-  Offset16To<LigatureArray>
+  typename Types::template OffsetTo<LigatureArray>
                 ligatureArray;          /* Offset to LigatureArray table--from
                                          * beginning of MarkLigPos subtable */
   public:
-  DEFINE_SIZE_STATIC (12);
+  DEFINE_SIZE_STATIC (4 + 4 * Types::size);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -153,8 +115,8 @@ struct MarkLigPosFormat1
       auto match = skippy_iter.match (buffer->info[j - 1]);
       if (match == skippy_iter.MATCH)
       {
-	c->last_base = (signed) j - 1;
-	break;
+        c->last_base = (signed) j - 1;
+        break;
       }
     }
     c->last_base_until = buffer->idx;
@@ -164,15 +126,15 @@ struct MarkLigPosFormat1
       return_trace (false);
     }
 
-    unsigned idx = (unsigned) c->last_base;
+    j = (unsigned) c->last_base;
 
     /* Checking that matched glyph is actually a ligature by GDEF is too strong; disabled */
-    //if (!_hb_glyph_info_is_ligature (&buffer->info[idx])) { return_trace (false); }
+    //if (!_hb_glyph_info_is_ligature (&buffer->info[j])) { return_trace (false); }
 
-    unsigned int lig_index = (this+ligatureCoverage).get_coverage  (buffer->info[idx].codepoint);
+    unsigned int lig_index = (this+ligatureCoverage).get_coverage  (buffer->info[j].codepoint);
     if (lig_index == NOT_COVERED)
     {
-      buffer->unsafe_to_concat_from_outbuffer (idx, buffer->idx + 1);
+      buffer->unsafe_to_concat_from_outbuffer (skippy_iter.idx, buffer->idx + 1);
       return_trace (false);
     }
 
@@ -183,7 +145,7 @@ struct MarkLigPosFormat1
     unsigned int comp_count = lig_attach.rows;
     if (unlikely (!comp_count))
     {
-      buffer->unsafe_to_concat_from_outbuffer (idx, buffer->idx + 1);
+      buffer->unsafe_to_concat_from_outbuffer (skippy_iter.idx, buffer->idx + 1);
       return_trace (false);
     }
 
@@ -192,7 +154,7 @@ struct MarkLigPosFormat1
      * can directly use the component index.  If not, we attach the mark
      * glyph to the last component of the ligature. */
     unsigned int comp_index;
-    unsigned int lig_id = _hb_glyph_info_get_lig_id (&buffer->info[idx]);
+    unsigned int lig_id = _hb_glyph_info_get_lig_id (&buffer->info[j]);
     unsigned int mark_id = _hb_glyph_info_get_lig_id (&buffer->cur());
     unsigned int mark_comp = _hb_glyph_info_get_lig_comp (&buffer->cur());
     if (lig_id && lig_id == mark_id && mark_comp > 0)
@@ -200,7 +162,7 @@ struct MarkLigPosFormat1
     else
       comp_index = comp_count - 1;
 
-    return_trace ((this+markArray).apply (c, mark_index, comp_index, lig_attach, classCount, idx));
+    return_trace ((this+markArray).apply (c, mark_index, comp_index, lig_attach, classCount, j));
   }
 
   bool subset (hb_subset_context_t *c) const
