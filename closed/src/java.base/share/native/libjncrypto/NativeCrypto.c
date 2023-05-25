@@ -2450,13 +2450,13 @@ Java_jdk_crypto_jniprovider_NativeCrypto_ECGenerateKeyPair
 
 cleanup:
     if (NULL != nativeX) {
-        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, x, nativeX, 0);
     }
     if (NULL != nativeY) {
-        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, y, nativeY, 0);
     }
     if (NULL != nativeS) {
-        (*env)->ReleasePrimitiveArrayCritical(env, s, nativeS, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, s, nativeS, 0);
     }
     if (NULL != ctx) {
         (*OSSL_BN_CTX_free)(ctx);
@@ -3041,7 +3041,7 @@ cleanup:
         (*env)->ReleasePrimitiveArrayCritical(env, salt, nativeSalt, JNI_ABORT);
     }
     if (NULL != nativeKey) {
-        (*env)->ReleasePrimitiveArrayCritical(env, key, nativeKey, JNI_ABORT);
+        (*env)->ReleasePrimitiveArrayCritical(env, key, nativeKey, 0);
     }
 
     return ret;
