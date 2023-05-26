@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package jdk.internal.misc;
 
 import java.net.InetAddress;
@@ -43,4 +49,11 @@ public interface JavaNetInetAddressAccess {
      */
     InetAddress getByName(String hostName, InetAddress hostAddress)
             throws UnknownHostException;
+
+    /*[IF CRIU_SUPPORT]*/
+    /**
+     * To be invoked by CRIU post-restore hook, clear the cache.
+     */
+    void clearInetAddressCache();
+    /*[ENDIF] CRIU_SUPPORT */
 }
