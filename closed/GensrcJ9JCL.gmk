@@ -40,10 +40,12 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 	DEST := $(SUPPORT_OUTPUTDIR)/overlay, \
 	FILES := \
 		src/java.base/share/classes/java/lang/ClassValue.java \
+		src/java.base/share/classes/java/net/InetAddress.java \
 		src/java.base/share/classes/java/security/Security.java \
 		src/java.base/share/classes/java/util/Timer.java \
 		src/java.base/share/classes/java/util/TimerTask.java \
 		src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java \
+		src/java.base/share/classes/jdk/internal/misc/JavaNetInetAddressAccess.java \
 		src/java.base/share/classes/sun/security/jca/ProviderConfig.java \
 		src/java.base/share/classes/sun/security/jca/ProviderList.java \
 		src/java.base/unix/classes/java/lang/ProcessEnvironment.java \
