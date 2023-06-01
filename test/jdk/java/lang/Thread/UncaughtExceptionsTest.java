@@ -67,14 +67,9 @@ public class UncaughtExceptionsTest {
     public void test(String className, int exitValue, String stdOutMatch, String stdErrMatch) throws Throwable {
         ProcessBuilder processBuilder = ProcessTools.createJavaProcessBuilder(String.format("UncaughtExitSimulator$%s",className));
         OutputAnalyzer outputAnalyzer = ProcessTools.executeCommand(processBuilder);
-        try {
-            outputAnalyzer.shouldHaveExitValue(exitValue);
-            outputAnalyzer.stderrShouldMatch(stdErrMatch);
-            outputAnalyzer.stdoutShouldMatch(stdOutMatch);
-        } catch (RuntimeException e) {
-            com.ibm.jvm.Dump.SystemDump();
-            throw e;
-        }
+        outputAnalyzer.shouldHaveExitValue(exitValue);
+        outputAnalyzer.stderrShouldMatch(stdErrMatch);
+        outputAnalyzer.stdoutShouldMatch(stdOutMatch);
     }
 
 }
@@ -98,7 +93,12 @@ class UncaughtExitSimulator extends Thread implements Runnable {
 
     public static void throwRuntimeException() { throw new RuntimeException("simulateUncaughtExitEvent"); }
 
-    public void run() { throwRuntimeException(); }
+    public void run() {
+        if (!Thread.currentThread().getName().equals("Thread-0")) {
+            com.ibm.jvm.Dump.SystemDump();
+        }
+        throwRuntimeException();
+    }
 
     /**
      * A thread is never alive after you've join()ed it.
