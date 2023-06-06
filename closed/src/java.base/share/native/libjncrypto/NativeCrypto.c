@@ -44,6 +44,7 @@
 
 #define OPENSSL_VERSION_1_0_0 OPENSSL_VERSION_CODE(1, 0, 0, 0)
 #define OPENSSL_VERSION_1_1_0 OPENSSL_VERSION_CODE(1, 1, 0, 0)
+#define OPENSSL_VERSION_1_1_1 OPENSSL_VERSION_CODE(1, 1, 1, 0)
 #define OPENSSL_VERSION_2_0_0 OPENSSL_VERSION_CODE(2, 0, 0, 0)
 /* Per new OpenSSL naming convention starting from OpenSSL 3, all major versions are ABI and API compatible. */
 #define OPENSSL_VERSION_3_0_0 OPENSSL_VERSION_CODE(3, 0, 0, 0)
@@ -148,6 +149,20 @@ typedef int OSSL_EC_KEY_set_public_key_t(EC_KEY *, const EC_POINT *);
 typedef int OSSL_EC_KEY_check_key_t(const EC_KEY *);
 typedef int EC_set_public_key_t(EC_KEY *, BIGNUM *, BIGNUM *, int);
 typedef const BIGNUM *OSSL_EC_KEY_get0_private_key_t(const EC_KEY *);
+
+typedef EVP_PKEY_CTX *OSSL_EVP_PKEY_CTX_new_t(EVP_PKEY *, ENGINE *);
+typedef EVP_PKEY_CTX *OSSL_EVP_PKEY_CTX_new_id_t(int, ENGINE *);
+typedef int OSSL_EVP_PKEY_keygen_init_t(EVP_PKEY_CTX *);
+typedef int OSSL_EVP_PKEY_keygen_t(EVP_PKEY_CTX *, EVP_PKEY **);
+typedef void OSSL_EVP_PKEY_CTX_free_t(EVP_PKEY_CTX *);
+typedef int OSSL_EVP_PKEY_get_raw_private_key_t(const EVP_PKEY *, unsigned char *, size_t *);
+typedef int OSSL_EVP_PKEY_get_raw_public_key_t(const EVP_PKEY *, unsigned char *, size_t *);
+typedef EVP_PKEY *OSSL_EVP_PKEY_new_raw_private_key_t(int, ENGINE *, const unsigned char *, size_t);
+typedef EVP_PKEY *OSSL_EVP_PKEY_new_raw_public_key_t(int, ENGINE *, const unsigned char *, size_t);
+typedef int OSSL_EVP_PKEY_derive_init_t(EVP_PKEY_CTX *);
+typedef int OSSL_EVP_PKEY_derive_set_peer_t(EVP_PKEY_CTX *, EVP_PKEY *);
+typedef int OSSL_EVP_PKEY_derive_t(EVP_PKEY_CTX *, unsigned char *, size_t *);
+typedef void OSSL_EVP_PKEY_free_t(EVP_PKEY *);
 
 typedef int OSSL_PKCS12_key_gen_t(const char *, int, unsigned char *, int, int, int, int, unsigned char *, const EVP_MD *);
 
@@ -260,6 +275,21 @@ OSSL_EC_KEY_set_public_key_t* OSSL_EC_KEY_set_public_key;
 OSSL_EC_KEY_check_key_t* OSSL_EC_KEY_check_key;
 EC_set_public_key_t* EC_set_public_key;
 OSSL_EC_KEY_get0_private_key_t *OSSL_EC_KEY_get0_private_key;
+
+/* Define pointers for OpenSSL functions to handle XDH algorithm. */
+OSSL_EVP_PKEY_CTX_new_t *OSSL_EVP_PKEY_CTX_new;
+OSSL_EVP_PKEY_CTX_new_id_t *OSSL_EVP_PKEY_CTX_new_id;
+OSSL_EVP_PKEY_keygen_init_t *OSSL_EVP_PKEY_keygen_init;
+OSSL_EVP_PKEY_keygen_t *OSSL_EVP_PKEY_keygen;
+OSSL_EVP_PKEY_CTX_free_t *OSSL_EVP_PKEY_CTX_free;
+OSSL_EVP_PKEY_get_raw_private_key_t *OSSL_EVP_PKEY_get_raw_private_key;
+OSSL_EVP_PKEY_get_raw_public_key_t *OSSL_EVP_PKEY_get_raw_public_key;
+OSSL_EVP_PKEY_new_raw_private_key_t *OSSL_EVP_PKEY_new_raw_private_key;
+OSSL_EVP_PKEY_new_raw_public_key_t *OSSL_EVP_PKEY_new_raw_public_key;
+OSSL_EVP_PKEY_derive_init_t *OSSL_EVP_PKEY_derive_init;
+OSSL_EVP_PKEY_derive_set_peer_t *OSSL_EVP_PKEY_derive_set_peer;
+OSSL_EVP_PKEY_derive_t *OSSL_EVP_PKEY_derive;
+OSSL_EVP_PKEY_free_t *OSSL_EVP_PKEY_free;
 
 /* Define pointers for OpenSSL functions to handle PBE algorithm. */
 OSSL_PKCS12_key_gen_t* OSSL_PKCS12_key_gen;
@@ -534,6 +564,37 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_ECGF2M = JNI_TRUE;
     }
 
+    /* Load the functions symbols for OpenSSL XDH algorithm. (Need OpenSSL 1.1.x or above). */
+    if (ossl_ver >= OPENSSL_VERSION_1_1_1) {
+        OSSL_EVP_PKEY_CTX_new = (OSSL_EVP_PKEY_CTX_new_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_CTX_new");
+        OSSL_EVP_PKEY_CTX_new_id = (OSSL_EVP_PKEY_CTX_new_id_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_CTX_new_id");
+        OSSL_EVP_PKEY_keygen_init = (OSSL_EVP_PKEY_keygen_init_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_keygen_init");
+        OSSL_EVP_PKEY_keygen = (OSSL_EVP_PKEY_keygen_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_keygen");
+        OSSL_EVP_PKEY_CTX_free = (OSSL_EVP_PKEY_CTX_free_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_CTX_free");
+        OSSL_EVP_PKEY_get_raw_private_key = (OSSL_EVP_PKEY_get_raw_private_key_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_get_raw_private_key");
+        OSSL_EVP_PKEY_get_raw_public_key = (OSSL_EVP_PKEY_get_raw_public_key_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_get_raw_public_key");
+        OSSL_EVP_PKEY_new_raw_private_key = (OSSL_EVP_PKEY_new_raw_private_key_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_new_raw_private_key");
+        OSSL_EVP_PKEY_new_raw_public_key = (OSSL_EVP_PKEY_new_raw_public_key_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_new_raw_public_key");
+        OSSL_EVP_PKEY_derive_init = (OSSL_EVP_PKEY_derive_init_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_derive_init");
+        OSSL_EVP_PKEY_derive_set_peer = (OSSL_EVP_PKEY_derive_set_peer_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_derive_set_peer");
+        OSSL_EVP_PKEY_derive = (OSSL_EVP_PKEY_derive_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_derive");
+        OSSL_EVP_PKEY_free = (OSSL_EVP_PKEY_free_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_free");
+    } else {
+        OSSL_EVP_PKEY_CTX_new = NULL;
+        OSSL_EVP_PKEY_CTX_new_id = NULL;
+        OSSL_EVP_PKEY_keygen_init = NULL;
+        OSSL_EVP_PKEY_keygen = NULL;
+        OSSL_EVP_PKEY_CTX_free = NULL;
+        OSSL_EVP_PKEY_get_raw_private_key = NULL;
+        OSSL_EVP_PKEY_get_raw_public_key = NULL;
+        OSSL_EVP_PKEY_new_raw_private_key = NULL;
+        OSSL_EVP_PKEY_new_raw_public_key = NULL;
+        OSSL_EVP_PKEY_derive_init = NULL;
+        OSSL_EVP_PKEY_derive_set_peer = NULL;
+        OSSL_EVP_PKEY_derive = NULL;
+        OSSL_EVP_PKEY_free = NULL;
+    }
+
     /* Load the functions symbols for OpenSSL PBE algorithm. */
     OSSL_PKCS12_key_gen = (OSSL_PKCS12_key_gen_t*)find_crypto_symbol(crypto_library, "PKCS12_key_gen_uni");
 
@@ -602,6 +663,21 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         (NULL == OSSL_EC_KEY_set_public_key) ||
         (NULL == OSSL_EC_KEY_check_key) ||
         (NULL == OSSL_PKCS12_key_gen) ||
+        /* Check symbols that are only available in OpenSSL 1.1.1 and above. */
+        ((ossl_ver >= OPENSSL_VERSION_1_1_1) &&
+            ((NULL == OSSL_EVP_PKEY_get_raw_private_key) ||
+             (NULL == OSSL_EVP_PKEY_get_raw_public_key) ||
+             (NULL == OSSL_EVP_PKEY_new_raw_private_key) ||
+             (NULL == OSSL_EVP_PKEY_new_raw_public_key) ||
+             (NULL == OSSL_EVP_PKEY_CTX_new) ||
+             (NULL == OSSL_EVP_PKEY_CTX_new_id) ||
+             (NULL == OSSL_EVP_PKEY_keygen_init) ||
+             (NULL == OSSL_EVP_PKEY_keygen) ||
+             (NULL == OSSL_EVP_PKEY_CTX_free) ||
+             (NULL == OSSL_EVP_PKEY_derive_init) ||
+             (NULL == OSSL_EVP_PKEY_derive_set_peer) ||
+             (NULL == OSSL_EVP_PKEY_derive) ||
+             (NULL == OSSL_EVP_PKEY_free))) ||
         /* Check symbols that are only available in OpenSSL 1.1.x and above */
         ((ossl_ver >= OPENSSL_VERSION_1_1_0) && ((NULL == OSSL_chacha20) || (NULL == OSSL_chacha20_poly1305))) ||
         /* Check symbols that are only available in OpenSSL 1.0.x and above */
@@ -610,7 +686,8 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         ((NULL == OSSL_OPENSSL_malloc) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||
         ((NULL == OSSL_OPENSSL_free) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||
         ((NULL == OSSL_CRYPTO_THREADID_set_callback) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||
-        ((NULL == OSSL_CRYPTO_set_locking_callback) && (ossl_ver < OPENSSL_VERSION_1_1_0))) {
+        ((NULL == OSSL_CRYPTO_set_locking_callback) && (ossl_ver < OPENSSL_VERSION_1_1_0))
+    ) {
         /* fprintf(stderr, "One or more of the required symbols are missing in the crypto library\n"); */
         /* fflush(stderr); */
         unload_crypto_library(crypto_library);
@@ -3044,5 +3121,165 @@ cleanup:
         (*env)->ReleasePrimitiveArrayCritical(env, key, nativeKey, 0);
     }
 
+    return ret;
+}
+
+/* Create a pair of private and public keys for XDH Key Agreement.
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    XDHCreateKeys
+ * Signature: ([BI[BII)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_XDHCreateKeys
+    (JNIEnv *env, jclass obj, jbyteArray privateKey, jint privateKeyLength, jbyteArray publicKey, jint publicKeyLength, jint curveType)
+{
+    jint ret = -1;
+
+    EVP_PKEY *pkey = NULL;
+    EVP_PKEY_CTX *pctx = NULL;
+
+    size_t priv_len = (size_t)privateKeyLength;
+    size_t pub_len = (size_t)publicKeyLength;
+
+    unsigned char *privateKeyArray = NULL;
+    unsigned char *publicKeyArray = NULL;
+
+    // Create PKEY (public/private pair) based on curve type (X25519 or X448)
+    pctx = (*OSSL_EVP_PKEY_CTX_new_id)(curveType, NULL);
+
+    if (NULL == pctx) {
+        goto cleanup;
+    }
+
+    (*OSSL_EVP_PKEY_keygen_init)(pctx);
+    (*OSSL_EVP_PKEY_keygen)(pctx, &pkey);
+
+    if (NULL == pkey) {
+        goto cleanup;
+    }
+
+    // Separate private and public and store into arrays
+    privateKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, privateKey, 0));
+    if (NULL == privateKeyArray) {
+        goto cleanup;
+    }
+    publicKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, publicKey, 0));
+    if (NULL == publicKeyArray) {
+        goto cleanup;
+    }
+
+    if (0 >= (*OSSL_EVP_PKEY_get_raw_private_key)(pkey, privateKeyArray, &priv_len)) {
+        goto cleanup;
+    }
+    if (0 >= (*OSSL_EVP_PKEY_get_raw_public_key)(pkey, publicKeyArray, &pub_len)) {
+        goto cleanup;
+    }
+
+    ret = 0;
+
+cleanup:
+    if (NULL != publicKeyArray) {
+        (*env)->ReleasePrimitiveArrayCritical(env, publicKey, publicKeyArray, 0);
+    }
+    if (NULL != privateKeyArray) {
+        (*env)->ReleasePrimitiveArrayCritical(env, privateKey, privateKeyArray, 0);
+    }
+    if (NULL != pkey) {
+        (*OSSL_EVP_PKEY_free)(pkey);
+    }
+    if (NULL != pctx) {
+        (*OSSL_EVP_PKEY_CTX_free)(pctx);
+    }
+    return ret;
+}
+
+/* XDH key agreement, derive shared secret key.
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    XDHGenerateSecret
+ * Signature: ([BI[BI[BII)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_XDHGenerateSecret
+    (JNIEnv *env, jclass obj, jbyteArray privateKey, jint privateKeyLength, jbyteArray publicKey, jint publicKeyLength, jbyteArray sharedKey, jint sharedKeyLength, jint curveType)
+{
+    jint ret = -1;
+
+    EVP_PKEY_CTX *pctx = NULL;
+
+    EVP_PKEY *pkey = NULL;
+    EVP_PKEY *peerkey = NULL;
+
+    size_t skeylen = (size_t)sharedKeyLength;
+    size_t privateKey_len = (size_t)privateKeyLength;
+    size_t publicKey_len = (size_t)publicKeyLength;
+
+    unsigned char *privateKeyArray = NULL;
+    unsigned char *publicKeyArray = NULL;
+    unsigned char *sharedKeyArray = NULL;
+
+    privateKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, privateKey, 0));
+    if (NULL == privateKeyArray) {
+        goto cleanup;
+    }
+    publicKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, publicKey, 0));
+    if (NULL == publicKeyArray) {
+        goto cleanup;
+    }
+
+    // Setup EVP_PKEY instances for user private and peer public keys
+    pkey = (*OSSL_EVP_PKEY_new_raw_private_key)(curveType, NULL, privateKeyArray, privateKey_len);
+    peerkey = (*OSSL_EVP_PKEY_new_raw_public_key)(curveType, NULL, publicKeyArray, publicKey_len);
+
+    if ((NULL == pkey) || (NULL == peerkey)) {
+        goto cleanup;
+    }
+
+    // Create key agreement context
+    pctx = (*OSSL_EVP_PKEY_CTX_new)(pkey, NULL);
+    if (NULL == pctx) {
+        goto cleanup;
+    }
+
+    // Initialize with user private key
+    if (0 >= (*OSSL_EVP_PKEY_derive_init)(pctx)) {
+        goto cleanup;
+    }
+
+    // Set peer's public key
+    if (0 >= (*OSSL_EVP_PKEY_derive_set_peer)(pctx, peerkey)) {
+        goto cleanup;
+    }
+
+    // Derive shared secret and save in sharedKeyArray
+    sharedKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, sharedKey, 0));
+    if (NULL == sharedKeyArray) {
+        goto cleanup;
+    }
+    if (0 >= (*OSSL_EVP_PKEY_derive)(pctx, sharedKeyArray, &skeylen)) {
+        goto cleanup;
+    }
+
+    ret = 0;
+cleanup:
+    if (NULL != sharedKeyArray) {
+        (*env)->ReleasePrimitiveArrayCritical(env, sharedKey, sharedKeyArray, 0);
+    }
+    if (NULL != pctx) {
+        (*OSSL_EVP_PKEY_CTX_free)(pctx);
+    }
+    if (NULL != peerkey) {
+        (*OSSL_EVP_PKEY_free)(peerkey);
+    }
+    if (NULL != pkey) {
+        (*OSSL_EVP_PKEY_free)(pkey);
+    }
+    if (NULL != publicKeyArray) {
+        (*env)->ReleasePrimitiveArrayCritical(env, publicKey, publicKeyArray, 0);
+    }
+    if (NULL != privateKeyArray) {
+        (*env)->ReleasePrimitiveArrayCritical(env, privateKey, privateKeyArray, 0);
+    }
     return ret;
 }

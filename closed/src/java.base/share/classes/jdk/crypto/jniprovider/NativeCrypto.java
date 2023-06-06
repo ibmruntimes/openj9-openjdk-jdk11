@@ -52,8 +52,13 @@ public class NativeCrypto {
     public static final int ECField_Fp = 0;
     public static final int ECField_F2m = 1;
 
+    /* Define XDH curve constants used by OpenSSL. */
+    public static final int X25519 = 1034;
+    public static final int X448 = 1035;
+
     public static final long OPENSSL_VERSION_1_0_0 = 0x1_00_00_000L;
     public static final long OPENSSL_VERSION_1_1_0 = 0x1_01_00_000L;
+    public static final long OPENSSL_VERSION_1_1_1 = 0x1_01_01_000L;
     public static final long OPENSSL_VERSION_3_0_0 = 0x3_00_00_000L;
 
     private static final Cleaner ECKeyCleaner = CleanerFactory.cleaner();
@@ -399,4 +404,18 @@ public class NativeCrypto {
                                       int id,
                                       int hashAlgorithm);
 
+    /* Native XDH (X25519, X448) interfaces. */
+    public final native int XDHCreateKeys(byte[] privateKey,
+                                          int privateKeyLength,
+                                          byte[] publicKey,
+                                          int publicKeyLength,
+                                          int curveType);
+
+    public final native int XDHGenerateSecret(byte[] privateKey,
+                                              int privateKeyLength,
+                                              byte[] publicKey,
+                                              int publicKeyLength,
+                                              byte[] computedSecret,
+                                              int computedSecretLength,
+                                              int curveType);
 }

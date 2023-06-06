@@ -81,6 +81,18 @@ public final class SunEC extends Provider {
      */
     private static final boolean useNativeECKeyGen = NativeCrypto.isAlgorithmEnabled("jdk.nativeECKeyGen", "SunEC");
 
+    /* The property 'jdk.nativeXDHKeyAgreement' is used to control enablement of the native
+     * XDH key agreement. XDH key agreement is only supported in OpenSSL 1.1.1 and above.
+     */
+    private static final boolean useNativeXDHKeyAgreement =
+        NativeCrypto.isAlgorithmEnabled("jdk.nativeXDHKeyAgreement", "SunEC");
+
+    /* The property 'jdk.nativeXDHKeyGen' is used to control enablement of the native
+     * XDH key generation. XDH key generation is only supported in OpenSSL 1.1.1 and above.
+     */
+    private static final boolean useNativeXDHKeyGen =
+        NativeCrypto.isAlgorithmEnabled("jdk.nativeXDHKeyGen", "SunEC");
+
     static {
         try {
             AccessController.doPrivileged(new PrivilegedAction<Void>() {
@@ -176,10 +188,61 @@ public final class SunEC extends Provider {
                         }
                         return new ECKeyPairGenerator();
                     } else if (algo.equals("XDH")) {
+                        if (useNativeXDHKeyGen) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_1_1_1) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("XDH KeyPair Generation - Not using OpenSSL integration due to older version of OpenSSL (<1.1.1).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("XDH KeyPair Generation - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("XDH KeyPair Generation - Using OpenSSL integration.");
+                                }
+                                return new NativeXDHKeyPairGenerator();
+                            }
+                        }
                         return new XDHKeyPairGenerator();
                     } else if (algo.equals("X25519")) {
+                        if (useNativeXDHKeyGen) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_1_1_1) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X25519 KeyPair Generation - Not using OpenSSL integration due to older version of OpenSSL (<1.1.1).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("X25519 KeyPair Generation - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X25519 KeyPair Generation - Using OpenSSL integration.");
+                                }
+                                return new NativeXDHKeyPairGenerator.X25519();
+                            }
+                        }
                         return new XDHKeyPairGenerator.X25519();
                     } else if (algo.equals("X448")) {
+                        if (useNativeXDHKeyGen) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_1_1_1) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X448 KeyPair Generation - Not using OpenSSL integration due to older version of OpenSSL (<1.1.1).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("X448 KeyPair Generation - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X448 KeyPair Generation - Using OpenSSL integration.");
+                                }
+                                return new NativeXDHKeyPairGenerator.X448();
+                            }
+                        }
                         return new XDHKeyPairGenerator.X448();
                     }
                 } else  if (type.equals("KeyAgreement")) {
@@ -190,10 +253,61 @@ public final class SunEC extends Provider {
                             return new ECDHKeyAgreement();
                         }
                     } else if (algo.equals("XDH")) {
+                        if (useNativeXDHKeyAgreement) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_1_1_1) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("XDH Key Agreement - Not using OpenSSL integration due to older version of OpenSSL (<1.1.1).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("XDH Key Agreement - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("XDH Key Agreement - Using OpenSSL integration.");
+                                }
+                                return new NativeXDHKeyAgreement();
+                            }
+                        }
                         return new XDHKeyAgreement();
                     } else if (algo.equals("X25519")) {
+                        if (useNativeXDHKeyAgreement) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_1_1_1) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X25519 Key Agreement - Not using OpenSSL integration due to older version of OpenSSL (<1.1.1).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("X25519 Key Agreement - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X25519 Key Agreement - Using OpenSSL integration.");
+                                }
+                                return new NativeXDHKeyAgreement.X25519();
+                            }
+                        }
                         return new XDHKeyAgreement.X25519();
                     } else if (algo.equals("X448")) {
+                        if (useNativeXDHKeyAgreement) {
+                            if (NativeCrypto.getVersionIfAvailable() < NativeCrypto.OPENSSL_VERSION_3_0_0) {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X448 Key Agreement - Not using OpenSSL integration due to older version of OpenSSL (<3.x).");
+                                }
+                            } else if (isAIX) {
+                                /* Disabling OpenSSL usage on AIX due to perfomance regression observed. */
+                                if (nativeCryptTrace) {
+                                    System.err.println("X448 Key Agreement - Not using OpenSSL integration on AIX.");
+                                }
+                            } else {
+                                if (nativeCryptTrace) {
+                                    System.err.println("X448 Key Agreement - Using OpenSSL integration.");
+                                }
+                                return new NativeXDHKeyAgreement.X448();
+                            }
+                        }
                         return new XDHKeyAgreement.X448();
                     }
                 }
@@ -369,23 +483,51 @@ public final class SunEC extends Provider {
             "X448", "sun.security.ec.XDHKeyFactory.X448",
             new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
 
-        putService(new ProviderService(this, "KeyPairGenerator",
-            "XDH", "sun.security.ec.XDHKeyPairGenerator", null, ATTRS));
-        putService(new ProviderService(this, "KeyPairGenerator",
-            "X25519", "sun.security.ec.XDHKeyPairGenerator.X25519",
-            new String[]{"1.3.101.110", "OID.1.3.101.110"}, ATTRS));
-        putService(new ProviderService(this, "KeyPairGenerator",
-            "X448", "sun.security.ec.XDHKeyPairGenerator.X448",
-            new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
+        if (useNativeXDHKeyGen
+            && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_1_1_1)
+            && !isAIX
+        ) {
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "XDH", "sun.security.ec.NativeXDHKeyPairGenerator", null, ATTRS));
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "X25519", "sun.security.ec.NativeXDHKeyPairGenerator.X25519",
+                new String[]{"1.3.101.110", "OID.1.3.101.110"}, ATTRS));
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "X448", "sun.security.ec.NativeXDHKeyPairGenerator.X448",
+                new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
+        } else {
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "XDH", "sun.security.ec.XDHKeyPairGenerator", null, ATTRS));
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "X25519", "sun.security.ec.XDHKeyPairGenerator.X25519",
+                new String[]{"1.3.101.110", "OID.1.3.101.110"}, ATTRS));
+            putService(new ProviderService(this, "KeyPairGenerator",
+                "X448", "sun.security.ec.XDHKeyPairGenerator.X448",
+                new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
+        }
 
-        putService(new ProviderService(this, "KeyAgreement",
-            "XDH", "sun.security.ec.XDHKeyAgreement", null, ATTRS));
-        putService(new ProviderService(this, "KeyAgreement",
-            "X25519", "sun.security.ec.XDHKeyAgreement.X25519",
-            new String[]{"1.3.101.110", "OID.1.3.101.110"}, ATTRS));
-        putService(new ProviderService(this, "KeyAgreement",
-            "X448", "sun.security.ec.XDHKeyAgreement.X448",
-            new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
+        if (useNativeXDHKeyAgreement
+            && (NativeCrypto.getVersionIfAvailable() >= NativeCrypto.OPENSSL_VERSION_1_1_1)
+            && !isAIX
+        ) {
+            putService(new ProviderService(this, "KeyAgreement",
+                "XDH", "sun.security.ec.NativeXDHKeyAgreement", null, ATTRS));
+            putService(new ProviderService(this, "KeyAgreement",
+                "X25519", "sun.security.ec.NativeXDHKeyAgreement.X25519",
+                new String[]{"1.3.101.110", "OID.1.3.101.110"}, ATTRS));
+            putService(new ProviderService(this, "KeyAgreement",
+                "X448", "sun.security.ec.NativeXDHKeyAgreement.X448",
+                new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
+        } else {
+            putService(new ProviderService(this, "KeyAgreement",
+                "XDH", "sun.security.ec.XDHKeyAgreement", null, ATTRS));
+            putService(new ProviderService(this, "KeyAgreement",
+                "X25519", "sun.security.ec.XDHKeyAgreement.X25519",
+                new String[]{"1.3.101.110", "OID.1.3.101.110"}, ATTRS));
+            putService(new ProviderService(this, "KeyAgreement",
+                "X448", "sun.security.ec.XDHKeyAgreement.X448",
+                new String[]{"1.3.101.111", "OID.1.3.101.111"}, ATTRS));
+        }
 
     }
 }
