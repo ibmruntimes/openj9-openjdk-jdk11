@@ -233,6 +233,7 @@ abstract class DigestBase extends MessageDigestSpi implements Cloneable {
     public Object clone() throws CloneNotSupportedException {
         DigestBase copy = (DigestBase) super.clone();
         copy.buffer = copy.buffer.clone();
+        copy.oneByte = null;
         return copy;
     }
 
