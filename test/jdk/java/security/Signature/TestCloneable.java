@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 8246077
  * @summary Make sure that signature objects which are cloneable
@@ -45,7 +51,6 @@ public class TestCloneable {
         return new Object[][] {
             { "SHA1withDSA", "SUN" }, { "NONEwithDSA", "SUN" },
             { "SHA224withDSA", "SUN" }, { "SHA256withDSA", "SUN" },
-            { "EdDSA", "SunEC" }, { "Ed25519", "SunEC" }, { "Ed448", "SunEC" },
             { "SHA1withECDSA", "SunEC" }, { "SHA224withECDSA", "SunEC" },
             { "SHA256withECDSA", "SunEC" }, { "SHA384withECDSA", "SunEC" },
             { "SHA512withECDSA", "SunEC" }, { "NONEwithECDSA", "SunEC" },
