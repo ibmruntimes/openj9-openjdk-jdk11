@@ -22,6 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 /*
  * eventHandler
  *
@@ -67,6 +74,10 @@
 #include "classTrack.h"
 #include "commonRef.h"
 #include "debugLoop.h"
+#include "j9cfg.h"
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+#include "transport.h"
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 static HandlerID requestIdCounter;
 static jbyte currentSessionID;
@@ -1220,6 +1231,47 @@ cbVMInit(jvmtiEnv *jvmti_env, JNIEnv *env, jthread thread)
     LOG_MISC(("END cbVMInit"));
 }
 
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+/* Event callback for JVMTI_EVENT_VM_RESTORE */
+static void JNICALL
+cbVMRestore(jvmtiEnv *jvmti_env, ...)
+{
+    EventInfo info;
+    JNIEnv *env = NULL;
+    jthread thread = NULL;
+    va_list args;
+    jbyte suspendPolicy = JDWP_SUSPEND_POLICY(NONE);
+
+    va_start(args, jvmti_env);
+    env = va_arg(args, JNIEnv *);
+    thread = va_arg(args, jthread);
+    va_end(args);
+
+    LOG_CB(("cbVMRestore"));
+
+    BEGIN_CALLBACK() {
+        (void)memset(&info, 0, sizeof(info));
+        info.ei = EI_VM_RESTORE;
+        info.thread = thread;
+        event_callback(env, &info);
+    } END_CALLBACK();
+
+    if (debugInit_suspendOnRestore()) {
+        /* Wait for a connection since if threads are suspended,
+         * we need an attached debugger to resume the VM.
+         */
+        transport_waitForConnectionOnRestore();
+        suspendPolicy = JDWP_SUSPEND_POLICY(ALL);
+    }
+    /* The VM restore extension event needs to call the helper instead
+     * of using the normal event handler code similar to the VM init event.
+     */
+    eventHelper_reportVMInit(env, currentSessionID, thread, suspendPolicy, JNI_TRUE);
+
+    LOG_MISC(("END cbVMRestore"));
+}
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
+
 /* Event callback for JVMTI_EVENT_VM_DEATH */
 static void JNICALL
 cbVMDeath(jvmtiEnv *jvmti_env, JNIEnv *env)
@@ -1236,6 +1288,15 @@ cbVMDeath(jvmtiEnv *jvmti_env, JNIEnv *env)
     if (error != JVMTI_ERROR_NONE) {
         EXIT_ERROR(error,"Can't clear event callbacks on vm death");
     }
+
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+    /* Clear extension event callbacks. */
+    error = JVMTI_FUNC_PTR(gdata->jvmti, SetExtensionEventCallback)
+                (gdata->jvmti, eventIndex2jvmti(EI_VM_RESTORE), NULL);
+    if (JVMTI_ERROR_NONE != error) {
+        EXIT_ERROR(error, "Can't clear event extension callbacks on vm death");
+    }
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
     /* Now that no new callbacks will be made, we need to wait for the ones
      *   that are still active to complete.
@@ -1530,6 +1591,14 @@ eventHandler_initialize(jbyte sessionID)
     if (error != JVMTI_ERROR_NONE) {
         EXIT_ERROR(error,"Can't set event callbacks");
     }
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+    /* Enable event and set callback for VMRestore extension event. */
+    error = JVMTI_FUNC_PTR(gdata->jvmti, SetExtensionEventCallback)
+                (gdata->jvmti, eventIndex2jvmti(EI_VM_RESTORE), &cbVMRestore);
+    if (JVMTI_ERROR_NONE != error) {
+        EXIT_ERROR(error, "Can't set event extension callbacks");
+    }
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
     /* Notify other modules that the event callbacks are in place */
     threadControl_onHook();

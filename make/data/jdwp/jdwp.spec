@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 JDWP "Java(tm) Debug Wire Protocol"
 (CommandSet VirtualMachine=1
     (Command Version=1
@@ -3094,6 +3100,17 @@ JDWP "Java(tm) Debug Wire Protocol"
                         (int requestID
                                 "Request that generated event")
                     )
+/*[IF CRIU_SUPPORT]*/
+                    (Alt VMRestore=JDWP.EventKind.VM_RESTORE
+                        "Notification of when the VM is restored from a checkpoint. Similar to"
+                        "VMStartEvent this occurs before application code has run, including any"
+                        "application hooks for the restore event."
+                        "The event is generated even if not explicitly requested."
+
+                        (int requestID "Request that generated event")
+                        (threadObject thread "The thread restoring the VM from a checkpoint.")
+                    )
+/*[ENDIF] CRIU_SUPPORT */
                 )
             )
         )
@@ -3223,6 +3240,9 @@ JDWP "Java(tm) Debug Wire Protocol"
     (Constant VM_INIT                =90  "obsolete - was used in jvmdi")
     (Constant VM_DEATH               =99  )
     (Constant VM_DISCONNECTED        =100 "Never sent across JDWP")
+/*[IF CRIU_SUPPORT]*/
+    (Constant VM_RESTORE             =101 "OpenJ9 VM Restored")
+/*[ENDIF] CRIU_SUPPORT */
 )
 
 (ConstantSet ThreadStatus

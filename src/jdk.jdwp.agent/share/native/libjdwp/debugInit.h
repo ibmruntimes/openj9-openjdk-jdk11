@@ -23,8 +23,16 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #ifndef JDWP_DEBUGINIT_H
 #define JDWP_DEBUGINIT_H
+
+#include "j9cfg.h"
 
 void debugInit_waitInitComplete(void);
 jboolean debugInit_isInitComplete(void);
@@ -34,6 +42,9 @@ jboolean debugInit_isInitComplete(void);
  */
 char *debugInit_launchOnInit(void);
 jboolean debugInit_suspendOnInit(void);
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+jboolean debugInit_suspendOnRestore(void);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 void debugInit_reset(JNIEnv *env);
 void debugInit_exit(jvmtiError, const char *);

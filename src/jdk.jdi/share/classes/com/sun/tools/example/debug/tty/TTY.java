@@ -24,6 +24,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * This source code is provided to illustrate the usage of a given feature
  * or technique and has been deliberately simplified. Additional steps
  * required for a production-quality application, such as security checks,
@@ -72,6 +78,14 @@ public class TTY implements EventNotifier {
         Thread.yield();  // fetch output
         MessageOutput.lnprint("VM Started:");
     }
+
+/*[IF CRIU_SUPPORT]*/
+    @Override
+    public void vmRestoreEvent(VMRestoreEvent re) {
+        Thread.yield(); // fetch output
+        MessageOutput.lnprint("VM Restored:");
+    }
+/*[ENDIF] CRIU_SUPPORT */
 
     @Override
     public void vmDeathEvent(VMDeathEvent e)  {

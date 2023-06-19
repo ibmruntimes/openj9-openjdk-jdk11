@@ -23,10 +23,17 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #ifndef JDWP_TRANSPORT_H
 #define JDWP_TRANSPORT_H
 
 #include "jdwpTransport.h"
+#include "j9cfg.h"
 
 void transport_initialize(void);
 void transport_reset(void);
@@ -37,6 +44,9 @@ jint transport_receivePacket(jdwpPacket *);
 jint transport_sendPacket(jdwpPacket *);
 jboolean transport_is_open(void);
 void transport_waitForConnection(void);
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+void transport_waitForConnectionOnRestore(void);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 void transport_close(void);
 
 #endif
