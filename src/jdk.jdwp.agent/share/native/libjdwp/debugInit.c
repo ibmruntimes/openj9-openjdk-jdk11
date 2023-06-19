@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <ctype.h>
 
 #include "util.h"
@@ -38,6 +44,7 @@
 #include "bag.h"
 #include "invoker.h"
 #include "sys.h"
+#include "j9cfg.h"
 
 /* How the options get to OnLoad: */
 #define XDEBUG "-Xdebug"
@@ -75,6 +82,9 @@ static jboolean initOnUncaught = JNI_FALSE; /* init when uncaught exc thrown */
 
 static char *launchOnInit = NULL;           /* launch this app during init */
 static jboolean suspendOnInit = JNI_TRUE;   /* suspend all app threads after init */
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+static jboolean suspendOnRestore = JNI_TRUE; /* suspend all app threads after VM restored */
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 static jboolean dopause = JNI_FALSE;        /* pause for debugger attach */
 static jboolean docoredump = JNI_FALSE;     /* core dump on exit */
 static char *logfile = NULL;                /* Name of logfile (if logging) */
@@ -102,6 +112,9 @@ static void JNICALL cbEarlyVMInit(jvmtiEnv*, JNIEnv *, jthread);
 static void JNICALL cbEarlyVMDeath(jvmtiEnv*, JNIEnv *);
 static void JNICALL cbEarlyException(jvmtiEnv*, JNIEnv *,
             jthread, jmethodID, jlocation, jobject, jmethodID, jlocation);
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+static void JNICALL cbEarlyVMRestore(jvmtiEnv *, ...);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 static void initialize(JNIEnv *env, jthread thread, EventIndex triggering_ei, EventInfo *opt_info);
 static jboolean parseOptions(char *str);
@@ -378,6 +391,16 @@ DEF_Agent_OnLoad(JavaVM *vm, char *options, void *reserved)
                         jvmtiErrorText(error), error));
         return JNI_ERR;
     }
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+    /* Enable extension events and set early callbacks for them. */
+    error = JVMTI_FUNC_PTR(gdata->jvmti, SetExtensionEventCallback)
+                (gdata->jvmti, eventIndex2jvmti(EI_VM_RESTORE), &cbEarlyVMRestore);
+    if (JVMTI_ERROR_NONE != error) {
+        ERROR_MESSAGE(("JDWP unable to set JVMTI extension event callbacks: %s(%d)",
+                        jvmtiErrorText(error), error));
+        return JNI_ERR;
+    }
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
     LOG_MISC(("OnLoad: DONE"));
     return JNI_OK;
@@ -443,6 +466,30 @@ cbEarlyVMInit(jvmtiEnv *jvmti_env, JNIEnv *env, jthread thread)
     vmInitialized = JNI_TRUE;
     LOG_MISC(("END cbEarlyVMInit"));
 }
+
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+static void JNICALL
+cbEarlyVMRestore(jvmtiEnv *jvmti_env, ...)
+{
+    JNIEnv *env = NULL;
+    jthread thread = NULL;
+    va_list args;
+
+    va_start(args, jvmti_env);
+    env = va_arg(args, JNIEnv *);
+    thread = va_arg(args, jthread);
+    va_end(args);
+
+    LOG_CB(("cbEarlyVMRestore"));
+    if (gdata->vmDead) {
+        EXIT_ERROR(AGENT_ERROR_INTERNAL, "VM dead at restore time");
+    }
+    if (suspendOnRestore) {
+        initialize(env, thread, EI_VM_RESTORE, NULL);
+    }
+    LOG_MISC(("END cbEarlyVMRestore"));
+}
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 static void
 disposeEnvironment(jvmtiEnv *jvmti_env)
@@ -712,6 +759,15 @@ initialize(JNIEnv *env, jthread thread, EventIndex triggering_ei, EventInfo *opt
         EXIT_ERROR(error, "unable to clear JVMTI callbacks");
     }
 
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+    /* Remove initial extension event callbacks and disable the events. */
+    error = JVMTI_FUNC_PTR(gdata->jvmti, SetExtensionEventCallback)
+                (gdata->jvmti, eventIndex2jvmti(EI_VM_RESTORE), NULL);
+    if (JVMTI_ERROR_NONE != error) {
+        EXIT_ERROR(error, "unable to clear extension event callbacks");
+    }
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
+
     commonRef_initialize();
     util_initialize(env);
     threadControl_initialize();
@@ -755,7 +811,21 @@ initialize(JNIEnv *env, jthread thread, EventIndex triggering_ei, EventInfo *opt
                                   : JDWP_SUSPEND_POLICY(NONE);
     if (triggering_ei == EI_VM_INIT) {
         LOG_MISC(("triggering_ei == EI_VM_INIT"));
-        eventHelper_reportVMInit(env, currentSessionID, thread, suspendPolicy);
+        eventHelper_reportVMInit(env, currentSessionID, thread, suspendPolicy, JNI_FALSE);
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+    } else if (EI_VM_RESTORE == triggering_ei) {
+        LOG_MISC(("triggering_ei == EI_VM_RESTORE"));
+        if (suspendOnRestore) {
+            /* Wait for a connection since if threads are suspended,
+             * we need an attached debugger to resume the VM.
+             */
+            transport_waitForConnectionOnRestore();
+            suspendPolicy = JDWP_SUSPEND_POLICY(ALL);
+        } else {
+            suspendPolicy = JDWP_SUSPEND_POLICY(NONE);
+        }
+        eventHelper_reportVMInit(env, currentSessionID, thread, suspendPolicy, JNI_TRUE);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
     } else {
         /*
          * TO DO: Kludgy way of getting the triggering event to the
@@ -838,6 +908,14 @@ debugInit_suspendOnInit(void)
 {
     return suspendOnInit;
 }
+
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+jboolean
+debugInit_suspendOnRestore(void)
+{
+    return suspendOnRestore;
+}
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 /*
  * code below is shamelessly swiped from hprof.
@@ -1219,6 +1297,12 @@ parseOptions(char *options)
             if ( !get_boolean(&str, &suspendOnInit) ) {
                 goto syntax_error;
             }
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+        } else if (0 == strcmp(buf, "suspendOnRestore")) {
+            if (!get_boolean(&str, &suspendOnRestore)) {
+                goto syntax_error;
+            }
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
         } else if ( strcmp(buf, "server")==0 ) {
             if ( !get_boolean(&str, &isServer) ) {
                 goto syntax_error;

@@ -23,11 +23,18 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "util.h"
 #include "utf_util.h"
 #include "transport.h"
 #include "debugLoop.h"
 #include "sys.h"
+#include "j9cfg.h"
 
 static jdwpTransportEnv *transport = NULL;
 static unsigned transportVersion = JDWPTRANSPORT_VERSION_1_0;
@@ -335,6 +342,22 @@ transport_waitForConnection(void)
         debugMonitorExit(listenerLock);
     }
 }
+
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+void
+transport_waitForConnectionOnRestore(void)
+{
+    /* Assuming the caller already checked the flag suspendOnRestore.
+     * We need to wait for a connection since the VM won't continue
+     * without a remote debugger telling it to.
+     */
+    debugMonitorEnter(listenerLock);
+    while (NULL == transport) {
+        debugMonitorWait(listenerLock);
+    }
+    debugMonitorExit(listenerLock);
+}
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 static void JNICALL
 acceptThread(jvmtiEnv* jvmti_env, JNIEnv* jni_env, void* arg)
