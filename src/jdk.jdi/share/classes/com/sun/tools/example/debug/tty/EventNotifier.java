@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 /*
  * This source code is provided to illustrate the usage of a given feature
@@ -38,6 +43,9 @@ import com.sun.jdi.event.*;
 
 interface EventNotifier {
     void vmStartEvent(VMStartEvent e);
+/*[IF CRIU_SUPPORT]*/
+    void vmRestoreEvent(VMRestoreEvent e);
+/*[ENDIF] CRIU_SUPPORT */
     void vmDeathEvent(VMDeathEvent e);
     void vmDisconnectEvent(VMDisconnectEvent e);
 

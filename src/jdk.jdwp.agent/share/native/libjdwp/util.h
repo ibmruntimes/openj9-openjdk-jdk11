@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 #ifndef JDWP_UTIL_H
 #define JDWP_UTIL_H
@@ -58,6 +63,7 @@
 #include "util_md.h"
 #include "error_messages.h"
 #include "debugInit.h"
+#include "j9cfg.h"
 
 /* Definition of a CommonRef tracked by the backend for the frontend */
 typedef struct RefNode {
@@ -166,7 +172,13 @@ typedef enum {
         EI_MONITOR_WAITED       = 18,
         EI_VM_INIT              = 19,
         EI_VM_DEATH             = 20,
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+        EI_VM_RESTORE           = 21,
+
+        EI_max                  = 21
+#else
         EI_max                  = 20
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 } EventIndex;
 
 /* Agent errors that might be in a jvmtiError for JDWP or internal.

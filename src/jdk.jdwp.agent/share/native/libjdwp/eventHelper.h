@@ -22,12 +22,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 #ifndef JDWP_EVENTHELPER_H
 #define JDWP_EVENTHELPER_H
 
 #include "bag.h"
 #include "invoker.h"
+#include "j9cfg.h"
 
 void eventHelper_initialize(jbyte sessionID);
 void eventHelper_reset(jbyte sessionID);
@@ -46,6 +52,9 @@ void eventHelper_recordFrameEvent(jint id, jbyte suspendPolicy, EventIndex ei,
 jbyte eventHelper_reportEvents(jbyte sessionID, struct bag *eventBag);
 void eventHelper_reportInvokeDone(jbyte sessionID, jthread thread);
 void eventHelper_reportVMInit(JNIEnv *env, jbyte sessionID, jthread thread, jbyte suspendPolicy);
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+void eventHelper_reportVMRestore(JNIEnv *env, jbyte sessionID, jthread thread, jbyte suspendPolicy);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 void eventHelper_suspendThread(jbyte sessionID, jthread thread);
 
 void eventHelper_holdEvents(void);

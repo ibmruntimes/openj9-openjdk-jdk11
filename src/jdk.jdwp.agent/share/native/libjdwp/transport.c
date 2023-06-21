@@ -22,12 +22,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include "util.h"
 #include "utf_util.h"
 #include "transport.h"
 #include "debugLoop.h"
 #include "sys.h"
+#include "j9cfg.h"
 
 static jdwpTransportEnv *transport = NULL;
 static unsigned transportVersion = JDWPTRANSPORT_VERSION_1_0;
@@ -335,6 +341,24 @@ transport_waitForConnection(void)
         debugMonitorExit(listenerLock);
     }
 }
+
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+void
+transport_waitForConnectionOnRestore(void)
+{
+    /*
+     * If suspended on VM restore, we also need to wait for a connection,
+     * since the VM won't continue without a remote debugger telling it to.
+     */
+    if (debugInit_suspendOnRestore()) {
+        debugMonitorEnter(listenerLock);
+        while (NULL == transport) {
+            debugMonitorWait(listenerLock);
+        }
+        debugMonitorExit(listenerLock);
+    }
+}
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 static void JNICALL
 acceptThread(jvmtiEnv* jvmti_env, JNIEnv* jni_env, void* arg)
