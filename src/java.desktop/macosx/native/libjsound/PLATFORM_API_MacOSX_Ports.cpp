@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (C) Copyright IBM Corp. 2023 All Rights Reserved.
+ * ===========================================================================
+ */
 
 //#define USE_ERROR
 //#define USE_TRACE
@@ -635,7 +640,7 @@ void PORT_GetControls(void* id, INT32 portIndex, PortControlCreator* creator) {
                     if (channelName == NULL) {
                         return;
                     }
-                    sprintf(channelName, "Ch %d", ch);
+                    snprintf(channelName, 16, "Ch %d", ch);
                 }
 
                 void* jControls[2];
