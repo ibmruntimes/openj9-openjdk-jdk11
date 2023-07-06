@@ -22,11 +22,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-/*
- * ===========================================================================
- * (C) Copyright IBM Corp. 2023 All Rights Reserved.
- * ===========================================================================
- */
 
 #import "java_awt_geom_PathIterator.h"
 #import "sun_font_CStrike.h"

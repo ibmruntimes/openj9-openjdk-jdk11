@@ -22,11 +22,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-/*
- * ===========================================================================
- * (C) Copyright IBM Corp. 2023 All Rights Reserved.
- * ===========================================================================
- */
 
 //#define USE_ERROR
 //#define USE_TRACE
