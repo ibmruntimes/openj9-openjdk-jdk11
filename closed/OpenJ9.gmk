@@ -27,6 +27,7 @@ ifeq (,$(wildcard $(SPEC)))
 endif
 include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
+include $(TOPDIR)/closed/JPP.gmk
 
 ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
@@ -314,8 +315,6 @@ $(foreach file, \
 	$(notdir $(wildcard $(OPENJ9_TOPDIR)/buildspecs/*)), \
 	$(eval $(call openj9_stage_buildspec_file,$(file))))
 
-J9TOOLS_DIR := $(SUPPORT_OUTPUTDIR)/j9tools
-
 stage-j9 :
 	@$(ECHO) Staging OpenJ9 runtime in $(OUTPUTDIR)/vm
 	$(call openj9_copy_tree,$(OUTPUTDIR)/vm,$(OPENJ9_TOPDIR)/runtime)
@@ -480,13 +479,13 @@ run-preprocessors-j9 : stage-j9
 	+BOOT_JDK=$(BOOT_JDK) $(EXPORT_COMPILER_ENV_VARS) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 		$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
 			BUILD_ID=$(BUILD_ID) \
-			DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
+			DEST_DIR=$(call MixedPath,$(J9TOOLS_DIR)) \
 			EXTRA_CONFIGURE_ARGS=$(OMR_EXTRA_CONFIGURE_ARGS) \
 			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
 			J9VM_SHA=$(OPENJ9_SHA) \
 			JAVA_HOME=$(BOOT_JDK) \
 			OMR_DIR=$(OUTPUTDIR)/vm/omr \
-			SOURCETOOLS_DIR=$(call FixPath,$(OPENJ9_TOPDIR))/sourcetools \
+			SOURCETOOLS_DIR=$(call MixedPath,$(OPENJ9_TOPDIR))/sourcetools \
 			SPEC=$(OPENJ9_BUILDSPEC) \
 			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
 			VERSION_MAJOR=$(VERSION_FEATURE) \

@@ -60,7 +60,7 @@ $(J9JCL_SOURCES_DONEFILE) : \
 	@$(MKDIR) -p $(J9TOOLS_DIR)
 	$(MAKE) $(MAKE_ARGS) -C $(OPENJ9_TOPDIR)/sourcetools -f buildj9tools.mk \
 		BOOT_JDK=$(BOOT_JDK) \
-		DEST_DIR=$(call FixPath,$(J9TOOLS_DIR)) \
+		DEST_DIR=$(call MixedPath,$(J9TOOLS_DIR)) \
 		JAVA_HOME=$(BOOT_JDK) \
 		preprocessor
 	@$(ECHO) Generating J9JCL sources
