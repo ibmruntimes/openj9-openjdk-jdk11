@@ -7,7 +7,7 @@
 
 namespace OT {
 namespace Layout {
-namespace GSUB_impl {
+namespace GSUB {
 
 struct ChainContextSubst : ChainContext {};
 

@@ -59,15 +59,17 @@ struct hb_sparseset_t
     hb_copy (o, *this);
   }
 
+  void init_shallow () { s.init (); }
   void init ()
   {
     hb_object_init (this);
-    s.init ();
+    init_shallow ();
   }
+  void fini_shallow () { s.fini (); }
   void fini ()
   {
     hb_object_fini (this);
-    s.fini ();
+    fini_shallow ();
   }
 
   explicit operator bool () const { return !is_empty (); }
@@ -79,7 +81,6 @@ struct hb_sparseset_t
   void reset () { s.reset (); }
   void clear () { s.clear (); }
   void invert () { s.invert (); }
-  bool is_inverted () const { return s.is_inverted (); }
   bool is_empty () const { return s.is_empty (); }
   uint32_t hash () const { return s.hash (); }
 
@@ -106,8 +107,10 @@ struct hb_sparseset_t
   bool get (hb_codepoint_t g) const { return s.get (g); }
 
   /* Has interface. */
-  bool operator [] (hb_codepoint_t k) const { return get (k); }
-  bool has (hb_codepoint_t k) const { return (*this)[k]; }
+  static constexpr bool SENTINEL = false;
+  typedef bool value_t;
+  value_t operator [] (hb_codepoint_t k) const { return get (k); }
+  bool has (hb_codepoint_t k) const { return (*this)[k] != SENTINEL; }
 
   /* Predicate. */
   bool operator () (hb_codepoint_t k) const { return has (k); }
@@ -171,11 +174,6 @@ struct hb_set_t : hb_sparseset_t<hb_bit_set_invertible_t>
   template <typename Iterable,
             hb_requires (hb_is_iterable (Iterable))>
   hb_set_t (const Iterable &o) : sparseset (o) {}
-
-  hb_set_t& operator << (hb_codepoint_t v)
-  { sparseset::operator<< (v); return *this; }
-  hb_set_t& operator << (const hb_pair_t<hb_codepoint_t, hb_codepoint_t>& range)
-  { sparseset::operator<< (range); return *this; }
 };
 
 static_assert (hb_set_t::INVALID == HB_SET_VALUE_INVALID, "");

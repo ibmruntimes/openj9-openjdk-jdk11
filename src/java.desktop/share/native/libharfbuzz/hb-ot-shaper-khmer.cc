@@ -89,11 +89,11 @@ set_khmer_properties (hb_glyph_info_t &info)
   info.khmer_category() = (khmer_category_t) (type & 0xFFu);
 }
 
-static bool
+static void
 setup_syllables_khmer (const hb_ot_shape_plan_t *plan,
                        hb_font_t *font,
                        hb_buffer_t *buffer);
-static bool
+static void
 reorder_khmer (const hb_ot_shape_plan_t *plan,
                hb_font_t *font,
                hb_buffer_t *buffer);
@@ -192,7 +192,7 @@ setup_masks_khmer (const hb_ot_shape_plan_t *plan HB_UNUSED,
     set_khmer_properties (info[i]);
 }
 
-static bool
+static void
 setup_syllables_khmer (const hb_ot_shape_plan_t *plan HB_UNUSED,
                        hb_font_t *font HB_UNUSED,
                        hb_buffer_t *buffer)
@@ -201,7 +201,6 @@ setup_syllables_khmer (const hb_ot_shape_plan_t *plan HB_UNUSED,
   find_syllables_khmer (buffer);
   foreach_syllable (buffer, start, end)
     buffer->unsafe_to_break (start, end);
-  return false;
 }
 
 
@@ -304,27 +303,23 @@ reorder_syllable_khmer (const hb_ot_shape_plan_t *plan,
   }
 }
 
-static bool
+static void
 reorder_khmer (const hb_ot_shape_plan_t *plan,
                hb_font_t *font,
                hb_buffer_t *buffer)
 {
-  bool ret = false;
   if (buffer->message (font, "start reordering khmer"))
   {
-    if (hb_syllabic_insert_dotted_circles (font, buffer,
-                                           khmer_broken_cluster,
-                                           K_Cat(DOTTEDCIRCLE),
-                                           (unsigned) -1))
-      ret = true;
+    hb_syllabic_insert_dotted_circles (font, buffer,
+                                       khmer_broken_cluster,
+                                       K_Cat(DOTTEDCIRCLE),
+                                       (unsigned) -1);
 
     foreach_syllable (buffer, start, end)
       reorder_syllable_khmer (plan, font->face, buffer, start, end);
     (void) buffer->message (font, "end reordering khmer");
   }
   HB_BUFFER_DEALLOCATE_VAR (buffer, khmer_category);
-
-  return ret;
 }
 
 
@@ -373,12 +368,12 @@ const hb_ot_shaper_t _hb_ot_shaper_khmer =
   data_destroy_khmer,
   nullptr, /* preprocess_text */
   nullptr, /* postprocess_glyphs */
+  HB_OT_SHAPE_NORMALIZATION_MODE_COMPOSED_DIACRITICS_NO_SHORT_CIRCUIT,
   decompose_khmer,
   compose_khmer,
   setup_masks_khmer,
-  nullptr, /* reorder_marks */
   HB_TAG_NONE, /* gpos_tag */
-  HB_OT_SHAPE_NORMALIZATION_MODE_COMPOSED_DIACRITICS_NO_SHORT_CIRCUIT,
+  nullptr, /* reorder_marks */
   HB_OT_SHAPE_ZERO_WIDTH_MARKS_NONE,
   false, /* fallback_position */
 };

@@ -98,11 +98,11 @@ is_consonant_myanmar (const hb_glyph_info_t &info)
 }
 
 
-static bool
+static void
 setup_syllables_myanmar (const hb_ot_shape_plan_t *plan,
                          hb_font_t *font,
                          hb_buffer_t *buffer);
-static bool
+static void
 reorder_myanmar (const hb_ot_shape_plan_t *plan,
                  hb_font_t *font,
                  hb_buffer_t *buffer);
@@ -150,7 +150,7 @@ setup_masks_myanmar (const hb_ot_shape_plan_t *plan HB_UNUSED,
     set_myanmar_properties (info[i]);
 }
 
-static bool
+static void
 setup_syllables_myanmar (const hb_ot_shape_plan_t *plan HB_UNUSED,
                          hb_font_t *font HB_UNUSED,
                          hb_buffer_t *buffer)
@@ -159,7 +159,6 @@ setup_syllables_myanmar (const hb_ot_shape_plan_t *plan HB_UNUSED,
   find_syllables_myanmar (buffer);
   foreach_syllable (buffer, start, end)
     buffer->unsafe_to_break (start, end);
-  return false;
 }
 
 static int
@@ -271,33 +270,6 @@ initial_reordering_consonant_syllable (hb_buffer_t *buffer,
 
   /* Sit tight, rock 'n roll! */
   buffer->sort (start, end, compare_myanmar_order);
-
-  /* Flip left-matra sequence. */
-  unsigned first_left_matra = end;
-  unsigned last_left_matra = end;
-  for (unsigned int i = start; i < end; i++)
-  {
-    if (info[i].myanmar_position() == POS_PRE_M)
-    {
-      if (first_left_matra == end)
-        first_left_matra = i;
-      last_left_matra = i;
-    }
-  }
-  /* https://github.com/harfbuzz/harfbuzz/issues/3863 */
-  if (first_left_matra < last_left_matra)
-  {
-    /* No need to merge clusters, done already? */
-    buffer->reverse_range (first_left_matra, last_left_matra + 1);
-    /* Reverse back VS, etc. */
-    unsigned i = first_left_matra;
-    for (unsigned j = i; j <= last_left_matra; j++)
-      if (info[j].myanmar_category() == M_Cat(VPre))
-      {
-        buffer->reverse_range (i, j + 1);
-        i = j + 1;
-      }
-  }
 }
 
 static void
@@ -319,18 +291,16 @@ reorder_syllable_myanmar (const hb_ot_shape_plan_t *plan HB_UNUSED,
   }
 }
 
-static bool
+static void
 reorder_myanmar (const hb_ot_shape_plan_t *plan,
                  hb_font_t *font,
                  hb_buffer_t *buffer)
 {
-  bool ret = false;
   if (buffer->message (font, "start reordering myanmar"))
   {
-    if (hb_syllabic_insert_dotted_circles (font, buffer,
-                                           myanmar_broken_cluster,
-                                           M_Cat(DOTTEDCIRCLE)))
-      ret = true;
+    hb_syllabic_insert_dotted_circles (font, buffer,
+                                       myanmar_broken_cluster,
+                                       M_Cat(DOTTEDCIRCLE));
 
     foreach_syllable (buffer, start, end)
       reorder_syllable_myanmar (plan, font->face, buffer, start, end);
@@ -339,8 +309,6 @@ reorder_myanmar (const hb_ot_shape_plan_t *plan,
 
   HB_BUFFER_DEALLOCATE_VAR (buffer, myanmar_category);
   HB_BUFFER_DEALLOCATE_VAR (buffer, myanmar_position);
-
-  return ret;
 }
 
 
@@ -352,18 +320,17 @@ const hb_ot_shaper_t _hb_ot_shaper_myanmar =
   nullptr, /* data_destroy */
   nullptr, /* preprocess_text */
   nullptr, /* postprocess_glyphs */
+  HB_OT_SHAPE_NORMALIZATION_MODE_COMPOSED_DIACRITICS_NO_SHORT_CIRCUIT,
   nullptr, /* decompose */
   nullptr, /* compose */
   setup_masks_myanmar,
-  nullptr, /* reorder_marks */
   HB_TAG_NONE, /* gpos_tag */
-  HB_OT_SHAPE_NORMALIZATION_MODE_COMPOSED_DIACRITICS_NO_SHORT_CIRCUIT,
+  nullptr, /* reorder_marks */
   HB_OT_SHAPE_ZERO_WIDTH_MARKS_BY_GDEF_EARLY,
   false, /* fallback_position */
 };
 
 
-#ifndef HB_NO_OT_SHAPER_MYANMAR_ZAWGYI
 /* Ugly Zawgyi encoding.
  * Disable all auto processing.
  * https://github.com/harfbuzz/harfbuzz/issues/1162 */
@@ -375,16 +342,15 @@ const hb_ot_shaper_t _hb_ot_shaper_myanmar_zawgyi =
   nullptr, /* data_destroy */
   nullptr, /* preprocess_text */
   nullptr, /* postprocess_glyphs */
+  HB_OT_SHAPE_NORMALIZATION_MODE_NONE,
   nullptr, /* decompose */
   nullptr, /* compose */
   nullptr, /* setup_masks */
-  nullptr, /* reorder_marks */
   HB_TAG_NONE, /* gpos_tag */
-  HB_OT_SHAPE_NORMALIZATION_MODE_NONE,
+  nullptr, /* reorder_marks */
   HB_OT_SHAPE_ZERO_WIDTH_MARKS_NONE,
   false, /* fallback_position */
 };
-#endif
 
 
 #endif

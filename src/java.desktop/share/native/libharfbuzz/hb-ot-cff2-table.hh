@@ -30,7 +30,6 @@
 #include "hb-ot-cff-common.hh"
 #include "hb-subset-cff2.hh"
 #include "hb-draw.hh"
-#include "hb-paint.hh"
 
 namespace CFF {
 
@@ -57,7 +56,7 @@ struct CFF2FDSelect
     unsigned int size = src.get_size (num_glyphs);
     CFF2FDSelect *dest = c->allocate_size<CFF2FDSelect> (size);
     if (unlikely (!dest)) return_trace (false);
-    hb_memcpy (dest, &src, size);
+    memcpy (dest, &src, size);
     return_trace (true);
   }
 
@@ -125,7 +124,7 @@ struct CFF2VariationStore
     unsigned int size_ = varStore->get_size ();
     CFF2VariationStore *dest = c->allocate_size<CFF2VariationStore> (size_);
     if (unlikely (!dest)) return_trace (false);
-    hb_memcpy (dest, varStore, size_);
+    memcpy (dest, varStore, size_);
     return_trace (true);
   }
 
@@ -283,6 +282,9 @@ struct cff2_private_dict_opset_t : dict_opset_t
       case OpCode_BlueFuzz:
       case OpCode_ExpansionFactor:
       case OpCode_LanguageGroup:
+        val.single_val = env.argStack.pop_num ();
+        env.clear_args ();
+        break;
       case OpCode_BlueValues:
       case OpCode_OtherBlues:
       case OpCode_FamilyBlues:
@@ -481,18 +483,13 @@ struct cff2
       blob = nullptr;
     }
 
-    hb_map_t *create_glyph_to_sid_map () const
-    {
-      return nullptr;
-    }
-
     bool is_valid () const { return blob; }
 
     protected:
+    hb_blob_t                   *blob = nullptr;
     hb_sanitize_context_t       sc;
 
     public:
-    hb_blob_t                   *blob = nullptr;
     cff2_top_dict_values_t      topDict;
     const CFF2Subrs             *globalSubrs = nullptr;
     const CFF2VariationStore    *varStore = nullptr;
@@ -514,7 +511,6 @@ struct cff2
     HB_INTERNAL bool get_extents (hb_font_t *font,
                                   hb_codepoint_t glyph,
                                   hb_glyph_extents_t *extents) const;
-    HB_INTERNAL bool paint_glyph (hb_font_t *font, hb_codepoint_t glyph, hb_paint_funcs_t *funcs, void *data, hb_color_t foreground) const;
     HB_INTERNAL bool get_path (hb_font_t *font, hb_codepoint_t glyph, hb_draw_session_t &draw_session) const;
   };
 

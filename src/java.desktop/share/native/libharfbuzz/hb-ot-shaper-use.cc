@@ -89,19 +89,19 @@ use_other_features[] =
   HB_TAG('p','s','t','s'),
 };
 
-static bool
+static void
 setup_syllables_use (const hb_ot_shape_plan_t *plan,
                      hb_font_t *font,
                      hb_buffer_t *buffer);
-static bool
+static void
 record_rphf_use (const hb_ot_shape_plan_t *plan,
                  hb_font_t *font,
                  hb_buffer_t *buffer);
-static bool
+static void
 record_pref_use (const hb_ot_shape_plan_t *plan,
                  hb_font_t *font,
                  hb_buffer_t *buffer);
-static bool
+static void
 reorder_use (const hb_ot_shape_plan_t *plan,
              hb_font_t *font,
              hb_buffer_t *buffer);
@@ -206,7 +206,7 @@ setup_masks_use (const hb_ot_shape_plan_t *plan,
   unsigned int count = buffer->len;
   hb_glyph_info_t *info = buffer->info;
   for (unsigned int i = 0; i < count; i++)
-    info[i].use_category() = hb_use_get_category (info[i].codepoint);
+    info[i].use_category() = hb_use_get_category (info[i]);
 }
 
 static void
@@ -293,7 +293,7 @@ setup_topographical_masks (const hb_ot_shape_plan_t *plan,
   }
 }
 
-static bool
+static void
 setup_syllables_use (const hb_ot_shape_plan_t *plan,
                      hb_font_t *font HB_UNUSED,
                      hb_buffer_t *buffer)
@@ -304,10 +304,9 @@ setup_syllables_use (const hb_ot_shape_plan_t *plan,
     buffer->unsafe_to_break (start, end);
   setup_rphf_mask (plan, buffer);
   setup_topographical_masks (plan, buffer);
-  return false;
 }
 
-static bool
+static void
 record_rphf_use (const hb_ot_shape_plan_t *plan,
                  hb_font_t *font HB_UNUSED,
                  hb_buffer_t *buffer)
@@ -315,7 +314,7 @@ record_rphf_use (const hb_ot_shape_plan_t *plan,
   const use_shape_plan_t *use_plan = (const use_shape_plan_t *) plan->data;
 
   hb_mask_t mask = use_plan->rphf_mask;
-  if (!mask) return false;
+  if (!mask) return;
   hb_glyph_info_t *info = buffer->info;
 
   foreach_syllable (buffer, start, end)
@@ -328,10 +327,9 @@ record_rphf_use (const hb_ot_shape_plan_t *plan,
         break;
       }
   }
-  return false;
 }
 
-static bool
+static void
 record_pref_use (const hb_ot_shape_plan_t *plan HB_UNUSED,
                  hb_font_t *font HB_UNUSED,
                  hb_buffer_t *buffer)
@@ -348,7 +346,6 @@ record_pref_use (const hb_ot_shape_plan_t *plan HB_UNUSED,
         break;
       }
   }
-  return false;
 }
 
 static inline bool
@@ -441,19 +438,17 @@ reorder_syllable_use (hb_buffer_t *buffer, unsigned int start, unsigned int end)
   }
 }
 
-static bool
+static void
 reorder_use (const hb_ot_shape_plan_t *plan,
              hb_font_t *font,
              hb_buffer_t *buffer)
 {
-  bool ret = false;
   if (buffer->message (font, "start reordering USE"))
   {
-    if (hb_syllabic_insert_dotted_circles (font, buffer,
-                                           use_broken_cluster,
-                                           USE(B),
-                                           USE(R)))
-      ret = true;
+    hb_syllabic_insert_dotted_circles (font, buffer,
+                                       use_broken_cluster,
+                                       USE(B),
+                                       USE(R));
 
     foreach_syllable (buffer, start, end)
       reorder_syllable_use (buffer, start, end);
@@ -462,8 +457,6 @@ reorder_use (const hb_ot_shape_plan_t *plan,
   }
 
   HB_BUFFER_DEALLOCATE_VAR (buffer, use_category);
-
-  return ret;
 }
 
 
@@ -497,12 +490,12 @@ const hb_ot_shaper_t _hb_ot_shaper_use =
   data_destroy_use,
   preprocess_text_use,
   nullptr, /* postprocess_glyphs */
+  HB_OT_SHAPE_NORMALIZATION_MODE_COMPOSED_DIACRITICS_NO_SHORT_CIRCUIT,
   nullptr, /* decompose */
   compose_use,
   setup_masks_use,
-  nullptr, /* reorder_marks */
   HB_TAG_NONE, /* gpos_tag */
-  HB_OT_SHAPE_NORMALIZATION_MODE_COMPOSED_DIACRITICS_NO_SHORT_CIRCUIT,
+  nullptr, /* reorder_marks */
   HB_OT_SHAPE_ZERO_WIDTH_MARKS_BY_GDEF_EARLY,
   false, /* fallback_position */
 };

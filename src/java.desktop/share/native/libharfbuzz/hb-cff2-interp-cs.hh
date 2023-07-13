@@ -40,22 +40,20 @@ struct blend_arg_t : number_t
   void set_real (double v) { reset_blends (); number_t::set_real (v); }
 
   void set_blends (unsigned int numValues_, unsigned int valueIndex_,
-                   hb_array_t<const blend_arg_t> blends_)
+                   unsigned int numBlends, hb_array_t<const blend_arg_t> blends_)
   {
     numValues = numValues_;
     valueIndex = valueIndex_;
-    unsigned numBlends = blends_.length;
-    if (unlikely (!deltas.resize_exact (numBlends)))
-      return;
+    deltas.resize (numBlends);
     for (unsigned int i = 0; i < numBlends; i++)
-      deltas.arrayZ[i] = blends_.arrayZ[i];
+      deltas[i] = blends_[i];
   }
 
   bool blending () const { return deltas.length > 0; }
   void reset_blends ()
   {
     numValues = valueIndex = 0;
-    deltas.shrink (0);
+    deltas.resize (0);
   }
 
   unsigned int numValues;
@@ -63,6 +61,7 @@ struct blend_arg_t : number_t
   hb_vector_t<number_t> deltas;
 };
 
+typedef interp_env_t<blend_arg_t> BlendInterpEnv;
 typedef biased_subrs_t<CFF2Subrs>   cff2_biased_subrs_t;
 
 template <typename ELEM>
@@ -118,7 +117,7 @@ struct cff2_cs_interp_env_t : cs_interp_env_t<ELEM, CFF2Subrs>
       region_count = varStore->varStore.get_region_index_count (get_ivs ());
       if (do_blend)
       {
-        if (unlikely (!scalars.resize_exact (region_count)))
+        if (unlikely (!scalars.resize (region_count)))
           SUPER::set_error ();
         else
           varStore->varStore.get_region_scalars (get_ivs (), coords, num_coords,
@@ -155,15 +154,12 @@ struct cff2_cs_interp_env_t : cs_interp_env_t<ELEM, CFF2Subrs>
     {
       if (likely (scalars.length == deltas.length))
       {
-        unsigned count = scalars.length;
-        for (unsigned i = 0; i < count; i++)
-          v += (double) scalars.arrayZ[i] * deltas.arrayZ[i].to_real ();
+        for (unsigned int i = 0; i < scalars.length; i++)
+          v += (double) scalars[i] * deltas[i].to_real ();
       }
     }
     return v;
   }
-
-  bool have_coords () const { return num_coords; }
 
   protected:
   const int     *coords;
@@ -224,10 +220,7 @@ struct cff2_cs_opset_t : cs_opset_t<ELEM, OPSET, cff2_cs_interp_env_t<ELEM>, PAR
                                  const hb_array_t<const ELEM> blends,
                                  unsigned n, unsigned i)
   {
-    if (env.have_coords ())
-      arg.set_int (round (arg.to_real () + env.blend_deltas (blends)));
-    else
-      arg.set_blends (n, i, blends);
+    arg.set_blends (n, i, blends.length, blends);
   }
   template <typename T = ELEM,
             hb_enable_if (!hb_is_same (T, blend_arg_t))>
