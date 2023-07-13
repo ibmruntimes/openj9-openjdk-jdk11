@@ -30,7 +30,6 @@
 #include "hb-ot-cff-common.hh"
 #include "hb-subset-cff1.hh"
 #include "hb-draw.hh"
-#include "hb-paint.hh"
 
 #define HB_STRING_ARRAY_NAME cff1_std_strings
 #define HB_STRING_ARRAY_LIST "hb-ot-cff1-std-str.hh"
@@ -176,7 +175,7 @@ struct Encoding
     unsigned int size = src.get_size ();
     Encoding *dest = c->allocate_size<Encoding> (size);
     if (unlikely (!dest)) return_trace (false);
-    hb_memcpy (dest, &src, size);
+    memcpy (dest, &src, size);
     return_trace (true);
   }
 
@@ -472,7 +471,7 @@ struct Charset
     unsigned int size = src.get_size (num_glyphs);
     Charset *dest = c->allocate_size<Charset> (size);
     if (unlikely (!dest)) return_trace (false);
-    hb_memcpy (dest, &src, size);
+    memcpy (dest, &src, size);
     return_trace (true);
   }
 
@@ -618,6 +617,7 @@ struct CFF1StringIndex : CFF1Index
     }
 
     byte_str_array_t bytesArray;
+    bytesArray.init ();
     if (!bytesArray.resize (sidmap.get_population ()))
       return_trace (false);
     for (unsigned int i = 0; i < strings.count; i++)
@@ -628,6 +628,7 @@ struct CFF1StringIndex : CFF1Index
     }
 
     bool result = CFF1Index::serialize (c, bytesArray);
+    bytesArray.fini ();
     return_trace (result);
   }
 };
@@ -812,7 +813,7 @@ struct cff1_top_dict_opset_t : top_dict_opset_t<cff1_top_dict_val_t>
         break;
 
       default:
-        env.last_offset = env.str_ref.get_offset ();
+        env.last_offset = env.str_ref.offset;
         top_dict_opset_t<cff1_top_dict_val_t>::process_op (op, env, dictval);
         /* Record this operand below if stack is empty, otherwise done */
         if (!env.argStack.is_empty ()) return;
@@ -902,6 +903,8 @@ struct cff1_private_dict_opset_t : dict_opset_t
       case OpCode_FamilyOtherBlues:
       case OpCode_StemSnapH:
       case OpCode_StemSnapV:
+        env.clear_args ();
+        break;
       case OpCode_StdHW:
       case OpCode_StdVW:
       case OpCode_BlueScale:
@@ -913,6 +916,7 @@ struct cff1_private_dict_opset_t : dict_opset_t
       case OpCode_initialRandomSeed:
       case OpCode_defaultWidthX:
       case OpCode_nominalWidthX:
+        val.single_val = env.argStack.pop_num ();
         env.clear_args ();
         break;
       case OpCode_Subrs:
@@ -1291,10 +1295,10 @@ struct cff1
     }
 
     protected:
+    hb_blob_t              *blob = nullptr;
     hb_sanitize_context_t   sc;
 
     public:
-    hb_blob_t               *blob = nullptr;
     const Encoding          *encoding = nullptr;
     const Charset           *charset = nullptr;
     const CFF1NameIndex     *nameIndex = nullptr;
@@ -1341,7 +1345,6 @@ struct cff1
     bool get_glyph_name (hb_codepoint_t glyph,
                          char *buf, unsigned int buf_len) const
     {
-      if (unlikely (glyph >= num_glyphs)) return false;
       if (unlikely (!is_valid ())) return false;
       if (is_CID()) return false;
       if (unlikely (!buf_len)) return true;
@@ -1376,7 +1379,7 @@ struct cff1
       if (unlikely (!len)) return false;
 
     retry:
-      hb_sorted_vector_t<gname_t> *names = glyph_names.get_acquire ();
+      hb_sorted_vector_t<gname_t> *names = glyph_names.get ();
       if (unlikely (!names))
       {
         names = (hb_sorted_vector_t<gname_t> *) hb_calloc (sizeof (hb_sorted_vector_t<gname_t>), 1);
@@ -1425,7 +1428,6 @@ struct cff1
     }
 
     HB_INTERNAL bool get_extents (hb_font_t *font, hb_codepoint_t glyph, hb_glyph_extents_t *extents) const;
-    HB_INTERNAL bool paint_glyph (hb_font_t *font, hb_codepoint_t glyph, hb_paint_funcs_t *funcs, void *data, hb_color_t foreground) const;
     HB_INTERNAL bool get_seac_components (hb_codepoint_t glyph, hb_codepoint_t *base, hb_codepoint_t *accent) const;
     HB_INTERNAL bool get_path (hb_font_t *font, hb_codepoint_t glyph, hb_draw_session_t &draw_session) const;
 

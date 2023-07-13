@@ -12,28 +12,27 @@ typedef AnchorMatrix Mark2Array;        /* mark2-major--
                                          * mark1-minor--
                                          * ordered by class--zero-based. */
 
-template <typename Types>
-struct MarkMarkPosFormat1_2
+struct MarkMarkPosFormat1
 {
   protected:
   HBUINT16      format;                 /* Format identifier--format = 1 */
-  typename Types::template OffsetTo<Coverage>
+  Offset16To<Coverage>
                 mark1Coverage;          /* Offset to Combining Mark1 Coverage
                                          * table--from beginning of MarkMarkPos
                                          * subtable */
-  typename Types::template OffsetTo<Coverage>
+  Offset16To<Coverage>
                 mark2Coverage;          /* Offset to Combining Mark2 Coverage
                                          * table--from beginning of MarkMarkPos
                                          * subtable */
   HBUINT16      classCount;             /* Number of defined mark classes */
-  typename Types::template OffsetTo<MarkArray>
+  Offset16To<MarkArray>
                 mark1Array;             /* Offset to Mark1Array table--from
                                          * beginning of MarkMarkPos subtable */
-  typename Types::template OffsetTo<Mark2Array>
+  Offset16To<Mark2Array>
                 mark2Array;             /* Offset to Mark2Array table--from
                                          * beginning of MarkMarkPos subtable */
   public:
-  DEFINE_SIZE_STATIC (4 + 4 * Types::size);
+  DEFINE_SIZE_STATIC (12);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -101,7 +100,7 @@ struct MarkMarkPosFormat1_2
     /* now we search backwards for a suitable mark glyph until a non-mark glyph */
     hb_ot_apply_context_t::skipping_iterator_t &skippy_iter = c->iter_input;
     skippy_iter.reset (buffer->idx, 1);
-    skippy_iter.set_lookup_props (c->lookup_props & ~(uint32_t)LookupFlag::IgnoreFlags);
+    skippy_iter.set_lookup_props (c->lookup_props & ~LookupFlag::IgnoreFlags);
     unsigned unsafe_from;
     if (!skippy_iter.prev (&unsafe_from))
     {

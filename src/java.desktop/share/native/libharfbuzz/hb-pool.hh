@@ -31,17 +31,19 @@
 
 /* Memory pool for persistent allocation of small objects. */
 
-template <typename T, unsigned ChunkLen = 32>
+template <typename T, unsigned ChunkLen = 16>
 struct hb_pool_t
 {
   hb_pool_t () : next (nullptr) {}
-  ~hb_pool_t ()
+  ~hb_pool_t () { fini (); }
+
+  void fini ()
   {
     next = nullptr;
 
-    + hb_iter (chunks)
-    | hb_apply (hb_free)
-    ;
+    for (chunk_t *_ : chunks) hb_free (_);
+
+    chunks.fini ();
   }
 
   T* alloc ()
@@ -58,7 +60,7 @@ struct hb_pool_t
     T* obj = next;
     next = * ((T**) next);
 
-    hb_memset (obj, 0, sizeof (T));
+    memset (obj, 0, sizeof (T));
 
     return obj;
   }

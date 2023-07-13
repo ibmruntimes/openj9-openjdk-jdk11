@@ -6,21 +6,20 @@
 
 namespace OT {
 namespace Layout {
-namespace GSUB_impl {
+namespace GSUB {
 
-template <typename Types>
-struct LigatureSubstFormat1_2
+struct LigatureSubstFormat1
 {
   protected:
   HBUINT16      format;                 /* Format identifier--format = 1 */
-  typename Types::template OffsetTo<Coverage>
+  Offset16To<Coverage>
                 coverage;               /* Offset to Coverage table--from
                                          * beginning of Substitution table */
-  Array16Of<typename Types::template OffsetTo<LigatureSet<Types>>>
+  Array16OfOffset16To<LigatureSet>
                 ligatureSet;            /* Array LigatureSet tables
                                          * ordered by Coverage Index */
   public:
-  DEFINE_SIZE_ARRAY (4 + Types::size, ligatureSet);
+  DEFINE_SIZE_ARRAY (6, ligatureSet);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -34,7 +33,7 @@ struct LigatureSubstFormat1_2
     + hb_zip (this+coverage, ligatureSet)
     | hb_filter (*glyphs, hb_first)
     | hb_map (hb_second)
-    | hb_map ([this, glyphs] (const typename Types::template OffsetTo<LigatureSet<Types>> &_)
+    | hb_map ([this, glyphs] (const Offset16To<LigatureSet> &_)
               { return (this+_).intersects (glyphs); })
     | hb_any
     ;
@@ -49,7 +48,7 @@ struct LigatureSubstFormat1_2
     | hb_filter (c->parent_active_glyphs (), hb_first)
     | hb_map (hb_second)
     | hb_map (hb_add (this))
-    | hb_apply ([c] (const LigatureSet<Types> &_) { _.closure (c); })
+    | hb_apply ([c] (const LigatureSet &_) { _.closure (c); })
     ;
 
   }
@@ -63,7 +62,7 @@ struct LigatureSubstFormat1_2
     + hb_zip (this+coverage, ligatureSet)
     | hb_map (hb_second)
     | hb_map (hb_add (this))
-    | hb_apply ([c] (const LigatureSet<Types> &_) { _.collect_glyphs (c); })
+    | hb_apply ([c] (const LigatureSet &_) { _.collect_glyphs (c); })
     ;
   }
 
@@ -74,7 +73,7 @@ struct LigatureSubstFormat1_2
     unsigned int index = (this+coverage).get_coverage (c->glyphs[0]);
     if (likely (index == NOT_COVERED)) return false;
 
-    const auto &lig_set = this+ligatureSet[index];
+    const LigatureSet &lig_set = this+ligatureSet[index];
     return lig_set.would_apply (c);
   }
 
@@ -85,7 +84,7 @@ struct LigatureSubstFormat1_2
     unsigned int index = (this+coverage).get_coverage (c->buffer->cur ().codepoint);
     if (likely (index == NOT_COVERED)) return_trace (false);
 
-    const auto &lig_set = this+ligatureSet[index];
+    const LigatureSet &lig_set = this+ligatureSet[index];
     return_trace (lig_set.apply (c));
   }
 
@@ -129,7 +128,7 @@ struct LigatureSubstFormat1_2
     hb_set_t new_coverage;
     + hb_zip (this+coverage, hb_iter (ligatureSet) | hb_map (hb_add (this)))
     | hb_filter (glyphset, hb_first)
-    | hb_filter ([&] (const LigatureSet<Types>& _) {
+    | hb_filter ([&] (const LigatureSet& _) {
       return _.intersects (&glyphset);
     }, hb_second)
     | hb_map (hb_first)

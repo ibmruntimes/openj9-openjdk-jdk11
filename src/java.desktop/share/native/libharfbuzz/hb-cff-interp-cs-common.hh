@@ -881,13 +881,7 @@ struct cs_interpreter_t : interpreter_t<ENV>
   {
     SUPER::env.set_endchar (false);
 
-    unsigned max_ops = HB_CFF_MAX_OPS;
     for (;;) {
-      if (unlikely (!--max_ops))
-      {
-        SUPER::env.set_error ();
-        break;
-      }
       OPSET::process_op (SUPER::env.fetch_op (), SUPER::env, param);
       if (unlikely (SUPER::env.in_error ()))
         return false;

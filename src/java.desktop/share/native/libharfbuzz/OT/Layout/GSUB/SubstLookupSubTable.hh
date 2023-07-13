@@ -13,7 +13,7 @@
 
 namespace OT {
 namespace Layout {
-namespace GSUB_impl {
+namespace GSUB {
 
 struct SubstLookupSubTable
 {

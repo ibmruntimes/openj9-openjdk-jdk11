@@ -5,13 +5,12 @@
 
 namespace OT {
 namespace Layout {
-namespace GSUB_impl {
+namespace GSUB {
 
-template <typename Types>
 struct AlternateSet
 {
   protected:
-  Array16Of<typename Types::HBGlyphID>
+  Array16Of<HBGlyphID16>
                 alternates;             /* Array of alternate GlyphIDs--in
                                          * arbitrary order */
   public:
@@ -57,22 +56,7 @@ struct AlternateSet
 
     if (unlikely (alt_index > count || alt_index == 0)) return_trace (false);
 
-    if (HB_BUFFER_MESSAGE_MORE && c->buffer->messaging ())
-    {
-      c->buffer->sync_so_far ();
-      c->buffer->message (c->font,
-                          "replacing glyph at %u (alternate substitution)",
-                          c->buffer->idx);
-    }
-
     c->replace_glyph (alternates[alt_index - 1]);
-
-    if (HB_BUFFER_MESSAGE_MORE && c->buffer->messaging ())
-    {
-      c->buffer->message (c->font,
-                          "replaced glyph at %u (alternate substitution)",
-                          c->buffer->idx - 1u);
-    }
 
     return_trace (true);
   }
@@ -84,7 +68,7 @@ struct AlternateSet
   {
     if (alternates.len && alternate_count)
     {
-      + alternates.as_array ().sub_array (start_offset, alternate_count)
+      + alternates.sub_array (start_offset, alternate_count)
       | hb_sink (hb_array (alternate_glyphs, *alternate_count))
       ;
     }

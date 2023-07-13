@@ -29,7 +29,7 @@
 #include "hb-ot-shaper-syllabic.hh"
 
 
-bool
+void
 hb_syllabic_insert_dotted_circles (hb_font_t *font,
                                    hb_buffer_t *buffer,
                                    unsigned int broken_syllable_type,
@@ -38,13 +38,13 @@ hb_syllabic_insert_dotted_circles (hb_font_t *font,
                                    int dottedcircle_position)
 {
   if (unlikely (buffer->flags & HB_BUFFER_FLAG_DO_NOT_INSERT_DOTTED_CIRCLE))
-    return false;
+    return;
   if (likely (!(buffer->scratch_flags & HB_BUFFER_SCRATCH_FLAG_HAS_BROKEN_SYLLABLE)))
-    return false;
+    return;
 
   hb_codepoint_t dottedcircle_glyph;
   if (!font->get_nominal_glyph (0x25CCu, &dottedcircle_glyph))
-    return false;
+    return;
 
   hb_glyph_info_t dottedcircle = {0};
   dottedcircle.codepoint = 0x25CCu;
@@ -84,16 +84,14 @@ hb_syllabic_insert_dotted_circles (hb_font_t *font,
       (void) buffer->next_glyph ();
   }
   buffer->sync ();
-  return true;
 }
 
-HB_INTERNAL bool
+HB_INTERNAL void
 hb_syllabic_clear_var (const hb_ot_shape_plan_t *plan,
                        hb_font_t *font,
                        hb_buffer_t *buffer)
 {
   HB_BUFFER_DEALLOCATE_VAR (buffer, syllable);
-  return false;
 }
 
 

@@ -74,11 +74,6 @@ struct hb_bit_set_invertible_t
       inverted = !inverted;
   }
 
-  bool is_inverted () const
-  {
-    return inverted;
-  }
-
   bool is_empty () const
   {
     hb_codepoint_t v = INVALID;
@@ -128,8 +123,10 @@ struct hb_bit_set_invertible_t
   bool get (hb_codepoint_t g) const { return s.get (g) ^ inverted; }
 
   /* Has interface. */
-  bool operator [] (hb_codepoint_t k) const { return get (k); }
-  bool has (hb_codepoint_t k) const { return (*this)[k]; }
+  static constexpr bool SENTINEL = false;
+  typedef bool value_t;
+  value_t operator [] (hb_codepoint_t k) const { return get (k); }
+  bool has (hb_codepoint_t k) const { return (*this)[k] != SENTINEL; }
   /* Predicate. */
   bool operator () (hb_codepoint_t k) const { return has (k); }
 

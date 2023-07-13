@@ -29,8 +29,6 @@
 
 #include "hb.hh"
 
-#include "hb-set.hh"
-
 
 /*
  * hb_hashmap_t
@@ -45,9 +43,9 @@ struct hb_hashmap_t
   hb_hashmap_t ()  { init (); }
   ~hb_hashmap_t () { fini (); }
 
-  hb_hashmap_t (const hb_hashmap_t& o) : hb_hashmap_t () { resize (o.population); hb_copy (o, *this); }
+  hb_hashmap_t (const hb_hashmap_t& o) : hb_hashmap_t () { resize (population); hb_copy (o, *this); }
   hb_hashmap_t (hb_hashmap_t&& o) : hb_hashmap_t () { hb_swap (*this, o); }
-  hb_hashmap_t& operator= (const hb_hashmap_t& o)  { reset (); resize (o.population); hb_copy (o, *this); return *this; }
+  hb_hashmap_t& operator= (const hb_hashmap_t& o)  { resize (population); hb_copy (o, *this); return *this; }
   hb_hashmap_t& operator= (hb_hashmap_t&& o)  { hb_swap (*this, o); return *this; }
 
   hb_hashmap_t (std::initializer_list<hb_pair_t<K, V>> lst) : hb_hashmap_t ()
@@ -73,11 +71,6 @@ struct hb_hashmap_t
     uint32_t is_tombstone_ : 1;
     V value;
 
-    item_t () : key (),
-                hash (0),
-                is_used_ (false), is_tombstone_ (false),
-                value () {}
-
     bool is_used () const { return is_used_; }
     void set_used (bool is_used) { is_used_ = is_used; }
     bool is_tombstone () const { return is_tombstone_; }
@@ -95,8 +88,17 @@ struct hb_hashmap_t
       return minus_1;
     };
 
-    bool operator == (const K &o) const { return hb_deref (key) == hb_deref (o); }
-    bool operator == (const item_t &o) const { return *this == o.key; }
+    void clear ()
+    {
+      new (std::addressof (key)) K ();
+      new (std::addressof (value)) V ();
+      hash = 0;
+      is_used_ = false;
+      is_tombstone_ = false;
+    }
+
+    bool operator == (const K &o) { return hb_deref (key) == hb_deref (o); }
+    bool operator == (const item_t &o) { return *this == o.key; }
     hb_pair_t<K, V> get_pair() const { return hb_pair_t<K, V> (key, value); }
     hb_pair_t<const K &, const V &> get_pair_ref() const { return hb_pair_t<const K &, const V &> (key, value); }
 
@@ -105,8 +107,8 @@ struct hb_hashmap_t
   };
 
   hb_object_header_t header;
-  unsigned int successful : 1; /* Allocations successful */
-  unsigned int population : 31; /* Not including tombstones. */
+  bool successful; /* Allocations successful */
+  unsigned int population; /* Not including tombstones. */
   unsigned int occupancy; /* Including tombstones. */
   unsigned int mask;
   unsigned int prime;
@@ -116,29 +118,27 @@ struct hb_hashmap_t
   {
     if (unlikely (!a.successful || !b.successful))
       return;
-    unsigned tmp = a.population;
-    a.population = b.population;
-    b.population = tmp;
-    //hb_swap (a.population, b.population);
+    hb_swap (a.population, b.population);
     hb_swap (a.occupancy, b.occupancy);
     hb_swap (a.mask, b.mask);
     hb_swap (a.prime, b.prime);
     hb_swap (a.items, b.items);
   }
-  void init ()
+  void init_shallow ()
   {
-    hb_object_init (this);
-
     successful = true;
     population = occupancy = 0;
     mask = 0;
     prime = 0;
     items = nullptr;
   }
-  void fini ()
+  void init ()
   {
-    hb_object_fini (this);
-
+    hb_object_init (this);
+    init_shallow ();
+  }
+  void fini_shallow ()
+  {
     if (likely (items)) {
       unsigned size = mask + 1;
       for (unsigned i = 0; i < size; i++)
@@ -147,6 +147,11 @@ struct hb_hashmap_t
       items = nullptr;
     }
     population = occupancy = 0;
+  }
+  void fini ()
+  {
+    hb_object_fini (this);
+    fini_shallow ();
   }
 
   void reset ()
@@ -161,9 +166,7 @@ struct hb_hashmap_t
   {
     if (unlikely (!successful)) return false;
 
-    if (new_population != 0 && (new_population + new_population / 2) < mask) return true;
-
-    unsigned int power = hb_bit_storage (hb_max ((unsigned) population, new_population) * 2 + 8);
+    unsigned int power = hb_bit_storage (hb_max (population, new_population) * 2 + 8);
     unsigned int new_size = 1u << power;
     item_t *new_items = (item_t *) hb_malloc ((size_t) new_size * sizeof (item_t));
     if (unlikely (!new_items))
@@ -172,9 +175,9 @@ struct hb_hashmap_t
       return false;
     }
     for (auto &_ : hb_iter (new_items, new_size))
-      new (&_) item_t ();
+      _.clear ();
 
-    unsigned int old_size = size ();
+    unsigned int old_size = mask + 1;
     item_t *old_items = items;
 
     /* Switch to new, empty, array. */
@@ -184,102 +187,67 @@ struct hb_hashmap_t
     items = new_items;
 
     /* Insert back old items. */
-    for (unsigned int i = 0; i < old_size; i++)
-    {
-      if (old_items[i].is_real ())
+    if (old_items)
+      for (unsigned int i = 0; i < old_size; i++)
       {
-        set_with_hash (std::move (old_items[i].key),
-                       old_items[i].hash,
-                       std::move (old_items[i].value));
+        if (old_items[i].is_real ())
+        {
+          set_with_hash (old_items[i].key,
+                         old_items[i].hash,
+                         std::move (old_items[i].value));
+        }
+        old_items[i].~item_t ();
       }
-      old_items[i].~item_t ();
-    }
 
     hb_free (old_items);
 
     return true;
   }
 
-  template <typename KK, typename VV>
-  bool set_with_hash (KK&& key, uint32_t hash, VV&& value, bool is_delete=false)
-  {
-    if (unlikely (!successful)) return false;
-    if (unlikely ((occupancy + occupancy / 2) >= mask && !resize ())) return false;
-    item_t &item = item_for_hash (key, hash);
-
-    if (is_delete && !(item == key))
-      return true; /* Trying to delete non-existent key. */
-
-    if (item.is_used ())
-    {
-      occupancy--;
-      if (!item.is_tombstone ())
-        population--;
-    }
-
-    item.key = std::forward<KK> (key);
-    item.value = std::forward<VV> (value);
-    item.hash = hash;
-    item.set_used (true);
-    item.set_tombstone (is_delete);
-
-    occupancy++;
-    if (!is_delete)
-      population++;
-
-    return true;
-  }
-
   template <typename VV>
-  bool set (const K &key, VV&& value) { return set_with_hash (key, hb_hash (key), std::forward<VV> (value)); }
-  template <typename VV>
-  bool set (K &&key, VV&& value) { return set_with_hash (std::move (key), hb_hash (key), std::forward<VV> (value)); }
+  bool set (K key, VV&& value) { return set_with_hash (key, hb_hash (key), std::forward<VV> (value)); }
 
-  const V& get_with_hash (const K &key, uint32_t hash) const
+  const V& get (K key) const
   {
     if (unlikely (!items)) return item_t::default_value ();
-    auto &item = item_for_hash (key, hash);
-    return item.is_real () && item == key ? item.value : item_t::default_value ();
-  }
-  const V& get (const K &key) const
-  {
-    if (unlikely (!items)) return item_t::default_value ();
-    return get_with_hash (key, hb_hash (key));
+    unsigned int i = bucket_for (key);
+    return items[i].is_real () && items[i] == key ? items[i].value : item_t::default_value ();
   }
 
-  void del (const K &key) { set_with_hash (key, hb_hash (key), item_t::default_value (), true); }
+  void del (K key) { set_with_hash (key, hb_hash (key), item_t::default_value (), true); }
 
   /* Has interface. */
-  const V& operator [] (K k) const { return get (k); }
-  template <typename VV=V>
-  bool has (K key, VV **vp = nullptr) const
+  typedef const V& value_t;
+  value_t operator [] (K k) const { return get (k); }
+  bool has (K key, const V **vp = nullptr) const
   {
     if (unlikely (!items))
-      return false;
-    auto &item = item_for_hash (key, hb_hash (key));
-    if (item.is_real () && item == key)
     {
-      if (vp) *vp = std::addressof (item.value);
+      if (vp) *vp = &item_t::default_value ();
+      return false;
+    }
+    unsigned int i = bucket_for (key);
+    if (items[i].is_real () && items[i] == key)
+    {
+      if (vp) *vp = &items[i].value;
       return true;
     }
     else
+    {
+      if (vp) *vp = &item_t::default_value ();
       return false;
+    }
   }
   /* Projection. */
   V operator () (K k) const { return get (k); }
-
-  unsigned size () const { return mask ? mask + 1 : 0; }
 
   void clear ()
   {
     if (unlikely (!successful)) return;
 
-    for (auto &_ : hb_iter (items, size ()))
-    {
-      /* Reconstruct items. */
-      _.~item_t ();
-      new (&_) item_t ();
-    }
+    if (items)
+      for (auto &_ : hb_iter (items, mask + 1))
+        _.clear ();
 
     population = occupancy = 0;
   }
@@ -289,10 +257,11 @@ struct hb_hashmap_t
 
   uint32_t hash () const
   {
-    return
-    + iter_items ()
-    | hb_reduce ([] (uint32_t h, const item_t &_) { return h ^ _.total_hash (); }, (uint32_t) 0u)
-    ;
+    uint32_t h = 0;
+    for (const auto &item : + hb_array (items, mask ? mask + 1 : 0)
+                            | hb_filter (&item_t::is_real))
+      h ^= item.total_hash ();
+    return h;
   }
 
   bool is_equal (const hb_hashmap_t &other) const
@@ -300,7 +269,7 @@ struct hb_hashmap_t
     if (population != other.population) return false;
 
     for (auto pair : iter ())
-      if (other.get (pair.first) != pair.second)
+      if (get (pair.first) != pair.second)
         return false;
 
     return true;
@@ -310,98 +279,78 @@ struct hb_hashmap_t
 
   unsigned int get_population () const { return population; }
 
-  void update (const hb_hashmap_t &other)
-  {
-    if (unlikely (!successful)) return;
-
-    hb_copy (other, *this);
-  }
-
-  void keys (hb_set_t &keys_) const
-  {
-    hb_copy (keys() , keys_);
-  }
-
-  void values (hb_set_t &values_) const
-  {
-    hb_copy (values() , values_);
-  }
-
   /*
    * Iterator
    */
-
-  auto iter_items () const HB_AUTO_RETURN
+  auto iter () const HB_AUTO_RETURN
   (
-    + hb_iter (items, size ())
+    + hb_array (items, mask ? mask + 1 : 0)
     | hb_filter (&item_t::is_real)
+    | hb_map (&item_t::get_pair)
   )
   auto iter_ref () const HB_AUTO_RETURN
   (
-    + iter_items ()
+    + hb_array (items, mask ? mask + 1 : 0)
+    | hb_filter (&item_t::is_real)
     | hb_map (&item_t::get_pair_ref)
-  )
-  auto iter () const HB_AUTO_RETURN
-  (
-    + iter_items ()
-    | hb_map (&item_t::get_pair)
-  )
-  auto keys_ref () const HB_AUTO_RETURN
-  (
-    + iter_items ()
-    | hb_map (&item_t::key)
   )
   auto keys () const HB_AUTO_RETURN
   (
-    + keys_ref ()
+    + hb_array (items, mask ? mask + 1 : 0)
+    | hb_filter (&item_t::is_real)
+    | hb_map (&item_t::key)
     | hb_map (hb_ridentity)
-  )
-  auto values_ref () const HB_AUTO_RETURN
-  (
-    + iter_items ()
-    | hb_map (&item_t::value)
   )
   auto values () const HB_AUTO_RETURN
   (
-    + values_ref ()
+    + hb_array (items, mask ? mask + 1 : 0)
+    | hb_filter (&item_t::is_real)
+    | hb_map (&item_t::value)
     | hb_map (hb_ridentity)
   )
-
-  /* C iterator. */
-  bool next (int *idx,
-             K *key,
-             V *value) const
-  {
-    unsigned i = (unsigned) (*idx + 1);
-
-    unsigned count = size ();
-    while (i < count && !items[i].is_real ())
-      i++;
-
-    if (i >= count)
-    {
-      *idx = -1;
-      return false;
-    }
-
-    *key = items[i].key;
-    *value = items[i].value;
-
-    *idx = (signed) i;
-    return true;
-  }
 
   /* Sink interface. */
   hb_hashmap_t& operator << (const hb_pair_t<K, V>& v)
   { set (v.first, v.second); return *this; }
-  hb_hashmap_t& operator << (const hb_pair_t<K, V&&>& v)
-  { set (v.first, std::move (v.second)); return *this; }
-  hb_hashmap_t& operator << (const hb_pair_t<K&&, V>& v)
-  { set (std::move (v.first), v.second); return *this; }
-  hb_hashmap_t& operator << (const hb_pair_t<K&&, V&&>& v)
-  { set (std::move (v.first), std::move (v.second)); return *this; }
 
-  item_t& item_for_hash (const K &key, uint32_t hash) const
+  protected:
+
+  template <typename VV>
+  bool set_with_hash (K key, uint32_t hash, VV&& value, bool is_delete=false)
+  {
+    if (unlikely (!successful)) return false;
+    if (unlikely ((occupancy + occupancy / 2) >= mask && !resize ())) return false;
+    unsigned int i = bucket_for_hash (key, hash);
+
+    if (is_delete && items[i].key != key)
+      return true; /* Trying to delete non-existent key. */
+
+    if (items[i].is_used ())
+    {
+      occupancy--;
+      if (!items[i].is_tombstone ())
+        population--;
+    }
+
+    items[i].key = key;
+    items[i].value = std::forward<VV> (value);
+    items[i].hash = hash;
+    items[i].set_used (true);
+    items[i].set_tombstone (is_delete);
+
+    occupancy++;
+    if (!is_delete)
+      population++;
+
+    return true;
+  }
+
+  unsigned int bucket_for (const K &key) const
+  {
+    return bucket_for_hash (key, hb_hash (key));
+  }
+
+  unsigned int bucket_for_hash (const K &key, uint32_t hash) const
   {
     hash &= 0x3FFFFFFF; // We only store lower 30bit of hash
     unsigned int i = hash % prime;
@@ -410,12 +359,12 @@ struct hb_hashmap_t
     while (items[i].is_used ())
     {
       if (items[i].hash == hash && items[i] == key)
-        return items[i];
+        return i;
       if (tombstone == (unsigned) -1 && items[i].is_tombstone ())
         tombstone = i;
       i = (i + ++step) & mask;
     }
-    return items[tombstone == (unsigned) -1 ? i : tombstone];
+    return tombstone == (unsigned) -1 ? i : tombstone;
   }
 
   static unsigned int prime_for (unsigned int shift)
@@ -493,6 +442,5 @@ struct hb_map_t : hb_hashmap_t<hb_codepoint_t,
             hb_requires (hb_is_iterable (Iterable))>
   hb_map_t (const Iterable &o) : hashmap (o) {}
 };
-
 
 #endif /* HB_MAP_HH */

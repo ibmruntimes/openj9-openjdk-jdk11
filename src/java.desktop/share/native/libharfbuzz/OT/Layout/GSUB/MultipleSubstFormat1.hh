@@ -6,21 +6,20 @@
 
 namespace OT {
 namespace Layout {
-namespace GSUB_impl {
+namespace GSUB {
 
-template <typename Types>
-struct MultipleSubstFormat1_2
+struct MultipleSubstFormat1
 {
   protected:
   HBUINT16      format;                 /* Format identifier--format = 1 */
-  typename Types::template OffsetTo<Coverage>
+  Offset16To<Coverage>
                 coverage;               /* Offset to Coverage table--from
                                          * beginning of Substitution table */
-  Array16Of<typename Types::template OffsetTo<Sequence<Types>>>
+  Array16OfOffset16To<Sequence>
                 sequence;               /* Array of Sequence tables
                                          * ordered by Coverage Index */
   public:
-  DEFINE_SIZE_ARRAY (4 + Types::size, sequence);
+  DEFINE_SIZE_ARRAY (6, sequence);
 
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -40,7 +39,7 @@ struct MultipleSubstFormat1_2
     | hb_filter (c->parent_active_glyphs (), hb_first)
     | hb_map (hb_second)
     | hb_map (hb_add (this))
-    | hb_apply ([c] (const Sequence<Types> &_) { _.closure (c); })
+    | hb_apply ([c] (const Sequence &_) { _.closure (c); })
     ;
   }
 
@@ -52,7 +51,7 @@ struct MultipleSubstFormat1_2
     + hb_zip (this+coverage, sequence)
     | hb_map (hb_second)
     | hb_map (hb_add (this))
-    | hb_apply ([c] (const Sequence<Types> &_) { _.collect_glyphs (c); })
+    | hb_apply ([c] (const Sequence &_) { _.collect_glyphs (c); })
     ;
   }
 
@@ -71,31 +70,22 @@ struct MultipleSubstFormat1_2
     return_trace ((this+sequence[index]).apply (c));
   }
 
-  template<typename Iterator,
-           hb_requires (hb_is_sorted_iterator (Iterator))>
   bool serialize (hb_serialize_context_t *c,
-                  Iterator it)
+                  hb_sorted_array_t<const HBGlyphID16> glyphs,
+                  hb_array_t<const unsigned int> substitute_len_list,
+                  hb_array_t<const HBGlyphID16> substitute_glyphs_list)
   {
     TRACE_SERIALIZE (this);
-    auto sequences =
-      + it
-      | hb_map (hb_second)
-      ;
-    auto glyphs =
-      + it
-      | hb_map_retains_sorting (hb_first)
-      ;
     if (unlikely (!c->extend_min (this))) return_trace (false);
-
-    if (unlikely (!sequence.serialize (c, sequences.length))) return_trace (false);
-
-    for (auto& pair : hb_zip (sequences, sequence))
+    if (unlikely (!sequence.serialize (c, glyphs.length))) return_trace (false);
+    for (unsigned int i = 0; i < glyphs.length; i++)
     {
-      if (unlikely (!pair.second
-                    .serialize_serialize (c, pair.first)))
+      unsigned int substitute_len = substitute_len_list[i];
+      if (unlikely (!sequence[i]
+                        .serialize_serialize (c, substitute_glyphs_list.sub_array (0, substitute_len))))
         return_trace (false);
+      substitute_glyphs_list += substitute_len;
     }
-
     return_trace (coverage.serialize_serialize (c, glyphs));
   }
 
