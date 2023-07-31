@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2023 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,18 +32,34 @@
 /* Load the crypto library (return NULL on error) */
 void * load_crypto_library(jboolean traceEnabled) {
     void * result = NULL;
+    const char *libname3_a_64 = "libcrypto.a(libcrypto64.so.3)";
+    const char *libname3_64 = "libcrypto64.so.3";
+    const char *libname3_a = "libcrypto.a(libcrypto.so.3)";
+    const char *libname3 = "libcrypto.so.3";
     const char *libname111 = "libcrypto.a(libcrypto64.so.1.1)";
     const char *libname110 = "libcrypto.so.1.1";
     const char *libname102 = "libcrypto.so.1.0.0";
     const char *symlink = "libcrypto.a(libcrypto64.so)";
 
-    result = dlopen (libname111, RTLD_NOW | RTLD_MEMBER);
+    result = dlopen (libname3_a_64, RTLD_NOW | RTLD_MEMBER);
     if (result == NULL) {
-        result = dlopen (libname110, RTLD_NOW);
+        result = dlopen (libname3_64, RTLD_NOW);
         if (result == NULL) {
-            result = dlopen (libname102, RTLD_NOW);
+            result = dlopen (libname3_a, RTLD_NOW | RTLD_MEMBER);
             if (result == NULL) {
-                result = dlopen (symlink, RTLD_NOW | RTLD_MEMBER);
+                result = dlopen (libname3, RTLD_NOW);
+                if (result == NULL) {
+                    result = dlopen (libname111, RTLD_NOW | RTLD_MEMBER);
+                    if (result == NULL) {
+                        result = dlopen (libname110, RTLD_NOW);
+                        if (result == NULL) {
+                            result = dlopen (libname102, RTLD_NOW);
+                            if (result == NULL) {
+                                result = dlopen (symlink, RTLD_NOW | RTLD_MEMBER);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

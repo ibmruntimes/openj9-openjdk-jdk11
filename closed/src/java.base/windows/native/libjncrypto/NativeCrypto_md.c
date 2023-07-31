@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2019, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2019, 2023 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,13 +29,16 @@
 /* Load the crypto library (return NULL on error) */
 void * load_crypto_library(jboolean traceEnabled) {
     void * result = NULL;
+    const char *libname3 = "libcrypto-3-x64.dll";
     const char *libname = "libcrypto-1_1-x64.dll";
     const char *oldname = "libeay32.dll";
 
-    result = LoadLibrary(libname);
-    
+    result = LoadLibrary(libname3);
     if (result == NULL) {
-        result = LoadLibrary(oldname);
+        result = LoadLibrary(libname);
+        if (result == NULL) {
+            result = LoadLibrary(oldname);
+        }
     }
 
     return result;
