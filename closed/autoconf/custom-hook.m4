@@ -350,7 +350,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_jitserver" = x ; then
     case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xz64)
+      xa64|xl64|xr64|xz64)
         AC_MSG_RESULT([yes (default)])
         OPENJ9_ENABLE_JITSERVER=true
         ;;
