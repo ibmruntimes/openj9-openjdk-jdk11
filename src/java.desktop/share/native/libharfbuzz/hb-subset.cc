@@ -43,11 +43,7 @@
 #include "OT/Color/sbix/sbix.hh"
 #include "hb-ot-os2-table.hh"
 #include "hb-ot-post-table.hh"
-
-#if !defined(AIX)
 #include "hb-ot-post-table-v2subset.hh"
-#endif
-
 #include "hb-ot-cff1-table.hh"
 #include "hb-ot-cff2-table.hh"
 #include "hb-ot-vorg-table.hh"

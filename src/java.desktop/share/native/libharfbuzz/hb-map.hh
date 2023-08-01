@@ -78,6 +78,10 @@ struct hb_hashmap_t
                 is_used_ (false), is_tombstone_ (false),
                 value () {}
 
+    // Needed for https://github.com/harfbuzz/harfbuzz/issues/4138
+    K& get_key () { return key; }
+    V& get_value () { return value; }
+
     bool is_used () const { return is_used_; }
     void set_used (bool is_used) { is_used_ = is_used; }
     bool is_tombstone () const { return is_tombstone_; }
@@ -349,7 +353,7 @@ struct hb_hashmap_t
   auto keys_ref () const HB_AUTO_RETURN
   (
     + iter_items ()
-    | hb_map (&item_t::key)
+    | hb_map (&item_t::get_key)
   )
   auto keys () const HB_AUTO_RETURN
   (
@@ -359,7 +363,7 @@ struct hb_hashmap_t
   auto values_ref () const HB_AUTO_RETURN
   (
     + iter_items ()
-    | hb_map (&item_t::value)
+    | hb_map (&item_t::get_value)
   )
   auto values () const HB_AUTO_RETURN
   (
