@@ -321,16 +321,6 @@ struct hb_hashmap_t
     hb_copy (other, *this);
   }
 
-  void keys (hb_set_t &keys_) const
-  {
-    hb_copy (keys() , keys_);
-  }
-
-  void values (hb_set_t &values_) const
-  {
-    hb_copy (values() , values_);
-  }
-
   /*
    * Iterator
    */
@@ -357,7 +347,8 @@ struct hb_hashmap_t
   )
   auto keys () const HB_AUTO_RETURN
   (
-    + keys_ref ()
+    + iter_items ()
+    | hb_map (&item_t::get_key)
     | hb_map (hb_ridentity)
   )
   auto values_ref () const HB_AUTO_RETURN
@@ -367,7 +358,8 @@ struct hb_hashmap_t
   )
   auto values () const HB_AUTO_RETURN
   (
-    + values_ref ()
+    + iter_items ()
+    | hb_map (&item_t::get_value)
     | hb_map (hb_ridentity)
   )
 

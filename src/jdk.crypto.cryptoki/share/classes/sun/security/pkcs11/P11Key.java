@@ -99,6 +99,9 @@ abstract class P11Key implements Key, Length {
     // flags indicating whether the key is a token object, sensitive, extractable
     final boolean tokenObject, sensitive, extractable;
 
+    // flag indicating whether the current token is NSS
+    final transient boolean isNSS;
+
     private final NativeKeyHolder keyIDHolder;
 
     private static final boolean DISABLE_NATIVE_KEYS_EXTRACTION;
@@ -145,7 +148,7 @@ abstract class P11Key implements Key, Length {
         this.sensitive = sensitive;
         this.extractable = extractable;
         char[] tokenLabel = this.token.tokenInfo.label;
-        boolean isNSS = (tokenLabel[0] == 'N' && tokenLabel[1] == 'S'
+        isNSS = (tokenLabel[0] == 'N' && tokenLabel[1] == 'S'
                 && tokenLabel[2] == 'S');
         boolean extractKeyInfo = (!DISABLE_NATIVE_KEYS_EXTRACTION && isNSS &&
                 extractable && !tokenObject);
@@ -246,7 +249,8 @@ abstract class P11Key implements Key, Length {
         } else {
             // XXX short term serialization for unextractable keys
             throw new NotSerializableException
-                ("Cannot serialize sensitive and unextractable keys");
+                    ("Cannot serialize sensitive, unextractable " + (isNSS ?
+                    ", and NSS token keys" : "keys"));
         }
         return new KeyRep(type, getAlgorithm(), format, getEncoded());
     }
@@ -412,7 +416,7 @@ abstract class P11Key implements Key, Length {
         if (keySensitive && (SunPKCS11.mysunpkcs11 != null) && "RSA".equals(algorithm)) {
             try {
                 byte[] key = SunPKCS11.mysunpkcs11.exportKey(session.id(), attributes, keyID);
-                RSAPrivateKey rsaPrivKey = RSAPrivateCrtKeyImpl.newKey(key);
+                RSAPrivateKey rsaPrivKey = RSAPrivateCrtKeyImpl.newKey(KeyType.RSA, "PKCS#8", key);
                 if (rsaPrivKey instanceof RSAPrivateCrtKeyImpl) {
                     return new P11RSAPrivateKeyFIPS(session, keyID, algorithm, keyLength, attributes, (RSAPrivateCrtKeyImpl)rsaPrivKey);
                 } else {
@@ -544,7 +548,7 @@ abstract class P11Key implements Key, Length {
         }
         public String getFormat() {
             token.ensureValid();
-            if (sensitive || (extractable == false)) {
+            if (sensitive || !extractable || (isNSS && tokenObject)) {
                 return null;
             } else {
                 return "RAW";
