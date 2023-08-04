@@ -107,7 +107,7 @@ public final class NativeECUtil {
         String curveName;
         if (params instanceof NamedCurve) {
             NamedCurve namedCurve = (NamedCurve) params;
-            curveName = namedCurve.getName();
+            curveName = namedCurve.getNameAndAliases()[0];
         } else {
             /* use the OID */
             try {

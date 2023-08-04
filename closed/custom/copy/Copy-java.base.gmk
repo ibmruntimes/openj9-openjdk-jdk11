@@ -200,7 +200,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     # OpenSSL 1.1.1 on AIX has switched to use archive library files (natural way)
     # instead of 'libcrypto.so' files.
     # See https://github.com/openssl/openssl/pull/6487.
-    LIBCRYPTO_NAMES := libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0 libcrypto.a
+    LIBCRYPTO_NAMES := libcrypto64.so.3 libcrypto.so.3 libcrypto.so.1.1 libcrypto.so.1.0.0
   else
     LIBCRYPTO_NAMES := libcrypto.so
   endif
