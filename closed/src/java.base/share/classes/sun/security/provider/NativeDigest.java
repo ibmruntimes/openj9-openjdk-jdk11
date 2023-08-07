@@ -24,10 +24,9 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2019 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
-
 
 package sun.security.provider;
 
@@ -137,7 +136,10 @@ abstract class NativeDigest extends MessageDigestSpi implements Cloneable {
             return;
         }
 
-        nativeCrypto.DigestReset(context);
+        int ret = nativeCrypto.DigestReset(context);
+        if (ret == -1) {
+            throw new ProviderException("Error in Native Digest Reset");
+        }
         bytesProcessed = 0;
     }
 
