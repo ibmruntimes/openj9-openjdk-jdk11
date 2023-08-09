@@ -93,12 +93,7 @@ class UncaughtExitSimulator extends Thread implements Runnable {
 
     public static void throwRuntimeException() { throw new RuntimeException("simulateUncaughtExitEvent"); }
 
-    public void run() {
-        if (!Thread.currentThread().getName().equals("Thread-0")) {
-            com.ibm.jvm.Dump.SystemDump();
-        }
-        throwRuntimeException();
-    }
+    public void run() { throwRuntimeException(); }
 
     /**
      * A thread is never alive after you've join()ed it.
