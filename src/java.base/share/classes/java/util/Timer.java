@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -532,6 +532,7 @@ class TimerThread extends Thread {
     private TaskQueue queue;
 
     TimerThread(TaskQueue queue) {
+        super("java.util.TimerThread");
         this.queue = queue;
     }
 
