@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -134,6 +134,8 @@ static void DescribeModule(JNIEnv* env, char* optString);
 static jboolean ValidateModules(JNIEnv* env);
 
 static void SetPaths(int argc, char **argv);
+
+static int parse_size(const char *s, jlong *result);
 
 static void DumpState();
 
@@ -320,6 +322,31 @@ JLI_Launch(int argc, char ** argv,              /* main argc, argv */
         char* cpath = getenv("CLASSPATH");
         if (cpath != NULL) {
             SetClassPath(cpath);
+        }
+    }
+
+    {
+        /* Process -Xmso in the OPENJ9_JAVA_OPTIONS environment variable to
+         * set the main thread stack size. May be overridden by a later command
+         * line option.
+         */
+        JLI_List openj9Args = JLI_List_new(8); /* 8 is arbitrary */
+        if (JLI_ParseOpenJ9ArgsFromEnvVar(openj9Args, "OPENJ9_JAVA_OPTIONS")) {
+            size_t i = openj9Args->size;
+            while (i > 0) {
+                i -= 1;
+                if (JLI_StrCCmp(openj9Args->elements[i], "-Xmso") == 0) {
+                    jlong tmp = 0;
+                    if (parse_size(openj9Args->elements[i] + 5, &tmp)) {
+                        threadStackSize = tmp;
+                        if (threadStackSize > 0 && threadStackSize < (jlong)STACK_SIZE_MINIMUM) {
+                            threadStackSize = STACK_SIZE_MINIMUM;
+                        }
+                    }
+                    break;
+                }
+            }
+            JLI_List_free(openj9Args);
         }
     }
 
