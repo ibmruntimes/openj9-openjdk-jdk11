@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -78,6 +84,7 @@ static jboolean expectingNoDashArg = JNI_FALSE;
 static size_t argsCount = 1;
 static jboolean stopExpansion = JNI_FALSE;
 static jboolean relaunch = JNI_FALSE;
+static jboolean parsingOpenJ9Args = JNI_FALSE;
 
 /*
  * Prototypes for internal functions.
@@ -427,6 +434,10 @@ JLI_PreprocessArg(const char *arg, jboolean expandSourceOpt) {
         return expandArg(arg);
     }
 
+    if (parsingOpenJ9Args && (JLI_StrCCmp(arg, "-Xoptionsfile=") == 0)) {
+        return expandArgFile(arg + 14);
+    }
+
     if (arg[0] != '@') {
         checkArg(arg);
         return NULL;
@@ -488,6 +499,42 @@ JLI_AddArgsFromEnvVar(JLI_List args, const char *var_name) {
     return expand(args, env, var_name);
 }
 
+JNIEXPORT jboolean JNICALL
+JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name) {
+    const char *env = getenv(var_name);
+    jboolean result = JNI_FALSE;
+
+    /* Save the state. */
+    int savedFirstAppArgIndex = firstAppArgIndex;
+    jboolean savedExpectingNoDashArg = expectingNoDashArg;
+    size_t savedArgsCount = argsCount;
+    jboolean savedStopExpansion = stopExpansion;
+    jboolean savedRelaunch = relaunch;
+
+     if (NULL == env) {
+        return JNI_FALSE;
+    }
+
+    parsingOpenJ9Args = JNI_TRUE;
+    firstAppArgIndex = NOT_FOUND;
+    expectingNoDashArg = JNI_FALSE;
+    argsCount = 1;
+    stopExpansion = JNI_FALSE;
+    relaunch = JNI_FALSE;
+
+    result = expand(args, env, var_name);
+
+    /* Restore the state. */
+    parsingOpenJ9Args = JNI_FALSE;
+    firstAppArgIndex = savedFirstAppArgIndex;
+    expectingNoDashArg = savedExpectingNoDashArg;
+    argsCount = savedArgsCount;
+    stopExpansion = savedStopExpansion;
+    relaunch = savedRelaunch;
+
+    return result;
+}
+
 /*
  * Expand a string into a list of args.
  * If the string is the result of looking up an environment variable,
@@ -501,9 +548,13 @@ static jboolean expand(JLI_List args, const char *str, const char *var_name) {
     char *p, *arg;
     char quote;
     JLI_List argsInFile;
+    char *argMem = NULL;
 
     // This is retained until the process terminates as it is saved as the args
     p = JLI_MemAlloc(JLI_StrLen(str) + 1);
+    if (parsingOpenJ9Args) {
+        argMem = p;
+    }
     while (*str != '\0') {
         while (*str != '\0' && isspace(*str)) {
             str++;
@@ -545,6 +596,10 @@ static jboolean expand(JLI_List args, const char *str, const char *var_name) {
                 }
                 exit(1);
             }
+            if (parsingOpenJ9Args) {
+                /* Dup the string so it can easily be freed later. */
+                arg = JLI_StringDup(arg);
+            }
             JLI_List_add(args, arg);
         } else {
             size_t cnt, idx;
@@ -584,6 +639,9 @@ static jboolean expand(JLI_List args, const char *str, const char *var_name) {
         assert (*str == '\0' || isspace(*str));
     }
 
+    if (parsingOpenJ9Args) {
+        JLI_MemFree(argMem);
+    }
     return JNI_TRUE;
 }
 

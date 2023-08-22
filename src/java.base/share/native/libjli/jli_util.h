@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 #ifndef _JLI_UTIL_H
 #define _JLI_UTIL_H
 
@@ -164,5 +170,8 @@ JLI_PreprocessArg(const char *arg, jboolean expandSourceOpt);
 
 JNIEXPORT jboolean JNICALL
 JLI_AddArgsFromEnvVar(JLI_List args, const char *var_name);
+
+JNIEXPORT jboolean JNICALL
+JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name);
 
 #endif  /* _JLI_UTIL_H */
