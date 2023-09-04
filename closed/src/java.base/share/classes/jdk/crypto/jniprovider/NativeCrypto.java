@@ -321,7 +321,8 @@ public class NativeCrypto {
                                     byte[] iv,
                                     int ivlen,
                                     byte[] key,
-                                    int keylen);
+                                    int keylen,
+                                    boolean doReset);
 
     public final native int ChaCha20Update(long context,
                                        byte[] input,
