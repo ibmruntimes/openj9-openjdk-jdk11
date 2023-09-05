@@ -33,6 +33,7 @@ package sun.security.ec;
 
 import java.util.*;
 import java.security.*;
+import sun.security.action.GetPropertyAction;
 import sun.security.util.CurveDB;
 import sun.security.util.NamedCurve;
 
@@ -68,7 +69,7 @@ public final class SunEC extends Provider {
     private static final boolean nativeCryptTrace = NativeCrypto.isTraceEnabled();
 
     // Flag indicating whether the operating system is AIX.
-    private static final boolean isAIX = "AIX".equals(System.getProperty("os.name"));
+    private static final boolean isAIX = "AIX".equals(GetPropertyAction.privilegedGetProperty("os.name"));
 
     /* The property 'jdk.nativeEC' is used to control enablement of the native
      * ECDH implementation.
