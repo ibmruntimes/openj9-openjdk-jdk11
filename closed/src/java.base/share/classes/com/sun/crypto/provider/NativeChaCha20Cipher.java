@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 package com.sun.crypto.provider;
@@ -92,6 +92,9 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
     private static final NativeCrypto nativeCrypto;
     private static final Cleaner contextCleaner;
     private final long context;
+
+    // The previous mode, initialized to an illegal value.
+    private int prevMode = Cipher.WRAP_MODE;
 
     private final ByteArrayOutputStream aadBuf;
 
@@ -600,7 +603,18 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         aadDone = false;
         initialized = true;
 
-        int ret = nativeCrypto.ChaCha20Init(context, ossl_mode, openssl_iv, openssl_iv.length, keyBytes, keyBytes.length);
+        // Optimize the initialization of chacha20-poly1305 when they have the same ossl_mode
+        // otherwise, we have to reinitialize based upon the ossl_mode.
+        int ret;
+        if (prevMode == ossl_mode) {
+            ret = nativeCrypto.ChaCha20Init(context, ossl_mode, openssl_iv, openssl_iv.length, keyBytes, keyBytes.length, true);
+        } else {
+            ret = nativeCrypto.ChaCha20Init(context, ossl_mode, openssl_iv, openssl_iv.length, keyBytes, keyBytes.length, false);
+            prevMode = ossl_mode;
+        }
+        if (ret == -1) {
+            throw new ProviderException("Error in Native ChaCha20Cipher");
+        }
     }
 
     /**
