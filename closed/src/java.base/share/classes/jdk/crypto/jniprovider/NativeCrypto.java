@@ -218,7 +218,7 @@ public class NativeCrypto {
                                                   int digestOffset,
                                                   int digestLen);
 
-    public final native void DigestReset(long context);
+    public final native int DigestReset(long context);
 
     /* Native interfaces shared by CBC and ChaCha20 */
 
