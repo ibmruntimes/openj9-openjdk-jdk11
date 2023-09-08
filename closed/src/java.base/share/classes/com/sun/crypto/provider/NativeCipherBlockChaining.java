@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -56,6 +56,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
     private static final NativeCrypto nativeCrypto;
     private static final Cleaner contextCleaner;
+    private int previousKeyLength = -1;
 
     /*
      * Initialize the CBC context.
@@ -184,7 +185,12 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
 
         int ret;
         synchronized (this) {
-            ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length);
+            if (previousKeyLength == key.length) {
+                ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length, true);
+            } else {
+                ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length, false);
+                previousKeyLength = key.length;
+            }
         }
         if (ret == -1) {
             throw new ProviderException("Error in Native CipherBlockChaining");
@@ -201,7 +207,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         System.arraycopy(iv, 0, r, 0, blockSize);
         int ret;
         synchronized (this) {
-            ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length);
+            ret = nativeCrypto.CBCInit(nativeContext, mode, iv, iv.length, key, key.length, true);
         }
         if (ret == -1) {
             throw new ProviderException("Error in Native CipherBlockChaining");
@@ -225,7 +231,7 @@ class NativeCipherBlockChaining extends FeedbackCipher  {
         System.arraycopy(rSave, 0, r, 0, blockSize);
         int ret;
         synchronized (this) {
-            ret = nativeCrypto.CBCInit(nativeContext, mode, r, r.length, key, key.length);
+            ret = nativeCrypto.CBCInit(nativeContext, mode, r, r.length, key, key.length, true);
         }
         if (ret == -1) {
             throw new ProviderException("Error in Native CipherBlockChaining");
