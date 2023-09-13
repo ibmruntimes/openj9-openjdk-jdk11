@@ -174,4 +174,7 @@ JLI_AddArgsFromEnvVar(JLI_List args, const char *var_name);
 JNIEXPORT jboolean JNICALL
 JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name);
 
+JNIEXPORT JLI_List JNICALL
+JLI_ParseOpenJ9ArgsFile(const char *filename);
+
 #endif  /* _JLI_UTIL_H */

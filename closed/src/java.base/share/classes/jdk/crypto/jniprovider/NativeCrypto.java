@@ -220,7 +220,7 @@ public class NativeCrypto {
 
     public final native int DigestReset(long context);
 
-    /* Native interfaces shared by CBC and ChaCha20 */
+    /* Native interfaces shared by CBC, ChaCha20 and GCM. */
 
     public final native long CreateContext();
 
@@ -252,7 +252,8 @@ public class NativeCrypto {
 
     /* Native GCM interfaces */
 
-    public final native int GCMEncrypt(byte[] key,
+    public final native int GCMEncrypt(long context,
+                                       byte[] key,
                                        int keylen,
                                        byte[] iv,
                                        int ivlen,
@@ -263,9 +264,12 @@ public class NativeCrypto {
                                        int outOffset,
                                        byte[] aad,
                                        int aadLen,
-                                       int tagLen);
+                                       int tagLen,
+                                       boolean newIVLen,
+                                       boolean newKeyLen);
 
-    public final native int GCMDecrypt(byte[] key,
+    public final native int GCMDecrypt(long context,
+                                       byte[] key,
                                        int keylen,
                                        byte[] iv,
                                        int ivlen,
@@ -276,7 +280,9 @@ public class NativeCrypto {
                                        int outOffset,
                                        byte[] aad,
                                        int aadLen,
-                                       int tagLen);
+                                       int tagLen,
+                                       boolean newIVLen,
+                                       boolean newKeyLen);
 
     /* Native RSA interfaces */
 
