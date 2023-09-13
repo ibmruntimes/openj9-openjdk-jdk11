@@ -371,8 +371,12 @@ static JLI_List expandArgFile(const char *arg) {
 
     /* failed to access the file */
     if (stat(arg, &st) != 0) {
-        JLI_ReportMessage(CFG_ERROR6, arg);
-        exit(1);
+        if (parsingOpenJ9Args) {
+            return NULL;
+        } else {
+            JLI_ReportMessage(CFG_ERROR6, arg);
+            exit(1);
+        }
     }
 
     if (st.st_size > MAX_ARGF_SIZE) {
@@ -383,15 +387,19 @@ static JLI_List expandArgFile(const char *arg) {
     fptr = fopen(arg, "r");
     /* arg file cannot be openned */
     if (fptr == NULL) {
-        JLI_ReportMessage(CFG_ERROR6, arg);
-        exit(1);
+        if (parsingOpenJ9Args) {
+            return NULL;
+        } else {
+            JLI_ReportMessage(CFG_ERROR6, arg);
+            exit(1);
+        }
     }
 
     rv = readArgFile(fptr);
     fclose(fptr);
 
     /* error occurred reading the file */
-    if (rv == NULL) {
+    if (rv == NULL && !parsingOpenJ9Args) {
         JLI_ReportMessage(DLL_ERROR4, arg);
         exit(1);
     }
@@ -523,6 +531,37 @@ JLI_ParseOpenJ9ArgsFromEnvVar(JLI_List args, const char *var_name) {
     relaunch = JNI_FALSE;
 
     result = expand(args, env, var_name);
+
+    /* Restore the state. */
+    parsingOpenJ9Args = JNI_FALSE;
+    firstAppArgIndex = savedFirstAppArgIndex;
+    expectingNoDashArg = savedExpectingNoDashArg;
+    argsCount = savedArgsCount;
+    stopExpansion = savedStopExpansion;
+    relaunch = savedRelaunch;
+
+    return result;
+}
+
+JNIEXPORT JLI_List JNICALL
+JLI_ParseOpenJ9ArgsFile(const char *filename) {
+    JLI_List result = NULL;
+
+    /* Save the state. */
+    int savedFirstAppArgIndex = firstAppArgIndex;
+    jboolean savedExpectingNoDashArg = expectingNoDashArg;
+    size_t savedArgsCount = argsCount;
+    jboolean savedStopExpansion = stopExpansion;
+    jboolean savedRelaunch = relaunch;
+
+    parsingOpenJ9Args = JNI_TRUE;
+    firstAppArgIndex = NOT_FOUND;
+    expectingNoDashArg = JNI_FALSE;
+    argsCount = 1;
+    stopExpansion = JNI_FALSE;
+    relaunch = JNI_FALSE;
+
+    result = expandArgFile(filename);
 
     /* Restore the state. */
     parsingOpenJ9Args = JNI_FALSE;
