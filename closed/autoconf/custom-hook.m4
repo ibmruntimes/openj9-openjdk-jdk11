@@ -41,6 +41,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_CMAKE
   OPENJ9_CONFIGURE_COMPILERS
   OPENJ9_CONFIGURE_CRIU_SUPPORT
+  OPENJ9_CONFIGURE_OPENJDK_CRAC_SUPPORT
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_DEMOS
@@ -330,6 +331,79 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
       AC_MSG_ERROR([unsupported OpenJ9 cpu $1])
       ;;
   esac
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_CRIU_SUPPORT],
+[
+  AC_MSG_CHECKING([for CRIU support])
+  AC_ARG_ENABLE([criu-support], [AS_HELP_STRING([--enable-criu-support], [enable CRIU support @<:@disabled@:>@])])
+  OPENJ9_ENABLE_CRIU_SUPPORT=false
+
+  if test "x$enable_criu_support" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_CRIU_SUPPORT=true
+  elif test "x$enable_criu_support" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_criu_support" = x ; then
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64|xl64|xr64|xz64)
+        AC_MSG_RESULT([yes (default)])
+        OPENJ9_ENABLE_CRIU_SUPPORT=true
+        ;;
+      *)
+        AC_MSG_RESULT([no (default)])
+        ;;
+    esac
+  else
+    AC_MSG_ERROR([--enable-criu-support accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_CRIU_SUPPORT)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_CRAC_SUPPORT],
+[
+  AC_MSG_CHECKING([for OpenJDK CRAC support])
+  AC_ARG_ENABLE([openjdk-crac-support], [AS_HELP_STRING([--enable-openjdk-crac-support], [enable OpenJDK CRAC support @<:@disabled@:>@])])
+  OPENJ9_ENABLE_OPENJDK_CRAC_SUPPORT=false
+
+  if test "x$enable_openjdk_crac_support" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_OPENJDK_CRAC_SUPPORT=true
+  elif test "x$enable_openjdk_crac_support" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_openjdk_crac_support" = x ; then
+    case "$OPENJ9_PLATFORM_CODE" in
+      xa64)
+        AC_MSG_RESULT([yes (default)])
+        OPENJ9_ENABLE_OPENJDK_CRAC_SUPPORT=true
+        ;;
+      *)
+        AC_MSG_RESULT([no (default)])
+        ;;
+    esac
+  else
+    AC_MSG_ERROR([--enable-openjdk-crac-support accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_OPENJDK_CRAC_SUPPORT)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_INLINE_TYPES],
+[
+  AC_MSG_CHECKING([for inline types])
+  AC_ARG_ENABLE([inline-types], [AS_HELP_STRING([--enable-inline-types], [enable Inline-Type support @<:@disabled@:>@])])
+  OPENJ9_ENABLE_INLINE_TYPES=false
+
+  if test "x$enable_inline_types" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_INLINE_TYPES=true
+  elif test "x$enable_inline_types" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_inline_types" = x ; then
+    AC_MSG_RESULT([no (default)])
+  else
+    AC_MSG_ERROR([--enable-inline-types accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_INLINE_TYPES)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
