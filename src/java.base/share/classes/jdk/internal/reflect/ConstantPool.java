@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package jdk.internal.reflect;
 
@@ -103,7 +108,10 @@ public class ConstantPool {
   // Internals only below this point
   //
 
+  private static native void registerNatives();
+
   static {
+      registerNatives();
       Reflection.registerFieldsToFilter(ConstantPool.class, new String[] { "constantPoolOop" });
   }
 
