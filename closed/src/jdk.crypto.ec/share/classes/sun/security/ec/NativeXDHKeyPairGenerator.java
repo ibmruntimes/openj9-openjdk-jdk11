@@ -38,6 +38,7 @@ import java.security.InvalidParameterException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGeneratorSpi;
+import java.security.Provider;
 import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -46,6 +47,8 @@ import java.security.spec.NamedParameterSpec;
 
 import jdk.crypto.jniprovider.NativeCrypto;
 
+import sun.security.jca.JCAUtil;
+import sun.security.provider.Sun;
 import sun.security.util.BitArray;
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.X509Key;
@@ -59,6 +62,7 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
     private final XECParameters lockedParams;
 
     private XDHKeyPairGenerator javaImplementation;
+    private boolean useJavaImpl;
 
     public NativeXDHKeyPairGenerator() {
         tryInitialize(NamedParameterSpec.X25519);
@@ -105,10 +109,42 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
         }
 
         ops = new XECOperations(params);
+        this.random = (random != null) ? random : JCAUtil.getSecureRandom();
+
+        useJavaImpl = false;
+        if (random == null) {
+            if (nativeCryptTrace) {
+                System.err.println("No SecureRandom implementation was provided during"
+                        + " initialization. Using OpenSSL.");
+            }
+        } else if ((random.getProvider() instanceof Sun)
+            && ("NativePRNG".equals(random.getAlgorithm()) || "DRBG".equals(random.getAlgorithm()))
+        ) {
+            if (nativeCryptTrace) {
+                System.err.println("Default SecureRandom implementation was provided during"
+                        + " initialization. Using OpenSSL.");
+            }
+        } else {
+            if (nativeCryptTrace) {
+                System.err.println("SecureRandom implementation was provided during"
+                        + " initialization. Using Java implementation instead of OpenSSL.");
+            }
+            useJavaImpl = true;
+        }
     }
 
     @Override
     public KeyPair generateKeyPair() {
+        /*
+         * When the keypair generator is initialized with
+         * anything other than the default SecureRandom
+         * implementation, use the Java implementation
+         * to generate the keypair.
+         */
+        if (useJavaImpl) {
+            return javaImplGenerateKeyPair();
+        }
+
         /* If library isn't loaded, use Java implementation. */
         if (!NativeCrypto.isAllowedAndLoaded()) {
             if (nativeCryptTrace) {
@@ -177,12 +213,16 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
      */
     private void initializeJavaImplementation() {
         if (javaImplementation == null) {
-            if (isX25519(ops.getParameters())) {
+            if (lockedParams == null) {
+                javaImplementation = new XDHKeyPairGenerator();
+            } else if (isX25519(lockedParams)) {
                 javaImplementation = new XDHKeyPairGenerator.X25519();
             } else {
                 javaImplementation = new XDHKeyPairGenerator.X448();
             }
         }
+
+        javaImplementation.initialize(ops.getParameters().getBits(), random);
     }
 
     /*
