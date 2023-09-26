@@ -22,6 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs11;
 
 import java.nio.ByteBuffer;
@@ -604,7 +611,7 @@ final class P11Cipher extends CipherSpi {
                 if (padBufferLen != 0) {
                     if (padBufferLen != padBuffer.length) {
                         int bufCapacity = padBuffer.length - padBufferLen;
-                        if (inLen > bufCapacity) {
+                        if (inLen >= bufCapacity) {
                             bufferInputBytes(in, inOfs, bufCapacity);
                             inOfs += bufCapacity;
                             inLen -= bufCapacity;
