@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -33,7 +33,6 @@ package java.lang.invoke;
 
 import jdk.internal.misc.JavaLangInvokeAccess;
 import jdk.internal.misc.SharedSecrets;
-import jdk.internal.org.objectweb.asm.AnnotationVisitor;
 import jdk.internal.org.objectweb.asm.ClassWriter;
 import jdk.internal.org.objectweb.asm.MethodVisitor;
 import jdk.internal.reflect.CallerSensitive;
@@ -1308,7 +1307,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             ClassWriter cw = new ClassWriter(0);
 
             // private static class InjectedInvoker {
-            //     @Hidden
             //     static Object invoke_V(MethodHandle vamh, Object[] args) throws Throwable {
             //        return vamh.invokeExact(args);
             //     }
@@ -1318,10 +1316,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             MethodVisitor mv = cw.visitMethod(ACC_STATIC, "invoke_V",
                           "(Ljava/lang/invoke/MethodHandle;[Ljava/lang/Object;)Ljava/lang/Object;",
                           null, null);
-
-            // Suppress invoker method in stack traces.
-            AnnotationVisitor av0 = mv.visitAnnotation("Ljava/lang/invoke/LambdaForm$Hidden;", true);
-            av0.visitEnd();
 
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
