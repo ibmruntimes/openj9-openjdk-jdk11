@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2021, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,8 @@
 package sun.security.rsa;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.math.BigInteger;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -49,7 +51,7 @@ import jdk.crypto.jniprovider.NativeCrypto;
  * RSA private key implementation for "RSA", "RSASSA-PSS" algorithms in CRT form.
  * For non-CRT private keys, see RSAPrivateKeyImpl. We need separate classes
  * to ensure correct behavior in instanceof checks, etc.
- *
+ * <p>
  * Note: RSA keys must be at least 512 bits long
  *
  * @see RSAPrivateKeyImpl
@@ -396,5 +398,20 @@ public final class RSAPrivateCrtKeyImpl
         } catch (IOException e) {
             throw new InvalidKeyException("Invalid RSA private key", e);
         }
+    }
+
+    /**
+     * Restores the state of this object from the stream.
+     * <p>
+     * Deserialization of this object is not supported.
+     *
+     * @param  stream the {@code ObjectInputStream} from which data is read
+     * @throws IOException if an I/O error occurs
+     * @throws ClassNotFoundException if a serialized class cannot be loaded
+     */
+    private void readObject(ObjectInputStream stream)
+            throws IOException, ClassNotFoundException {
+        throw new InvalidObjectException(
+                "RSAPrivateCrtKeyImpl keys are not directly deserializable");
     }
 }
