@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package java.lang.invoke;
 
@@ -4896,7 +4901,7 @@ assertEquals("boojum", (String) catTrace.invokeExact("boo", "jum"));
                 pred.set(i, dropArguments0(constant(boolean.class, true), 0, commonParameterSequence));
             }
             if (fini.get(i) == null) {
-                fini.set(i, empty(methodType(t, commonParameterSequence)));
+                fini.set(i, empty(methodType(loopReturnType, commonParameterSequence)));
             }
         }
 
