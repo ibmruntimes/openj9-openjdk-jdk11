@@ -578,7 +578,9 @@ class TimerThread extends Thread {
                             // A zero checkpointRestoreTimeDelta value indicates no Checkpoint performed yet,
                             // it can't be negative, otherwise a RestoreException already was thrown.
                             if (checkpointRestoreTimeDelta > 0) {
+                                // Ensure the time compensation in milliseconds is not less than the checkpoint restore time delta.
                                 task.nextExecutionTime += (checkpointRestoreTimeDelta / 1000000);
+                                task.nextExecutionTime += ((checkpointRestoreTimeDelta % 1000000 == 0) ? 0 : 1);
                                 // clear the flag - only one time adjustment required
                                 task.criuAdjustRequired = false;
                             }
