@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 /*
  * This source code is provided to illustrate the usage of a given feature
@@ -72,6 +77,14 @@ public class TTY implements EventNotifier {
         Thread.yield();  // fetch output
         MessageOutput.lnprint("VM Started:");
     }
+
+/*[IF CRIU_SUPPORT]*/
+    @Override
+    public void vmRestoreEvent(VMRestoreEvent re)  {
+        Thread.yield();  // fetch output
+        MessageOutput.lnprint("VM Restored:");
+    }
+/*[ENDIF] CRIU_SUPPORT */
 
     @Override
     public void vmDeathEvent(VMDeathEvent e)  {

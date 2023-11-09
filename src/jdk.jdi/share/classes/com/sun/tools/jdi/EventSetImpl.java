@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
 
 package com.sun.tools.jdi;
 
@@ -64,6 +69,9 @@ import com.sun.jdi.event.ThreadStartEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
 import com.sun.jdi.event.VMStartEvent;
+/*[IF CRIU_SUPPORT]*/
+import com.sun.jdi.event.VMRestoreEvent;
+/*[ENDIF] CRIU_SUPPORT */
 import com.sun.jdi.event.WatchpointEvent;
 import com.sun.jdi.request.EventRequest;
 
@@ -495,6 +503,19 @@ public class EventSetImpl extends ArrayList<Event> implements EventSet {
         }
     }
 
+/*[IF CRIU_SUPPORT]*/
+class VMRestoreEventImpl extends ThreadedEventImpl implements VMRestoreEvent {
+
+    VMRestoreEventImpl(JDWP.Event.Composite.Events.VMRestore evt) {
+        super(evt, evt.requestID, evt.thread);
+    }
+
+    String eventName() {
+        return "VMRestoreEvent";
+    }
+}
+/*[ENDIF] CRIU_SUPPORT */
+
     class VMDeathEventImpl extends EventImpl implements VMDeathEvent {
 
         VMDeathEventImpl(JDWP.Event.Composite.Events.VMDeath evt) {
@@ -805,6 +826,12 @@ public class EventSetImpl extends ArrayList<Event> implements EventSet {
             case JDWP.EventKind.VM_DEATH:
                 return new VMDeathEventImpl(
                       (JDWP.Event.Composite.Events.VMDeath)comm);
+
+/*[IF CRIU_SUPPORT]*/
+            case JDWP.EventKind.VM_RESTORE:
+                return new VMRestoreEventImpl(
+                      (JDWP.Event.Composite.Events.VMRestore)comm);
+/*[ENDIF] CRIU_SUPPORT */
 
             default:
                 // Ignore unknown event types
