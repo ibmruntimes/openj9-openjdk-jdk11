@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 8163798 8189611
  * @summary basic tests for multi-release jar versioned streams
@@ -104,7 +110,7 @@ public class TestVersionedStream {
     @AfterClass
     public void close() throws IOException {
         Files.walk(userdir, 1)
-                .filter(p -> !p.equals(userdir))
+                .filter(p -> !p.equals(userdir) && !p.getFileName().toString().startsWith("verbosegc"))
                 .forEach(p -> {
                     try {
                         if (Files.isDirectory(p)) {
