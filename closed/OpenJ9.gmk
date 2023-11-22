@@ -195,6 +195,7 @@ $(foreach file, \
 		vmtest \
 		) \
 	$(patsubst %, $(OPENJ9_VM_BUILD_DIR)/$(call SHARED_LIBRARY,%), \
+		access \
 		anntests \
 		balloon29 \
 		bcuwhite \
