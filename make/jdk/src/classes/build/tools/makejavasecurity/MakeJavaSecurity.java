@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package build.tools.makejavasecurity;
 
 import java.io.*;
@@ -91,7 +97,8 @@ public class MakeJavaSecurity {
         }
 
         // Filter out platform-unrelated ones. We only support
-        // #ifdef, #ifndef, #else, and #endif. Nesting not supported (yet).
+        // #ifdef, #ifndef, #else, #endif and #if defined A || B.
+        // Other Nesting not supported (yet).
         int mode = 0;   // 0: out of block, 1: in match, 2: in non-match
         Iterator<String> iter = lines.iterator();
         while (iter.hasNext()) {
@@ -111,6 +118,18 @@ public class MakeJavaSecurity {
                     mode = line.endsWith(args[2]+"-"+args[3]) ? 2 : 1;
                 } else {
                     mode = line.endsWith(args[2]) ? 2 : 1;
+                }
+                iter.remove();
+            } else if (line.startsWith("#if defined ")) {
+                for (String l : line.split("\\|\\|")) {
+                    if (l.indexOf('-') > 0) {
+                        mode = l.trim().endsWith(args[2] + "-" + args[3]) ? 1 : 2;
+                    } else {
+                        mode = l.trim().endsWith(args[2]) ? 1 : 2;
+                    }
+                    if (mode == 1) {
+                        break;
+                    }
                 }
                 iter.remove();
             } else if (line.startsWith("#else")) {

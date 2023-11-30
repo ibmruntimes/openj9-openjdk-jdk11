@@ -238,9 +238,9 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
 endif # OPENSSL_BUNDLE_LIB_PATH
 
 ################################################################################
-# Copy the nss.fips.cfg only on x86 linux
+# Copy the nss.fips.cfg only on x86/p/z linux
 
-ifeq ($(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU_ARCH), linux-x86)
+ifneq ($(filter linux-x86_64 linux-ppc64le linux-s390x, $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU)), )
   NSS_FIPS_CFG_SRC := $(TOPDIR)/closed/src/java.base/share/conf/security/nss.fips.cfg
   NSS_FIPS_CFG_DST := $(CONF_DST_DIR)/security/nss.fips.cfg
 
