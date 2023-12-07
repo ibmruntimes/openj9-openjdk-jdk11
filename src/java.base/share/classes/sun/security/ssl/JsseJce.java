@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.ssl;
 
 import java.math.BigInteger;
@@ -143,6 +149,26 @@ final class JsseJce {
      * JCA identifier string for ECDSA, i.e. a ECDSA with SHA-1.
      */
     static final String SIGNATURE_ECDSA = "SHA1withECDSA";
+
+    /**
+     * JCA identifier string for ECDSA, i.e. a ECDSA with SHA224.
+     */
+    static final String SIGNATURE_ECDSA_224 = "SHA224withECDSA";
+
+    /**
+     * JCA identifier string for ECDSA, i.e. a ECDSA with SHA256.
+     */
+    static final String SIGNATURE_ECDSA_256 = "SHA256withECDSA";
+
+    /**
+     * JCA identifier string for ECDSA, i.e. a ECDSA with SHA384.
+     */
+    static final String SIGNATURE_ECDSA_384 = "SHA384withECDSA";
+
+    /**
+     * JCA identifier string for ECDSA, i.e. a ECDSA with SHA512.
+     */
+    static final String SIGNATURE_ECDSA_512 = "SHA512withECDSA";
 
     /**
      * JCA identifier string for Raw DSA, i.e. a DSA signature without
@@ -393,10 +419,38 @@ final class JsseJce {
         // Is EC crypto available?
         private static final boolean isAvailable;
 
+        /**
+         * Checks if a particular signature algorithm is available.
+         *
+         * @param algorithm the algorithm we will attempt to instantiate to check if it is available
+         * @return true if the signature algorithm is found, false otherwise
+         */
+        private static boolean isSignatureAlgorithmAvailable(String algorithm) {
+            try {
+                // Attempt to create a Cipher instance with the specified algorithm.
+                JsseJce.getSignature(algorithm);
+                return true;
+            } catch (NoSuchAlgorithmException e) {
+                return false;
+            }
+        }
+
         static {
             boolean mediator = true;
             try {
-                JsseJce.getSignature(SIGNATURE_ECDSA);
+                // When running in FIPS mode, the signature "SHA1withECDSA" is not
+                // available by default. In this scenario we should still set EC
+                // availability to true since other algorithms in the ECDSA signature
+                // family are available for use in various ECDSA TLS ciphers. All
+                // FIPS solutions are expected to have an algorithm such as
+                // "SHA512withECDSA", "SHA384withECDSA", "SHA256withECDSA", or
+                // "SHA224withECDSA" available so we will also check for these algorithms.
+                mediator = isSignatureAlgorithmAvailable(SIGNATURE_ECDSA)
+                    || isSignatureAlgorithmAvailable(SIGNATURE_ECDSA_224)
+                    || isSignatureAlgorithmAvailable(SIGNATURE_ECDSA_256)
+                    || isSignatureAlgorithmAvailable(SIGNATURE_ECDSA_384)
+                    || isSignatureAlgorithmAvailable(SIGNATURE_ECDSA_512);
+
                 JsseJce.getSignature(SIGNATURE_RAWECDSA);
                 JsseJce.getKeyAgreement("ECDH");
                 JsseJce.getKeyFactory("EC");
