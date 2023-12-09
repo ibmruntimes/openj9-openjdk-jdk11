@@ -119,14 +119,15 @@ public class NativeCrypto {
 
     /**
      * Return the OpenSSL version.
-     * -1 is returned if CRIU is enabled and the checkpoint is allowed.
+     * -1 is returned if CRIU is enabled and checkpoints are allowed
+     * unless -XX:-CRIUSecProvider is specified.
      * The libraries are to be loaded for the first reference of InstanceHolder.instance.
      *
      * @return the OpenSSL library version if it is available
      */
     public static final long getVersionIfAvailable() {
 /*[IF CRIU_SUPPORT]*/
-        if (InternalCRIUSupport.isCheckpointAllowed()) {
+        if (InternalCRIUSupport.isCheckpointAllowed() && InternalCRIUSupport.enableCRIUSecProvider()) {
             return -1;
         }
 /*[ENDIF] CRIU_SUPPORT */

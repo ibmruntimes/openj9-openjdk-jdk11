@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package com.sun.crypto.provider;
 
 import java.util.Arrays;
@@ -33,6 +39,11 @@ import javax.crypto.MacSpi;
 import javax.crypto.SecretKey;
 import java.security.*;
 import java.security.spec.*;
+
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.CRIUSECProvider;
+import openj9.internal.criu.InternalCRIUSupport;
+/*[ENDIF] CRIU_SUPPORT */
 
 /**
  * This class constitutes the core of HMAC-<MD> algorithms, where
@@ -94,6 +105,12 @@ abstract class HmacCore extends MacSpi implements Cloneable {
         this.k_ipad = new byte[blockLen];
         this.k_opad = new byte[blockLen];
         first = true;
+
+        /*[IF CRIU_SUPPORT]*/
+        if (InternalCRIUSupport.enableCRIUSecProvider()) {
+            CRIUSECProvider.doOnRestart(this, hmac -> hmac.engineReset());
+        }
+        /*[ENDIF] CRIU_SUPPORT */
     }
 
     /**

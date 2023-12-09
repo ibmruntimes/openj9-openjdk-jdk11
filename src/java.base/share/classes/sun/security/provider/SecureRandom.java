@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.provider;
 
 import java.io.IOException;
@@ -31,6 +37,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandomSpi;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
 
 /**
  * <p>This class provides a crytpographically strong pseudo-random number
@@ -261,6 +268,14 @@ implements java.io.Serializable {
         remainder = output;
         remCount %= DIGEST_SIZE;
     }
+
+    /*[IF CRIU_SUPPORT]*/
+    void clearState() {
+        Arrays.fill(state, (byte) 0x00);
+        Arrays.fill(remainder, (byte) 0x00);
+        remCount = 0;
+    }
+    /*[ENDIF] CRIU_SUPPORT */
 
     /*
      * This method is called to restore the state of the random object from

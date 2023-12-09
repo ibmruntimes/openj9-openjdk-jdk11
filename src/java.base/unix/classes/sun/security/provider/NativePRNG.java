@@ -23,12 +23,22 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.provider;
 
 import java.io.*;
 import java.net.*;
 import java.security.*;
 import java.util.Arrays;
+
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.CRIUSECProvider;
+/*[ENDIF] CRIU_SUPPORT */
 
 import sun.security.util.Debug;
 
@@ -86,6 +96,9 @@ public final class NativePRNG extends SecureRandomSpi {
 
     // which kind of RandomIO object are we creating?
     private enum Variant {
+        /*[IF CRIU_SUPPORT]*/
+        CRIU,
+        /*[ENDIF] CRIU_SUPPORT */
         MIXED, BLOCKING, NONBLOCKING
     }
 
@@ -135,6 +148,13 @@ public final class NativePRNG extends SecureRandomSpi {
                     File nextFile;
 
                     switch(v) {
+                    /*[IF CRIU_SUPPORT]*/
+                    case CRIU:
+                        seedFile = new File(NAME_RANDOM);
+                        nextFile = new File(NAME_URANDOM);
+                        break;
+                    /*[ENDIF] CRIU_SUPPORT */
+
                     case MIXED:
                         URL egdUrl;
                         File egdFile = null;
@@ -187,7 +207,18 @@ public final class NativePRNG extends SecureRandomSpi {
                     }
 
                     try {
-                        return new RandomIO(seedFile, nextFile);
+                        RandomIO instance = new RandomIO(seedFile, nextFile, v);
+
+                        /*[IF CRIU_SUPPORT]*/
+                        /* CRIU is only used if isCheckpointAllowed(),
+                         * so there's no need to check that again here.
+                         */
+                        if (v == Variant.CRIU) {
+                            CRIUSECProvider.doOnRestart(instance, random -> random.clearRNGState());
+                        }
+                        /*[ENDIF] CRIU_SUPPORT */
+
+                        return instance;
                     } catch (Exception e) {
                         return null;
                     }
@@ -325,6 +356,53 @@ public final class NativePRNG extends SecureRandomSpi {
         }
     }
 
+    /*[IF CRIU_SUPPORT]*/
+    /**
+     * A NativePRNG-like class that uses /dev/random for seed and
+     * /dev/urandom for random material.
+     *
+     * Note that it does not respect the egd properties, since we have
+     * no way of knowing what those qualities are.
+     *
+     * This is very similar to the outer NativePRNG class, minimizing any
+     * breakage to the serialization of the existing implementation.
+     *
+     * @since   1.8
+     */
+    public static final class CRIUNativePRNG extends SecureRandomSpi {
+        private static final long serialVersionUID = -6599091113397072932L;
+
+        private static final RandomIO INSTANCE = initIO(Variant.CRIU);
+
+        // constructor, called by the JCA framework
+        public CRIUNativePRNG() {
+            super();
+            if (INSTANCE == null) {
+                throw new AssertionError(
+                    "NativePRNG$CRIUNativePRNG not available");
+            }
+        }
+
+        // set the seed
+        @Override
+        protected void engineSetSeed(byte[] seed) {
+            INSTANCE.implSetSeed(seed);
+        }
+
+        // get pseudo random bytes
+        @Override
+        protected void engineNextBytes(byte[] bytes) {
+            INSTANCE.implNextBytes(bytes);
+        }
+
+        // get true random bytes
+        @Override
+        protected byte[] engineGenerateSeed(int numBytes) {
+            return INSTANCE.implGenerateSeed(numBytes);
+        }
+    }
+    /*[ENDIF] CRIU_SUPPORT */
+
     /**
      * Nested class doing the actual work. Singleton, see INSTANCE above.
      */
@@ -357,6 +435,8 @@ public final class NativePRNG extends SecureRandomSpi {
         // buffer for next bits
         private byte[] nextBuffer;
 
+        private final Variant variant;
+
         // number of bytes left in nextBuffer
         private int buffered;
 
@@ -383,11 +463,12 @@ public final class NativePRNG extends SecureRandomSpi {
         private final Object LOCK_SET_SEED = new Object();
 
         // constructor, called only once from initIO()
-        private RandomIO(File seedFile, File nextFile) throws IOException {
+        private RandomIO(File seedFile, File nextFile, Variant variant) throws IOException {
             this.seedFile = seedFile;
             seedIn = FileInputStreamPool.getInputStream(seedFile);
             nextIn = FileInputStreamPool.getInputStream(nextFile);
             nextBuffer = new byte[bufferSize];
+            this.variant = variant;
         }
 
         // get the SHA1PRNG for mixing
@@ -401,7 +482,7 @@ public final class NativePRNG extends SecureRandomSpi {
                         r = new sun.security.provider.SecureRandom();
                         try {
                             byte[] b = new byte[20];
-                            readFully(nextIn, b);
+                            readFully(nextIn, b, variant);
                             r.engineSetSeed(b);
                         } catch (IOException e) {
                             throw new ProviderException("init failed", e);
@@ -416,9 +497,17 @@ public final class NativePRNG extends SecureRandomSpi {
         // read data.length bytes from in
         // These are not normal files, so we need to loop the read.
         // just keep trying as long as we are making progress
-        private static void readFully(InputStream in, byte[] data)
+        private static void readFully(InputStream in, byte[] data, Variant variant)
                 throws IOException {
             int len = data.length;
+            /*[IF CRIU_SUPPORT]*/
+            if (variant == Variant.CRIU) {
+                // read bytes from non blocking source
+                if (in.readNBytes(data, 0, len) < len) {
+                    throw new IOException("Could not read from file(s)");
+                }
+            }
+            /*[ELSE] CRIU_SUPPORT */
             int ofs = 0;
             while (len > 0) {
                 int k = in.read(data, ofs, len);
@@ -431,6 +520,7 @@ public final class NativePRNG extends SecureRandomSpi {
             if (len > 0) {
                 throw new IOException("Could not read from file(s)");
             }
+            /*[ENDIF] CRIU_SUPPORT */
         }
 
         // get true random bytes, just read from "seed"
@@ -438,7 +528,7 @@ public final class NativePRNG extends SecureRandomSpi {
             synchronized (LOCK_GET_SEED) {
                 try {
                     byte[] b = new byte[numBytes];
-                    readFully(seedIn, b);
+                    readFully(seedIn, b, variant);
                     return b;
                 } catch (IOException e) {
                     throw new ProviderException("generateSeed() failed", e);
@@ -523,7 +613,7 @@ public final class NativePRNG extends SecureRandomSpi {
 
             // Load fresh random bytes into nextBuffer
             lastRead = time;
-            readFully(nextIn, nextBuffer);
+            readFully(nextIn, nextBuffer, variant);
             buffered = nextBuffer.length;
         }
 
@@ -533,6 +623,16 @@ public final class NativePRNG extends SecureRandomSpi {
         private void implNextBytes(byte[] data) {
                 try {
                     getMixRandom().engineNextBytes(data);
+                    /*[IF CRIU_SUPPORT]*/
+                    if (variant == Variant.CRIU) {
+                        // read random data from non blocking source
+                        byte[] rawData = new byte[data.length];
+                        readFully(nextIn, rawData, variant);
+                        for (int i = 0; i < data.length; i++) {
+                            data[i] ^= rawData[i];
+                        }
+                    }
+                    /*[ELSE] CRIU_SUPPORT */
                     int data_len = data.length;
                     int ofs = 0;
                     int len;
@@ -562,9 +662,19 @@ public final class NativePRNG extends SecureRandomSpi {
                         }
                     data_len -= len;
                     }
+                    /*[ENDIF] CRIU_SUPPORT */
                 } catch (IOException e){
                     throw new ProviderException("nextBytes() failed", e);
                 }
         }
+
+        /*[IF CRIU_SUPPORT]*/
+        private void clearRNGState() {
+            if (mixRandom != null) {
+                mixRandom.clearState();
+            }
+        }
+        /*[ENDIF] CRIU_SUPPORT */
+
         }
 }

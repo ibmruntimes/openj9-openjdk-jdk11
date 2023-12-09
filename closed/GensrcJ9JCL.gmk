@@ -39,6 +39,7 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 	SRC := $(TOPDIR), \
 	DEST := $(SUPPORT_OUTPUTDIR)/overlay, \
 	FILES := \
+		src/java.base/share/classes/com/sun/crypto/provider/HmacCore.java \
 		src/java.base/share/classes/java/lang/ClassValue.java \
 		src/java.base/share/classes/java/net/InetAddress.java \
 		src/java.base/share/classes/java/security/Security.java \
@@ -48,7 +49,10 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 		src/java.base/share/classes/jdk/internal/misc/JavaNetInetAddressAccess.java \
 		src/java.base/share/classes/sun/security/jca/ProviderConfig.java \
 		src/java.base/share/classes/sun/security/jca/ProviderList.java \
+		src/java.base/share/classes/sun/security/provider/DigestBase.java \
+		src/java.base/share/classes/sun/security/provider/SecureRandom.java \
 		src/java.base/unix/classes/java/lang/ProcessEnvironment.java \
+		src/java.base/unix/classes/sun/security/provider/NativePRNG.java \
 	))
 
 IncludeIfUnsure := -includeIfUnsure -noWarnIncludeIf
