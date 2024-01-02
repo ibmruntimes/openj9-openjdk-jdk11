@@ -22,6 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+*/
+
 package sun.nio.ch.sctp;
 
 import java.net.InetAddress;
@@ -289,8 +296,6 @@ public class SctpMultiChannelImpl extends SctpMultiChannel
     @Override
     public void implCloseSelectableChannel() throws IOException {
         synchronized (stateLock) {
-            SctpNet.preClose(fdVal);
-
             if (receiverThread != 0)
                 NativeThread.signal(receiverThread);
 
@@ -299,6 +304,8 @@ public class SctpMultiChannelImpl extends SctpMultiChannel
 
             if (!isRegistered())
                 kill();
+
+            SctpNet.preClose(fdVal);
         }
     }
 

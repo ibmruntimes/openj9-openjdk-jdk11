@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.nio.ch;
 
 import java.io.FileDescriptor;
@@ -361,8 +367,9 @@ class ServerSocketChannelImpl
                 assert state == ST_CLOSING;
                 long th = thread;
                 if (th != 0) {
-                    nd.preClose(fd);
                     NativeThread.signal(th);
+
+                    nd.preClose(fd);
 
                     // wait for accept operation to end
                     while (thread != 0) {
