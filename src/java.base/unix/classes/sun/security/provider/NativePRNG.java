@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -506,8 +506,9 @@ public final class NativePRNG extends SecureRandomSpi {
                 if (in.readNBytes(data, 0, len) < len) {
                     throw new IOException("Could not read from file(s)");
                 }
+                return;
             }
-            /*[ELSE] CRIU_SUPPORT */
+            /*[ENDIF] CRIU_SUPPORT */
             int ofs = 0;
             while (len > 0) {
                 int k = in.read(data, ofs, len);
@@ -520,7 +521,6 @@ public final class NativePRNG extends SecureRandomSpi {
             if (len > 0) {
                 throw new IOException("Could not read from file(s)");
             }
-            /*[ENDIF] CRIU_SUPPORT */
         }
 
         // get true random bytes, just read from "seed"
@@ -631,8 +631,9 @@ public final class NativePRNG extends SecureRandomSpi {
                         for (int i = 0; i < data.length; i++) {
                             data[i] ^= rawData[i];
                         }
+                        return;
                     }
-                    /*[ELSE] CRIU_SUPPORT */
+                    /*[ENDIF] CRIU_SUPPORT */
                     int data_len = data.length;
                     int ofs = 0;
                     int len;
@@ -662,7 +663,6 @@ public final class NativePRNG extends SecureRandomSpi {
                         }
                     data_len -= len;
                     }
-                    /*[ENDIF] CRIU_SUPPORT */
                 } catch (IOException e){
                     throw new ProviderException("nextBytes() failed", e);
                 }
