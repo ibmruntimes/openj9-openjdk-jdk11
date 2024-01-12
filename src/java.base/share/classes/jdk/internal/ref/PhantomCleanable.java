@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 package jdk.internal.ref;
 
@@ -29,6 +34,10 @@ import java.lang.ref.Cleaner;
 import java.lang.ref.Reference;
 import java.lang.ref.PhantomReference;
 import java.util.Objects;
+
+/*[IF CRIU_SUPPORT]*/
+import openj9.internal.criu.NotCheckpointSafe;
+/*[ENDIF] CRIU_SUPPORT */
 
 /**
  * PhantomCleanable subclasses efficiently encapsulate cleanup state and
@@ -83,6 +92,9 @@ public abstract class PhantomCleanable<T> extends PhantomReference<T>
     /**
      * Insert this PhantomCleanable after the list head.
      */
+    /*[IF CRIU_SUPPORT]*/
+    @NotCheckpointSafe
+    /*[ENDIF] CRIU_SUPPORT */
     private void insert() {
         synchronized (list) {
             prev = list;
@@ -98,6 +110,9 @@ public abstract class PhantomCleanable<T> extends PhantomReference<T>
      * @return true if Cleanable was removed or false if not because
      * it had already been removed before
      */
+    /*[IF CRIU_SUPPORT]*/
+    @NotCheckpointSafe
+    /*[ENDIF] CRIU_SUPPORT */
     private boolean remove() {
         synchronized (list) {
             if (next != this) {
@@ -116,6 +131,9 @@ public abstract class PhantomCleanable<T> extends PhantomReference<T>
      *
      * @return true if the list is empty
      */
+    /*[IF CRIU_SUPPORT]*/
+    @NotCheckpointSafe
+    /*[ENDIF] CRIU_SUPPORT */
     boolean isListEmpty() {
         synchronized (list) {
             return list == list.next;
