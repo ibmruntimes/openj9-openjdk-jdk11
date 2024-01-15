@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -47,6 +47,7 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 		src/java.base/share/classes/java/util/TimerTask.java \
 		src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java \
 		src/java.base/share/classes/jdk/internal/misc/JavaNetInetAddressAccess.java \
+		src/java.base/share/classes/jdk/internal/ref/PhantomCleanable.java \
 		src/java.base/share/classes/sun/security/jca/ProviderConfig.java \
 		src/java.base/share/classes/sun/security/jca/ProviderList.java \
 		src/java.base/share/classes/sun/security/provider/DigestBase.java \
