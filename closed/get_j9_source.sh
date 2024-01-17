@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -59,14 +59,8 @@ declare -A references
 git_urls[openj9]=https://github.com/eclipse-openj9/openj9
 git_urls[omr]=https://github.com/eclipse-openj9/openj9-omr
 
-currentbranch=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$currentbranch" =~ v[0-9]+\.[0-9]+(\.[0-9]+)?-release ]] ; then
-	branches[openj9]=$currentbranch
-	branches[omr]=$currentbranch
-else
-	branches[openj9]=master
-	branches[omr]=openj9
-fi
+branches[openj9]=v0.43.0-release
+branches[omr]=v0.43.0-release
 
 pflag=false
 
