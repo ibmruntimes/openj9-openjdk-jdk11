@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -378,15 +378,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_CRAC_SUPPORT],
   elif test "x$enable_crac_support" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_crac_support" = x ; then
-    case "$OPENJ9_PLATFORM_CODE" in
-      xa64)
-        AC_MSG_RESULT([yes (default)])
-        OPENJ9_ENABLE_CRAC_SUPPORT=true
-        ;;
-      *)
-        AC_MSG_RESULT([no (default)])
-        ;;
-    esac
+    AC_MSG_RESULT([no (default)])
   else
     AC_MSG_ERROR([--enable-crac-support accepts no argument])
   fi
