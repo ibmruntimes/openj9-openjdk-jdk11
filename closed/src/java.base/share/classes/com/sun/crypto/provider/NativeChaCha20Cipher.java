@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
  * ===========================================================================
  */
 package com.sun.crypto.provider;
@@ -199,20 +199,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      */
     @Override
     protected int engineGetOutputSize(int inputLen) {
-        int outLen = 0;
-
-        if (mode == MODE_NONE) {
-            outLen = inputLen;
-        } else if (mode == MODE_AEAD) {
-            if (direction == Cipher.ENCRYPT_MODE) {
-                outLen = Math.addExact(inputLen, TAG_LENGTH);
-            } else {
-                outLen = Integer.max(inputLen, TAG_LENGTH) - TAG_LENGTH;
-                outLen = Math.addExact(outLen, engine.getCipherBufferLength());
-            }
-        }
-
-        return outLen;
+        return engine.getOutputSize(inputLen, true);
     }
 
     /**
@@ -561,6 +548,9 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         // assigning them to the object.
         byte[] newKeyBytes = getEncodedKey(key);
         checkKeyAndNonce(newKeyBytes, newNonce);
+        if (this.keyBytes != null) {
+            Arrays.fill(this.keyBytes, (byte)0);
+        }
         this.keyBytes = newKeyBytes;
         nonce = newNonce;
 
@@ -656,6 +646,9 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         }
         byte[] encodedKey = key.getEncoded();
         if (encodedKey == null || encodedKey.length != 32) {
+            if (encodedKey != null) {
+                Arrays.fill(encodedKey, (byte)0);
+            }
             throw new InvalidKeyException("Key length must be 256 bits");
         }
         return encodedKey;
@@ -674,11 +667,11 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      */
     @Override
     protected byte[] engineUpdate(byte[] in, int inOfs, int inLen) {
-        byte[] out = new byte[inLen];
+        byte[] out = new byte[engine.getOutputSize(inLen, false)];
         try {
             int size = engine.doUpdate(in, inOfs, inLen, out, 0);
             // Special case for EngineAEADDec, doUpdate only buffers the input
-            // So the output array must be empty since no encryption happened yet
+            // so the output array must be empty since no encryption has happened yet.
             if (size == 0) {
                 return new byte[0];
             }
@@ -737,7 +730,7 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
     @Override
     protected byte[] engineDoFinal(byte[] in, int inOfs, int inLen)
             throws AEADBadTagException {
-        byte[] output = new byte[engineGetOutputSize(inLen)];
+        byte[] output = new byte[engine.getOutputSize(inLen, true)];
         try {
             engine.doFinal(in, inOfs, inLen, output, 0);
         } catch (ShortBufferException | KeyException exc) {
@@ -862,6 +855,17 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
      */
     interface ChaChaEngine {
         /**
+         * Size an output buffer based on the input and where applicable
+         * the current state of the engine in a multipart operation.
+         *
+         * @param inLength the input length.
+         * @param isFinal true if this is invoked from a doFinal call.
+         *
+         * @return the recommended size for the output buffer.
+         */
+        int getOutputSize(int inLength, boolean isFinal);
+
+        /**
          * Perform a multi-part update for ChaCha20.
          *
          * @param in the input data.
@@ -907,11 +911,48 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         * @return the number of unprocessed bytes left.
         */
         int getCipherBufferLength();
+
+        /**
+         * Determines if two arrays have any overlapping memory.
+         *
+         * @param input The input array.
+         * @param inputStart The index of the input arrays start.
+         * @param inputEnd The index of the input arrays end.
+         * @param output The output array.
+         * @param outputStart The index of the output arrays start.
+         * @param outputEnd The index of the output arrays end.
+         * @return true if any memory overlaps, false otherwise.
+         */
+        static boolean arraysOverlap(byte[] input, int inputStart, int inputEnd, byte[] output, int outputStart, int outputEnd) {
+
+            // Check if there is potential overlap if input and output buffers have same address.
+            if (input != output) {
+                return false;
+            }
+
+            // If the start of input is anywhere in the range of the output array, there is an overlap.
+            if ((outputStart <= inputStart) && (inputStart < outputEnd)) {
+                return true;
+            }
+
+            // If the start of output is anywhere in the range of the input array, there is an overlap.
+            if ((inputStart <= outputStart) && (outputStart < inputEnd)) {
+                return true;
+            }
+
+            return false; // Memory does not overlap, return false.
+        }
     }
 
     private final class EngineStreamOnly implements ChaChaEngine {
 
         EngineStreamOnly() { }
+
+        @Override
+        public int getOutputSize(int inLength, boolean isFinal) {
+            // The isFinal parameter is not relevant in this kind of engine.
+            return inLength;
+        }
 
         @Override
         public synchronized int doUpdate(byte[] in, int inOff, int inLen, byte[] out,
@@ -928,10 +969,25 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
                     throw new ShortBufferException("Output buffer too small");
                 }
 
-                Objects.checkFromIndexSize(inOff, inLen, in.length);
-                int ret = nativeCrypto.ChaCha20Update(context, in, inOff, inLen, out, outOff, /*aadArray*/ null, /*aadArray.length*/ 0);
-                if (ret == -1) {
-                    throw new ProviderException("Error in Native ChaCha20Cipher");
+                if (in != null) {
+                    Objects.checkFromIndexSize(inOff, inLen, in.length);
+
+                    // Check if there is any overlap with the input and output
+                    // buffers. If so, create a temporary copy of the input such
+                    // that it does not overlap while performing an update computation
+                    // within the openssl library.
+                    int ret = -1;
+                    if (ChaChaEngine.arraysOverlap(in, inOff, inOff + inLen, out, outOff, outOff + getOutputSize(inLen, false))) {
+                        byte[] newInArray = Arrays.copyOfRange(in, inOff, inOff + inLen);
+                        ret = nativeCrypto.ChaCha20Update(context, newInArray, 0, inLen, out, outOff, /*aadArray*/ null, /*aadArray.length*/ 0);
+                        Arrays.fill(newInArray, (byte)0);
+                    } else {
+                        ret = nativeCrypto.ChaCha20Update(context, in, inOff, inLen, out, outOff, /*aadArray*/ null, /*aadArray.length*/ 0);
+                    }
+
+                    if (ret == -1) {
+                        throw new ProviderException("Error in Native ChaCha20Cipher");
+                    }
                 }
                 return inLen;
             } else {
@@ -963,6 +1019,11 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
         }
 
         @Override
+        public int getOutputSize(int inLength, boolean isFinal) {
+            return (isFinal ? Math.addExact(inLength, TAG_LENGTH) : inLength);
+        }
+
+        @Override
         public synchronized int doUpdate(byte[] in, int inOff, int inLen, byte[] out,
                 int outOff) throws ShortBufferException, KeyException {
             if (initialized) {
@@ -984,11 +1045,22 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
 
                 Objects.checkFromIndexSize(inOff, inLen, in.length);
 
-                byte aadArray[] = aadBuf.toByteArray();
+                byte[] aadArray = aadBuf.toByteArray();
                 aadBuf.reset();
-                int ret = nativeCrypto.ChaCha20Update(context, in, inOff, inLen, out, outOff, aadArray, aadArray.length);
+                // Check if there is any overlap with the input and output
+                // buffers. If so, create a temporary copy of the input such
+                // that it does not overlap while performing an update computation
+                // within the openssl library.
+                int ret = -1;
+                if (ChaChaEngine.arraysOverlap(in, inOff, inOff + inLen, out, outOff, outOff + getOutputSize(inLen, false))) {
+                    byte[] newInArray = Arrays.copyOfRange(in, inOff, inOff + inLen);
+                    ret = nativeCrypto.ChaCha20Update(context, newInArray, 0, inLen, out, outOff, aadArray, aadArray.length);
+                    Arrays.fill(newInArray, (byte)0);
+                } else {
+                    ret = nativeCrypto.ChaCha20Update(context, in, inOff, inLen, out, outOff, aadArray, aadArray.length);
+                }
                 if (ret == -1) {
-                    throw new ProviderException("Error in Native CipherBlockChaining");
+                    throw new ProviderException("Error in Native ChaCha20Cipher");
                 }
 
                 return inLen;
@@ -1034,6 +1106,18 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
             counter = 1;
             cipherBuf = new ByteArrayOutputStream(CIPHERBUF_BASE);
             tag = new byte[TAG_LENGTH];
+        }
+
+        @Override
+        public int getOutputSize(int inLen, boolean isFinal) {
+            // If we are performing a decrypt-update we should always return
+            // zero length since we cannot return any data until the tag has
+            // been consumed and verified.  CipherSpi.engineGetOutputSize will
+            // always set isFinal to true to get the required output buffer
+            // size.
+            return (isFinal ?
+                    Integer.max(Math.addExact((inLen - TAG_LENGTH),
+                            getCipherBufferLength()), 0) : 0);
         }
 
         @Override
@@ -1118,7 +1202,10 @@ abstract class NativeChaCha20Cipher extends CipherSpi {
 
         @Override
         public int getCipherBufferLength() {
-            return cipherBuf.size();
+            if (cipherBuf != null) {
+                return cipherBuf.size();
+            }
+            return 0;
         }
     }
 
