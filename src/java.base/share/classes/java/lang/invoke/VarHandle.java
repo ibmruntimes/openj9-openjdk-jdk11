@@ -23,9 +23,16 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.lang.invoke;
 
 import jdk.internal.HotSpotIntrinsicCandidate;
+import jdk.internal.misc.Unsafe;
 import jdk.internal.util.Preconditions;
 import jdk.internal.vm.annotation.ForceInline;
 import jdk.internal.vm.annotation.Stable;
@@ -1964,11 +1971,22 @@ public abstract class VarHandle {
                 new MethodHandle[AccessMode.values().length];
     }
 
+    private static final long TYPES_AND_INVOKERS_OFFSET;
+
+    static {
+        TYPES_AND_INVOKERS_OFFSET = UNSAFE.objectFieldOffset(VarHandle.class, "typesAndInvokers");
+    }
+
     @ForceInline
     private final TypesAndInvokers getTypesAndInvokers() {
         TypesAndInvokers tis = typesAndInvokers;
         if (tis == null) {
-            tis = typesAndInvokers = new TypesAndInvokers();
+            tis = new TypesAndInvokers();
+            Object other = UNSAFE.compareAndExchangeObject(this, TYPES_AND_INVOKERS_OFFSET, null, tis);
+            if (other != null) {
+                // Lost the race, so use what was set by winning thread.
+                tis = (TypesAndInvokers) other;
+            }
         }
         return tis;
     }
@@ -1978,7 +1996,13 @@ public abstract class VarHandle {
         TypesAndInvokers tis = getTypesAndInvokers();
         MethodHandle mh = tis.methodHandle_table[mode];
         if (mh == null) {
-            mh = tis.methodHandle_table[mode] = getMethodHandleUncached(mode);
+            mh = getMethodHandleUncached(mode);
+            long offset = Unsafe.ARRAY_OBJECT_BASE_OFFSET + (Unsafe.ARRAY_OBJECT_INDEX_SCALE * mode);
+            Object other = UNSAFE.compareAndExchangeObject(tis.methodHandle_table, offset, null, mh);
+            if (other != null) {
+                // We lost the race. Use the winning thread's handle instead.
+                mh = (MethodHandle) other;
+            }
         }
         return mh;
     }
