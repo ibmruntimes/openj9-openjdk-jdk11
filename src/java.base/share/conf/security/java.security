@@ -100,6 +100,7 @@ RestrictedSecurity.NSS.140-2.desc.fips = true
 RestrictedSecurity.NSS.140-2.desc.number = Certificate #4413
 RestrictedSecurity.NSS.140-2.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/4413
 RestrictedSecurity.NSS.140-2.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.NSS.140-2.fips.mode = 140-2
 
 RestrictedSecurity.NSS.140-2.tls.disabledNamedCurves =
 RestrictedSecurity.NSS.140-2.tls.disabledAlgorithms = \
@@ -165,6 +166,8 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.fips.mode = 140-3
+
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledNamedCurves =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     3DES_EDE_CBC, \
