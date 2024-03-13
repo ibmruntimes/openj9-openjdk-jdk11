@@ -78,7 +78,7 @@ public final class RestrictedSecurity {
         supportedPlatformsNSS.put("Arch", List.of("amd64", "ppc64le", "s390x"));
         supportedPlatformsNSS.put("OS", List.of("Linux"));
 
-        supportedPlatformsOpenJCEPlus.put("Arch", List.of("amd64", "ppc64"));
+        supportedPlatformsOpenJCEPlus.put("Arch", List.of("amd64", "ppc64", "s390x"));
         supportedPlatformsOpenJCEPlus.put("OS", List.of("Linux", "AIX", "Windows"));
 
         @SuppressWarnings("removal")

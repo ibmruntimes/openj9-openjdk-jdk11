@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -109,3 +109,23 @@ ifneq (,$(HEALTHCENTER_JAR))
   # The content must be extracted before module-info can be compiled.
   ibm.healthcenter-java : ibm.healthcenter-copy
 endif # HEALTHCENTER_JAR
+
+ifeq (true,$(BUILD_OPENJCEPLUS))
+
+ifeq ($(call And, $(call isTargetOs, windows) $(call isTargetCpu, x86_64)), true)
+  OPENJCEPLUS_JGSKIT_MAKE := jgskit.win64.mak
+else
+  OPENJCEPLUS_JGSKIT_MAKE := jgskit.mak
+endif
+
+openjceplus-copy : openjceplus-libs
+
+.PHONY : openjceplus-clean
+
+openjceplus-clean :
+	@$(ECHO) Cleaning OpenJCEPlus native code
+	$(MAKE) -C $(OPENJCEPLUS_TOPDIR)/src/main/native -f $(OPENJCEPLUS_JGSKIT_MAKE) cleanAll
+
+clean-openjceplus : openjceplus-clean
+
+endif # BUILD_OPENJCEPLUS

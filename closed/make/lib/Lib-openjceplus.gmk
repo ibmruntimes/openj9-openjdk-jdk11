@@ -1,0 +1,71 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+include LibCommon.gmk
+
+ifeq (true,$(BUILD_OPENJCEPLUS))
+
+# Identify the desired JGSKIT target platform.
+OPENJCEPLUS_BOOT_JDK := $(BOOT_JDK)
+OPENJCEPLUS_GSKIT_HOME := $(OPENJCEPLUS_TOPDIR)/ock/jgsk_sdk
+OPENJCEPLUS_JCE_CLASSPATH := $(JDK_OUTPUTDIR)/modules/openjceplus:$(JDK_OUTPUTDIR)/modules/java.base
+OPENJCEPLUS_JGSKIT_MAKE := jgskit.mak
+OPENJCEPLUS_JGSKIT_MAKE_PATH := $(OPENJCEPLUS_TOPDIR)/src/main/native
+OPENJCEPLUS_JGSKIT_PLATFORM :=
+
+ifeq ($(call isTargetOs, aix), true)
+  OPENJCEPLUS_JGSKIT_PLATFORM := ppc-aix64
+else ifeq ($(call isTargetOs, linux), true)
+  ifeq ($(call isTargetCpu, ppc64le), true)
+    OPENJCEPLUS_JGSKIT_PLATFORM := ppcle-linux64
+  else ifeq ($(call isTargetCpu, s390x), true)
+    OPENJCEPLUS_JGSKIT_PLATFORM := s390-linux64
+  else ifeq ($(call isTargetCpu, x86_64), true)
+    OPENJCEPLUS_JGSKIT_PLATFORM := x86-linux64
+  endif
+else ifeq ($(call isTargetOs, windows), true)
+  ifeq ($(call isTargetCpu, x86_64), true)
+    OPENJCEPLUS_BOOT_JDK := $(call MixedPath,$(OPENJCEPLUS_BOOT_JDK))
+    OPENJCEPLUS_GSKIT_HOME := $(call MixedPath,$(OPENJCEPLUS_GSKIT_HOME))
+    OPENJCEPLUS_JCE_CLASSPATH := "$(call MixedPath,$(JDK_OUTPUTDIR)/modules/openjceplus)\;$(call MixedPath,$(JDK_OUTPUTDIR)/modules/java.base)"
+    OPENJCEPLUS_JGSKIT_MAKE := jgskit.win64.mak
+    OPENJCEPLUS_JGSKIT_PLATFORM := win64
+  endif
+endif
+
+ifeq (,$(OPENJCEPLUS_JGSKIT_PLATFORM))
+  $(error Unsupported platform $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU))
+endif # OPENJCEPLUS_JGSKIT_PLATFORM
+
+.PHONY : compile-libs
+
+compile-libs :
+	@$(ECHO) Compiling OpenJCEPlus native code
+	export \
+			GSKIT_HOME=$(OPENJCEPLUS_GSKIT_HOME) \
+			JAVA_HOME=$(OPENJCEPLUS_BOOT_JDK) \
+			JCE_CLASSPATH=$(OPENJCEPLUS_JCE_CLASSPATH) \
+			PLATFORM=$(OPENJCEPLUS_JGSKIT_PLATFORM) \
+		&& $(MAKE) -j1 -C $(OPENJCEPLUS_JGSKIT_MAKE_PATH) -f $(OPENJCEPLUS_JGSKIT_MAKE) all
+	@$(ECHO) OpenJCEplus compile complete
+
+TARGETS += compile-libs
+
+endif # BUILD_OPENJCEPLUS

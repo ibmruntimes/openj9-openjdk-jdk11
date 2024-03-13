@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -160,6 +160,9 @@ module java.base {
         jdk.compiler,
         jdk.jlink;
     exports jdk.internal.logger to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         java.logging;
     exports jdk.internal.org.objectweb.asm to
         jdk.jartool,
@@ -182,6 +185,9 @@ module java.base {
     exports jdk.internal.org.xml.sax.helpers to
         jdk.jfr;
     exports jdk.internal.misc to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         java.desktop,
         java.logging,
         java.management,
@@ -252,6 +258,9 @@ module java.base {
         jdk.jconsole,
         jdk.sctp;
     exports sun.net.www to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         java.desktop,
         java.net.http,
         jdk.jartool;
@@ -283,8 +292,14 @@ module java.base {
         java.security.jgss,
         jdk.crypto.ec;
     exports sun.security.internal.interfaces to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         jdk.crypto.cryptoki;
     exports sun.security.internal.spec to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         jdk.crypto.cryptoki;
     exports sun.security.jca to
         java.smartcardio,
@@ -292,6 +307,9 @@ module java.base {
         jdk.crypto.cryptoki,
         jdk.naming.dns;
     exports sun.security.pkcs to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         jdk.crypto.ec,
         jdk.jartool;
     exports sun.security.provider to
@@ -312,6 +330,9 @@ module java.base {
     exports sun.security.tools to
         jdk.jartool;
     exports sun.security.util to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         java.desktop,
         java.naming,
         java.rmi,
@@ -330,6 +351,9 @@ module java.base {
     exports sun.security.util.math.intpoly to
         jdk.crypto.ec
     exports sun.security.x509 to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         jdk.crypto.ec,
         jdk.crypto.cryptoki,
         jdk.jartool;
@@ -342,6 +366,9 @@ module java.base {
         jdk.jlink,
         jdk.localedata;
     exports sun.util.logging to
+/*[IF OPENJCEPLUS_SUPPORT]*/
+        openjceplus,
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
         java.desktop,
         java.logging,
         java.prefs;

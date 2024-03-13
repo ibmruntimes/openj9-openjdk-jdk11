@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -52,6 +52,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES
   OPENJ9_THIRD_PARTY_REQUIREMENTS
   OPENJ9_CHECK_NASM_VERSION
+  OPENJCEPLUS_SETUP
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
@@ -825,4 +826,29 @@ AC_DEFUN([OPENJ9_GENERATE_TOOL_WRAPPERS],
   OPENJ9_GENERATE_TOOL_WRAPPER([ml64], [$ML64])
   OPENJ9_GENERATE_TOOL_WRAPPER([nasm], [$NASM])
   OPENJ9_GENERATE_TOOL_WRAPPER([rc], [$RC])
+])
+
+AC_DEFUN([OPENJCEPLUS_SETUP],
+[
+  AC_ARG_ENABLE([openjceplus], [AS_HELP_STRING([--enable-openjceplus],
+      [enable OpenJCEPlus integration @<:@disabled@:>@])])
+  AC_MSG_CHECKING([for OpenJCEPlus])
+  if test "x$enable_openjceplus" = xyes ; then
+    if test -d "$TOPDIR/OpenJCEPlus" ; then
+      AC_MSG_RESULT([yes (explicitly set)])
+      BUILD_OPENJCEPLUS=true
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_ERROR([OpenJCEPlus not found at $TOPDIR/OpenJCEPlus])
+    fi
+  elif test "x$enable_openjceplus" = xno ; then
+    AC_MSG_RESULT([no])
+    BUILD_OPENJCEPLUS=false
+  elif test "x$enable_openjceplus" = x ; then
+    AC_MSG_RESULT([no (default)])
+    BUILD_OPENJCEPLUS=false
+  else
+    AC_MSG_ERROR([--enable-openjceplus accepts no argument])
+  fi
+  AC_SUBST(BUILD_OPENJCEPLUS)
 ])

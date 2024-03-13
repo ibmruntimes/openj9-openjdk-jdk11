@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -40,6 +40,13 @@ usage() {
 	echo "  -omr-branch       the OpenJ9/omr git branch: openj9"
 	echo "  -omr-sha          a commit SHA for the omr repository"
 	echo "  -omr-reference    a local repo to use as a clone reference"
+	echo "  -openjceplus-repo the OpenJCEPlus repository url"
+	echo "  -openjceplus-branch the OpenJCEPlus git branch"
+	echo "  -openjceplus-sha  a commit SHA for the OpenJCEPlus repository"
+	echo "  -openjceplus-reference a local repo to use as a clone reference"
+	echo "  -gskit-bin        the GSKit binary url"
+	echo "  -gskit-sdk-bin    the GSKIT SDK binary url"
+	echo "  -gskit-credential the credential for downloading the GSKit and GSKit SDK"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
 	echo "  --openssl-repo    Specify the OpenSSL repository to download from"
 	echo "  --openssl-version Specify the version of OpenSSL source to download"
@@ -57,7 +64,23 @@ for i in "$@" ; do
 			usage
 			;;
 
-		-openj9-repo=* | -openj9-branch=* | -openj9-sha=* | -openj9-reference=* | -omr-repo=* | -omr-branch=* | -omr-sha=* | -omr-reference=* | -parallel=* )
+		  -gskit-bin=* \
+		| -gskit-credential=* \
+		| -gskit-sdk-bin=* \
+		| -omr-branch=* \
+		| -omr-reference=* \
+		| -omr-repo=* \
+		| -omr-sha=* \
+		| -openj9-branch=* \
+		| -openj9-reference=* \
+		| -openj9-repo=* \
+		| -openj9-sha=* \
+		| -openjceplus-branch=* \
+		| -openjceplus-reference=* \
+		| -openjceplus-repo=* \
+		| -openjceplus-sha=* \
+		| -parallel=* \
+		)
 			j9options="${j9options} ${i}"
 			;;
 
