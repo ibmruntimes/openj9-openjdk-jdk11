@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,6 +22,20 @@
  * ===========================================================================
  */
 
+#if defined(_AIX)
+#include <dlfcn.h>
+#include <sys/ldr.h>
+#define DLFCN_LDINFO_SIZE (sizeof(struct ld_info) + _XOPEN_PATH_MAX + _XOPEN_NAME_MAX)
+#elif defined(__APPLE__) /* defined(_AIX) */
+#include <dlfcn.h>
+#include <mach-o/dyld.h>
+#elif defined(__linux__) /* defined(__APPLE__) */
+#include <dlfcn.h>
+#include <link.h>
+#elif defined(_WIN32) /* defined(__linux__) */
+#include <windows.h>
+#endif /* defined(_AIX) */
+
 #include <openssl/evp.h>
 #include <openssl/aes.h>
 #include <openssl/err.h>
@@ -37,7 +51,6 @@
 #include <string.h>
 
 #include "jdk_crypto_jniprovider_NativeCrypto.h"
-#include "NativeCrypto_md.h"
 
 #define OPENSSL_VERSION_CODE(major, minor, fix, patch) \
         ((((jlong)(major)) << 28) | ((minor) << 20) | ((fix) << 12) | (patch))
@@ -56,13 +69,18 @@
 #define OPENSSL_SAME_MODE (-1)
 
 /* needed for OpenSSL 1.0.2 Thread handling routines */
-# define CRYPTO_LOCK 1
+#define CRYPTO_LOCK 1
 
 #if defined(WINDOWS)
 # include <windows.h>
 #else /* defined(WINDOWS) */
 # include <pthread.h>
 #endif /* defined(WINDOWS) */
+
+/* Header for NativeCrypto loading methods. */
+static void * find_crypto_symbol(void *handle, const char *symname);
+static void * find_crypto_library(jboolean traceEnabled, const char *chomepath);
+static void unload_crypto_library(void *handle);
 
 /* Header for RSA algorithm using 1.0.2 OpenSSL. */
 int OSSL102_RSA_set0_key(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
@@ -71,15 +89,15 @@ int OSSL102_RSA_set0_crt_params(RSA *, BIGNUM *, BIGNUM *, BIGNUM *);
 
 /* Define literals from OpenSSL 1.1.x so that it compiles with OpenSSL 1.0.x. */
 #ifndef EVP_CTRL_AEAD_GET_TAG
-# define EVP_CTRL_AEAD_GET_TAG     EVP_CTRL_GCM_GET_TAG
+#define EVP_CTRL_AEAD_GET_TAG EVP_CTRL_GCM_GET_TAG
 #endif
 
 #ifndef EVP_CTRL_AEAD_SET_IVLEN
-# define EVP_CTRL_AEAD_SET_IVLEN     EVP_CTRL_GCM_SET_IVLEN
+#define EVP_CTRL_AEAD_SET_IVLEN EVP_CTRL_GCM_SET_IVLEN
 #endif
 
 #ifndef EVP_CTRL_AEAD_SET_TAG
-# define EVP_CTRL_AEAD_SET_TAG     EVP_CTRL_GCM_SET_TAG
+#define EVP_CTRL_AEAD_SET_TAG EVP_CTRL_GCM_SET_TAG
 #endif
 
 /* Whether loaded library is in FIPS mode. */
@@ -328,12 +346,12 @@ typedef struct OpenSSLMDContext {
 } OpenSSLMDContext;
 
 /* Handle errors from OpenSSL calls. */
-static void printErrors(void) {
+static void printErrors(void)
+{
     unsigned long errCode = 0;
 
     fprintf(stderr, "An OpenSSL error occurred\n");
-    while(0 != (errCode = (*OSSL_get_error)()))
-    {
+    while (0 != (errCode = (*OSSL_get_error)())) {
         char err_str[120];
         (*OSSL_error_string_n)(errCode, err_str, (sizeof(err_str) / sizeof(char)));
         fprintf(stderr, "%s\n", err_str);
@@ -380,30 +398,114 @@ JNIEXPORT jboolean JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_isOpenSSLFIP
     return OSSL_IS_FIPS;
 }
 
-/*
- * Class:     jdk_crypto_jniprovider_NativeCrypto
- * Method:    loadCrypto
- * Signature: (Z)J
- */
-JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
-  (JNIEnv *env, jclass thisObj, jboolean traceEnabled)
+/* Unload the crypto library. */
+static void
+unload_crypto_library(void *crypto_library)
 {
-    typedef const char* OSSL_version_t(int);
+#if defined(_WIN32)
+    FreeLibrary(crypto_library);
+#else /* defined(_WIN32) */
+    (void)dlclose(crypto_library);
+#endif /* defined(_WIN32) */
+}
 
-     /* Determine the version of OpenSSL. */
-    OSSL_version_t* OSSL_version;
-    const char * openssl_version;
-    jlong ossl_ver = 0;
+/* Find the symbol in the crypto library (return NULL if not found). */
+static void *
+find_crypto_symbol(void *crypto_library, const char *symname)
+{
+#if defined(_WIN32)
+    return GetProcAddress(crypto_library, symname);
+#else /* defined(_WIN32) */
+    return dlsym(crypto_library, symname);
+#endif /* defined(_WIN32) */
+}
 
-    /* Load OpenSSL Crypto library */
-    crypto_library = load_crypto_library(traceEnabled);
-    if (NULL == crypto_library) {
-        if (traceEnabled) {
-            fprintf(stderr, " :FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
-            fflush(stderr);
+static void
+log_crypto_library_path(jboolean traceEnabled, void *crypto_library, const char *message)
+{
+    if (traceEnabled && (NULL != crypto_library)) {
+#if defined(_AIX)
+        int rc = 0;
+        /* Initialize the buffer with maximum size for L_GETINFO. */
+        char *buffer = (char *)malloc(DLFCN_LDINFO_SIZE);
+        if (NULL == buffer) {
+            return;
         }
-        return -1;
+        /* Get the list of all object files loaded by this process. */
+        rc = loadquery(L_GETINFO, buffer, DLFCN_LDINFO_SIZE);
+
+        /* Parse the list of all object files and print the OPENSSL library path. */
+        if (0 == rc) {
+            char *buf = buffer;
+            for (;;) {
+                struct ld_info *cur_info = (struct ld_info *)buf;
+                const char *path = cur_info->ldinfo_filename;
+                const char *member_name = path + strlen(cur_info->ldinfo_filename) + 1;
+                if (('\0' != *member_name) && (NULL != strstr(path, "/libcrypto"))) {
+                    fprintf(stdout, "%s: %s(%s)\n", message, path, member_name);
+                    fflush(stdout);
+                    break;
+                }
+                if (0 == cur_info->ldinfo_next) {
+                    break;
+                }
+                buf += cur_info->ldinfo_next;
+            }
+        }
+        free(buffer);
+#elif defined(__APPLE__) /* defined(_AIX) */
+        /* Since we know the image we want will always be near the end of the list, start there and go backwards. */
+        uint32_t i = _dyld_image_count() - 1;
+        for (; i >= 0; i--) {
+            const char *image_name = _dyld_get_image_name(i);
+            void *probe_handle = NULL;
+            jboolean same_handle = JNI_FALSE;
+            if (NULL == image_name) {
+                continue;
+            }
+
+            /* Why dlopen doesn't affect _dyld stuff: if an image is already loaded, it returns the existing handle. */
+            probe_handle = dlopen(image_name, RTLD_LAZY);
+            if (NULL == probe_handle) {
+                continue;
+            }
+            if (crypto_library == probe_handle) {
+                same_handle = JNI_TRUE;
+            }
+            dlclose(probe_handle);
+
+            if (same_handle) {
+                fprintf(stdout, "OpenSSL was loaded from - %s\n", image_name);
+                fflush(stdout);
+                break;
+            }
+        }
+#elif defined(_WIN32) /* defined(__APPLE__) */
+        char path[MAX_PATH];
+        DWORD written = GetModuleFileName(crypto_library, path, MAX_PATH);
+        if (0 != written) {
+            fprintf(stdout, "OpenSSL was loaded from - %s\n", path);
+            fflush(stdout);
+        }
+#else /* defined(_WIN32) */
+        struct link_map *map = NULL;
+        int ret = dlinfo(crypto_library, RTLD_DI_LINKMAP, &map);
+        if ((0 == ret) && (NULL != map)) {
+            fprintf(stdout, "OpenSSL was loaded from - %s\n", map->l_name);
+            fflush(stdout);
+        }
+#endif /* defined(_AIX) */
     }
+}
+
+/* Get the version for the crypto library. */
+static jlong
+get_crypto_library_version(jboolean traceEnabled, void *crypto_library, const char *message)
+{
+    typedef const char *OSSL_version_t(int);
+    OSSL_version_t *OSSL_version = NULL;
+    const char *openssl_version = NULL;
+    jlong ossl_ver = 0;
 
     /*
      * Different symbols are used by OpenSSL with 1.0 and 1.1 and later.
@@ -413,12 +515,12 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
      */
     OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "OpenSSL_version");
 
-    if (NULL == OSSL_version)  {
+    if (NULL == OSSL_version) {
         OSSL_version = (OSSL_version_t*)find_crypto_symbol(crypto_library, "SSLeay_version");
 
-        if (NULL == OSSL_version)  {
+        if (NULL == OSSL_version) {
             if (traceEnabled) {
-                fprintf(stderr, "Only OpenSSL 1.0.x, 1.1.x and 3.x are supported\n");
+                fprintf(stderr, "Error loading OpenSSL: Error finding the OpenSSL version symbol in the crypto library\n");
                 fflush(stderr);
             }
             unload_crypto_library(crypto_library);
@@ -430,7 +532,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
             ossl_ver = extractVersionToJlong(openssl_version);
             if (!((OPENSSL_VERSION_1_0_0 <= ossl_ver) && (ossl_ver < OPENSSL_VERSION_1_1_0))) {
                 if (traceEnabled) {
-                    fprintf(stderr, "Unsupported OpenSSL version: %s\n", openssl_version);
+                    fprintf(stderr, "Error loading OpenSSL: Incompatible OpenSSL version found: %s\n", openssl_version);
                     fflush(stderr);
                 }
                 unload_crypto_library(crypto_library);
@@ -442,22 +544,17 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         openssl_version = (*OSSL_version)(0); /* get OPENSSL_VERSION */
         /* Ensure the OpenSSL version is "OpenSSL 1.1.x" or "OpenSSL 3.x.x". */
         ossl_ver = extractVersionToJlong(openssl_version);
-        if (!((OPENSSL_VERSION_1_1_0 <= ossl_ver) && (ossl_ver < OPENSSL_VERSION_2_0_0))
-        &&  !((OPENSSL_VERSION_3_0_0 <= ossl_ver) && (ossl_ver < OPENSSL_VERSION_4_0_0))
+        if (!(((OPENSSL_VERSION_1_1_0 <= ossl_ver) && (ossl_ver < OPENSSL_VERSION_2_0_0))
+           || ((OPENSSL_VERSION_3_0_0 <= ossl_ver) && (ossl_ver < OPENSSL_VERSION_4_0_0)))
         ) {
             if (traceEnabled) {
-                fprintf(stderr, "Unsupported OpenSSL version: %s\n", openssl_version);
+                fprintf(stderr, "Error loading OpenSSL: Incompatible OpenSSL version found: %s\n", openssl_version);
                 fflush(stderr);
             }
             unload_crypto_library(crypto_library);
             crypto_library = NULL;
             return -1;
         }
-    }
-
-    if (traceEnabled) {
-        fprintf(stderr, "Supported OpenSSL version: %s\n", openssl_version);
-        fflush(stderr);
     }
 
     /* Check whether the loaded OpenSSL library is in FIPS mode. */
@@ -479,13 +576,302 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         }
     }
 
+    if (traceEnabled) {
+        fprintf(stdout, "%s: %s\n", message, openssl_version);
+        fflush(stdout);
+    }
+
+    return ossl_ver;
+}
+
+static void *
+load_crypto_library(jboolean traceEnabled, const char *libName)
+{
+    void *result = NULL;
+    if ((NULL != libName) && ('\0' != *libName)) {
+#if defined(_AIX)
+        int flags = RTLD_NOW;
+        if (NULL != strrchr(libName, '(')) {
+            flags |= RTLD_MEMBER;
+        }
+        result = dlopen(libName, flags);
+#elif defined(_WIN32) /* defined(_AIX) */
+        result = LoadLibrary(libName);
+#else /* defined(_WIN32) */
+        result = dlopen(libName, RTLD_NOW);
+#endif /* defined(_AIX) */
+    }
+    return result;
+}
+
+/* Look for a crypto library in java.home or the system.
+ * NULL is returned when an appropriate crypto library
+ * cannot be found.
+ */
+static void *
+find_crypto_library(jboolean traceEnabled, const char *chomepath)
+{
+    /* Library names for OpenSSL 1.1.1, 1.1.0 and symbolic links:
+     * It is important to preserve the order!!!
+     *
+     * Since there is no indication of the version of a symlink,
+     * they have to be loaded first, so as to compare with other
+     * available options.
+     * Note: On macOS 11 or later, loading the general symlink causes
+     * a fatal warning and associated abort by default, so it is
+     * omitted.
+     *
+     * The rest of the libraries are listed in descending order,
+     * which allows us to do two things:
+     * - Stop if a general symlink is loaded and we then find a
+     *   specific version that is higher.
+     * - Stop immediately if a specific version is loaded, as
+     *   anything after that will be a lower version.
+     */
+    static const char * const libNames[] = {
+#if defined(_AIX)
+        "libcrypto.a(libcrypto64.so)",      /* general symlink library name from archive file */
+        "libcrypto64.so",                   /* general symlink library name */
+        "libcrypto.a(libcrypto.so)",        /* general symlink library name from archive file */
+        "libcrypto.so",                     /* general symlink library name */
+        "libcrypto.a(libcrypto64.so.3)",    /* 3.x library name from archive file */
+        "libcrypto64.so.3",                 /* 3.x library name */
+        "libcrypto.a(libcrypto.so.3)",      /* 3.x library name from archive file */
+        "libcrypto.so.3",                   /* 3.x library name */
+        "libcrypto.a(libcrypto64.so.1.1)",  /* 1.1.x library name from archive file */
+        "libcrypto.so.1.1",                 /* 1.1.x library name */
+        "libcrypto.a(libcrypto.so.1.0.0)",  /* 1.0.x library name from archive file */
+        "libcrypto.so.1.0.0",               /* 1.0.x library name */
+#elif defined(__APPLE__) /* defined(_AIX) */
+        "libcrypto.3.dylib",                /* 3.x library name */
+        "libcrypto.1.1.dylib",              /* 1.1.x library name */
+        "libcrypto.1.0.0.dylib",            /* 1.0.x library name */
+#elif defined(_WIN32) /* defined(__APPLE__) */
+        "libcrypto-3-x64.dll",              /* 3.x library name */
+        "libcrypto-1_1-x64.dll",            /* 1.1.x library name */
+        "libeay32.dll",                     /* old library name */
+#else /* defined(_WIN32) */
+        "libcrypto.so",                     /* general symlink library name */
+        "libcrypto.so.3",                   /* 3.x library name */
+        "libcrypto.so.1.1",                 /* 1.1.x library name */
+        "libcrypto.so.1.0.0",               /* 1.0.x library name */
+        "libcrypto.so.10",                  /* old library name */
+#endif /* defined(_AIX) */
+    };
+
+    const size_t numOfLibs = sizeof(libNames) / sizeof(libNames[0]);
+#if defined(_AIX)
+    const size_t num_of_generic = 4;
+#elif defined(__linux__) /* defined(_AIX) */
+    const size_t num_of_generic = 1;
+#else /* defined(__linux__) */
+    const size_t num_of_generic = 0;
+#endif /* defined(_AIX) */
+
+    void *result = NULL;
+    void *prevResult = NULL;
+    size_t i = 0;
+    long tempVersion = 0;
+    long previousVersion = 0;
+
+    /* If JAVA_HOME is not null or empty and no library has been loaded yet, try there. */
+    if ((NULL != chomepath) && ('\0' != *chomepath) && (NULL == crypto_library)) {
+#if defined(_WIN32)
+        static const char pathSuffix[] = "\\bin\\";
+#else /* defined(_WIN32) */
+        static const char pathSuffix[] = "/lib/";
+#endif /* defined(_WIN32) */
+
+        size_t path_len = strlen(chomepath) + sizeof(pathSuffix) - 1;
+        char *libPath = malloc(path_len + 1);
+
+        if (NULL == libPath) {
+            if (traceEnabled) {
+                fprintf(stderr, "\tFailed to allocate memory for path.\n");
+            }
+            return NULL;
+        }
+        strcpy(libPath, chomepath);
+
+        /* Append the proper directory using a slash or backslash, depending on the operating system. */
+        strcat(libPath, pathSuffix);
+
+        if (traceEnabled) {
+            fprintf(stdout, "Attempting to load library bundled with JDK from: %s\n", libPath);
+        }
+
+        for (i = 0; i < numOfLibs; i++) {
+            size_t file_len = strlen(libNames[i]);
+            /* Allocate memory for the new file name with the path. */
+            char *libNameWithPath = (char *)malloc(path_len + file_len + 1);
+
+            if (NULL == libNameWithPath) {
+                if (traceEnabled) {
+                    fprintf(stderr, "\tFailed to allocate memory for file name with path.\n");
+                }
+                continue;
+            }
+
+            strcpy(libNameWithPath, libPath);
+            strcat(libNameWithPath, libNames[i]);
+
+            /* Load OpenSSL Crypto library bundled with JDK. */
+            if (traceEnabled) {
+                fprintf(stdout, "\tAttempting to load: %s\n", libNames[i]);
+            }
+            result = load_crypto_library(traceEnabled, libNameWithPath);
+
+            free(libNameWithPath);
+
+            if (NULL == result) {
+                continue;
+            }
+
+            /* Identify and load the latest version from the potential libraries.
+             * This logic depends upon the order in which libnames are defined.
+             * Libraries are listed in descending order w.r.t version.
+             * Since only one library is bundled with the JDK, once any library is
+             * loaded, this is the only available and we can stop.
+             */
+            tempVersion = get_crypto_library_version(traceEnabled, result, "\t\tLoaded OpenSSL version");
+            if (tempVersion > 0) {
+                free(libPath);
+                return result;
+            }
+        }
+        free(libPath);
+    }
+
+    /* The attempt to load from property and OpenSSL bundled with JDK failed.
+     * Try loading the libraries in the order set out above, and retain the latest library.
+     */
+    for (i = 0; i < numOfLibs; i++) {
+        if (traceEnabled) {
+            fprintf(stdout, "Attempting to load libname from OS: %s\n", libNames[i]);
+        }
+        result = load_crypto_library(traceEnabled, libNames[i]);
+
+        if (NULL == result) {
+            continue;
+        }
+
+        /* Identify and load the latest version from the available libraries.
+         * This logic depends upon the order in which libnames are defined.
+         * It only loads the libraries which can possibly be the latest versions.
+         */
+        log_crypto_library_path(traceEnabled, result, "\tLibrary to be potentially used was loaded from");
+        tempVersion = get_crypto_library_version(traceEnabled, result, "\tLoaded OpenSSL version");
+
+        if (tempVersion <= 0) {
+            continue;
+        }
+
+        if (tempVersion > previousVersion) {
+            if (0 != previousVersion) {
+                unload_crypto_library(prevResult);
+            }
+            previousVersion = tempVersion;
+            prevResult = result;
+        } else {
+            unload_crypto_library(result);
+        }
+
+        /* If library checked is not a generic one, there is no need to check further. */
+        if (i >= num_of_generic) {
+            break;
+        }
+    }
+
+    /* If we reach here, it means that none of the non-generic libraries
+     * where found. However, a generic one might have been found in the
+     * process and, if so, it will be in the prevResult variable.
+     */
+    return prevResult;
+}
+
+/*
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    loadCrypto
+ * Signature: (ZLjava/lang/String;Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
+  (JNIEnv * env, jobject jobj, jboolean traceEnabled, jstring jlibname, jstring jhomepath)
+{
+    const char *chomepath = "";
+    jlong ossl_ver = 0;
+
+    if (NULL != jlibname) {
+        const char *clibname = (*env)->GetStringUTFChars(env, jlibname, NULL);
+        if (NULL == clibname) {
+            if (traceEnabled) {
+                fprintf(stderr, "Failed to get jdk.native.openssl.lib value.\n");
+                fflush(stderr);
+            }
+            return -1;
+        }
+        if ('\0' == clibname[0]) {
+            if (traceEnabled) {
+                fprintf(stderr, "The jdk.native.openssl.lib property is not set.\n");
+                fflush(stderr);
+            }
+        } else {
+            crypto_library = load_crypto_library(traceEnabled, clibname);
+            if (NULL == crypto_library) {
+                if (traceEnabled) {
+                    fprintf(stderr, "OpenSSL library specified in jdk.openssl.lib couldn't be loaded.\n");
+                    fflush(stderr);
+                }
+                (*env)->ReleaseStringUTFChars(env, jlibname, clibname);
+                return -1;
+            }
+        }
+        (*env)->ReleaseStringUTFChars(env, jlibname, clibname);
+    }
+
+    if (NULL != jhomepath) {
+        chomepath = (*env)->GetStringUTFChars(env, jhomepath, NULL);
+        if (NULL == chomepath) {
+            if (traceEnabled) {
+                fprintf(stderr, "Failed to get java.home value.\n");
+                fflush(stderr);
+            }
+            return -1;
+        }
+    }
+
+    /* If the jdk.native.openssl.lib property was not set, attempt
+     * to find an OpenSSL library from java.home or OS Library path.
+     */
+    if (NULL == crypto_library) {
+        crypto_library = find_crypto_library(traceEnabled, chomepath);
+    }
+
+    if (NULL != jhomepath) {
+        (*env)->ReleaseStringUTFChars(env, jhomepath, chomepath);
+    }
+
+    /* If an OpenSSL library was not loaded from any of the potential
+     * sources, fail loading native crypto.
+     */
+    if (NULL == crypto_library) {
+        if (traceEnabled) {
+            fprintf(stderr, "FAILED TO LOAD OPENSSL CRYPTO LIBRARY\n");
+            fflush(stderr);
+        }
+        return -1;
+    }
+
+    log_crypto_library_path(traceEnabled, crypto_library, "OpenSSL to be used was loaded from");
+    ossl_ver = get_crypto_library_version(traceEnabled, crypto_library, "Version of OpenSSL library that is used");
+
     /* Load the function symbols for OpenSSL errors. */
     OSSL_error_string_n = (OSSL_error_string_n_t*)find_crypto_symbol(crypto_library, "ERR_error_string_n");
     OSSL_error_string = (OSSL_error_string_t*)find_crypto_symbol(crypto_library, "ERR_error_string");
     OSSL_get_error = (OSSL_get_error_t*)find_crypto_symbol(crypto_library, "ERR_get_error");
 
-    /* Load Threading routines for OpenSSL 1.0.2 */
-    if(ossl_ver < OPENSSL_VERSION_1_1_0) {
+    /* Load Threading routines for OpenSSL 1.0.2. */
+    if (ossl_ver < OPENSSL_VERSION_1_1_0) {
         OSSL_CRYPTO_num_locks = (OSSL_CRYPTO_num_locks_t*)find_crypto_symbol(crypto_library, "CRYPTO_num_locks");
         OSSL_CRYPTO_THREADID_set_numeric = (OSSL_CRYPTO_THREADID_set_numeric_t*)find_crypto_symbol(crypto_library, "CRYPTO_THREADID_set_numeric");
         OSSL_OPENSSL_malloc = (OSSL_OPENSSL_malloc_t*)find_crypto_symbol(crypto_library, "CRYPTO_malloc");
@@ -502,7 +888,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_sha384 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha384");
     OSSL_sha512 = (OSSL_sha_t*)find_crypto_symbol(crypto_library, "EVP_sha512");
 
-    if(ossl_ver >= OPENSSL_VERSION_1_1_0) {
+    if (ossl_ver >= OPENSSL_VERSION_1_1_0) {
         OSSL_MD_CTX_new = (OSSL_MD_CTX_new_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_new");
         OSSL_MD_CTX_reset = (OSSL_MD_CTX_reset_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_reset");
         OSSL_MD_CTX_free = (OSSL_MD_CTX_free_t*)find_crypto_symbol(crypto_library, "EVP_MD_CTX_free");
@@ -536,7 +922,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     OSSL_DecryptFinal = (OSSL_DecryptFinal_t*)find_crypto_symbol(crypto_library, "EVP_DecryptFinal");
 
     /* Load the functions symbols for OpenSSL ChaCha20 algorithms. (Need OpenSSL 1.1.x or above) */
-    if(ossl_ver >= OPENSSL_VERSION_1_1_0) {
+    if (ossl_ver >= OPENSSL_VERSION_1_1_0) {
         OSSL_chacha20 = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_chacha20");
         OSSL_chacha20_poly1305 = (OSSL_cipher_t*)find_crypto_symbol(crypto_library, "EVP_chacha20_poly1305");
     } else {
@@ -547,7 +933,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
     /* Load the functions symbols for OpenSSL RSA algorithm. */
     OSSL_RSA_new = (OSSL_RSA_new_t*)find_crypto_symbol(crypto_library, "RSA_new");
 
-    if(ossl_ver >= OPENSSL_VERSION_1_1_0) {
+    if (ossl_ver >= OPENSSL_VERSION_1_1_0) {
         OSSL_RSA_set0_key = (OSSL_RSA_set0_key_t*)find_crypto_symbol(crypto_library, "RSA_set0_key");
         OSSL_RSA_set0_factors = (OSSL_RSA_set0_factors_t*)find_crypto_symbol(crypto_library, "RSA_set0_factors");
         OSSL_RSA_set0_crt_params = (OSSL_RSA_set0_key_t*)find_crypto_symbol(crypto_library, "RSA_set0_crt_params");
@@ -768,18 +1154,25 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         ((NULL == OSSL_CRYPTO_THREADID_set_callback) && (ossl_ver < OPENSSL_VERSION_1_1_0)) ||
         ((NULL == OSSL_CRYPTO_set_locking_callback) && (ossl_ver < OPENSSL_VERSION_1_1_0))
     ) {
-        /* fprintf(stderr, "One or more of the required symbols are missing in the crypto library\n"); */
-        /* fflush(stderr); */
+        if (traceEnabled) {
+            fprintf(stderr, "Error loading OpenSSL: One or more of the required symbols are missing.");
+        }
         unload_crypto_library(crypto_library);
         crypto_library = NULL;
         return -1;
     } else {
-        if(ossl_ver < OPENSSL_VERSION_1_1_0) {
+        if (ossl_ver < OPENSSL_VERSION_1_1_0) {
             if (0 != thread_setup()) {
+                if (traceEnabled) {
+                    fprintf(stderr, "Error loading OpenSSL: Thread setup was unsuccessful.");
+                }
                 unload_crypto_library(crypto_library);
                 crypto_library = NULL;
                 return -1;
             }
+        }
+        if (traceEnabled) {
+            fprintf(stderr, "OpenSSL library loaded successfully.\n");
         }
         return ossl_ver;
     }
@@ -943,8 +1336,8 @@ JNIEXPORT jboolean JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_isMD5Availab
  * Signature: (JI)J
  */
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateContext
-  (JNIEnv *env, jclass thisObj, jlong copyContext, jint algoIdx) {
-
+  (JNIEnv *env, jclass thisObj, jlong copyContext, jint algoIdx)
+{
     EVP_MD_CTX *ctx = NULL;
     const EVP_MD *digestAlg = NULL;
     OpenSSLMDContext *context = NULL;
@@ -1031,8 +1424,8 @@ releaseContexts:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyContext
-  (JNIEnv *env, jclass thisObj, jlong c) {
-
+  (JNIEnv *env, jclass thisObj, jlong c)
+{
     OpenSSLMDContext *context = (OpenSSLMDContext*)(intptr_t) c;
     if (NULL == context) {
         return -1;
@@ -1060,8 +1453,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestDestroyCon
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate
   (JNIEnv *env, jclass thisObj, jlong c, jbyteArray message, jint messageOffset,
-  jint messageLen) {
-
+  jint messageLen)
+{
     OpenSSLMDContext *context = (OpenSSLMDContext*)(intptr_t) c;
     unsigned char* messageNative = NULL;
 
@@ -1096,8 +1489,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestUpdate
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAndReset
   (JNIEnv *env, jclass thisObj, jlong c, jbyteArray message, jint messageOffset, jint messageLen,
-  jbyteArray digest, jint digestOffset, jint digestLen) {
-
+  jbyteArray digest, jint digestOffset, jint digestLen)
+{
     OpenSSLMDContext *context = (OpenSSLMDContext*)(intptr_t) c;
 
     unsigned int size = 0;
@@ -1166,8 +1559,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestComputeAnd
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
-  (JNIEnv *env, jclass thisObj, jlong c) {
-
+  (JNIEnv *env, jclass thisObj, jlong c)
+{
     OpenSSLMDContext *context = (OpenSSLMDContext*)(intptr_t) c;
 
     if ((NULL == context) || (NULL == context->ctx) || (NULL == context->cachedInitializedDigestContext)) {
@@ -1203,8 +1596,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestReset
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CreateContext
-  (JNIEnv *env, jclass thisObj) {
-
+  (JNIEnv *env, jclass thisObj)
+{
     EVP_CIPHER_CTX *ctx = NULL;
 
     /* Create and initialise the context */
@@ -1222,8 +1615,8 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CreateContext
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DestroyContext
-  (JNIEnv *env, jclass thisObj, jlong c) {
-
+  (JNIEnv *env, jclass thisObj, jlong c)
+{
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX*)(intptr_t) c;
     if (NULL == ctx) {
         return -1;
@@ -1241,8 +1634,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DestroyContext
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
   (JNIEnv *env, jclass thisObj, jlong c, jint mode, jbyteArray iv, jint iv_len,
-  jbyteArray key, jint key_len, jboolean doReset) {
-
+  jbyteArray key, jint key_len, jboolean doReset)
+{
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX*)(intptr_t) c;
     unsigned char* ivNative = NULL;
     unsigned char* keyNative = NULL;
@@ -1303,8 +1696,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCInit
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate
   (JNIEnv *env, jclass thisObj, jlong c, jbyteArray input, jint inputOffset, jint inputLen,
-  jbyteArray output, jint outputOffset) {
-
+  jbyteArray output, jint outputOffset)
+{
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX*)(intptr_t) c;
 
     int outputLen = 0;
@@ -1348,8 +1741,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCUpdate
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_CBCFinalEncrypt
   (JNIEnv *env, jclass thisObj, jlong c, jbyteArray input, jint inputOffset, jint inputLen,
-  jbyteArray output, jint outputOffset) {
-
+  jbyteArray output, jint outputOffset)
+{
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX*)(intptr_t) c;
 
     if (NULL == ctx) {
@@ -1634,7 +2027,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_GCMDecrypt
     }
 
     if (inLen - tagLen > 0) {
-        if(0 == (*OSSL_DecryptUpdate)(ctx, outputNative + outOffset, &len, inputNative + inOffset, inLen - tagLen)) {
+        if (0 == (*OSSL_DecryptUpdate)(ctx, outputNative + outOffset, &len, inputNative + inOffset, inLen - tagLen)) {
             printErrors();
             goto cleanup;
         }
@@ -1685,8 +2078,8 @@ BIGNUM* convertJavaBItoBN(unsigned char* in, int len);
  * Signature: ([BI[BI)J
  */
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPublicKey
-  (JNIEnv *env, jclass obj, jbyteArray n, jint nLen, jbyteArray e, jint eLen) {
-
+  (JNIEnv *env, jclass obj, jbyteArray n, jint nLen, jbyteArray e, jint eLen)
+{
     unsigned char* nNative = NULL;
     unsigned char* eNative = NULL;
     RSA* publicRSAKey = NULL;
@@ -1736,7 +2129,8 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPublic
  * Signature: ([BI[BI[BI[BI[BI[BI[BI[BI)J
  */
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivateCrtKey
-  (JNIEnv *env, jclass obj, jbyteArray n, jint nLen, jbyteArray d, jint dLen, jbyteArray e, jint eLen, jbyteArray p, jint pLen, jbyteArray q, jint qLen, jbyteArray dp, jint dpLen, jbyteArray dq, jint dqLen, jbyteArray qinv, jint qinvLen) {
+  (JNIEnv *env, jclass obj, jbyteArray n, jint nLen, jbyteArray d, jint dLen, jbyteArray e, jint eLen, jbyteArray p, jint pLen, jbyteArray q, jint qLen, jbyteArray dp, jint dpLen, jbyteArray dq, jint dqLen, jbyteArray qinv, jint qinvLen)
+{
     unsigned char* nNative = NULL;
     unsigned char* dNative = NULL;
     unsigned char* eNative = NULL;
@@ -1903,7 +2297,8 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_createRSAPrivat
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_destroyRSAKey
-  (JNIEnv *env, jclass obj, jlong rsaKey) {
+  (JNIEnv *env, jclass obj, jlong rsaKey)
+{
     RSA* rsaKey2 = (RSA*)(intptr_t)rsaKey;
     if (NULL != rsaKey2) {
         (*OSSL_RSA_free)(rsaKey2);
@@ -1918,8 +2313,8 @@ JNIEXPORT void JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_destroyRSAKey
  * Signature: ([BI[BJ)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP
-  (JNIEnv *env, jclass obj, jbyteArray k, jint kLen, jbyteArray m, jlong publicRSAKey) {
-
+  (JNIEnv *env, jclass obj, jbyteArray k, jint kLen, jbyteArray m, jlong publicRSAKey)
+{
     unsigned char* kNative = NULL;
     unsigned char* mNative = NULL;
     RSA* rsaKey = NULL;
@@ -1955,8 +2350,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSAEP
  * Signature: ([BI[BIJ)I
  */
 JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
-  (JNIEnv *env, jclass obj, jbyteArray k, jint kLen, jbyteArray m, jint verify, jlong privateRSAKey) {
-
+  (JNIEnv *env, jclass obj, jbyteArray k, jint kLen, jbyteArray m, jint verify, jlong privateRSAKey)
+{
     unsigned char* kNative = NULL;
     unsigned char* mNative = NULL;
     int msg_len = 0;
@@ -2007,7 +2402,7 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
                                 }
                             }
                         }
-                    } else { // if verify == kLen
+                    } else { /* if verify == kLen */
                         for (i = 0; i < verify; i++) {
                             if (kNative[i] != k2[i]) {
                                 msg_len = -2;
@@ -2037,7 +2432,8 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_RSADP
  * Converts 2's complement representation of a big integer
  * into an OpenSSL BIGNUM
  */
-BIGNUM* convertJavaBItoBN(unsigned char* in, int len) {
+BIGNUM* convertJavaBItoBN(unsigned char* in, int len)
+{
     /* first bit is neg */
     int neg = (in[0] & 0x80);
     int c = 1; /* carry bit */
@@ -2522,7 +2918,7 @@ Java_jdk_crypto_jniprovider_NativeCrypto_ECGenerateKeyPair
         goto cleanup;
     }
 
-    // to translate the public key to java format, we need to extract the public key coordinates: xBN, yBN
+    /* to translate the public key to java format, we need to extract the public key coordinates: xBN, yBN */
     ctx = (*OSSL_BN_CTX_new)();
     if (NULL == ctx) {
         goto cleanup;
@@ -2554,7 +2950,7 @@ Java_jdk_crypto_jniprovider_NativeCrypto_ECGenerateKeyPair
         goto cleanup;
     }
 
-    // to translate the private key to java format, we need the private key BIGNUM
+    /* to translate the private key to java format, we need the private key BIGNUM */
     sBN = (*OSSL_EC_KEY_get0_private_key)(nativeKey);
 
     ret = getArrayFromBN(sBN, nativeS, sLen);
@@ -3269,13 +3665,13 @@ cleanup:
     }
 
     if (NULL != signature) {
-        // The BIGNUM structs will be freed by the signature.
+        /* The BIGNUM structs will be freed by the signature. */
         sBN = NULL;
         rBN = NULL;
         (*OSSL_ECDSA_SIG_free)(signature);
     }
 
-    // In case the BIGNUM structs weren't freed by the signature.
+    /* In case the BIGNUM structs weren't freed by the signature. */
     if (NULL != sBN) {
         (*OSSL_BN_free)(sBN);
     }
@@ -3311,7 +3707,7 @@ Java_jdk_crypto_jniprovider_NativeCrypto_XDHCreateKeys
     unsigned char *privateKeyArray = NULL;
     unsigned char *publicKeyArray = NULL;
 
-    // Create PKEY (public/private pair) based on curve type (X25519 or X448)
+    /* Create PKEY (public/private pair) based on curve type (X25519 or X448). */
     pctx = (*OSSL_EVP_PKEY_CTX_new_id)(curveType, NULL);
 
     if (NULL == pctx) {
@@ -3325,7 +3721,7 @@ Java_jdk_crypto_jniprovider_NativeCrypto_XDHCreateKeys
         goto cleanup;
     }
 
-    // Separate private and public and store into arrays
+    /* Separate private and public and store into arrays. */
     privateKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, privateKey, 0));
     if (NULL == privateKeyArray) {
         goto cleanup;
@@ -3394,7 +3790,7 @@ Java_jdk_crypto_jniprovider_NativeCrypto_XDHGenerateSecret
         goto cleanup;
     }
 
-    // Setup EVP_PKEY instances for user private and peer public keys
+    /* Setup EVP_PKEY instances for user private and peer public keys. */
     pkey = (*OSSL_EVP_PKEY_new_raw_private_key)(curveType, NULL, privateKeyArray, privateKey_len);
     peerkey = (*OSSL_EVP_PKEY_new_raw_public_key)(curveType, NULL, publicKeyArray, publicKey_len);
 
@@ -3402,23 +3798,23 @@ Java_jdk_crypto_jniprovider_NativeCrypto_XDHGenerateSecret
         goto cleanup;
     }
 
-    // Create key agreement context
+    /* Create key agreement context. */
     pctx = (*OSSL_EVP_PKEY_CTX_new)(pkey, NULL);
     if (NULL == pctx) {
         goto cleanup;
     }
 
-    // Initialize with user private key
+    /* Initialize with user private key. */
     if (0 >= (*OSSL_EVP_PKEY_derive_init)(pctx)) {
         goto cleanup;
     }
 
-    // Set peer's public key
+    /* Set peer's public key. */
     if (0 >= (*OSSL_EVP_PKEY_derive_set_peer)(pctx, peerkey)) {
         goto cleanup;
     }
 
-    // Derive shared secret and save in sharedKeyArray
+    /* Derive shared secret and save in sharedKeyArray. */
     sharedKeyArray = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, sharedKey, 0));
     if (NULL == sharedKeyArray) {
         goto cleanup;
