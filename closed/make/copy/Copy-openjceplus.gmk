@@ -1,0 +1,58 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+include $(TOPDIR)/closed/CopySupport.gmk
+
+ifeq (true,$(BUILD_OPENJCEPLUS))
+  # Copy OpenJCEPlus legal files.
+  $(call openj9_copy_files,, \
+      $(OPENJCEPLUS_TOPDIR)/LICENSE \
+      $(LEGAL_DST_DIR)/OPENJCEPLUS_LICENSE)
+
+  $(call openj9_copy_files,, \
+      $(OPENJCEPLUS_TOPDIR)/NOTICES.md \
+      $(LEGAL_DST_DIR)/NOTICES.md)
+
+  # Copy OpenJCEPlus native libraries.
+  $(eval $(call SetupCopyFiles, OPENJCEPLUS_JGSKIT_LIBS_COPY, \
+      SRC := $(OPENJCEPLUS_TOPDIR)/target, \
+      FILES := $(filter %.dll %.so %.x, $(call FindFiles, $(OPENJCEPLUS_TOPDIR)/target)), \
+      FLATTEN := true, \
+      DEST := $(LIB_DST_DIR), \
+  ))
+
+  TARGETS += $(OPENJCEPLUS_JGSKIT_LIBS_COPY)
+
+  # Bundle GSKIT library.
+  OPENJCEPLUS_OCK_DIR := $(OPENJCEPLUS_TOPDIR)/ock/jgsk_sdk/lib64
+  ifeq ($(call isTargetOs, windows), true)
+    OPENJCEPLUS_OCK_SUB_DIR := modules_cmds
+  else
+    OPENJCEPLUS_OCK_SUB_DIR := modules_libs
+  endif
+
+  $(eval $(call SetupCopyFiles, OPENJCEPLUS_OCK_COPY, \
+      SRC := $(OPENJCEPLUS_OCK_DIR), \
+      DEST := $(SUPPORT_OUTPUTDIR)/$(OPENJCEPLUS_OCK_SUB_DIR)/$(MODULE), \
+      FILES := $(call FindFiles, $(OPENJCEPLUS_OCK_DIR)), \
+  ))
+
+  TARGETS += $(OPENJCEPLUS_OCK_COPY)
+endif # BUILD_OPENJCEPLUS

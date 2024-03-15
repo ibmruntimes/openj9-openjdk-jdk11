@@ -88,10 +88,12 @@ security.provider.tbd=Apple
 security.provider.tbd=SunPKCS11
 #endif
 
-#if defined linux-x86 || defined linux-ppc || defined linux-s390
+#if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
 #
 # Java Restricted Security Mode
 #
+#endif
+#if defined linux-ppc || defined linux-s390 || defined linux-x86
 RestrictedSecurity.NSS.140-2.desc.name = Red Hat Enterprise Linux 8 NSS Cryptographic Module FIPS 140-2
 RestrictedSecurity.NSS.140-2.desc.default = true
 RestrictedSecurity.NSS.140-2.desc.fips = true
@@ -154,6 +156,59 @@ RestrictedSecurity.NSS.140-2.javax.net.ssl.keyStore = NONE
 
 RestrictedSecurity.NSS.140-2.securerandom.provider = SunPKCS11-NSS-FIPS
 RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
+#endif
+
+#if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = true
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledNamedCurves =
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
+    3DES_EDE_CBC, \
+    anon, \
+    DES, \
+    DH keySize < 2048, \
+    EC keySize < 224, \
+    MD5withRSA, \
+    NULL, \
+    RC4, \
+    SSLv3, \
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA, \
+    TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, \
+    TLS_DHE_DSS_WITH_AES_128_GCM_SHA256, \
+    TLS_DHE_DSS_WITH_AES_256_CBC_SHA, \
+    TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, \
+    TLS_DHE_DSS_WITH_AES_256_GCM_SHA384, \
+    TLS_EMPTY_RENEGOTIATION_INFO_SCSV, \
+    TLS_RSA_WITH_AES_128_CBC_SHA, \
+    TLS_RSA_WITH_AES_128_CBC_SHA256, \
+    TLS_RSA_WITH_AES_128_GCM_SHA256, \
+    TLS_RSA_WITH_AES_256_CBC_SHA, \
+    TLS_RSA_WITH_AES_256_CBC_SHA256, \
+    TLS_RSA_WITH_AES_256_GCM_SHA384, \
+    TLSv1, \
+    TLSv1.1, \
+    X25519, \
+    X448
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.ephemeralDHKeySize =
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.legacyAlgorithms =
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.certpath.disabledAlgorithms =
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.legacyAlgorithms =
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = SUN [{CertificateFactory, X.509, ImplementedIn=Software}, \
+    {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
+    {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
+    {CertStore, Collection, ImplementedIn=Software}, \
+    {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
+    {Configuration, JavaLoginConfig, *}, \
+    {Policy, JavaPolicy, *}]
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.javax.net.ssl.keyStore = NONE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.algorithm = SHA512DRBG
 #endif
 
 #

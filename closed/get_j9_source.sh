@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -39,6 +39,13 @@ usage() {
 	echo "  -omr-branch       the OpenJ9/omr git branch: openj9"
 	echo "  -omr-sha          a commit SHA for the omr repository"
 	echo "  -omr-reference    a local repo to use as a clone reference"
+	echo "  -openjceplus-repo the OpenJCEPlus repository url"
+	echo "  -openjceplus-branch the OpenJCEPlus git branch"
+	echo "  -openjceplus-sha  a commit SHA for the OpenJCEPlus repository"
+	echo "  -openjceplus-reference a local repo to use as a clone reference"
+	echo "  -gskit-bin        the GSKit binary url"
+	echo "  -gskit-sdk-bin    the GSKIT SDK binary url"
+	echo "  -gskit-credential the credential for downloading the GSKit binaries"
 	echo "  -parallel         (boolean) if 'true' then the clone j9 repository commands run in parallel, default is false"
 	echo ""
 	exit 1
@@ -108,6 +115,34 @@ for i in "$@" ; do
 			references[omr]="${i#*=}"
 			;;
 
+		-openjceplus-repo=* )
+			git_urls[OpenJCEPlus]="${i#*=}"
+			;;
+
+		-openjceplus-branch=* )
+			branches[OpenJCEPlus]="${i#*=}"
+			;;
+
+		-openjceplus-sha=* )
+			shas[OpenJCEPlus]="${i#*=}"
+			;;
+
+		-openjceplus-reference=* )
+			references[OpenJCEPlus]="${i#*=}"
+			;;
+
+		-gskit-bin=* )
+			gskit_bin="${i#*=}"
+			;;
+
+		-gskit-sdk-bin=* )
+			gskit_sdk_bin="${i#*=}"
+			;;
+
+		-gskit-credential=* )
+			gskit_credential="${i#*=}"
+			;;
+
 		-parallel=* )
 			pflag="${i#*=}"
 			;;
@@ -171,6 +206,37 @@ done
 if [ ${pflag} = true ] ; then
 	# wait for all subprocesses to complete
 	wait
+fi
+
+# Download OCK binaries and create Java module folder.
+openjceplus_source=OpenJCEPlus
+if [ -n "${git_urls[$openjceplus_source]}" ] ; then
+
+	echo
+	echo "$openjceplus_source exists, download OCK binaries"
+	echo
+
+	cd $openjceplus_source
+	mkdir -p ock/jgsk_sdk/lib64
+
+	if [ -n "$gskit_credential" ] ; then
+		curl -u "$gskit_credential" $gskit_bin > ock/jgsk_crypto.tar
+		curl -u "$gskit_credential" $gskit_sdk_bin > ock/jgsk_crypto_sdk.tar
+	else
+		echo
+		echo "GSKit binaries are needed for compiling $openjceplus_source"
+		echo "Please set -gskit-bin, -gskit-sdk-bin, and -gskit-credential"
+		exit 1
+	fi
+
+	tar -xf ock/jgsk_crypto_sdk.tar -C ock
+	tar -xf ock/jgsk_crypto.tar -C ock/jgsk_sdk/lib64
+
+	# Create OpenJCEPlus Java module folder.
+	mkdir -p src/main/openjceplus/share/classes
+	cp -r src/main/java/* src/main/openjceplus/share/classes/
+
+	cd ..
 fi
 
 END_TIME=$(date +%s)
