@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -24,4 +24,5 @@ JRE_MODULES += \
 	openj9.dataaccess \
 	openj9.dtfj \
 	openj9.gpu \
+	$(if $(call equals, $(BUILD_OPENJCEPLUS), true), openjceplus) \
 	#

@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -55,6 +55,10 @@ MODULES_FILTER += \
 TOP_SRC_DIRS += \
 	$(J9JCL_SOURCES_DIR) \
 	#
+
+ifeq (true,$(BUILD_OPENJCEPLUS))
+  TOP_SRC_DIRS += $(OPENJCEPLUS_TOPDIR)/src/main
+endif
 
 .PHONY : generate-j9jcl-sources
 

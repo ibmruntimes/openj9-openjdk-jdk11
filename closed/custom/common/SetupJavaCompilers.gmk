@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -24,6 +24,7 @@ WARNING_MODULES := \
 	openj9.dtfj \
 	openj9.dtfjview \
 	openj9.traceformat \
+	openjceplus \
 	#
 
 ifneq (,$(filter $(WARNING_MODULES),$(MODULE)))

@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -21,6 +21,7 @@
 # exclude all source directories
 /omr
 /openj9
+/OpenJCEPlus
 /openssl
 # exclude optional eclipse project file
 /.project
