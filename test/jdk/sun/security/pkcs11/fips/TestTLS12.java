@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 8029661
  * @summary Test TLS 1.2
@@ -30,7 +36,7 @@
  *          java.base/com.sun.net.ssl.internal.ssl
  *          java.base/com.sun.crypto.provider
  * @library /test/lib ..
- * @run main/othervm/timeout=120 TestTLS12
+ * @run main/othervm/timeout=120 -Djdk.tls.useExtendedMasterSecret=false TestTLS12
  */
 
 import java.io.File;
