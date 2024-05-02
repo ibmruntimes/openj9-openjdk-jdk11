@@ -189,12 +189,12 @@ public class DocFilesHandlerImpl implements DocFilesHandler {
         Content pkgLinkContent = docletWriter.getPackageLink(pkg, docletWriter.contents.packageLabel);
         navBar.setNavLinkPackage(pkgLinkContent);
         navBar.setUserHeader(docletWriter.getUserHeaderFooter(true));
-        htmlContent.addContent(navBar.getContent(true));
+        htmlContent.add(navBar.getContent(true));
         List<? extends DocTree> fullBody = utils.getFullBody(dfElement);
         Content bodyContent = docletWriter.commentTagsToContent(null, dfElement, fullBody, false);
 
         docletWriter.addTagsInfo(dfElement, bodyContent);
-        htmlContent.addContent(bodyContent);
+        htmlContent.add(bodyContent);
 
         docletWriter.addBottom(htmlContent);
         docletWriter.printHtmlDocument(Collections.emptyList(), false, htmlContent);

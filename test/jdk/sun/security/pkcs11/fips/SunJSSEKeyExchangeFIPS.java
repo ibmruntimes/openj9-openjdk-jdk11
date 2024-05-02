@@ -22,12 +22,18 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 8257545
  * @summary Test that SunJSSE uses FIPS during the key exchange (TLSv1.2)
  * @modules java.base/com.sun.net.ssl.internal.ssl
  * @library /test/lib ..
- * @run main/othervm/timeout=120 SunJSSEKeyExchangeFIPS
+ * @run main/othervm/timeout=120 -Djdk.tls.useExtendedMasterSecret=false SunJSSEKeyExchangeFIPS
  */
 
 import java.nio.ByteBuffer;

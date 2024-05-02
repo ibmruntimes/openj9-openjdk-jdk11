@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs11;
 
 import java.security.*;
@@ -110,6 +116,8 @@ public final class P11TlsMasterSecretGenerator extends KeyGeneratorSpi {
             throw new InvalidAlgorithmParameterException("init() failed", e);
         }
         this.spec = spec;
+        byte[] extendedMasterSecretSessionHash =
+                spec.getExtendedMasterSecretSessionHash();
         final boolean isTlsRsaPremasterSecret =
                 p11Key.getAlgorithm().equals("TlsRsaPremasterSecret");
         if (tlsVersion == 0x0300) {
@@ -118,6 +126,9 @@ public final class P11TlsMasterSecretGenerator extends KeyGeneratorSpi {
         } else if (tlsVersion == 0x0301 || tlsVersion == 0x0302) {
             mechanism = isTlsRsaPremasterSecret ?
                     CKM_TLS_MASTER_KEY_DERIVE : CKM_TLS_MASTER_KEY_DERIVE_DH;
+        } else if (extendedMasterSecretSessionHash.length != 0) {
+            mechanism = isTlsRsaPremasterSecret ?
+                    CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE : CKM_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_DH;
         } else if (tlsVersion == 0x0303) {
             mechanism = isTlsRsaPremasterSecret ?
                     CKM_TLS12_MASTER_KEY_DERIVE : CKM_TLS12_MASTER_KEY_DERIVE_DH;
@@ -146,12 +157,20 @@ public final class P11TlsMasterSecretGenerator extends KeyGeneratorSpi {
         }
         byte[] clientRandom = spec.getClientRandom();
         byte[] serverRandom = spec.getServerRandom();
+        byte[] extendedMasterSecretSessionHash =
+                spec.getExtendedMasterSecretSessionHash();
         CK_SSL3_RANDOM_DATA random =
                 new CK_SSL3_RANDOM_DATA(clientRandom, serverRandom);
         CK_MECHANISM ckMechanism = null;
         if (tlsVersion < 0x0303) {
             CK_SSL3_MASTER_KEY_DERIVE_PARAMS params =
                     new CK_SSL3_MASTER_KEY_DERIVE_PARAMS(random, ckVersion);
+            ckMechanism = new CK_MECHANISM(mechanism, params);
+        } else if (extendedMasterSecretSessionHash.length != 0) {
+            CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS params =
+                    new CK_NSS_TLS_EXTENDED_MASTER_KEY_DERIVE_PARAMS(
+                            Functions.getHashMechId(spec.getPRFHashAlg()),
+                            extendedMasterSecretSessionHash, ckVersion);
             ckMechanism = new CK_MECHANISM(mechanism, params);
         } else if (tlsVersion == 0x0303) {
             CK_TLS12_MASTER_KEY_DERIVE_PARAMS params =
@@ -163,8 +182,16 @@ public final class P11TlsMasterSecretGenerator extends KeyGeneratorSpi {
         long p11KeyID = p11Key.getKeyID();
         try {
             session = token.getObjSession();
-            CK_ATTRIBUTE[] attributes = token.getAttributes(O_GENERATE,
-                CKO_SECRET_KEY, CKK_GENERIC_SECRET, new CK_ATTRIBUTE[0]);
+            CK_ATTRIBUTE[] attributes;
+            if (extendedMasterSecretSessionHash.length != 0) {
+                attributes = token.getAttributes(O_GENERATE,
+                        CKO_SECRET_KEY, CKK_GENERIC_SECRET, new CK_ATTRIBUTE[] {
+                                new CK_ATTRIBUTE(CKA_CLASS, CKO_SECRET_KEY),
+                                new CK_ATTRIBUTE(CKA_KEY_TYPE, CKK_GENERIC_SECRET)});
+            } else {
+                attributes = token.getAttributes(O_GENERATE,
+                        CKO_SECRET_KEY, CKK_GENERIC_SECRET, new CK_ATTRIBUTE[0]);
+            }
             long keyID = token.p11.C_DeriveKey(session.id(),
                     ckMechanism, p11KeyID, attributes);
             int major, minor;

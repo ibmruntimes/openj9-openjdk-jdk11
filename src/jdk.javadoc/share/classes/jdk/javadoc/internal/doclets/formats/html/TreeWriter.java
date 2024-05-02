@@ -121,16 +121,16 @@ public class TreeWriter extends AbstractTreeWriter {
         HtmlTree htmlTree = (configuration.allowTag(HtmlTag.MAIN))
                 ? HtmlTree.MAIN()
                 : body;
-        htmlTree.addContent(div);
+        htmlTree.add(div);
         HtmlTree divTree = new HtmlTree(HtmlTag.DIV);
         divTree.setStyle(HtmlStyle.contentContainer);
         addTree(classtree.baseClasses(), "doclet.Class_Hierarchy", divTree);
         addTree(classtree.baseInterfaces(), "doclet.Interface_Hierarchy", divTree);
         addTree(classtree.baseAnnotationTypes(), "doclet.Annotation_Type_Hierarchy", divTree);
         addTree(classtree.baseEnums(), "doclet.Enum_Hierarchy", divTree, true);
-        htmlTree.addContent(divTree);
+        htmlTree.add(divTree);
         if (configuration.allowTag(HtmlTag.MAIN)) {
-            body.addContent(htmlTree);
+            body.add(htmlTree);
         }
         if (configuration.allowTag(HtmlTag.FOOTER)) {
             htmlTree = HtmlTree.FOOTER();
@@ -139,7 +139,7 @@ public class TreeWriter extends AbstractTreeWriter {
         }
         addBottom(htmlTree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
-            body.addContent(htmlTree);
+            body.add(htmlTree);
         }
         printHtmlDocument(null, true, body);
     }
@@ -157,7 +157,7 @@ public class TreeWriter extends AbstractTreeWriter {
         if (!classesOnly) {
             Content span = HtmlTree.SPAN(HtmlStyle.packageHierarchyLabel,
                     contents.packageHierarchies);
-            contentTree.addContent(span);
+            contentTree.add(span);
             HtmlTree ul = new HtmlTree(HtmlTag.UL);
             ul.setStyle(HtmlStyle.horizontal);
             int i = 0;
@@ -174,12 +174,12 @@ public class TreeWriter extends AbstractTreeWriter {
                 Content li = HtmlTree.LI(links.createLink(link,
                         new StringContent(utils.getPackageName(pkg))));
                 if (i < packages.size() - 1) {
-                    li.addContent(", ");
+                    li.add(", ");
                 }
-                ul.addContent(li);
+                ul.add(li);
                 i++;
             }
-            contentTree.addContent(ul);
+            contentTree.add(ul);
         }
     }
 
@@ -196,9 +196,9 @@ public class TreeWriter extends AbstractTreeWriter {
                 : bodyTree;
         addTop(htmlTree);
         navBar.setUserHeader(getUserHeaderFooter(true));
-        htmlTree.addContent(navBar.getContent(true));
+        htmlTree.add(navBar.getContent(true));
         if (configuration.allowTag(HtmlTag.HEADER)) {
-            bodyTree.addContent(htmlTree);
+            bodyTree.add(htmlTree);
         }
         return bodyTree;
     }

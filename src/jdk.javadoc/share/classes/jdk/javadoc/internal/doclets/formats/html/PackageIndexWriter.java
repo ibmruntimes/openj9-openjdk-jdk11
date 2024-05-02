@@ -138,7 +138,7 @@ public class PackageIndexWriter extends AbstractPackageIndexWriter {
             }
 
             Content div = HtmlTree.DIV(HtmlStyle.contentContainer, table.toContent());
-            main.addContent(div);
+            main.add(div);
 
             if (table.needsScript()) {
                 getMainBodyScript().append(table.getScript());
@@ -160,7 +160,7 @@ public class PackageIndexWriter extends AbstractPackageIndexWriter {
             HtmlTree div = new HtmlTree(HtmlTag.DIV);
             div.setStyle(HtmlStyle.contentContainer);
             addOverviewComment(div);
-            main.addContent(div);
+            main.add(div);
         }
     }
 
@@ -188,7 +188,7 @@ public class PackageIndexWriter extends AbstractPackageIndexWriter {
     protected void addNavigationBarHeader(Content header) {
         addTop(header);
         navBar.setUserHeader(getUserHeaderFooter(true));
-        header.addContent(navBar.getContent(true));
+        header.add(navBar.getContent(true));
     }
 
     /**
