@@ -104,9 +104,9 @@ public class SingleIndexWriter extends AbstractIndexWriter {
                 : body;
         addTop(htmlTree);
         navBar.setUserHeader(getUserHeaderFooter(true));
-        htmlTree.addContent(navBar.getContent(true));
+        htmlTree.add(navBar.getContent(true));
         if (configuration.allowTag(HtmlTag.HEADER)) {
-            body.addContent(htmlTree);
+            body.add(htmlTree);
         }
         HtmlTree divTree = new HtmlTree(HtmlTag.DIV);
         divTree.setStyle(HtmlStyle.contentContainer);
@@ -124,7 +124,7 @@ public class SingleIndexWriter extends AbstractIndexWriter {
             }
         }
         addLinksForIndexes(divTree);
-        body.addContent((configuration.allowTag(HtmlTag.MAIN))
+        body.add((configuration.allowTag(HtmlTag.MAIN))
                 ? HtmlTree.MAIN(divTree)
                 : divTree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
@@ -132,7 +132,7 @@ public class SingleIndexWriter extends AbstractIndexWriter {
         }
         addBottom(htmlTree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
-            body.addContent(htmlTree);
+            body.add(htmlTree);
         }
         createSearchIndexFiles();
         printHtmlDocument(null, true, body);
@@ -146,17 +146,17 @@ public class SingleIndexWriter extends AbstractIndexWriter {
     protected void addLinksForIndexes(Content contentTree) {
         for (Object ch : elements) {
             String unicode = ch.toString();
-            contentTree.addContent(
+            contentTree.add(
                     links.createLink(getNameForIndex(unicode),
                             new StringContent(unicode)));
-            contentTree.addContent(Contents.SPACE);
+            contentTree.add(Contents.SPACE);
         }
-        contentTree.addContent(new HtmlTree(HtmlTag.BR));
-        contentTree.addContent(links.createLink(DocPaths.ALLCLASSES_INDEX,
+        contentTree.add(new HtmlTree(HtmlTag.BR));
+        contentTree.add(links.createLink(DocPaths.ALLCLASSES_INDEX,
                 contents.allClassesLabel));
         if (!configuration.packages.isEmpty()) {
-            contentTree.addContent(Contents.SPACE);
-            contentTree.addContent(links.createLink(DocPaths.ALLPACKAGES_INDEX,
+            contentTree.add(Contents.SPACE);
+            contentTree.add(links.createLink(DocPaths.ALLPACKAGES_INDEX,
                     contents.allPackagesLabel));
     }
 }

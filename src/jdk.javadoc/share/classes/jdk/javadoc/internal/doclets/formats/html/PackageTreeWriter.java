@@ -115,23 +115,23 @@ public class PackageTreeWriter extends AbstractTreeWriter {
         if (configuration.packages.size() > 1) {
             addLinkToMainTree(div);
         }
-        htmlTree.addContent(div);
+        htmlTree.add(div);
         HtmlTree divTree = new HtmlTree(HtmlTag.DIV);
         divTree.setStyle(HtmlStyle.contentContainer);
         addTree(classtree.baseClasses(), "doclet.Class_Hierarchy", divTree);
         addTree(classtree.baseInterfaces(), "doclet.Interface_Hierarchy", divTree);
         addTree(classtree.baseAnnotationTypes(), "doclet.Annotation_Type_Hierarchy", divTree);
         addTree(classtree.baseEnums(), "doclet.Enum_Hierarchy", divTree, true);
-        htmlTree.addContent(divTree);
+        htmlTree.add(divTree);
         if (configuration.allowTag(HtmlTag.MAIN)) {
-            body.addContent(htmlTree);
+            body.add(htmlTree);
         }
         HtmlTree tree = (configuration.allowTag(HtmlTag.FOOTER))
                 ? HtmlTree.FOOTER()
                 : body;
         addBottom(tree);
         if (configuration.allowTag(HtmlTag.FOOTER)) {
-            body.addContent(tree);
+            body.add(tree);
         }
         printHtmlDocument(null, true, body);
     }
@@ -153,9 +153,9 @@ public class PackageTreeWriter extends AbstractTreeWriter {
                 contents.moduleLabel);
         navBar.setNavLinkModule(linkContent);
         navBar.setUserHeader(getUserHeaderFooter(true));
-        htmlTree.addContent(navBar.getContent(true));
+        htmlTree.add(navBar.getContent(true));
         if (configuration.allowTag(HtmlTag.HEADER)) {
-            bodyTree.addContent(htmlTree);
+            bodyTree.add(htmlTree);
         }
         return bodyTree;
     }
@@ -168,10 +168,10 @@ public class PackageTreeWriter extends AbstractTreeWriter {
     protected void addLinkToMainTree(Content div) {
         Content span = HtmlTree.SPAN(HtmlStyle.packageHierarchyLabel,
                 contents.packageHierarchies);
-        div.addContent(span);
+        div.add(span);
         HtmlTree ul = new HtmlTree (HtmlTag.UL);
         ul.setStyle(HtmlStyle.horizontal);
-        ul.addContent(getNavLinkMainTree(configuration.getText("doclet.All_Packages")));
-        div.addContent(ul);
+        ul.add(getNavLinkMainTree(configuration.getText("doclet.All_Packages")));
+        div.add(ul);
     }
 }
