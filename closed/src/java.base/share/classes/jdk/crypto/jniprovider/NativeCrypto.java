@@ -416,6 +416,19 @@ public class NativeCrypto {
                                       int id,
                                       int hashAlgorithm);
 
+    /* Native ECDSA interfaces. */
+    public final native int ECDSASign(long key,
+                                      byte[] digest,
+                                      int digestLen,
+                                      byte[] signature,
+                                      int sigLen);
+
+    public final native int ECDSAVerify(long key,
+                                        byte[] digest,
+                                        int digestLen,
+                                        byte[] signature,
+                                        int sigLen);
+
     /* Native XDH (X25519, X448) interfaces. */
     public final native int XDHCreateKeys(byte[] privateKey,
                                           int privateKeyLength,
