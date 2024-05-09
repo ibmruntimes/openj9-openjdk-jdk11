@@ -155,6 +155,14 @@ typedef int OSSL_EC_KEY_check_key_t(const EC_KEY *);
 typedef int EC_set_public_key_t(EC_KEY *, BIGNUM *, BIGNUM *, int);
 typedef const BIGNUM *OSSL_EC_KEY_get0_private_key_t(const EC_KEY *);
 
+typedef ECDSA_SIG *OSSL_ECDSA_do_sign_t(const unsigned char *, int, EC_KEY *);
+typedef int OSSL_ECDSA_do_verify_t(const unsigned char *, int, const ECDSA_SIG *, EC_KEY *);
+typedef ECDSA_SIG *OSSL_ECDSA_SIG_new_t(void);
+typedef void OSSL_ECDSA_SIG_free_t(ECDSA_SIG *);
+typedef const BIGNUM *OSSL_ECDSA_SIG_get0_r_t(const ECDSA_SIG *);
+typedef const BIGNUM *OSSL_ECDSA_SIG_get0_s_t(const ECDSA_SIG *);
+typedef int OSSL_ECDSA_SIG_set0_t(ECDSA_SIG *, BIGNUM *, BIGNUM *);
+
 typedef EVP_PKEY_CTX *OSSL_EVP_PKEY_CTX_new_t(EVP_PKEY *, ENGINE *);
 typedef EVP_PKEY_CTX *OSSL_EVP_PKEY_CTX_new_id_t(int, ENGINE *);
 typedef int OSSL_EVP_PKEY_keygen_init_t(EVP_PKEY_CTX *);
@@ -281,6 +289,15 @@ OSSL_EC_KEY_set_public_key_t* OSSL_EC_KEY_set_public_key;
 OSSL_EC_KEY_check_key_t* OSSL_EC_KEY_check_key;
 EC_set_public_key_t* EC_set_public_key;
 OSSL_EC_KEY_get0_private_key_t *OSSL_EC_KEY_get0_private_key;
+
+/* Define pointers for OpenSSL functions to handle ECDSA algorithm. */
+OSSL_ECDSA_do_sign_t *OSSL_ECDSA_do_sign;
+OSSL_ECDSA_do_verify_t *OSSL_ECDSA_do_verify;
+OSSL_ECDSA_SIG_new_t *OSSL_ECDSA_SIG_new;
+OSSL_ECDSA_SIG_free_t *OSSL_ECDSA_SIG_free;
+OSSL_ECDSA_SIG_get0_r_t *OSSL_ECDSA_SIG_get0_r;
+OSSL_ECDSA_SIG_get0_s_t *OSSL_ECDSA_SIG_get0_s;
+OSSL_ECDSA_SIG_set0_t *OSSL_ECDSA_SIG_set0;
 
 /* Define pointers for OpenSSL functions to handle XDH algorithm. */
 OSSL_EVP_PKEY_CTX_new_t *OSSL_EVP_PKEY_CTX_new;
@@ -572,7 +589,7 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_ECGF2M = JNI_TRUE;
     }
 
-    /* Load the functions symbols for OpenSSL XDH algorithm. (Need OpenSSL 1.1.x or above). */
+    /* Load the functions symbols for OpenSSL XDH and ECDSA algorithms. (Need OpenSSL 1.1.x or above). */
     if (ossl_ver >= OPENSSL_VERSION_1_1_1) {
         OSSL_EVP_PKEY_CTX_new = (OSSL_EVP_PKEY_CTX_new_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_CTX_new");
         OSSL_EVP_PKEY_CTX_new_id = (OSSL_EVP_PKEY_CTX_new_id_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_CTX_new_id");
@@ -587,6 +604,14 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_EVP_PKEY_derive_set_peer = (OSSL_EVP_PKEY_derive_set_peer_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_derive_set_peer");
         OSSL_EVP_PKEY_derive = (OSSL_EVP_PKEY_derive_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_derive");
         OSSL_EVP_PKEY_free = (OSSL_EVP_PKEY_free_t *)find_crypto_symbol(crypto_library, "EVP_PKEY_free");
+
+        OSSL_ECDSA_do_sign = (OSSL_ECDSA_do_sign_t *)find_crypto_symbol(crypto_library, "ECDSA_do_sign");
+        OSSL_ECDSA_do_verify = (OSSL_ECDSA_do_verify_t *)find_crypto_symbol(crypto_library, "ECDSA_do_verify");
+        OSSL_ECDSA_SIG_new = (OSSL_ECDSA_SIG_new_t *)find_crypto_symbol(crypto_library, "ECDSA_SIG_new");
+        OSSL_ECDSA_SIG_free = (OSSL_ECDSA_SIG_free_t *)find_crypto_symbol(crypto_library, "ECDSA_SIG_free");
+        OSSL_ECDSA_SIG_get0_r = (OSSL_ECDSA_SIG_get0_r_t *)find_crypto_symbol(crypto_library, "ECDSA_SIG_get0_r");
+        OSSL_ECDSA_SIG_get0_s = (OSSL_ECDSA_SIG_get0_s_t *)find_crypto_symbol(crypto_library, "ECDSA_SIG_get0_s");
+        OSSL_ECDSA_SIG_set0 = (OSSL_ECDSA_SIG_set0_t *)find_crypto_symbol(crypto_library, "ECDSA_SIG_set0");
     } else {
         OSSL_EVP_PKEY_CTX_new = NULL;
         OSSL_EVP_PKEY_CTX_new_id = NULL;
@@ -601,6 +626,14 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
         OSSL_EVP_PKEY_derive_set_peer = NULL;
         OSSL_EVP_PKEY_derive = NULL;
         OSSL_EVP_PKEY_free = NULL;
+
+        OSSL_ECDSA_do_sign = NULL;
+        OSSL_ECDSA_do_verify = NULL;
+        OSSL_ECDSA_SIG_new = NULL;
+        OSSL_ECDSA_SIG_free = NULL;
+        OSSL_ECDSA_SIG_get0_r = NULL;
+        OSSL_ECDSA_SIG_get0_s = NULL;
+        OSSL_ECDSA_SIG_set0 = NULL;
     }
 
     /* Load the functions symbols for OpenSSL PBE algorithm. */
@@ -685,7 +718,14 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
              (NULL == OSSL_EVP_PKEY_derive_init) ||
              (NULL == OSSL_EVP_PKEY_derive_set_peer) ||
              (NULL == OSSL_EVP_PKEY_derive) ||
-             (NULL == OSSL_EVP_PKEY_free))) ||
+             (NULL == OSSL_EVP_PKEY_free) ||
+             (NULL == OSSL_ECDSA_do_sign) ||
+             (NULL == OSSL_ECDSA_do_verify) ||
+             (NULL == OSSL_ECDSA_SIG_new) ||
+             (NULL == OSSL_ECDSA_SIG_free) ||
+             (NULL == OSSL_ECDSA_SIG_get0_r) ||
+             (NULL == OSSL_ECDSA_SIG_get0_s) ||
+             (NULL == OSSL_ECDSA_SIG_set0))) ||
         /* Check symbols that are only available in OpenSSL 1.1.x and above */
         ((ossl_ver >= OPENSSL_VERSION_1_1_0) && ((NULL == OSSL_chacha20) || (NULL == OSSL_chacha20_poly1305))) ||
         /* Check symbols that are only available in OpenSSL 1.0.x and above */
@@ -3088,6 +3128,137 @@ cleanup:
     }
     if (NULL != nativeKey) {
         (*env)->ReleasePrimitiveArrayCritical(env, key, nativeKey, 0);
+    }
+
+    return ret;
+}
+
+/* Create an ECDSA Signature
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECDSASign
+ * Signature: (J[BI[B)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECDSASign
+  (JNIEnv *env, jclass obj, jlong key, jbyteArray digest, jint digestLen, jbyteArray sig, jint sigLen)
+{
+    jint ret = -1;
+
+    unsigned char *nativeDigest = NULL;
+    unsigned char *nativeSig = NULL;
+    EC_KEY *privateKey = (EC_KEY *)(intptr_t)key;
+    ECDSA_SIG *signature = NULL;
+    const BIGNUM *rBN = NULL;
+    const BIGNUM *sBN = NULL;
+
+    nativeDigest = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, digest, 0));
+    if (NULL == nativeDigest) {
+        goto cleanup;
+    }
+
+    signature = (*OSSL_ECDSA_do_sign)(nativeDigest, digestLen, privateKey);
+    if (NULL == signature) {
+        printf("Failed to create an ECDSA Signature.\n");
+        goto cleanup;
+    }
+
+    rBN = (*OSSL_ECDSA_SIG_get0_r)(signature);
+    sBN = (*OSSL_ECDSA_SIG_get0_s)(signature);
+
+    nativeSig = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, sig, 0));
+    if (NULL == nativeSig) {
+        goto cleanup;
+    }
+
+    ret = getArrayFromBN(rBN, nativeSig, sigLen / 2);
+    if (-1 == ret) {
+        goto cleanup;
+    }
+
+    ret = getArrayFromBN(sBN, &nativeSig[sigLen / 2], sigLen / 2);
+    if (-1 == ret) {
+        goto cleanup;
+    }
+
+    ret = sigLen;
+
+cleanup:
+    if (NULL != nativeSig) {
+        (*env)->ReleasePrimitiveArrayCritical(env, sig, nativeSig, 0);
+    }
+
+    if (NULL != signature) {
+        (*OSSL_ECDSA_SIG_free)(signature);
+    }
+
+    if (NULL != nativeDigest) {
+        (*env)->ReleasePrimitiveArrayCritical(env, digest, nativeDigest, JNI_ABORT);
+    }
+
+    return ret;
+}
+
+/* Verify an ECDSA Signature
+ *
+ * Class:     jdk_crypto_jniprovider_NativeCrypto
+ * Method:    ECDSAVerify
+ * Signature: (J[BI[B)I
+ */
+JNIEXPORT jint JNICALL
+Java_jdk_crypto_jniprovider_NativeCrypto_ECDSAVerify
+  (JNIEnv *env, jclass obj, jlong key, jbyteArray digest, jint digestLen, jbyteArray sig, jint sigLen)
+{
+    jint ret = -1;
+
+    unsigned char *nativeDigest = NULL;
+    unsigned char *nativeSig = NULL;
+    EC_KEY *publicKey = (EC_KEY *)(intptr_t)key;
+    ECDSA_SIG *signature = NULL;
+    BIGNUM *rBN = NULL;
+    BIGNUM *sBN = NULL;
+
+    nativeSig = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, sig, 0));
+    if (NULL == nativeSig) {
+        goto cleanup;
+    }
+
+    rBN = (*OSSL_BN_bin2bn)(nativeSig, sigLen / 2, NULL);
+    sBN = (*OSSL_BN_bin2bn)(&nativeSig[sigLen / 2], sigLen / 2, NULL);
+    signature = (*OSSL_ECDSA_SIG_new)();
+    if (0 == (*OSSL_ECDSA_SIG_set0)(signature, rBN, sBN)) {
+        goto cleanup;
+    }
+
+    nativeDigest = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, digest, 0));
+    if (NULL == nativeDigest) {
+        goto cleanup;
+    }
+
+    ret = (*OSSL_ECDSA_do_verify)(nativeDigest, digestLen, signature, publicKey);
+
+cleanup:
+    if (NULL != nativeDigest) {
+        (*env)->ReleasePrimitiveArrayCritical(env, digest, nativeDigest, JNI_ABORT);
+    }
+
+    if (NULL != signature) {
+        // The BIGNUM structs will be freed by the signature.
+        sBN = NULL;
+        rBN = NULL;
+        (*OSSL_ECDSA_SIG_free)(signature);
+    }
+
+    // In case the BIGNUM structs weren't freed by the signature.
+    if (NULL != sBN) {
+        (*OSSL_BN_free)(sBN);
+    }
+    if (NULL != rBN) {
+        (*OSSL_BN_free)(rBN);
+    }
+
+    if (NULL != nativeSig) {
+        (*env)->ReleasePrimitiveArrayCritical(env, sig, nativeSig, JNI_ABORT);
     }
 
     return ret;
