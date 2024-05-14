@@ -75,6 +75,10 @@ AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
     if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
       AC_MSG_ERROR([[--with-mixedrefs=[static|dynamic] requires --with-cmake]])
     fi
+
+    if test "x$OPENJ9_CPU" = xaarch64 -a "x$OPENJ9_BUILD_OS" = xosx ; then
+      AC_MSG_ERROR([AArch64 macOS build requires --with-cmake])
+    fi
   else
     OPENJ9_ENABLE_CMAKE=true
     if AS_EXECUTABLE_P(["$with_cmake"]) ; then
