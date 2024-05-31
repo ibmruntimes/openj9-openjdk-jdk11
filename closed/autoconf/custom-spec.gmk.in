@@ -166,6 +166,7 @@ $(foreach var, \
 	$(eval $(var) += -I$(SUPPORT_OUTPUTDIR)/openj9_include))
 
 J9JCL_SOURCES_DIR      := $(SUPPORT_OUTPUTDIR)/j9jcl
+J9JCL_SOURCES_DONEFILE := $(MAKESUPPORT_OUTPUTDIR)/j9jcl.done
 
 ifeq (riscv64,$(OPENJDK_TARGET_CPU))
   ifeq (cross,$(COMPILE_TYPE))

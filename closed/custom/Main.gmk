@@ -36,6 +36,14 @@ PHASE_MAKEDIRS := $(TOPDIR)/closed/make $(PHASE_MAKEDIRS)
 
 OPENJ9_MAKE := $(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/OpenJ9.gmk
 
+# An early part of the build process involves computing the list of main targets.
+# Those targets include {module}-java, {module}-jmod, etc. which requires that the
+# set of module names be known. We must build and run the preprocessor to ensure the
+# modules specific to OpenJ9 will be found and included in that set. The next two
+# rules make that happen.
+
+create-main-targets-include java.base-gensrc : generate-j9jcl-sources
+
 j9vm-build : buildtools-langtools
   ifeq ($(BUILD_OPENSSL),yes)
 	@+$(MAKE) $(MAKE_ARGS) -f $(TOPDIR)/closed/openssl.gmk

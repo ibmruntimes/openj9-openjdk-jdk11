@@ -27,6 +27,7 @@ ifeq (,$(wildcard $(SPEC)))
 endif
 include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
+include $(TOPDIR)/closed/JPP.gmk
 
 ifeq (,$(BUILD_ID))
   BUILD_ID := 000000
