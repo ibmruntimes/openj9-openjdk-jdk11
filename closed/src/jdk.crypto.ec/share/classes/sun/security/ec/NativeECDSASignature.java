@@ -94,14 +94,14 @@ abstract class NativeECDSASignature extends SignatureSpi {
     // private key, if initialized for signing
     private ECPrivateKey privateKey;
 
-    // private key impl, if initialized for signing
-    private ECPrivateKeyImpl privateKeyImpl;
+    // native private key pointer, if initialized for signing
+    private long nativePrivateKey;
 
     // public key, if initialized for verifying
     private ECPublicKey publicKey;
 
-    // public key impl, if initialized for verifying
-    private ECPublicKeyImpl publicKeyImpl;
+    // native public key pointer, if initialized for verifying
+    private long nativePublicKey;
 
     // signature parameters
     private ECParameterSpec sigParams;
@@ -110,7 +110,7 @@ abstract class NativeECDSASignature extends SignatureSpi {
     private final boolean p1363Format;
 
     // the Java implementation, if needed
-    private ECDSASignature javaImplementation;
+    ECDSASignature javaImplementation;
 
     /**
      * Constructs a new NativeECDSASignature.
@@ -174,51 +174,62 @@ abstract class NativeECDSASignature extends SignatureSpi {
         // Stores the precomputed message digest value.
         @Override
         protected void engineUpdate(byte b) throws SignatureException {
-            if (offset >= precomputedDigest.length) {
-                offset = RAW_ECDSA_MAX + 1;
-                return;
+            if (this.javaImplementation != null) {
+                this.javaImplementation.engineUpdate(b);
+            } else {
+                if (offset >= precomputedDigest.length) {
+                    offset = RAW_ECDSA_MAX + 1;
+                    return;
+                }
+                precomputedDigest[offset++] = b;
             }
-            precomputedDigest[offset++] = b;
         }
 
         // Stores the precomputed message digest value.
         @Override
         protected void engineUpdate(byte[] b, int off, int len)
         throws SignatureException {
-            if (offset >= precomputedDigest.length) {
-                offset = RAW_ECDSA_MAX + 1;
-                return;
+            if (this.javaImplementation != null) {
+                this.javaImplementation.engineUpdate(b, off, len);
+            } else {
+                if (offset >= precomputedDigest.length) {
+                    offset = RAW_ECDSA_MAX + 1;
+                    return;
+                }
+                System.arraycopy(b, off, precomputedDigest, offset, len);
+                offset += len;
             }
-            System.arraycopy(b, off, precomputedDigest, offset, len);
-            offset += len;
         }
 
         // Stores the precomputed message digest value.
         @Override
         protected void engineUpdate(ByteBuffer byteBuffer) {
-            int len = byteBuffer.remaining();
-            if (len <= 0) {
-                return;
+            if (this.javaImplementation != null) {
+                this.javaImplementation.engineUpdate(byteBuffer);
+            } else {
+                int len = byteBuffer.remaining();
+                if (len <= 0) {
+                    return;
+                }
+                if (len >= (precomputedDigest.length - offset)) {
+                    offset = RAW_ECDSA_MAX + 1;
+                    return;
+                }
+                byteBuffer.get(precomputedDigest, offset, len);
+                offset += len;
             }
-            if (len >= (precomputedDigest.length - offset)) {
-                offset = RAW_ECDSA_MAX + 1;
-                return;
-            }
-            byteBuffer.get(precomputedDigest, offset, len);
-            offset += len;
         }
 
         @Override
-        protected void resetDigest() {
+        void resetDigest() {
             offset = 0;
         }
 
         // Returns the precomputed message digest value.
         @Override
-        protected byte[] getDigestValue() throws SignatureException {
+        byte[] getDigestValue() throws SignatureException {
             if (offset > RAW_ECDSA_MAX) {
                 throw new SignatureException("Message digest is too long");
-
             }
             byte[] result = new byte[offset];
             System.arraycopy(precomputedDigest, 0, result, 0, offset);
@@ -327,17 +338,19 @@ abstract class NativeECDSASignature extends SignatureSpi {
         this.privateKey = null;
         resetDigest();
 
-        if (key instanceof ECPublicKeyImpl) {
-            ECPublicKeyImpl keyImpl = (ECPublicKeyImpl) key;
-            this.publicKeyImpl = keyImpl;
-            this.privateKeyImpl = null;
-            this.javaImplementation = null;
-            if (nativeCryptTrace) {
-                System.err.println("InitVerify: Using native crypto implementation for verifying signature.");
-            }
-        } else {
+        this.nativePublicKey = NativeECUtil.getPublicKeyNativePtr(key);
+        if (this.nativePublicKey == -1) {
             this.javaImplementation = getJavaInstance();
             this.javaImplementation.engineInitVerify(publicKey);
+            if (nativeCryptTrace) {
+                System.err.println("InitVerify: Could not create a pointer to a native key."
+                        + " Using Java implementation.");
+            }
+            return;
+        }
+        this.javaImplementation = null;
+        if (nativeCryptTrace) {
+            System.err.println("InitVerify: Keys were successfully converted to native OpenSSL format.");
         }
     }
 
@@ -386,24 +399,26 @@ abstract class NativeECDSASignature extends SignatureSpi {
         this.random = random;
         resetDigest();
 
-        if (key instanceof ECPrivateKeyImpl) {
-            ECPrivateKeyImpl keyImpl = (ECPrivateKeyImpl) key;
-            this.publicKeyImpl = null;
-            this.privateKeyImpl = keyImpl;
-            this.javaImplementation = null;
-            if (nativeCryptTrace) {
-                System.err.println("InitSign: Using native crypto implementation for verifying signature.");
-            }
-        } else {
+        this.nativePrivateKey = NativeECUtil.getPrivateKeyNativePtr(key);
+        if (this.nativePrivateKey == -1) {
             this.javaImplementation = getJavaInstance();
             this.javaImplementation.engineInitSign(privateKey, random);
+            if (nativeCryptTrace) {
+                System.err.println("InitSign: Could not create a pointer to a native key."
+                        + " Using Java implementation.");
+            }
+            return;
+        }
+        this.javaImplementation = null;
+        if (nativeCryptTrace) {
+            System.err.println("InitSign: Keys were successfully converted to native OpenSSL format.");
         }
     }
 
     /**
      * Resets the message digest if needed.
      */
-    protected void resetDigest() {
+    void resetDigest() {
         if (needsReset) {
             if (messageDigest != null) {
                 messageDigest.reset();
@@ -415,7 +430,7 @@ abstract class NativeECDSASignature extends SignatureSpi {
     /**
      * Returns the message digest value.
      */
-    protected byte[] getDigestValue() throws SignatureException {
+    byte[] getDigestValue() throws SignatureException {
         needsReset = false;
         return messageDigest.digest();
     }
@@ -475,19 +490,11 @@ abstract class NativeECDSASignature extends SignatureSpi {
             return this.javaImplementation.engineSign();
         }
 
-        long nativePrivateKey = privateKeyImpl.getNativePtr();
         byte[] digest = getDigestValue();
         int digestLen = digest.length;
         ECParameterSpec params = privateKey.getParams();
         int sigLen = ((params.getOrder().bitLength() + 7) / 8) * 2;
         byte[] sig = new byte[sigLen];
-
-        if (nativePrivateKey == -1) {
-            throw new ProviderException("Keys could not be converted to native OpenSSL format");
-        }
-        if (nativeCryptTrace) {
-            System.err.println("Sign: Keys were successfully converted to native OpenSSL format.");
-        }
 
         if (nativeCrypto == null) {
             nativeCrypto = NativeCrypto.getNativeCrypto();
@@ -517,14 +524,6 @@ abstract class NativeECDSASignature extends SignatureSpi {
     protected boolean engineVerify(byte[] signature) throws SignatureException {
         if (this.javaImplementation != null) {
             return this.javaImplementation.engineVerify(signature);
-        }
-
-        long nativePublicKey = publicKeyImpl.getNativePtr();
-        if (nativePublicKey == -1) {
-            throw new ProviderException("Could not convert keys to native format");
-        }
-        if (nativeCryptTrace) {
-            System.err.println("Verify: Keys were successfully converted to native OpenSSL format.");
         }
 
         if (nativeCrypto == null) {
