@@ -40,8 +40,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_PLATFORM_SETUP
   OPENJ9_CONFIGURE_CMAKE
   OPENJ9_CONFIGURE_COMPILERS
-  OPENJ9_CONFIGURE_CRAC_SUPPORT
-  OPENJ9_CONFIGURE_CRIU_SUPPORT
+  OPENJ9_CONFIGURE_CRAC_AND_CRIU_SUPPORT
   OPENJ9_CONFIGURE_CUDA
   OPENJ9_CONFIGURE_DDR
   OPENJ9_CONFIGURE_DEMOS
@@ -335,9 +334,112 @@ AC_DEFUN([OPENJ9_PLATFORM_EXTRACT_VARS_FROM_CPU],
   esac
 ])
 
+AC_DEFUN([OPENJ9_CONFIGURE_CRAC_AND_CRIU_SUPPORT],
+[
+  AC_ARG_ENABLE([crac-support], [AS_HELP_STRING([--enable-crac-support], [enable CRaC support @<:@platform dependent@:>@])])
+  AC_ARG_ENABLE([criu-support], [AS_HELP_STRING([--enable-criu-support], [enable CRIU support @<:@platform dependent@:>@])])
+
+  # Complain about explicitly requested, but illegal combinations.
+  if test "x$enable_crac_support" = xyes && test "x$enable_criu_support" = xno ; then
+    AC_MSG_ERROR([--enable-crac-support requires CRIU support])
+  fi
+
+  # Compute platform-specific defaults.
+  case "$OPENJ9_PLATFORM_CODE" in
+    xa64)
+      default_crac=yes
+      default_criu=yes
+      ;;
+    xl64|xr64|xz64)
+      default_crac=no
+      default_criu=yes
+      ;;
+    *)
+      default_crac=no
+      default_criu=no
+      ;;
+  esac
+
+  # Capture the origin of each setting.
+  if test "x$enable_crac_support" = xyes ; then
+    origin_crac="explicitly enabled"
+  elif test "x$enable_crac_support" = xno ; then
+    origin_crac="explicitly disabled"
+  elif test "x$enable_crac_support" = x ; then
+    # Adjust if CRUI is explicitly disabled.
+    if test "x$enable_criu_support" = xno && test "x$default_crac" = xyes ; then
+      origin_crac="implicitly disabled"
+      enable_crac_support=no
+    else
+      origin_crac=default
+      enable_crac_support=$default_crac
+    fi
+  else
+    AC_MSG_ERROR([--enable-crac-support accepts no argument])
+  fi
+
+  if test "x$enable_criu_support" = xyes ; then
+    origin_criu="explicitly enabled"
+  elif test "x$enable_criu_support" = xno ; then
+    origin_criu="explicitly disabled"
+  elif test "x$enable_criu_support" = x ; then
+    # Adjust if CRaC is explicitly enabled.
+    if test "x$enable_crac_support" = xyes && test "x$default_criu" = xno ; then
+      origin_criu="implicitly enabled"
+      enable_criu_support=yes
+    else
+      origin_criu=default
+      enable_criu_support=$default_criu
+    fi
+  else
+    AC_MSG_ERROR([--enable-criu-support accepts no argument])
+  fi
+
+  # Report and capture results.
+  AC_MSG_CHECKING([for CRAC support])
+  if test "x$enable_crac_support" = xyes ; then
+    AC_MSG_RESULT([yes ($origin_crac)])
+    OPENJ9_ENABLE_CRAC_SUPPORT=true
+  else
+    AC_MSG_RESULT([no ($origin_crac)])
+    OPENJ9_ENABLE_CRAC_SUPPORT=false
+  fi
+  AC_SUBST(OPENJ9_ENABLE_CRAC_SUPPORT)
+
+  AC_MSG_CHECKING([for CRIU support])
+  if test "x$enable_criu_support" = xyes ; then
+    AC_MSG_RESULT([yes ($origin_criu)])
+    OPENJ9_ENABLE_CRIU_SUPPORT=true
+  else
+    AC_MSG_RESULT([no ($origin_criu)])
+    OPENJ9_ENABLE_CRIU_SUPPORT=false
+  fi
+  AC_SUBST(OPENJ9_ENABLE_CRIU_SUPPORT)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_INLINE_TYPES],
+[
+  AC_MSG_CHECKING([for inline types])
+  AC_ARG_ENABLE([inline-types], [AS_HELP_STRING([--enable-inline-types], [enable Inline-Type support @<:@disabled@:>@])])
+  OPENJ9_ENABLE_INLINE_TYPES=false
+
+  if test "x$enable_inline_types" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_INLINE_TYPES=true
+  elif test "x$enable_inline_types" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_inline_types" = x ; then
+    AC_MSG_RESULT([no (default)])
+  else
+    AC_MSG_ERROR([--enable-inline-types accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_INLINE_TYPES)
+])
+
 AC_DEFUN([OPENJ9_CONFIGURE_JFR],
 [
   AC_ARG_ENABLE([jfr], [AS_HELP_STRING([--enable-jfr], [enable JFR support @<:@platform dependent@:>@])])
+
   AC_MSG_CHECKING([for jfr])
   OPENJ9_ENABLE_JFR=false
   if test "x$enable_jfr" = xyes ; then
@@ -358,6 +460,7 @@ AC_DEFUN([OPENJ9_CONFIGURE_JFR],
   else
     AC_MSG_ERROR([--enable-jfr accepts no argument])
   fi
+
   AC_SUBST(OPENJ9_ENABLE_JFR)
 ])
 
@@ -396,59 +499,6 @@ AC_DEFUN([OPENJ9_CONFIGURE_JITSERVER],
   fi
 
   AC_SUBST(OPENJ9_ENABLE_JITSERVER)
-])
-
-AC_DEFUN([OPENJ9_CONFIGURE_CRAC_SUPPORT],
-[
-  AC_MSG_CHECKING([for CRAC support])
-  AC_ARG_ENABLE([crac-support], [AS_HELP_STRING([--enable-crac-support], [enable CRAC support @<:@platform dependent@:>@])])
-  OPENJ9_ENABLE_CRAC_SUPPORT=false
-
-  if test "x$enable_crac_support" = xyes ; then
-    AC_MSG_RESULT([yes (explicitly enabled)])
-    OPENJ9_ENABLE_CRAC_SUPPORT=true
-  elif test "x$enable_crac_support" = xno ; then
-    AC_MSG_RESULT([no (explicitly disabled)])
-  elif test "x$enable_crac_support" = x ; then
-    case "$OPENJ9_PLATFORM_CODE" in
-      xa64)
-        AC_MSG_RESULT([yes (default)])
-        OPENJ9_ENABLE_CRAC_SUPPORT=true
-        ;;
-      *)
-        AC_MSG_RESULT([no (default)])
-        ;;
-    esac
-  else
-    AC_MSG_ERROR([--enable-crac-support accepts no argument])
-  fi
-  AC_SUBST(OPENJ9_ENABLE_CRAC_SUPPORT)
-])
-
-AC_DEFUN([OPENJ9_CONFIGURE_CRIU_SUPPORT],
-[
-  AC_MSG_CHECKING([for CRIU support])
-  AC_ARG_ENABLE([criu-support], [AS_HELP_STRING([--enable-criu-support], [enable CRIU support @<:@platform dependent@:>@])])
-  OPENJ9_ENABLE_CRIU_SUPPORT=false
-  if test "x$enable_criu_support" = xyes ; then
-    AC_MSG_RESULT([yes (explicitly enabled)])
-    OPENJ9_ENABLE_CRIU_SUPPORT=true
-  elif test "x$enable_criu_support" = xno ; then
-    AC_MSG_RESULT([no (explicitly disabled)])
-  elif test "x$enable_criu_support" = x ; then
-    case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xl64|xr64|xz64)
-        AC_MSG_RESULT([yes (default)])
-        OPENJ9_ENABLE_CRIU_SUPPORT=true
-        ;;
-      *)
-        AC_MSG_RESULT([no (default)])
-        ;;
-    esac
-  else
-    AC_MSG_ERROR([--enable-criu-support accepts no argument])
-  fi
-  AC_SUBST(OPENJ9_ENABLE_CRIU_SUPPORT)
 ])
 
 AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
