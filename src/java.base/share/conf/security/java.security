@@ -139,18 +139,19 @@ RestrictedSecurity.NSS.140-2.tls.legacyAlgorithms =
 
 RestrictedSecurity.NSS.140-2.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.NSS.140-2.jce.legacyAlgorithms =
-RestrictedSecurity.NSS.140-2.jce.provider.1 = SunPKCS11 ${java.home}/conf/security/nss.fips.cfg
-RestrictedSecurity.NSS.140-2.jce.provider.2 = SUN [{CertificateFactory, X.509, ImplementedIn=Software}, \
+RestrictedSecurity.NSS.140-2.jce.provider.1 = sun.security.pkcs11.SunPKCS11 ${java.home}/conf/security/nss.fips.cfg
+RestrictedSecurity.NSS.140-2.jce.provider.2 = sun.security.provider.Sun [ \
+    {CertificateFactory, X.509, ImplementedIn=Software}, \
     {CertStore, Collection, ImplementedIn=Software}, \
     {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
     {Policy, JavaPolicy, *}, {Configuration, JavaLoginConfig, *}, \
     {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
     {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
     {KeyStore, PKCS12, *}]
-RestrictedSecurity.NSS.140-2.jce.provider.3 = SunEC [{KeyFactory, EC, ImplementedIn=Software: \
+RestrictedSecurity.NSS.140-2.jce.provider.3 = sun.security.ec.SunEC [{KeyFactory, EC, ImplementedIn=Software: \
     SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
     KeySize=256}, {AlgorithmParameters, EC, *}]
-RestrictedSecurity.NSS.140-2.jce.provider.4 = SunJSSE
+RestrictedSecurity.NSS.140-2.jce.provider.4 = sun.security.ssl.SunJSSE
 
 RestrictedSecurity.NSS.140-2.keystore.type = PKCS11
 RestrictedSecurity.NSS.140-2.javax.net.ssl.keyStore = NONE
@@ -163,7 +164,7 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = true
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:f5b04d07f6fd5d11374b23dd96110b231d0241096563ae55cf3ea6fb1788d97c
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:c0f81edb5bbd6a17a3ebbe7aa459441d6b1c77fc02773b8ecc79b4d996c3d055
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -202,14 +203,15 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.legacyAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.legacyAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = SUN [{CertificateFactory, X.509, ImplementedIn=Software}, \
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = sun.security.provider.Sun [ \
+    {CertificateFactory, X.509, ImplementedIn=Software}, \
     {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
     {CertPathValidator, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
     {CertStore, Collection, ImplementedIn=Software}, \
     {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
     {Configuration, JavaLoginConfig, *}, \
     {Policy, JavaPolicy, *}]
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = sun.security.ssl.SunJSSE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.algorithm = SHA512DRBG
