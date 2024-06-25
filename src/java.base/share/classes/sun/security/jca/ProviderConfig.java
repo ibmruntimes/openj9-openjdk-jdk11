@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
  * ===========================================================================
  */
 
@@ -170,17 +170,20 @@ final class ProviderConfig {
     // com.sun.net.ssl.internal.ssl.Provider has been deprecated since JDK 9
     @SuppressWarnings("deprecation")
     synchronized Provider getProvider() {
-        if (!RestrictedSecurity.isProviderAllowed(provName)) {
-            // We're in restricted security mode which does not allow this provider,
-            // return without loading.
-            return null;
-        }
         // volatile variable load
         Provider p = provider;
+        // There is RestrictedSecurity check in the ServiceLoader before the
+        // provider is initialized. So the check has already occurred for the
+        // provider where provider != null.
         if (p != null) {
             return p;
         }
         if (shouldLoad() == false) {
+            return null;
+        }
+        if (!RestrictedSecurity.isProviderAllowed(provName)) {
+            // We're in restricted security mode which does not allow this provider,
+            // return without loading.
             return null;
         }
 
@@ -361,8 +364,12 @@ final class ProviderConfig {
                     if (debug != null) {
                         debug.println("Found SL Provider named " + pName);
                     }
-                    if (pName.equals(pn)) {
+                    if (p.getClass().getName().equals(pn)) {
                         return p;
+                    } else if (pName.equals(pn)) {
+                        if (!RestrictedSecurity.isEnabled()) {
+                            return p;
+                        }
                     }
                 } catch (SecurityException | ServiceConfigurationError |
                          InvalidParameterException ex) {
