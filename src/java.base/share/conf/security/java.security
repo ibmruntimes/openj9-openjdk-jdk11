@@ -161,10 +161,34 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 #endif
 
 #if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
+#
+# Strict Restricted Security mode profile for FIPS 140-3. This policy represents only allowable
+# approved cryptography in the OpenJCEPlusFIPS provider along with other non-cryptographic algorithms
+# commonly used. Please note that the following constraints represent algorithms no longer allowable
+# within this strict profile for the OpenJCEPlusFIPS provider as compared to the
+# "RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced" profile defined below.
+#    {AlgorithmParameterGenerator, DiffieHellman, *}, \
+#    {AlgorithmParameters, DiffieHellman, *}, \
+#    {KeyAgreement, DiffieHellman, *}, \
+#    {KeyFactory, DiffieHellman, *}, \
+#    {KeyGenerator, HmacSHA3-224, *}, \
+#    {KeyGenerator, HmacSHA3-256, *}, \
+#    {KeyGenerator, HmacSHA3-384, *}, \
+#    {KeyGenerator, HmacSHA3-512, *}, \
+#    {KeyPairGenerator, DiffieHellman, *}, \
+#    {MessageDigest, MD5, *}, \
+#    {MessageDigest, SHA-1, *}, \
+#    {MessageDigest, SHA-512/224, *}, \
+#    {MessageDigest, SHA-512/256, *}, \
+#    {Signature, NONEwithDSA, *}, \
+#    {Signature, NONEwithRSA, *}, \
+#    {Signature, RSAforSSL, *}, \
+#    {Signature, SHA1withRSA, *}
+#
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = true
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:c0f81edb5bbd6a17a3ebbe7aa459441d6b1c77fc02773b8ecc79b4d996c3d055
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -177,6 +201,7 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     DES, \
     DH keySize < 2048, \
     EC keySize < 224, \
+    ECDH, \
     MD5withRSA, \
     NULL, \
     RC4, \
@@ -187,6 +212,12 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     TLS_DHE_DSS_WITH_AES_256_CBC_SHA, \
     TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, \
     TLS_DHE_DSS_WITH_AES_256_GCM_SHA384, \
+    TLS_DHE_RSA_WITH_AES_128_CBC_SHA, \
+    TLS_DHE_RSA_WITH_AES_256_CBC_SHA, \
+    TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, \
+    TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA, \
+    TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, \
+    TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, \
     TLS_EMPTY_RENEGOTIATION_INFO_SCSV, \
     TLS_RSA_WITH_AES_128_CBC_SHA, \
     TLS_RSA_WITH_AES_128_CBC_SHA256, \
@@ -200,9 +231,80 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     X448
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.ephemeralDHKeySize =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.legacyAlgorithms =
+
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.legacyAlgorithms =
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS [ \
+    {AlgorithmParameterGenerator, AESGCM, *}, \
+    {AlgorithmParameterGenerator, CCM, *}, \
+    {AlgorithmParameterGenerator, EC, *}, \
+    {AlgorithmParameterGenerator, GCM, *}, \
+    {AlgorithmParameters, AES, *}, \
+    {AlgorithmParameters, CCM, *}, \
+    {AlgorithmParameters, DSA, *}, \
+    {AlgorithmParameters, EC, *}, \
+    {AlgorithmParameters, GCM, *}, \
+    {AlgorithmParameters, OAEP, *}, \
+    {AlgorithmParameters, RSAPSS, *}, \
+    {Cipher, AES, *}, \
+    {Cipher, AES/CCM/NoPadding, *}, \
+    {Cipher, AES/GCM/NoPadding, *}, \
+    {KeyAgreement, ECDH, *}, \
+    {KeyFactory, DSA, *}, \
+    {KeyFactory, EC, *}, \
+    {KeyFactory, RSA, *}, \
+    {KeyFactory, RSAPSS, *}, \
+    {KeyGenerator, AES, *}, \
+    {KeyGenerator, HmacSHA224, *}, \
+    {KeyGenerator, HmacSHA256, *}, \
+    {KeyGenerator, HmacSHA384, *}, \
+    {KeyGenerator, HmacSHA512, *}, \
+    {KeyGenerator, kda-hkdf-with-sha224, *}, \
+    {KeyGenerator, kda-hkdf-with-sha256, *}, \
+    {KeyGenerator, kda-hkdf-with-sha384, *}, \
+    {KeyGenerator, kda-hkdf-with-sha512, *}, \
+    {KeyGenerator, SunTls12KeyMaterial, *}, \
+    {KeyGenerator, SunTls12MasterSecret, *}, \
+    {KeyGenerator, SunTls12Prf, *}, \
+    {KeyGenerator, SunTls12RsaPremasterSecret, *}, \
+    {KeyGenerator, SunTlsKeyMaterial, *}, \
+    {KeyGenerator, SunTlsMasterSecret, *}, \
+    {KeyGenerator, SunTlsPrf, *}, \
+    {KeyGenerator, SunTlsRsaPremasterSecret, *}, \
+    {KeyPairGenerator, EC, *}, \
+    {KeyPairGenerator, RSA, *}, \
+    {KeyPairGenerator, RSAPSS, *}, \
+    {Mac, HmacSHA224, *}, \
+    {Mac, HmacSHA256, *}, \
+    {Mac, HmacSHA3-224, *}, \
+    {Mac, HmacSHA3-256, *}, \
+    {Mac, HmacSHA3-384, *}, \
+    {Mac, HmacSHA3-512, *}, \
+    {Mac, HmacSHA384, *}, \
+    {Mac, HmacSHA512, *}, \
+    {MessageDigest, SHA-224, *}, \
+    {MessageDigest, SHA-256, *}, \
+    {MessageDigest, SHA-384, *}, \
+    {MessageDigest, SHA-512, *}, \
+    {MessageDigest, SHA3-224, *}, \
+    {MessageDigest, SHA3-256, *}, \
+    {MessageDigest, SHA3-384, *}, \
+    {MessageDigest, SHA3-512, *}, \
+    {SecretKeyFactory, AES, *}, \
+    {SecureRandom, SHA256DRBG, *}, \
+    {SecureRandom, SHA512DRBG, *}, \
+    {Signature, NONEwithECDSA, *}, \
+    {Signature, RSAPSS, *}, \
+    {Signature, SHA224withDSA, *}, \
+    {Signature, SHA224withECDSA, *}, \
+    {Signature, SHA224withRSA, *}, \
+    {Signature, SHA256withDSA, *}, \
+    {Signature, SHA256withECDSA, *}, \
+    {Signature, SHA256withRSA, *}, \
+    {Signature, SHA384withECDSA, *}, \
+    {Signature, SHA384withRSA, *}, \
+    {Signature, SHA512withECDSA, *}, \
+    {Signature, SHA512withRSA, *}]
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = sun.security.provider.Sun [ \
     {CertificateFactory, X.509, ImplementedIn=Software}, \
     {CertPathBuilder, PKIX, ValidationAlgorithm=RFC5280:ImplementedIn=Software}, \
@@ -212,9 +314,39 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = sun.security.provi
     {Configuration, JavaLoginConfig, *}, \
     {Policy, JavaPolicy, *}]
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = sun.security.ssl.SunJSSE
+
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.algorithm = SHA512DRBG
+
+# Weakly-Enforced Restricted Security mode profile for FIPS 140-3. This profile allows for all algorithms
+# within the OpenJCEPlusFIPS provider to be callable, even though algorithms may or may not be allowable
+# according to the security policy described in the strict profile being extended and depending on how
+# algorithms are used. This profile also includes non-cryptographic algorithms and common configuration
+# options that MAY be allowable under certain NIST circumstances depending on application deployments.
+# For example, PKCS12 files are pre-configured.
+#
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.desc.name = Weakly-Enforced OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.desc.default = true
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.extends = RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.tls.disabledAlgorithms = + \
+    TLS_CHACHA20_POLY1305_SHA256, \
+    TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, \
+    TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.2 = sun.security.provider.Sun
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.3 = sun.security.rsa.SunRsaSign
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.4 = sun.security.ec.SunEC
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.5 = sun.security.ssl.SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.6 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.7 = sun.security.jgss.SunProvider
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.8 = com.sun.security.sasl.Provider
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.9 = org.jcp.xml.dsig.internal.dom.XMLDSigRI
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.10 = sun.security.smartcardio.SunPCSC
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.11 = sun.security.provider.certpath.ldap.JdkLDAP
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.12 = com.sun.security.sasl.gsskerb.JdkSASL
 #endif
 
 #
