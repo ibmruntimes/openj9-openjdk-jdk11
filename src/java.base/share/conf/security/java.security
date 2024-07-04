@@ -151,7 +151,7 @@ RestrictedSecurity.NSS.140-2.jce.provider.2 = sun.security.provider.Sun [ \
 RestrictedSecurity.NSS.140-2.jce.provider.3 = sun.security.ec.SunEC [{KeyFactory, EC, ImplementedIn=Software: \
     SupportedKeyClasses=java.security.interfaces.ECPublicKey|java.security.interfaces.ECPrivateKey: \
     KeySize=256}, {AlgorithmParameters, EC, *}]
-RestrictedSecurity.NSS.140-2.jce.provider.4 = sun.security.ssl.SunJSSE
+RestrictedSecurity.NSS.140-2.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.NSS.140-2.keystore.type = PKCS11
 RestrictedSecurity.NSS.140-2.javax.net.ssl.keyStore = NONE
@@ -188,7 +188,7 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:e71c49d65fd291efe75993ccbe6999e6cfb26bf9ef3e8424cb086c7e2a225ce6
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:b3e01416cda6ca0134e92940b1c2d94664a742325cbbc8d65b6f536ea3770853
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -313,7 +313,7 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = sun.security.provi
     {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
     {Configuration, JavaLoginConfig, *}, \
     {Policy, JavaPolicy, *}]
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.securerandom.provider = OpenJCEPlusFIPS
@@ -339,7 +339,7 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.1 = co
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.2 = sun.security.provider.Sun
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.3 = sun.security.rsa.SunRsaSign
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.4 = sun.security.ec.SunEC
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.5 = sun.security.ssl.SunJSSE
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.6 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.7 = sun.security.jgss.SunProvider
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.8 = com.sun.security.sasl.Provider
