@@ -386,6 +386,7 @@ sun/security/krb5/ktab/KeyTabIndex.java https://github.com/ibmruntimes/openj9-op
 sun/security/krb5/runNameEquals.sh https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
 java/util/Locale/LSRDataTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
 java/util/Locale/LanguageSubtagRegistryTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
+java/lang/System/LoggerFinder/SignedLoggerFinderTest/SignedLoggerFinderTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
 #
 # Exclude tests list from extended.openjdk
 #
