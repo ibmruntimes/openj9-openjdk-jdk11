@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -384,8 +384,6 @@ sun/security/krb5/ktab/BufferBoundary.java https://github.com/ibmruntimes/openj9
 sun/security/krb5/ktab/FileKeyTab.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
 sun/security/krb5/ktab/KeyTabIndex.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
 sun/security/krb5/runNameEquals.sh https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
-java/util/Locale/LSRDataTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
-java/util/Locale/LanguageSubtagRegistryTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all
 #
 # Exclude tests list from extended.openjdk
 #
@@ -410,40 +408,9 @@ com/sun/security/sasl/ntlm/NTLMTest.java https://github.com/ibmruntimes/openj9-o
 java/io/File/createTempFile/SecurityTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 java/io/Serializable/serialFilter/FilterWithSecurityManagerTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 java/io/Serializable/serialFilter/GlobalFilterTest.java#id0 https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/checkActivateRef/CheckActivateRef.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/checkAnnotations/CheckAnnotations.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/checkImplClassLoader/CheckImplClassLoader.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/checkRegisterInLog/CheckRegisterInLog.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/createPrivateActivable/CreatePrivateActivatable.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/downloadParameterClass/DownloadParameterClass.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/elucidateNoSuchMethod/ElucidateNoSuchMethod.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/forceLogSnapshot/ForceLogSnapshot.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/inactiveGroup/InactiveGroup.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 java/rmi/activation/Activatable/lookupActivationSystem/LookupActivationSystem.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/nonExistentActivatable/NonExistentActivatable.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/restartCrashedService/RestartCrashedService.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/restartLatecomer/RestartLatecomer.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/restartService/RestartService.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/shutdownGracefully/ShutdownGracefully.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/Activatable/unregisterInactive/UnregisterInactive.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/ActivateFailedException/activateFails/ActivateFails.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/ActivationSystem/activeGroup/IdempotentActiveGroup.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/ActivationSystem/modifyDescriptor/ModifyDescriptor.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/ActivationSystem/stubClassesPermitted/StubClassesPermitted.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/ActivationSystem/unregisterGroup/UnregisterGroup.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/activation/CommandEnvironment/SetChildEnv.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/dgc/VMID/CheckVMID.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/dgc/dgcImplInsulation/DGCImplInsulation.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 java/rmi/registry/altSecurityManager/AltSecurityManager.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/registry/classPathCodebase/ClassPathCodebase.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/server/RMIClassLoader/downloadArrayClass/DownloadArrayClass.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/server/RMIClassLoader/loadProxyClasses/LoadProxyClasses.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/server/RMIClassLoader/useCodebaseOnly/UseCodebaseOnly.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/server/RMISocketFactory/useSocketFactory/activatable/UseCustomSocketFactory.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/server/RMISocketFactory/useSocketFactory/registry/UseCustomSocketFactory.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/server/clientStackTrace/ClientStackTrace.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 java/rmi/server/useCustomRef/UseCustomRef.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-java/rmi/transport/dgcDeadLock/DGCDeadLock.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 javax/imageio/CachePremissionsTest/CachePermissionsTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 javax/net/ssl/ALPN/SSLEngineAlpnTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 javax/net/ssl/ALPN/SSLServerSocketAlpnTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
@@ -609,7 +576,6 @@ jdk/security/jarsigner/Spec.java https://github.com/ibmruntimes/openj9-openjdk-j
 jdk/security/logging/TestSecurityPropertyModificationLog.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 jdk/security/logging/TestTLSHandshakeLog.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 sun/nio/cs/TestStringCoding.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
-sun/rmi/server/MarshalOutputStream/marshalForeignStub/MarshalForeignStub.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 sun/rmi/transport/tcp/disableMultiplexing/DisableMultiplexing.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 sun/security/ec/InvalidCurve.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
 sun/security/ec/NSASuiteB/TestSHAwithECDSASignatureOids.java https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/775 linux-x64,linux-ppc64le,linux-s390x,aix-all,windows-all
