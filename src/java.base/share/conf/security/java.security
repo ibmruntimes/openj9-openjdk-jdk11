@@ -188,7 +188,7 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:a5bd1607d552ad08e8d3372bceaedb759a68a48ed8d3840abc1992615a814447
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:5af18e620abe8662be273e46fd1b4a6389d2f5778b55fdc4159707301a3142a1
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -200,6 +200,7 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     anon, \
     DES, \
     DH keySize < 2048, \
+    DTLSv1.0, \
     EC keySize < 224, \
     ECDH, \
     MD5withRSA, \
