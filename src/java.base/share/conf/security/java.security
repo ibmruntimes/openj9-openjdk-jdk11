@@ -188,25 +188,14 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:5af18e620abe8662be273e46fd1b4a6389d2f5778b55fdc4159707301a3142a1
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:5757f948a738ca5c9e066655591d511c27d3f2c3ec593c77bf2c17af360a1695
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.fips.mode = 140-3
 
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledNamedCurves =
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
-    3DES_EDE_CBC, \
-    anon, \
-    DES, \
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = + \
     DH keySize < 2048, \
-    DTLSv1.0, \
-    EC keySize < 224, \
-    ECDH, \
-    MD5withRSA, \
-    NULL, \
-    RC4, \
-    SSLv3, \
     TLS_DHE_DSS_WITH_AES_128_CBC_SHA, \
     TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, \
     TLS_DHE_DSS_WITH_AES_128_GCM_SHA256, \
@@ -230,15 +219,9 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.disabledAlgorithms = \
     TLS_RSA_WITH_AES_256_CBC_SHA, \
     TLS_RSA_WITH_AES_256_CBC_SHA256, \
     TLS_RSA_WITH_AES_256_GCM_SHA384, \
-    TLSv1, \
-    TLSv1.1, \
     X25519, \
     X448
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.ephemeralDHKeySize =
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.tls.legacyAlgorithms =
 
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.certpath.disabledAlgorithms =
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.legacyAlgorithms =
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS [ \
     {AlgorithmParameterGenerator, AESGCM, *}, \
     {AlgorithmParameterGenerator, CCM, *}, \
