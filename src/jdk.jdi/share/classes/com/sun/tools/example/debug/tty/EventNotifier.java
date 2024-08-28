@@ -24,6 +24,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * This source code is provided to illustrate the usage of a given feature
  * or technique and has been deliberately simplified. Additional steps
  * required for a production-quality application, such as security checks,
@@ -38,6 +44,9 @@ import com.sun.jdi.event.*;
 
 interface EventNotifier {
     void vmStartEvent(VMStartEvent e);
+/*[IF CRIU_SUPPORT]*/
+    void vmRestoreEvent(VMRestoreEvent e);
+/*[ENDIF] CRIU_SUPPORT */
     void vmDeathEvent(VMDeathEvent e);
     void vmDisconnectEvent(VMDisconnectEvent e);
 

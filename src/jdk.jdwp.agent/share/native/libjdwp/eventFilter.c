@@ -22,6 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 /*
  * eventFilter
  *
@@ -40,6 +47,7 @@
 #include "threadControl.h"
 #include "SDE.h"
 #include "jvmti.h"
+#include "j9cfg.h"
 
 typedef struct ClassFilter {
     jclass clazz;
@@ -1242,6 +1250,9 @@ enableEvents(HandlerNode *node)
         case EI_VM_DEATH:
         case EI_CLASS_PREPARE:
         case EI_GC_FINISH:
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+        case EI_VM_RESTORE:
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
             return error;
 
         case EI_FIELD_ACCESS:
@@ -1301,6 +1312,9 @@ disableEvents(HandlerNode *node)
         case EI_VM_DEATH:
         case EI_CLASS_PREPARE:
         case EI_GC_FINISH:
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+        case EI_VM_RESTORE:
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
             return error;
 
         case EI_FIELD_ACCESS:

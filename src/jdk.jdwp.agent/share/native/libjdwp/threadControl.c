@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "util.h"
 #include "eventHandler.h"
 #include "threadControl.h"
@@ -31,6 +37,10 @@
 #include "stepControl.h"
 #include "invoker.h"
 #include "bag.h"
+#include "j9cfg.h"
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+#include "ibmjvmti.h"
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
 
 #define HANDLING_EVENT(node) ((node)->current_ei != 0)
 
@@ -1653,6 +1663,34 @@ threadControl_getInvokeRequest(jthread thread)
     return request;
 }
 
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+static jvmtiExtensionFunction
+find_ext_function(jvmtiEnv *jvmti, const char *funcName)
+{
+    jint extCount = 0;
+    jvmtiExtensionFunctionInfo *extList = NULL;
+    jvmtiExtensionFunction retFunc = NULL;
+
+    jvmtiError err = JVMTI_FUNC_PTR(jvmti, GetExtensionFunctions)
+                            (jvmti, &extCount, &extList);
+    if (JVMTI_ERROR_NONE == err) {
+        jint i = 0;
+        for (i = 0; i < extCount; i++) {
+            if (0 == strcmp(extList[i].id, funcName)) {
+                retFunc = extList[i].func;
+                break;
+            }
+        }
+    } else {
+        ERROR_MESSAGE(("Error in JVMTI GetExtensionFunctions: %s(%d)\n", jvmtiErrorText(err), err));
+    }
+    return retFunc;
+}
+
+static jvmtiExtensionFunction addDebugThreadToCheckpointState_func = NULL;
+static jvmtiExtensionFunction removeDebugThreadFromCheckpointState_func = NULL;
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
+
 jvmtiError
 threadControl_addDebugThread(jthread thread)
 {
@@ -1672,6 +1710,12 @@ threadControl_addDebugThread(jthread thread)
         } else {
             debugThreadCount++;
             error = JVMTI_ERROR_NONE;
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+            if (NULL == addDebugThreadToCheckpointState_func) {
+                addDebugThreadToCheckpointState_func = find_ext_function(gdata->jvmti, OPENJ9_FUNCTION_ADD_DEBUG_THREAD);
+            }
+            error = (*addDebugThreadToCheckpointState_func)(gdata->jvmti, thread);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
         }
     }
     debugMonitorExit(threadLock);
@@ -1699,6 +1743,12 @@ threadControl_removeDebugThread(jthread thread)
             }
             debugThreadCount--;
             error = JVMTI_ERROR_NONE;
+#if defined(J9VM_OPT_CRIU_SUPPORT)
+            if (NULL == removeDebugThreadFromCheckpointState_func) {
+                removeDebugThreadFromCheckpointState_func = find_ext_function(gdata->jvmti, OPENJ9_FUNCTION_REMOVE_DEBUG_THREAD);
+            }
+            error = (*removeDebugThreadFromCheckpointState_func)(gdata->jvmti, thread);
+#endif /* defined(J9VM_OPT_CRIU_SUPPORT) */
             break;
         }
     }
