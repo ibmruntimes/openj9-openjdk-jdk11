@@ -373,8 +373,6 @@ static void *crypto_library = NULL;
 JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
   (JNIEnv *env, jclass thisObj, jboolean traceEnabled)
 {
-
-    char *error;
     typedef const char* OSSL_version_t(int);
 
      /* Determine the version of OpenSSL. */
@@ -2295,7 +2293,6 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_ChaCha20FinalEnc
   (JNIEnv *env, jobject thisObj, jlong c, jbyteArray output, jint outputOffset, jint tagLen)
 {
     int len = 0;
-    int outputLen = -1;
     unsigned char *outputNative = NULL;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX*)(intptr_t) c;
 
@@ -2338,7 +2335,6 @@ JNIEXPORT jint JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_ChaCha20FinalDec
 {
     int len = 0;
     int plaintext_len = 0;
-    int outputLen = 0;
     int ret = 0;
 
     unsigned char *inputNative = NULL;
@@ -2831,10 +2827,6 @@ Java_jdk_crypto_jniprovider_NativeCrypto_ECEncodeGF
     BIGNUM *yBN = NULL;
     BIGNUM *nBN = NULL;
     BIGNUM *hBN = NULL;
-    EC_GROUP *group = NULL;
-    EC_POINT *generator = NULL;
-    BN_CTX *ctx = NULL;
-    int ret = 0;
 
     nativeA = (unsigned char *)((*env)->GetPrimitiveArrayCritical(env, a, 0));
     if (NULL == nativeA) {
