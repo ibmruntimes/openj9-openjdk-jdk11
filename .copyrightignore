@@ -32,6 +32,8 @@
 # ===========================================================================
 
 /src/bsd/doc/
+/src/hotspot/share/jfr/metadata/metadata.xml
+/src/hotspot/share/jfr/metadata/metadata.xsd
 /src/jdk.crypto.ec/share/native/libsunec/impl/
 /src/linux/doc/
 /src/solaris/doc/
