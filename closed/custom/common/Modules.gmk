@@ -41,15 +41,20 @@ else
 	#
 endif
 
+ifeq (false,$(OPENJ9_ENABLE_JFR))
+  MODULES_FILTER += \
+	jdk.jfr \
+	jdk.management.jfr \
+	#
+endif
+
 MODULES_FILTER += \
 	jdk.aot \
 	jdk.hotspot.agent \
 	jdk.internal.vm.ci \
 	jdk.internal.vm.compiler \
 	jdk.internal.vm.compiler.management \
-	jdk.jfr \
 	jdk.jstatd \
-	jdk.management.jfr \
 	#
 
 TOP_SRC_DIRS += \
