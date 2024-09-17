@@ -47,6 +47,7 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 		src/java.base/share/classes/java/util/Timer.java \
 		src/java.base/share/classes/java/util/TimerTask.java \
 		src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java \
+		src/java.base/share/classes/java/util/zip/ZipFile.java \
 		src/java.base/share/classes/jdk/internal/misc/JavaNetInetAddressAccess.java \
 		src/java.base/share/classes/jdk/internal/ref/PhantomCleanable.java \
 		src/java.base/share/classes/module-info.java \
