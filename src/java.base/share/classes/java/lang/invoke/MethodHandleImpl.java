@@ -919,8 +919,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         final int CALL_TARGET  = nameCursor++;
         assert(CALL_TARGET == SELECT_ALT+1);  // must be true to trigger IBG.emitSelectAlternative
 
-        MethodType lambdaType = basicType.invokerType();
-        Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+        Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
         BoundMethodHandle.SpeciesData data =
                 (GET_COUNTERS != -1) ? BoundMethodHandle.speciesData_LLLL()
@@ -950,7 +949,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         invokeArgs[0] = names[SELECT_ALT];
         names[CALL_TARGET] = new Name(basicType, invokeArgs);
 
-        lform = new LambdaForm(lambdaType.parameterCount(), names, /*forceInline=*/true, Kind.GUARD);
+        lform = new LambdaForm(basicType.parameterCount() + 1, names, /*forceInline=*/true, Kind.GUARD);
 
         return basicType.form().setCachedLambdaForm(MethodTypeForm.LF_GWT, lform);
     }
@@ -977,8 +976,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * among catchException combinators with the same basic type.
      */
     private static LambdaForm makeGuardWithCatchForm(MethodType basicType) {
-        MethodType lambdaType = basicType.invokerType();
-
         LambdaForm lform = basicType.form().cachedLambdaForm(MethodTypeForm.LF_GWC);
         if (lform != null) {
             return lform;
@@ -997,7 +994,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         final int TRY_CATCH        = nameCursor++;
         final int UNBOX_RESULT     = nameCursor++;
 
-        Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+        Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
         BoundMethodHandle.SpeciesData data = BoundMethodHandle.speciesData_LLLLL();
         names[THIS_MH]          = names[THIS_MH].withConstraint(data);
@@ -1026,7 +1023,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         Object[] unboxArgs  = new Object[] {names[GET_UNBOX_RESULT], names[TRY_CATCH]};
         names[UNBOX_RESULT] = new Name(invokeBasicUnbox, unboxArgs);
 
-        lform = new LambdaForm(lambdaType.parameterCount(), names, Kind.GUARD_WITH_CATCH);
+        lform = new LambdaForm(basicType.parameterCount() + 1, names, Kind.GUARD_WITH_CATCH);
 
         return basicType.form().setCachedLambdaForm(MethodTypeForm.LF_GWC, lform);
     }
@@ -1893,8 +1890,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * bytecode generation}.
      */
     private static LambdaForm makeLoopForm(MethodType basicType, BasicType[] localVarTypes) {
-        MethodType lambdaType = basicType.invokerType();
-
         final int THIS_MH = 0;  // the BMH_LLL
         final int ARG_BASE = 1; // start of incoming arguments
         final int ARG_LIMIT = ARG_BASE + basicType.parameterCount();
@@ -1909,7 +1904,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
 
         LambdaForm lform = basicType.form().cachedLambdaForm(MethodTypeForm.LF_LOOP);
         if (lform == null) {
-            Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+            Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
             BoundMethodHandle.SpeciesData data = BoundMethodHandle.speciesData_LLL();
             names[THIS_MH] = names[THIS_MH].withConstraint(data);
@@ -1937,7 +1932,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             names[UNBOX_RESULT] = new Name(invokeBasicUnbox, unboxArgs);
 
             lform = basicType.form().setCachedLambdaForm(MethodTypeForm.LF_LOOP,
-                    new LambdaForm(lambdaType.parameterCount(), names, Kind.LOOP));
+                    new LambdaForm(basicType.parameterCount() + 1, names, Kind.LOOP));
         }
 
         // BOXED_ARGS is the index into the names array where the loop idiom starts
@@ -2126,8 +2121,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * forms among tryFinally combinators with the same basic type.
      */
     private static LambdaForm makeTryFinallyForm(MethodType basicType) {
-        MethodType lambdaType = basicType.invokerType();
-
         LambdaForm lform = basicType.form().cachedLambdaForm(MethodTypeForm.LF_TF);
         if (lform != null) {
             return lform;
@@ -2145,7 +2138,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         final int TRY_FINALLY      = nameCursor++;
         final int UNBOX_RESULT     = nameCursor++;
 
-        Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+        Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
         BoundMethodHandle.SpeciesData data = BoundMethodHandle.speciesData_LLLL();
         names[THIS_MH]          = names[THIS_MH].withConstraint(data);
@@ -2171,7 +2164,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         Object[] unboxArgs  = new Object[] {names[GET_UNBOX_RESULT], names[TRY_FINALLY]};
         names[UNBOX_RESULT] = new Name(invokeBasicUnbox, unboxArgs);
 
-        lform = new LambdaForm(lambdaType.parameterCount(), names, Kind.TRY_FINALLY);
+        lform = new LambdaForm(basicType.parameterCount() + 1, names, Kind.TRY_FINALLY);
 
         return basicType.form().setCachedLambdaForm(MethodTypeForm.LF_TF, lform);
     }
