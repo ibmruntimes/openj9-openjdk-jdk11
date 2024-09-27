@@ -104,15 +104,13 @@ ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
   export UMA_SUPPRESS_WARNINGS_AS_ERRORS := 1
 endif
 
-ifeq (windows,$(OPENJDK_TARGET_OS))
+ifeq ($(call isTargetOs, windows), true)
   # convert windows path to unix path
   UnixPath = $(shell $(PATHTOOL) -u $1)
-  # set Visual Studio environment
-  # wrap PATH in quotes as it contains spaces (unix path)
-  EXPORT_COMPILER_ENV_VARS := PATH="$(PATH)"
-else ifeq (zos,$(OPENJDK_TARGET_OS))
+  EXPORT_COMPILER_ENV_VARS :=
+else ifeq ($(call isTargetOs, zos), true)
   UnixPath = $1
-  # Allow options to follow the input file name
+  # allow options to follow the input file name
   EXPORT_COMPILER_ENV_VARS := _CC_CCMODE=1 _C89_CCMODE=1 _CXX_CCMODE=1
 else
   UnixPath = $1
