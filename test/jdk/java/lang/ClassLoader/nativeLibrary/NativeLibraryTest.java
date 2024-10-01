@@ -94,6 +94,8 @@ public class NativeLibraryTest {
             throw new RuntimeException("should fail to load the native library" +
                     " by another class loader");
         } catch (UnsatisfiedLinkError e) {}
+        // keep Runnable r strongly reachable so that it is not reclaimable by GC
+        java.lang.ref.Reference.reachabilityFence(r);
     }
 
     /*
