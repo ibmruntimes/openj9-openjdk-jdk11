@@ -24,7 +24,7 @@
 #
 
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2023 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 
 include LibCommon.gmk
@@ -47,6 +47,29 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBNET, \
     NAME := net, \
     OPTIMIZATION := LOW, \
     CFLAGS := $(CFLAGS_JDKLIB), \
+    aix_close.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    bsd_close.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    linux_close.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    net_util.c_CFLAGS := \
+        -I$(OPENJ9_TOPDIR)/runtime/include \
+        -I$(OPENJ9_TOPDIR)/runtime/oti \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR) \
+        -I$(OPENJ9_TOPDIR)/runtime/jcl \
+        -I$(OPENJ9_TOPDIR)/runtime/util \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    net_util_md.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    PlainSocketImpl.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
     DISABLED_WARNINGS_gcc := format-nonliteral, \
     DISABLED_WARNINGS_clang := parentheses-equality constant-logical-operand, \
     DISABLED_WARNINGS_microsoft := 4244 4047 4133 4996, \
@@ -75,6 +98,23 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBNIO, \
     OPTIMIZATION := HIGH, \
     WARNINGS_AS_ERRORS_xlc := false, \
     CFLAGS := $(CFLAGS_JDKLIB), \
+    FileDispatcherImpl.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    Net.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    nio_util.c_CFLAGS := \
+        -I$(OPENJ9_TOPDIR)/runtime/include \
+        -I$(OPENJ9_TOPDIR)/runtime/oti \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR) \
+        -I$(OPENJ9_TOPDIR)/runtime/jcl \
+        -I$(OPENJ9_TOPDIR)/runtime/util \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    SocketDispatcher.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
     EXTRA_HEADER_DIRS := \
         libnio/ch \
         libnio/fs \

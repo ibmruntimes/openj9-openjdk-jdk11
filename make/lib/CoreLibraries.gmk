@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# ===========================================================================
+
 WIN_VERIFY_LIB := $(SUPPORT_OUTPUTDIR)/native/$(MODULE)/libverify/verify.lib
 
 # Hook to include the corresponding custom file, if present.
@@ -102,8 +106,30 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBJAVA, \
     OPTIMIZATION := HIGH, \
     CFLAGS := $(CFLAGS_JDKLIB) \
         $(LIBJAVA_CFLAGS), \
+    check_version.c_CFLAGS := \
+        -I$(OPENJ9_TOPDIR)/runtime/include \
+        -I$(OPENJ9_TOPDIR)/runtime/oti \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR) \
+        -I$(OPENJ9_TOPDIR)/runtime/jcl \
+        -I$(OPENJ9_TOPDIR)/runtime/util \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    io_util_md.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
     System.c_CFLAGS := $(VERSION_CFLAGS), \
     jdk_util.c_CFLAGS := $(VERSION_CFLAGS), \
+    UnixFileSystem_md.c_CFLAGS := \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
+    VM.c_CFLAGS := \
+        -I$(OPENJ9_TOPDIR)/runtime/include \
+        -I$(OPENJ9_TOPDIR)/runtime/oti \
+        -I$(OPENJ9OMR_TOPDIR)/include_core \
+        -I$(OPENJ9_VM_BUILD_DIR) \
+        -I$(OPENJ9_TOPDIR)/runtime/jcl \
+        -I$(OPENJ9_TOPDIR)/runtime/util \
+        -I$(OPENJ9_VM_BUILD_DIR)/jcl, \
     EXTRA_HEADER_DIRS := libfdlibm, \
     WARNINGS_AS_ERRORS_xlc := false, \
     DISABLED_WARNINGS_gcc := unused-result, \

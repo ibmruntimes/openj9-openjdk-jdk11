@@ -23,9 +23,20 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "net_util.h"
 
 #include "java_net_InetAddress.h"
+
+#include "j9access.h"
+/* tracehelp.c defines getTraceInterfaceFromVM(), used by J9_UTINTERFACE_FROM_VM(). */
+#include "tracehelp.c"
+#include "ut_jcl_net.c"
 
 int IPv6_supported();
 int reuseport_supported();
@@ -54,6 +65,8 @@ DEF_JNI_OnLoad(JavaVM *vm, void *reserved)
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_2) != JNI_OK) {
         return JNI_EVERSION; /* JNI version not supported */
     }
+
+    UT_JCL_NET_MODULE_LOADED(J9_UTINTERFACE_FROM_VM((J9JavaVM *)vm));
 
     iCls = (*env)->FindClass(env, "java/lang/Boolean");
     CHECK_NULL_RETURN(iCls, JNI_VERSION_1_2);

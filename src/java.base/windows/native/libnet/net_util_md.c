@@ -22,10 +22,19 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "net_util.h"
 
 #include "java_net_InetAddress.h"
 #include "java_net_SocketOptions.h"
+
+#include "ut_jcl_net.h"
 
 // Taken from mstcpip.h in Windows SDK 8.0 or newer.
 #define SIO_LOOPBACK_FAST_PATH              _WSAIOW(IOC_VENDOR,16)
@@ -461,6 +470,7 @@ NET_SocketClose(int fd) {
             shutdown(fd, SD_SEND);
         }
     }
+    Trc_NET_SocketClose(fd);
     ret = closesocket (fd);
     return ret;
 }
