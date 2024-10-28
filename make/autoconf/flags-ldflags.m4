@@ -26,6 +26,10 @@
 ################################################################################
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# ===========================================================================
+
 AC_DEFUN([FLAGS_SETUP_LDFLAGS],
 [
   FLAGS_SETUP_LDFLAGS_HELPER
@@ -93,7 +97,7 @@ AC_DEFUN([FLAGS_SETUP_LDFLAGS_HELPER],
     BASIC_LDFLAGS_JVM_ONLY="-library=%none -mt -z noversion"
 
   elif test "x$TOOLCHAIN_TYPE" = xxlc; then
-    BASIC_LDFLAGS="-b64 -brtl -bnolibpath -bexpall -bernotok -btextpsize:64K \
+    BASIC_LDFLAGS="-b64 -brtl -bnolibpath -bexpall -bernotok -brwexec_must -btextpsize:64K \
         -bdatapsize:64K -bstackpsize:64K"
     # libjvm.so has gotten too large for normal TOC size; compile with qpic=large and link with bigtoc
     BASIC_LDFLAGS_JVM_ONLY="-Wl,-lC_r -bbigtoc"
