@@ -21,6 +21,11 @@
  * questions.
  *
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <door.h>
 #include <errno.h>
@@ -170,7 +175,7 @@ static int check_permission(const char* path) {
 /* fill-in the name of attach file name in given buffer */
 static void fill_attach_file_name(char* path, int len, pid_t pid) {
     memset(path, 0, len);
-    sprintf(path, ATTACH_FILE_PATTERN, pid);
+    snprintf(path, len, ATTACH_FILE_PATTERN, pid);
 }
 
 #define DOOR_FILE_PATTERN "/tmp/.java_pid%d"
@@ -180,7 +185,7 @@ static int open_door(pid_t pid) {
     char path[PATH_MAX + 1];
     int fd;
 
-    sprintf(path, DOOR_FILE_PATTERN, pid);
+    snprintf(path, sizeof(path), DOOR_FILE_PATTERN, pid);
     fd = file_open(path, O_RDONLY);
     if (fd < 0) {
         set_jvm_error(JVM_ERR_CANT_OPEN_DOOR);
@@ -531,7 +536,7 @@ int jvm_enable_dtprobes(jvm_t* jvm, int num_probe_types, const char** probe_type
     if (count == 0) {
         return count;
     }
-    sprintf(buf, "%d", probe_type);
+    snprintf(buf, sizeof(buf), "%d", probe_type);
     args[0] = buf;
 
     fd = enqueue_command(jvm, ENABLE_DPROBES_CMD, 1, args);

@@ -21,6 +21,11 @@
  * questions.
  *
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1327,12 +1332,12 @@ int Jget_vframe(jvm_agent_t* J, int vframe_no,
   int32_t   err;
 
   if (vframe_no >= N->vf_cnt) {
-     (void) sprintf(name, "Wrong inlinedMethod%1d()", vframe_no);
+     (void) snprintf(name, size, "Wrong inlinedMethod%1d()", vframe_no);
      return -1;
   }
   vf = N->vframes + vframe_no;
   name[0] = COMP_METHOD_SIGN;
-  err = name_for_methodPtr(J, vf->method, name + 1, size);
+  err = name_for_methodPtr(J, vf->method, name + 1, size - 1);
   CHECK_FAIL(err);
 
   jframe->bci = vf->bci;
