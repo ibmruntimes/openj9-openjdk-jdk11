@@ -49,6 +49,7 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_JITSERVER
   OPENJ9_CONFIGURE_NUMA
   OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES
+  OPENJ9_CONFIGURE_SNAPSHOTS
   OPENJ9_CONFIGURE_WARNINGS
   OPENJ9_THIRD_PARTY_REQUIREMENTS
   OPENJ9_CHECK_NASM_VERSION
@@ -519,6 +520,25 @@ AC_DEFUN([OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES],
   fi
 
   AC_SUBST(OPENJ9_ENABLE_OPENJDK_METHODHANDLES)
+])
+
+AC_DEFUN([OPENJ9_CONFIGURE_SNAPSHOTS],
+[
+  AC_MSG_CHECKING([for snapshot support])
+  AC_ARG_ENABLE([snapshots], [AS_HELP_STRING([--enable-snapshots],
+      [enable RAM persistence snapshots @<:@disabled@:>@])])
+  OPENJ9_ENABLE_SNAPSHOTS=false
+  if test "x$enable_snapshots" = xyes ; then
+    AC_MSG_RESULT([yes (explicitly enabled)])
+    OPENJ9_ENABLE_SNAPSHOTS=true
+  elif test "x$enable_snapshots" = xno ; then
+    AC_MSG_RESULT([no (explicitly disabled)])
+  elif test "x$enable_snapshots" = x ; then
+    AC_MSG_RESULT([no (default)])
+  else
+    AC_MSG_ERROR([--enable-snapshots accepts no argument])
+  fi
+  AC_SUBST(OPENJ9_ENABLE_SNAPSHOTS)
 ])
 
 AC_DEFUN([OPENJ9_PLATFORM_SETUP],
