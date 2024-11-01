@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 
 // -*- C++ -*-
 // Program for unpacking specially compressed Java packages.
@@ -672,7 +677,7 @@ void unpacker::read_file_header() {
   }
   if (majminfound == null) {
     char message[200];
-    sprintf(message, "@" ERROR_FORMAT ": magic/ver = "
+    snprintf(message, sizeof(message), "@" ERROR_FORMAT ": magic/ver = "
             "%08X/%d.%d should be %08X/%d.%d OR %08X/%d.%d OR %08X/%d.%d OR %08X/%d.%d\n",
             magic, majver, minver,
             JAVA_PACKAGE_MAGIC, JAVA5_PACKAGE_MAJOR_VERSION, JAVA5_PACKAGE_MINOR_VERSION,
@@ -3731,13 +3736,17 @@ const char* entry::string() {
     break;
   case CONSTANT_Integer:
   case CONSTANT_Float:
-    buf = getbuf(12);
-    sprintf((char*)buf.ptr, "0x%08x", value.i);
+#define BUF_SIZE 12
+    buf = getbuf(BUF_SIZE);
+    snprintf((char*)buf.ptr, BUF_SIZE, "0x%08x", value.i);
+#undef BUF_SIZE
     break;
   case CONSTANT_Long:
   case CONSTANT_Double:
-    buf = getbuf(24);
-    sprintf((char*)buf.ptr, "0x" LONG_LONG_HEX_FORMAT, value.l);
+#define BUF_SIZE 24
+    buf = getbuf(BUF_SIZE);
+    snprintf((char*)buf.ptr, BUF_SIZE, "0x" LONG_LONG_HEX_FORMAT, value.l);
+#undef BUF_SIZE
     break;
   default:
     if (nrefs == 0) {
