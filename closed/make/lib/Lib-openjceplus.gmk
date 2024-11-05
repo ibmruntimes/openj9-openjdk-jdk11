@@ -23,8 +23,9 @@ include LibCommon.gmk
 ifeq (true,$(BUILD_OPENJCEPLUS))
 
 # Identify the desired JGSKIT target platform.
-OPENJCEPLUS_BOOT_JDK := $(BOOT_JDK)
+OPENJCEPLUS_JDK := $(JDK_OUTPUTDIR)
 OPENJCEPLUS_GSKIT_HOME := $(OPENJCEPLUS_TOPDIR)/ock/jgsk_sdk
+OPENJCEPLUS_HEADER_FILES := $(SUPPORT_OUTPUTDIR)/headers/openjceplus
 OPENJCEPLUS_JCE_CLASSPATH := $(JDK_OUTPUTDIR)/modules/openjceplus:$(JDK_OUTPUTDIR)/modules/java.base
 OPENJCEPLUS_JGSKIT_MAKE := jgskit.mak
 OPENJCEPLUS_JGSKIT_MAKE_PATH := $(OPENJCEPLUS_TOPDIR)/src/main/native
@@ -42,9 +43,10 @@ else ifeq ($(call isTargetOs, linux), true)
   endif
 else ifeq ($(call isTargetOs, windows), true)
   ifeq ($(call isTargetCpu, x86_64), true)
-    OPENJCEPLUS_BOOT_JDK := $(call MixedPath,$(OPENJCEPLUS_BOOT_JDK))
+    OPENJCEPLUS_JDK := $(call MixedPath,$(OPENJCEPLUS_JDK))
     OPENJCEPLUS_GSKIT_HOME := $(call MixedPath,$(OPENJCEPLUS_GSKIT_HOME))
-    OPENJCEPLUS_JCE_CLASSPATH := "$(call MixedPath,$(JDK_OUTPUTDIR)/modules/openjceplus)\;$(call MixedPath,$(JDK_OUTPUTDIR)/modules/java.base)"
+    OPENJCEPLUS_HEADER_FILES := $(call MixedPath,$(OPENJCEPLUS_HEADER_FILES))
+    OPENJCEPLUS_JCE_CLASSPATH := "$(call MixedPath,$(JDK_OUTPUTDIR)/modules/openjceplus);$(call MixedPath,$(JDK_OUTPUTDIR)/modules/java.base)"
     OPENJCEPLUS_JGSKIT_MAKE := jgskit.win64.mak
     OPENJCEPLUS_JGSKIT_PLATFORM := win64
   endif
@@ -58,12 +60,16 @@ endif # OPENJCEPLUS_JGSKIT_PLATFORM
 
 compile-libs :
 	@$(ECHO) Compiling OpenJCEPlus native code
-	export \
-			GSKIT_HOME=$(OPENJCEPLUS_GSKIT_HOME) \
-			JAVA_HOME=$(OPENJCEPLUS_BOOT_JDK) \
-			JCE_CLASSPATH=$(OPENJCEPLUS_JCE_CLASSPATH) \
-			PLATFORM=$(OPENJCEPLUS_JGSKIT_PLATFORM) \
-		&& $(MAKE) -j1 -C $(OPENJCEPLUS_JGSKIT_MAKE_PATH) -f $(OPENJCEPLUS_JGSKIT_MAKE) all
+	$(MAKE) \
+		-C $(OPENJCEPLUS_JGSKIT_MAKE_PATH) \
+		-f $(OPENJCEPLUS_JGSKIT_MAKE) \
+		EXTERNAL_HEADERS=true \
+		GSKIT_HOME=$(OPENJCEPLUS_GSKIT_HOME) \
+		JAVA_HOME=$(OPENJCEPLUS_JDK) \
+		JCE_CLASSPATH=$(OPENJCEPLUS_JCE_CLASSPATH) \
+		OPENJCEPLUS_HEADER_FILES=$(OPENJCEPLUS_HEADER_FILES) \
+		PLATFORM=$(OPENJCEPLUS_JGSKIT_PLATFORM) \
+		all
 	@$(ECHO) OpenJCEplus compile complete
 
 TARGETS += compile-libs
