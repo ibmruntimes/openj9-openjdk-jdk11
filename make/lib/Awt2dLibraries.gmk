@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2011, 2022, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2011, 2023, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -22,6 +22,9 @@
 # or visit www.oracle.com if you need additional information or have any
 # questions.
 #
+# ===========================================================================
+# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# ===========================================================================
 
 $(eval $(call IncludeCustomExtension, lib/Awt2dLibraries-pre.gmk))
 
@@ -227,7 +230,7 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBAWT, \
     EXTRA_HEADER_DIRS := $(LIBAWT_EXTRA_HEADER_DIRS), \
     DISABLED_WARNINGS_gcc := sign-compare unused-result maybe-uninitialized \
         format-nonliteral parentheses, \
-    DISABLED_WARNINGS_clang := logical-op-parentheses extern-initializer, \
+    DISABLED_WARNINGS_clang := logical-op-parentheses extern-initializer deprecated-non-prototype unknown-warning-option, \
     DISABLED_WARNINGS_solstudio := E_DECLARATION_IN_CODE, \
     DISABLED_WARNINGS_microsoft := 4244 4267 4996, \
     ASFLAGS := $(LIBAWT_ASFLAGS), \
