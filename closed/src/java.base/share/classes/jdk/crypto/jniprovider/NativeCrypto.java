@@ -79,6 +79,8 @@ public class NativeCrypto {
     // or one of the OPENSSL_VERSION_x_x_x constants
     private final long ossl_ver;
 
+    private final boolean isOpenSSLFIPS;
+
     private static long loadCryptoLibraries() {
         long osslVersion;
 
@@ -105,6 +107,11 @@ public class NativeCrypto {
     @SuppressWarnings("removal")
     private NativeCrypto() {
         ossl_ver = AccessController.doPrivileged((PrivilegedAction<Long>) () -> loadCryptoLibraries()).longValue();
+        if (ossl_ver != -1) {
+            isOpenSSLFIPS = isOpenSSLFIPS();
+        } else {
+            isOpenSSLFIPS = false;
+        }
     }
 
     /**
@@ -178,6 +185,54 @@ public class NativeCrypto {
         return traceEnabled;
     }
 
+    public static final boolean isOpenSSLFIPSVersion() {
+        return InstanceHolder.instance.isOpenSSLFIPS;
+    }
+
+    /**
+     * Check whether a native implementation is available in the loaded OpenSSL library.
+     * Note that, an algorithm could be unavailable due to options used to build the
+     * OpenSSL version utilized, or using a FIPS version that doesn't allow it.
+     *
+     * @param algorithm the algorithm checked
+     * @return whether a native implementation of the given crypto algorithm is available
+     */
+    public static final boolean isAlgorithmAvailable(String algorithm) {
+        boolean isAlgorithmAvailable = false;
+        if (isAllowedAndLoaded()) {
+            if (isOpenSSLFIPSVersion()) {
+                switch (algorithm) {
+                case "ChaCha20":
+                case "MD5":
+                    // not available
+                    break;
+                default:
+                    isAlgorithmAvailable = true;
+                    break;
+                }
+            } else {
+                switch (algorithm) {
+                case "MD5":
+                    isAlgorithmAvailable = isMD5Available();
+                    break;
+                default:
+                    isAlgorithmAvailable = true;
+                    break;
+                }
+            }
+        }
+
+        // Issue a message indicating whether the crypto implementation is available.
+        if (traceEnabled) {
+            if (isAlgorithmAvailable) {
+                System.err.println(algorithm + " native crypto implementation is available.");
+            } else {
+                System.err.println(algorithm + " native crypto implementation is not available.");
+            }
+        }
+        return isAlgorithmAvailable;
+    }
+
     @CallerSensitive
     public static NativeCrypto getNativeCrypto() {
         ClassLoader callerClassLoader = Reflection.getCallerClass().getClassLoader();
@@ -203,6 +258,8 @@ public class NativeCrypto {
     private static final native long loadCrypto(boolean trace);
 
     public static final native boolean isMD5Available();
+
+    private static final native boolean isOpenSSLFIPS();
 
     public final native long DigestCreateContext(long nativeBuffer,
                                                  int algoIndex);
