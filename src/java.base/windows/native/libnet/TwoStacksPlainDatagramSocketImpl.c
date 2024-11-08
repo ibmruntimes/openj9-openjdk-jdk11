@@ -22,6 +22,11 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
 #include <malloc.h>
 
 #include "net_util.h"
@@ -1864,7 +1869,7 @@ jobject getMulticastInterface(JNIEnv *env, jobject this, int fd, int fd1, jint o
                                                                    index);
             if (ni == NULL) {
                 char errmsg[255];
-                sprintf(errmsg,
+                snprintf(errmsg, sizeof(errmsg),
                         "IPV6_MULTICAST_IF returned index to unrecognized interface: %d",
                         index);
                 JNU_ThrowByName(env, JNU_JAVANETPKG "SocketException", errmsg);
@@ -1983,7 +1988,7 @@ Java_java_net_TwoStacksPlainDatagramSocketImpl_socketGetOption
         int size = 0;
         char errmsg[255 + 31];
         getErrorString(errno, tmpbuf, sizeof(tmpbuf));
-        sprintf(errmsg, "error getting socket option: %s", tmpbuf);
+        snprintf(errmsg, sizeof(errmsg), "error getting socket option: %s", tmpbuf);
         JNU_ThrowByName(env, JNU_JAVANETPKG "SocketException", errmsg);
         return NULL;
     }
