@@ -525,3 +525,39 @@ RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.jce.provider.1 =  com.s
 
 RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-SameStartWithoutVersion
+# Test property - Same beginnings of the profile name without version
+#
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.name = Test-Profile-SameStartWithoutVersion
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.default = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.fips = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.hash = SHA256:2c893d75043da09c3dba8d8b24cb71dc1c7ceac5fb8bf362a35847418a933a06
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.3 = sun.security.ssl.SunJSSE
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.securerandom.algorithm = SHA512DRBG
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.name = Test-Profile-SameStartWithoutVersionPart
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.default = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.fips = true
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.hash = SHA256:2c893d75043da09c3dba8d8b24cb71dc1c7ceac5fb8bf362a35847418a933a06
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.number = Certificate #XXX
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.fips.mode = 140-3
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.3 = sun.security.ssl.SunJSSE
+
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.algorithm = SHA512DRBG
