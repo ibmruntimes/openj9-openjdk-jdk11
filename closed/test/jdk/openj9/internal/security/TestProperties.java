@@ -43,6 +43,15 @@ import jdk.test.lib.process.ProcessTools;
 
 public class TestProperties {
 
+    private static Stream<Arguments> patternMatches_expectedExitValue0() {
+        return Stream.of(
+                // 1 - Test property - Same beginnings of the profile name without version.
+                Arguments.of("Test-Profile-SameStartWithoutVersion",
+                        System.getProperty("test.src") + "/property-java.security",
+                        "(?s)(?=.*Sun)(?=.*\\bSunJCE\\b)(?=.*SunJSSE)")
+        );
+    }
+
     private static Stream<Arguments> patternMatches_expectedExitValue1() {
         return Stream.of(
                 // 1 - Test profile - base profile misspell properties.
@@ -153,6 +162,19 @@ public class TestProperties {
                         System.getProperty("test.src") + "/property-java.security",
                         "You cannot add or remove to provider (.*?). This is the base profile.")
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("patternMatches_expectedExitValue0")
+    public void shouldContain_expectedExitValue0(String customprofile, String securityPropertyFile, String expected) throws Exception {
+        OutputAnalyzer outputAnalyzer = ProcessTools.executeTestJava(
+                "-Dsemeru.fips=true",
+                "-Dsemeru.customprofile=" + customprofile,
+                "-Djava.security.properties=" + securityPropertyFile,
+                "TestProperties"
+        );
+        outputAnalyzer.reportDiagnosticSummary();
+        outputAnalyzer.shouldHaveExitValue(0).shouldMatch(expected);
     }
 
     @ParameterizedTest
