@@ -33,7 +33,7 @@ ifeq (true,$(BUILD_OPENJCEPLUS))
   # Copy OpenJCEPlus native libraries.
   $(eval $(call SetupCopyFiles, OPENJCEPLUS_JGSKIT_LIBS_COPY, \
       SRC := $(OPENJCEPLUS_TOPDIR)/target, \
-      FILES := $(filter %.dll %.so %.x, $(call FindFiles, $(OPENJCEPLUS_TOPDIR)/target)), \
+      FILES := $(filter %.dll %.dylib %.so %.x, $(call FindFiles, $(OPENJCEPLUS_TOPDIR)/target)), \
       FLATTEN := true, \
       DEST := $(LIB_DST_DIR), \
   ))
