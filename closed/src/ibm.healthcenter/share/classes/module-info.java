@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2021, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2021, 2024 All Rights Reserved
  * ===========================================================================
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -26,6 +26,7 @@
 module ibm.healthcenter {
   requires java.logging;
   requires java.management;
+  requires java.management.rmi;
   requires java.naming;
   requires java.prefs;
   requires java.rmi;
