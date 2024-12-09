@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2021, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2021, 2024 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -47,9 +47,13 @@ TRANSPORT_PROPERTY_SED_SCRIPT := -e 's|$(TRANSPORT_PROPERTY_REGEX)\s*=.*|$(TRANS
 
 HEALTHCENTER_COPY := $(JDK_OUTPUTDIR)/modules/$(MODULE)/_the.$(MODULE)_copy_marker
 
+# The order in which the jars are extracted needs to remain intact,
+# as both jars contain copies of some of the same classes,
+# to avoid a HealthCenterNotSupportedException.
+
 HEALTHCENTER_JARS := \
-	$(HEALTHCENTER_HOME)/healthcenter.jar \
 	$(HEALTHCENTER_HOME)/monitoring-api.jar \
+	$(HEALTHCENTER_HOME)/healthcenter.jar \
 	#
 
 HEALTHCENTER_EXCLUDED_PACKAGES := \
