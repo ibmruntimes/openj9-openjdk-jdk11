@@ -50,6 +50,7 @@ $(eval $(call SetupCopyFiles,COPY_OVERLAY_FILES, \
 		src/java.base/share/classes/java/util/zip/ZipFile.java \
 		src/java.base/share/classes/jdk/internal/misc/JavaNetInetAddressAccess.java \
 		src/java.base/share/classes/jdk/internal/ref/PhantomCleanable.java \
+		src/java.base/share/classes/jdk/internal/reflect/MethodAccessorGenerator.java \
 		src/java.base/share/classes/module-info.java \
 		src/java.base/share/classes/sun/security/jca/ProviderConfig.java \
 		src/java.base/share/classes/sun/security/jca/ProviderList.java \
