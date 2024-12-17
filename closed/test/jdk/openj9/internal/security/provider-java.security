@@ -21,7 +21,7 @@
 RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestBase.Version.desc.default = false
 RestrictedSecurity.TestBase.Version.desc.fips = true
-RestrictedSecurity.TestBase.Version.desc.hash = SHA256:0ca32676ac2ae92d0469cbf293f3a69416c5d0312c80473319452f4d6995d234
+RestrictedSecurity.TestBase.Version.desc.hash = SHA256:24859dcd916c3d301c0a8d0a58f96f7c3a493cadad48ff1c91a5151f2cdd2d49
 RestrictedSecurity.TestBase.Version.desc.number = Certificate #XXX
 RestrictedSecurity.TestBase.Version.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.TestBase.Version.desc.sunsetDate = 2026-09-21
@@ -36,7 +36,7 @@ RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.TestBase.Version.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.TestBase.Version.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.TestBase.Version.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.TestBase.Version.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.TestBase.Version.securerandom.provider = OpenJCEPlusFIPS
@@ -50,7 +50,7 @@ RestrictedSecurity.TestBase.Version-Extended.tls.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.2 = sun.security.rsa.SunRsaSign
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.3 = sun.security.ec.SunEC
-RestrictedSecurity.TestBase.Version-Extended.jce.provider.4 = sun.security.ssl.SunJSSE
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.5 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.6 = sun.security.jgss.SunProvider
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.7 = com.sun.security.sasl.Provider
@@ -82,7 +82,7 @@ RestrictedSecurity.Test-Profile.Updated_2.extends = RestrictedSecurity.TestBase.
 RestrictedSecurity.Test-Profile.Updated_2.tls.disabledAlgorithms =
 
 RestrictedSecurity.Test-Profile.Updated_2.jce.provider.1 = sun.security.provider.Sun
-RestrictedSecurity.Test-Profile.Updated_2.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Updated_2.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.Updated_3
@@ -97,7 +97,7 @@ RestrictedSecurity.Test-Profile.Updated_3.jce.provider.1 = sun.security.provider
 RestrictedSecurity.Test-Profile.Updated_3.jce.provider.2 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.Test-Profile.Updated_3.jce.provider.3 =
 RestrictedSecurity.Test-Profile.Updated_3.jce.provider.4 = sun.security.ec.SunEC
-RestrictedSecurity.Test-Profile.Updated_3.jce.provider.5 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Updated_3.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.Updated_4
@@ -111,7 +111,7 @@ RestrictedSecurity.Test-Profile.Updated_4.tls.disabledAlgorithms =
 RestrictedSecurity.Test-Profile.Updated_4.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile.Updated_4.jce.provider.2 =
 RestrictedSecurity.Test-Profile.Updated_4.jce.provider.3 = sun.security.ec.SunEC
-RestrictedSecurity.Test-Profile.Updated_4.jce.provider.4 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Updated_4.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.Base
@@ -124,7 +124,7 @@ RestrictedSecurity.Test-Profile.Base.tls.disabledAlgorithms =
 
 RestrictedSecurity.Test-Profile.Base.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile.Base.jce.provider.4 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Base.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.Extended_1
@@ -138,7 +138,7 @@ RestrictedSecurity.Test-Profile.Extended_1.tls.disabledAlgorithms =
 RestrictedSecurity.Test-Profile.Extended_1.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile.Extended_1.jce.provider.2 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.Test-Profile.Extended_1.jce.provider.3 = sun.security.rsa.SunRsaSign
-RestrictedSecurity.Test-Profile.Extended_1.jce.provider.5 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.Extended_2
@@ -163,7 +163,7 @@ RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.tls.disabledAlgorithms =
 RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.2 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.3 =
-RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.4 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.BaseOneProviderEmpty.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.ExtendedOneProviderEmpty
@@ -176,7 +176,7 @@ RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.tls.disabledAlgorithms 
 
 RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.4 = sun.security.ec.SunEC
 RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.5 =
 RestrictedSecurity.Test-Profile.ExtendedOneProviderEmpty.jce.provider.6 = sun.security.pkcs11.SunPKCS11

@@ -36,7 +36,7 @@ RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.TestBase.Version.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.TestBase.Version.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.TestBase.Version.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.TestBase.Version.javax.net.ssl.keyStore = NONE
 RestrictedSecurity.TestBase.Version.securerandom.provider = OpenJCEPlusFIPS
@@ -50,7 +50,7 @@ RestrictedSecurity.TestBase.Version-Extended.tls.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.2 = sun.security.rsa.SunRsaSign
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.3 = sun.security.ec.SunEC
-RestrictedSecurity.TestBase.Version-Extended.jce.provider.4 = sun.security.ssl.SunJSSE
+RestrictedSecurity.TestBase.Version-Extended.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.5 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.6 = sun.security.jgss.SunProvider
 RestrictedSecurity.TestBase.Version-Extended.jce.provider.7 = com.sun.security.sasl.Provider
@@ -76,7 +76,7 @@ RestrictedSecurity.Test-Profile.Base.tls.disabledAlgorithmsWrongTypo =
 
 RestrictedSecurity.Test-Profile.Base.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile.Base.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.Test-Profile.Base.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile.Base.securerandom.algorithm = SHA512DRBG
@@ -94,7 +94,7 @@ RestrictedSecurity.Test-Profile.Extended_1.jce.provider.1 = sun.security.provide
 RestrictedSecurity.Test-Profile.Extended_1.jce.provider.2 = com.sun.crypto.provider.SunJCE
 RestrictedSecurity.Test-Profile.Extended_1.jce.providerWrongTypo = sun.security.rsa.SunRsaSign
 RestrictedSecurity.Test-Profile.Extended_1.jce.provider.4 = sun.security.ec.SunEC
-RestrictedSecurity.Test-Profile.Extended_1.jce.provider.5 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile.Extended_1.jce.provider.5 = com.sun.net.ssl.internal.ssl.Provider
 
 #
 # Test-Profile.Extended_2
@@ -127,7 +127,7 @@ RestrictedSecurity.Test-Profile-MultiDefault.Base.fips.mode = 140-3
 
 RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile-MultiDefault.Base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.Test-Profile-MultiDefault.Base.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-MultiDefault.Base.securerandom.algorithm = SHA512DRBG
@@ -253,7 +253,7 @@ RestrictedSecurity.Test-Profile-SetProperty.Base.tls.ephemeralDHKeySize =
 RestrictedSecurity.Test-Profile-SetProperty.Base.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile-SetProperty.Base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.Test-Profile-SetProperty.Base.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-SetProperty.Base.securerandom.algorithm = SHA512DRBG
@@ -533,7 +533,7 @@ RestrictedSecurity.Test-Profile-ConstraintChanged_3.Base.securerandom.algorithm 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.name = Test-Profile-SameStartWithoutVersion
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.default = true
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.fips = true
-RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.hash = SHA256:2c893d75043da09c3dba8d8b24cb71dc1c7ceac5fb8bf362a35847418a933a06
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.hash = SHA256:92693ffabd97694f750d645934cb6d0d3f13e4cade30070fd2479b7b9bcb7f42
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.number = Certificate #XXX
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.desc.sunsetDate = 2026-09-21
@@ -541,7 +541,7 @@ RestrictedSecurity.Test-Profile-SameStartWithoutVersion.fips.mode = 140-3
 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile-SameStartWithoutVersion.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-SameStartWithoutVersion.securerandom.algorithm = SHA512DRBG
@@ -557,7 +557,7 @@ RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.fips.mode = 140-3
 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.1 = sun.security.provider.Sun
 RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.2 = com.sun.crypto.provider.SunJCE
-RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.algorithm = SHA512DRBG
