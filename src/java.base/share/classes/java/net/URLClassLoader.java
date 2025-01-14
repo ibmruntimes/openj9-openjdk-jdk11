@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2021 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  */
 package java.net;
@@ -708,11 +708,9 @@ public class URLClassLoader extends SecureClassLoader implements Closeable {
                 sharedClassMetaDataCache.setSharedClassMetaData(index, metadata); //OpenJ9-shared_classes_misc
                                                                                 //OpenJ9-shared_classes_misc
             }                                                                   //OpenJ9-shared_classes_misc
-            boolean storeSuccessful = false;                                    //OpenJ9-shared_classes_misc
             try {                                                               //OpenJ9-shared_classes_misc
                 /* Store class in shared class cache for future use */           //OpenJ9-shared_classes_misc
-                storeSuccessful =                                               //OpenJ9-shared_classes_misc
-                  sharedClassServiceProvider.storeSharedClassURLClasspath(clazz, index); //OpenJ9-shared_classes_misc
+                sharedClassServiceProvider.storeSharedClassURLClasspath(clazz, index); //OpenJ9-shared_classes_misc
             } catch (Exception e) {                                             //OpenJ9-shared_classes_misc
                 e.printStackTrace();                                            //OpenJ9-shared_classes_misc
             }                                                                   //OpenJ9-shared_classes_misc
