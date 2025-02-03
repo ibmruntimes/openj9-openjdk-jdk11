@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -38,7 +38,6 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
 
   OPENJ9_BASIC_SETUP_FUNDAMENTAL_TOOLS
   OPENJ9_PLATFORM_SETUP
-  OPENJ9_CONFIGURE_CMAKE
   OPENJ9_CONFIGURE_COMPILERS
   OPENJ9_CONFIGURE_CRAC_AND_CRIU_SUPPORT
   OPENJ9_CONFIGURE_CUDA
@@ -51,44 +50,13 @@ AC_DEFUN_ONCE([CUSTOM_EARLY_HOOK],
   OPENJ9_CONFIGURE_OPENJDK_METHODHANDLES
   OPENJ9_CONFIGURE_SNAPSHOTS
   OPENJ9_CONFIGURE_WARNINGS
-  OPENJ9_THIRD_PARTY_REQUIREMENTS
   OPENJ9_CHECK_NASM_VERSION
   OPENJCEPLUS_SETUP
 ])
 
-AC_DEFUN([OPENJ9_CONFIGURE_CMAKE],
-[
-  AC_ARG_WITH(cmake, [AS_HELP_STRING([--with-cmake], [enable building openJ9 with CMake])],
-    [
-      if test "x$with_cmake" = xyes -o "x$with_cmake" = x ; then
-        with_cmake=cmake
-      fi
-    ],
-    [
-      with_cmake=cmake
-    ])
-  # at this point with_cmake should either be no, or the name of the cmake command
-  if test "x$with_cmake" = xno ; then
-    OPENJ9_ENABLE_CMAKE=false
-
-    # Currently, mixedrefs mode is only available with CMake enabled
-    if test "x$OMR_MIXED_REFERENCES_MODE" != xoff ; then
-      AC_MSG_ERROR([[--with-mixedrefs=[static|dynamic] requires --with-cmake]])
-    fi
-  else
-    OPENJ9_ENABLE_CMAKE=true
-    if AS_EXECUTABLE_P(["$with_cmake"]) ; then
-      CMAKE="$with_cmake"
-    else
-      UTIL_REQUIRE_PROGS([CMAKE], [$with_cmake])
-    fi
-  fi
-
-  AC_SUBST(OPENJ9_ENABLE_CMAKE)
-])
-
 AC_DEFUN([OPENJ9_BASIC_SETUP_FUNDAMENTAL_TOOLS],
 [
+  UTIL_REQUIRE_PROGS(CMAKE, cmake)
   UTIL_REQUIRE_PROGS(M4, m4)
 ])
 
@@ -670,52 +638,6 @@ AC_DEFUN([OPENJ9_CHECK_NASM_VERSION],
       AC_MSG_ERROR([nasm version detected: $NASM_VERSION; required version 2.11+])
     fi
   fi
-])
-
-AC_DEFUN([OPENJ9_THIRD_PARTY_REQUIREMENTS],
-[
-  # check 3rd party library requirement for UMA
-  AC_ARG_WITH(freemarker-jar, [AS_HELP_STRING([--with-freemarker-jar],
-      [path to freemarker.jar (used to build OpenJ9 build tools)])])
-
-  FREEMARKER_JAR=
-  if test "x$OPENJ9_ENABLE_CMAKE" != xtrue ; then
-    AC_MSG_CHECKING([that freemarker location is set])
-    if test "x$with_freemarker_jar" = x -o "x$with_freemarker_jar" = xno ; then
-      AC_MSG_RESULT([no])
-      printf "\n"
-      printf "The FreeMarker library is required to build the OpenJ9 build tools\n"
-      printf "and has to be provided during configure process.\n"
-      printf "\n"
-      printf "Download the FreeMarker library and unpack it into an arbitrary directory:\n"
-      printf "\n"
-      printf "wget https://sourceforge.net/projects/freemarker/files/freemarker/2.3.8/freemarker-2.3.8.tar.gz/download -O freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "tar -xzf freemarker-2.3.8.tar.gz\n"
-      printf "\n"
-      printf "Then run configure with '--with-freemarker-jar=<freemarker_jar>'\n"
-      printf "\n"
-
-      AC_MSG_ERROR([Cannot continue])
-    else
-      AC_MSG_RESULT([yes])
-      AC_MSG_CHECKING([checking that '$with_freemarker_jar' exists])
-      if test -f "$with_freemarker_jar" ; then
-        AC_MSG_RESULT([yes])
-      else
-        AC_MSG_RESULT([no])
-        AC_MSG_ERROR([freemarker.jar not found at '$with_freemarker_jar'])
-      fi
-    fi
-
-    if test "x$OPENJDK_BUILD_OS_ENV" = xwindows.cygwin ; then
-      FREEMARKER_JAR=`$PATHTOOL -m "$with_freemarker_jar"`
-    else
-      FREEMARKER_JAR=$with_freemarker_jar
-    fi
-  fi
-
-  AC_SUBST(FREEMARKER_JAR)
 ])
 
 AC_DEFUN_ONCE([CUSTOM_LATE_HOOK],

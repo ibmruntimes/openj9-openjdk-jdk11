@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -78,21 +78,10 @@ else
   OPENJ9_VERSION_STRING := $(OPENJ9_BRANCH)-$(OPENJ9_SHA)
 endif
 
-ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-  # If a logging level was specified that shows commands, tell cmake to do likewise.
-  ifneq (,$(or $(filter true,$(LOG_CMDLINES)),$(filter debug trace,$(LOG_LEVEL))))
-    MAKE_ARGS += VERBOSE=ON
-  endif
-else
-  # MAKEFLAGS, as inherited from openjdk, includes options (e.g. '-r' and '-R')
-  # that don't work well with OpenJ9 and OMR when not using cmake.
-  unexport MAKEFLAGS
-  # Filter out unwanted make flags.
-  MAKE_ARGS := $(filter-out -R -r -s,$(MAKE_ARGS))
-  ifneq (,$(JOBS))
-    MAKE_ARGS += -j $(JOBS)
-  endif
-endif # OPENJ9_ENABLE_CMAKE
+# If a logging level was specified that shows commands, tell cmake to do likewise.
+ifneq (,$(or $(filter true,$(LOG_CMDLINES)),$(filter debug trace,$(LOG_LEVEL))))
+  MAKE_ARGS += VERBOSE=ON
+endif
 
 # Propagate configure option '--disable-warnings-as-errors-omr' to OMR.
 ifeq (false,$(WARNINGS_AS_ERRORS_OMR))
@@ -124,30 +113,7 @@ endif
 	clean-openj9-thirdparty-binaries \
 	openj9-config-headers \
 	run-preprocessors-j9 \
-	stage-j9 \
 	#
-
-# openj9_copy_tree
-# ----------------
-# $1 = The target directory to create or update.
-# $2 = The source directory to copy.
-openj9_copy_tree = $(call openj9_copy_tree_impl,$(strip $1),$(strip $2))
-
-OPENJ9_MARKER_FILE := .up-to-date
-
-# Use '-m' to update file modification times ('-m' is equivalent to '--touch' in some implementations of tar).
-define openj9_copy_tree_impl
-	@$(MKDIR) -p $1
-	@$(TAR) --create --directory=$2 $(if $(wildcard $1/$(OPENJ9_MARKER_FILE)),--newer=$1/$(OPENJ9_MARKER_FILE)) --exclude=.git . \
-		| $(TAR) --extract --directory=$1 -m
-	@$(TOUCH) $1/$(OPENJ9_MARKER_FILE)
-endef
-
-ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-  CONFIG_HEADERS := j9cfg.h omr/omrcfg.h
-else
-  CONFIG_HEADERS := include/j9cfg.h omr/include_core/omrcfg.h
-endif
 
 define openj9_config_header_rules
   openj9-config-headers : $(SUPPORT_OUTPUTDIR)/openj9_include/$(notdir $1)
@@ -157,7 +123,7 @@ define openj9_config_header_rules
 endef
 
 $(foreach file, \
-	$(CONFIG_HEADERS), \
+	j9cfg.h omr/omrcfg.h, \
 	$(eval $(call openj9_config_header_rules, $(OPENJ9_VM_BUILD_DIR)/$(file))))
 
 # openj9_test_image_rules
@@ -227,121 +193,6 @@ $(foreach file, \
 	$(if $(wildcard $(file)), \
 		$(eval $(call openj9_test_image_rules, $(file)))))
 
-# Comments for stage-j9
-# Currently there is a staged location where j9 is built.  This is due to a number of reasons:
-# 1. make currently leaves output files in current directory
-# 2. generated source and header files
-# 3. repo layout compared to source.zip layout
-# See issue 49 for more information and actions to correct this action.
-
-# Functions to generate sed program fragments.
-# $1 - name of flag to be enabled or disabled.
-SedDisable = -e '/"$(strip $1)"/s/"true"/"false"/g'
-SedEnable  = -e '/"$(strip $1)"/s/"false"/"true"/g'
-
-# Adjust features based on our configuration.
-ifeq (true,$(OPENJ9_ENABLE_CUDA))
-  FEATURE_SED_SCRIPT := $(call SedEnable,opt_cuda)
-else
-  FEATURE_SED_SCRIPT := $(call SedDisable,opt_cuda)
-endif
-
-# Function to generate sed program fragment.
-# $1 - name of make macro to use instead of a hard-coded tool reference.
-# $2 - suffix of uma_make_cmd property name to be adjusted.
-SedUmaCommand = -e '/<property name="uma_make_cmd_$(strip $2)"/s|value="[^"]*"|value="$($(strip $1))"|'
-
-# Copy configured values to relevant UMA properties in .spec files.
-SPEC_SED_SCRIPT := \
-	$(call SedUmaCommand, CC,  cc) \
-	$(call SedUmaCommand, CXX, cxx) \
-	$(call SedUmaCommand, CXX, interp_gcc) \
-	$(call SedUmaCommand, CXX, ppc_gcc_cxx) \
-	#
-
-# Adjust DDR enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_DDR))
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_useOmrDdr)
-  SPEC_SED_SCRIPT    += $(call SedEnable,module_ddr)
-else
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_useOmrDdr)
-  SPEC_SED_SCRIPT    += $(call SedDisable,module_ddr)
-endif
-
-# Adjust JFR enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_JFR))
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_jfr)
-else
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_jfr)
-endif
-
-# Adjust JITServer enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_jitserver)
-else
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_jitserver)
-endif
-
-# Adjust CRAC Support enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_CRAC_SUPPORT))
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_cracSupport)
-else # OPENJ9_ENABLE_CRAC_SUPPORT
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_cracSupport)
-endif # OPENJ9_ENABLE_CRAC_SUPPORT
-
-# Adjust CRIU Support enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_criuSupport)
-else # OPENJ9_ENABLE_CRIU_SUPPORT
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_criuSupport)
-endif # OPENJ9_ENABLE_CRIU_SUPPORT
-
-# Adjust OpenJDK MethodHandles enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_methodHandle)
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_openjdkMethodhandle)
-else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_methodHandle)
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_openjdkMethodhandle)
-endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
-
-# Adjust snapshots enablement flags.
-ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
-  FEATURE_SED_SCRIPT += $(call SedEnable,opt_snapshots)
-else # OPENJ9_ENABLE_SNAPSHOTS
-  FEATURE_SED_SCRIPT += $(call SedDisable,opt_snapshots)
-endif # OPENJ9_ENABLE_SNAPSHOTS
-
-# Disable windows rebase.
-SPEC_SED_SCRIPT += $(call SedDisable,uma_windowsRebase)
-
-# openj9_stage_buildspec_file
-# ---------------------------
-# $1 = The simple name of the file to copy.
-define openj9_stage_buildspec_file
-stage-j9 : $(OUTPUTDIR)/vm/buildspecs/$1
-$(OUTPUTDIR)/vm/buildspecs/$1 : $(OPENJ9_TOPDIR)/buildspecs/$1
-	@$(MKDIR) -p $$(@D)
-  ifeq (.feature,$(suffix $1))
-	@$(SED) $(FEATURE_SED_SCRIPT) < $$< > $$@
-  else ifeq (.spec,$(suffix $1))
-	@$(SED) $(SPEC_SED_SCRIPT) < $$< > $$@
-  else
-	@$(CP) $$< $$@
-  endif
-endef
-
-$(foreach file, \
-	$(notdir $(wildcard $(OPENJ9_TOPDIR)/buildspecs/*)), \
-	$(eval $(call openj9_stage_buildspec_file,$(file))))
-
-stage-j9 :
-	@$(ECHO) Staging OpenJ9 runtime in $(OUTPUTDIR)/vm
-	$(call openj9_copy_tree,$(OUTPUTDIR)/vm,$(OPENJ9_TOPDIR)/runtime)
-
-	@$(ECHO) Staging OpenJ9 OMR in $(OUTPUTDIR)/vm
-	$(call openj9_copy_tree,$(OUTPUTDIR)/vm/omr,$(OPENJ9OMR_TOPDIR))
-
 OPENJ9_VERSION_VARS := \
 	COMPANY_NAME \
 	COMPILER_VERSION_STRING \
@@ -392,9 +243,7 @@ run-preprocessors-j9 : \
 	$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
 	$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h
 
-ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-
-  CMAKE_ARGS := \
+CMAKE_ARGS := \
 	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(patsubst %_cross,%,$(OPENJ9_BUILDSPEC)).cmake \
 	-DBOOT_JDK="$(BOOT_JDK)" \
 	-DBUILD_ID=$(BUILD_ID) \
@@ -408,101 +257,101 @@ ifeq (true,$(OPENJ9_ENABLE_CMAKE))
 	-DOPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
 	#
 
-  # Windows can't specify compiler overrides since we already generated wrapper scripts.
-  ifneq (windows,$(OPENJDK_TARGET_OS))
-    # Override the compilers if an OPENJ9_* value is specified.
-    # Otherwise, toolchain.cmake has the default values.
-    ifneq (,$(OPENJ9_CC))
-      CMAKE_ARGS += -DCMAKE_C_COMPILER="$(OPENJ9_CC)"
-    endif
-    ifneq (,$(OPENJ9_CXX))
-      CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(OPENJ9_CXX)"
-    endif
-  endif # windows
+# Windows can't specify compiler overrides since we already generated wrapper scripts.
+ifneq (windows,$(OPENJDK_TARGET_OS))
+  # Override the compilers if an OPENJ9_* value is specified.
+  # Otherwise, toolchain.cmake has the default values.
+  ifneq (,$(OPENJ9_CC))
+    CMAKE_ARGS += -DCMAKE_C_COMPILER="$(OPENJ9_CC)"
+  endif
+  ifneq (,$(OPENJ9_CXX))
+    CMAKE_ARGS += -DCMAKE_CXX_COMPILER="$(OPENJ9_CXX)"
+  endif
+endif # windows
 
-  ifneq (,$(CCACHE))
-    # openjdk makefiles add a bunch of environemnt variables to the ccache command.
-    # CMake will not parse this properly, so we wrap the whole thing in the env command.
-    # We also need to add semicolons between arguments or else cmake will treat the whole
-    # thing as one long command name.
+ifneq (,$(CCACHE))
+  # openjdk makefiles add a bunch of environemnt variables to the ccache command.
+  # CMake will not parse this properly, so we wrap the whole thing in the env command.
+  # We also need to add semicolons between arguments or else cmake will treat the whole
+  # thing as one long command name.
 
-    # Note: We remove the CCACHE_COMPRESS option that openjdk adds, because it significantly
-    # slows down the build (to the point of erasing any gains from using ccache).
-    CCACHE_NOCOMPRESS := $(filter-out CCACHE_COMPRESS=1,$(CCACHE))
-    ESCAPED_CCACHE := env$(subst $(SPACE),,$(addprefix ;,$(CCACHE_NOCOMPRESS)))
+  # Note: We remove the CCACHE_COMPRESS option that openjdk adds, because it significantly
+  # slows down the build (to the point of erasing any gains from using ccache).
+  CCACHE_NOCOMPRESS := $(filter-out CCACHE_COMPRESS=1,$(CCACHE))
+  ESCAPED_CCACHE := env$(subst $(SPACE),,$(addprefix ;,$(CCACHE_NOCOMPRESS)))
 
-    CMAKE_ARGS += -DCMAKE_C_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
-    CMAKE_ARGS += -DCMAKE_CXX_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
-  endif # CCACHE
+  CMAKE_ARGS += -DCMAKE_C_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
+  CMAKE_ARGS += -DCMAKE_CXX_COMPILER_LAUNCHER="$(ESCAPED_CCACHE)"
+endif # CCACHE
 
-  ifeq (true,$(OPENJ9_ENABLE_JFR))
-    CMAKE_ARGS += -DJ9VM_OPT_JFR=ON
-  else # OPENJ9_ENABLE_JFR
-    CMAKE_ARGS += -DJ9VM_OPT_JFR=OFF
-  endif # OPENJ9_ENABLE_JFR
+ifeq (true,$(OPENJ9_ENABLE_JFR))
+  CMAKE_ARGS += -DJ9VM_OPT_JFR=ON
+else # OPENJ9_ENABLE_JFR
+  CMAKE_ARGS += -DJ9VM_OPT_JFR=OFF
+endif # OPENJ9_ENABLE_JFR
 
-  ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
-    CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=ON
+ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
+  CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=ON
 
-    ifneq (,$(OPENSSL_CFLAGS))
-      CMAKE_ARGS += -DOPENSSL_CFLAGS="$(OPENSSL_CFLAGS)"
-    endif
-
-    ifneq (,$(OPENSSL_DIR))
-      CMAKE_ARGS += -DOPENSSL_DIR="$(OPENSSL_DIR)"
-    endif
-
-    ifneq (,$(OPENSSL_BUNDLE_LIB_PATH))
-      CMAKE_ARGS += -DOPENSSL_BUNDLE_LIB_PATH="$(OPENSSL_BUNDLE_LIB_PATH)"
-    endif
-  else
-    CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=OFF
-  endif # OPENJ9_ENABLE_JITSERVER
-
-  ifeq (true,$(OPENJ9_ENABLE_CUDA))
-    CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON -DOMR_CUDA_HOME="$(call UnixPath,$(CUDA_HOME))"
-  else # OPENJ9_ENABLE_CUDA
-    CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
-  endif # OPENJ9_ENABLE_CUDA
-
-  ifeq (true,$(OPENJ9_ENABLE_CRAC_SUPPORT))
-    CMAKE_ARGS += -DJ9VM_OPT_CRAC_SUPPORT=ON
-  else # OPENJ9_ENABLE_CRAC_SUPPORT
-    CMAKE_ARGS += -DJ9VM_OPT_CRAC_SUPPORT=OFF
-  endif # OPENJ9_ENABLE_CRAC_SUPPORT
-
-  ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
-    CMAKE_ARGS += -DJ9VM_OPT_CRIU_SUPPORT=ON
-  else # OPENJ9_ENABLE_CRIU_SUPPORT
-    CMAKE_ARGS += -DJ9VM_OPT_CRIU_SUPPORT=OFF
-  endif # OPENJ9_ENABLE_CRIU_SUPPORT
-
-  ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
-    CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=OFF
-    CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=ON
-  else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
-    CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=ON
-    CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=OFF
-  endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
-
-  ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
-    CMAKE_ARGS += -DJ9VM_OPT_SNAPSHOTS=ON
-  else # OPENJ9_ENABLE_SNAPSHOTS
-    CMAKE_ARGS += -DJ9VM_OPT_SNAPSHOTS=OFF
-  endif # OPENJ9_ENABLE_SNAPSHOTS
-
-  # Propagate configure option '--disable-warnings-as-errors-omr' to OMR.
-  ifeq (false,$(WARNINGS_AS_ERRORS_OMR))
-    CMAKE_ARGS += -DOMR_WARNINGS_AS_ERRORS=OFF
+  ifneq (,$(OPENSSL_CFLAGS))
+    CMAKE_ARGS += -DOPENSSL_CFLAGS="$(OPENSSL_CFLAGS)"
   endif
 
-  # Propagate configure option '--disable-warnings-as-errors-openj9' to OpenJ9.
-  ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
-    CMAKE_ARGS += -DJ9VM_WARNINGS_AS_ERRORS=OFF
- endif
+  ifneq (,$(OPENSSL_DIR))
+    CMAKE_ARGS += -DOPENSSL_DIR="$(OPENSSL_DIR)"
+  endif
 
-  # Do this last so extra args take precedence.
-  CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
+  ifneq (,$(OPENSSL_BUNDLE_LIB_PATH))
+    CMAKE_ARGS += -DOPENSSL_BUNDLE_LIB_PATH="$(OPENSSL_BUNDLE_LIB_PATH)"
+  endif
+else
+  CMAKE_ARGS += -DJ9VM_OPT_JITSERVER=OFF
+endif # OPENJ9_ENABLE_JITSERVER
+
+ifeq (true,$(OPENJ9_ENABLE_CUDA))
+  CMAKE_ARGS += -DJ9VM_OPT_CUDA=ON -DOMR_CUDA_HOME="$(call UnixPath,$(CUDA_HOME))"
+else # OPENJ9_ENABLE_CUDA
+  CMAKE_ARGS += -DJ9VM_OPT_CUDA=OFF
+endif # OPENJ9_ENABLE_CUDA
+
+ifeq (true,$(OPENJ9_ENABLE_CRAC_SUPPORT))
+  CMAKE_ARGS += -DJ9VM_OPT_CRAC_SUPPORT=ON
+else # OPENJ9_ENABLE_CRAC_SUPPORT
+  CMAKE_ARGS += -DJ9VM_OPT_CRAC_SUPPORT=OFF
+endif # OPENJ9_ENABLE_CRAC_SUPPORT
+
+ifeq (true,$(OPENJ9_ENABLE_CRIU_SUPPORT))
+  CMAKE_ARGS += -DJ9VM_OPT_CRIU_SUPPORT=ON
+else # OPENJ9_ENABLE_CRIU_SUPPORT
+  CMAKE_ARGS += -DJ9VM_OPT_CRIU_SUPPORT=OFF
+endif # OPENJ9_ENABLE_CRIU_SUPPORT
+
+ifeq (true,$(OPENJ9_ENABLE_OPENJDK_METHODHANDLES))
+  CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=OFF
+  CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=ON
+else # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+  CMAKE_ARGS += -DJ9VM_OPT_METHOD_HANDLE=ON
+  CMAKE_ARGS += -DJ9VM_OPT_OPENJDK_METHODHANDLE=OFF
+endif # OPENJ9_ENABLE_OPENJDK_METHODHANDLES
+
+ifeq (true,$(OPENJ9_ENABLE_SNAPSHOTS))
+  CMAKE_ARGS += -DJ9VM_OPT_SNAPSHOTS=ON
+else # OPENJ9_ENABLE_SNAPSHOTS
+  CMAKE_ARGS += -DJ9VM_OPT_SNAPSHOTS=OFF
+endif # OPENJ9_ENABLE_SNAPSHOTS
+
+# Propagate configure option '--disable-warnings-as-errors-omr' to OMR.
+ifeq (false,$(WARNINGS_AS_ERRORS_OMR))
+  CMAKE_ARGS += -DOMR_WARNINGS_AS_ERRORS=OFF
+endif
+
+# Propagate configure option '--disable-warnings-as-errors-openj9' to OpenJ9.
+ifeq (false,$(WARNINGS_AS_ERRORS_OPENJ9))
+  CMAKE_ARGS += -DJ9VM_WARNINGS_AS_ERRORS=OFF
+endif
+
+# Do this last so extra args take precedence.
+CMAKE_ARGS += $(EXTRA_CMAKE_ARGS)
 
 $(OUTPUTDIR)/vm/cmake.stamp :
 	@$(MKDIR) -p $(@D)
@@ -510,27 +359,6 @@ $(OUTPUTDIR)/vm/cmake.stamp :
 	$(TOUCH) $@
 
 run-preprocessors-j9 : $(OUTPUTDIR)/vm/cmake.stamp
-
-else # OPENJ9_ENABLE_CMAKE
-
-run-preprocessors-j9 : stage-j9
-	@$(ECHO) Running OpenJ9 preprocessors with OPENJ9_BUILDSPEC: $(OPENJ9_BUILDSPEC)
-	+BOOT_JDK=$(BOOT_JDK) $(EXPORT_COMPILER_ENV_VARS) OPENJDK_VERSION_NUMBER_FOUR_POSITIONS=$(VERSION_NUMBER_FOUR_POSITIONS) \
-		$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm -f $(OPENJ9_TOPDIR)/runtime/buildtools.mk \
-			BUILD_ID=$(BUILD_ID) \
-			DEST_DIR=$(call MixedPath,$(J9TOOLS_DIR)) \
-			EXTRA_CONFIGURE_ARGS=$(OMR_EXTRA_CONFIGURE_ARGS) \
-			FREEMARKER_JAR="$(FREEMARKER_JAR)" \
-			J9VM_SHA=$(OPENJ9_SHA) \
-			JAVA_HOME=$(BOOT_JDK) \
-			OMR_DIR=$(OUTPUTDIR)/vm/omr \
-			SOURCETOOLS_DIR=$(call MixedPath,$(OPENJ9_TOPDIR))/sourcetools \
-			SPEC=$(OPENJ9_BUILDSPEC) \
-			UMA_OPTIONS_EXTRA="-buildDate $(shell date +'%Y%m%d')" \
-			VERSION_MAJOR=$(VERSION_FEATURE) \
-			tools
-
-endif # OPENJ9_ENABLE_CMAKE
 
 CUSTOM_COMPILER_ENV_VARS :=
 
@@ -543,31 +371,11 @@ endif
 ifneq (,$(OPENJ9_DEVELOPER_DIR))
   CUSTOM_COMPILER_ENV_VARS += DEVELOPER_DIR="$(OPENJ9_DEVELOPER_DIR)"
 endif
-ifeq (true,$(OPENJ9_ENABLE_JITSERVER))
-  ifneq (true,$(OPENJ9_ENABLE_CMAKE))
-    CUSTOM_COMPILER_ENV_VARS += J9VM_OPT_JITSERVER=1
-
-    ifneq (,$(OPENSSL_CFLAGS))
-      CUSTOM_COMPILER_ENV_VARS += OPENSSL_CFLAGS="$(OPENSSL_CFLAGS)"
-    endif
-
-    ifneq (,$(OPENSSL_DIR))
-      CUSTOM_COMPILER_ENV_VARS += OPENSSL_DIR="$(OPENSSL_DIR)"
-    endif
-
-    ifneq (,$(OPENSSL_BUNDLE_LIB_PATH))
-      CUSTOM_COMPILER_ENV_VARS += OPENSSL_BUNDLE_LIB_PATH="$(OPENSSL_BUNDLE_LIB_PATH)"
-    endif
-  endif # OPENJ9_ENABLE_CMAKE
-endif # OPENJ9_ENABLE_JITSERVER
 
 ifneq (true,$(OPENJ9_ENABLE_DDR))
   DDR_COMMAND :=
-else ifeq (true,$(OPENJ9_ENABLE_CMAKE))
-  DDR_COMMAND := $(EXPORT_COMPILER_ENV_VARS) $(MAKE) $(MAKE_ARGS) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
 else
-  DDR_COMMAND := CC="$(CC)" CXX="$(CXX)" $(EXPORT_COMPILER_ENV_VARS) \
-	$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm/ddr -f run_omrddrgen.mk
+  DDR_COMMAND := $(EXPORT_COMPILER_ENV_VARS) $(MAKE) $(MAKE_ARGS) -C $(OPENJ9_VM_BUILD_DIR) j9ddr
 endif # OPENJ9_ENABLE_DDR
 
 build-j9 : run-preprocessors-j9
