@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2022 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -43,7 +43,7 @@ include $(TOPDIR)/make/common/JavaCompilation.gmk
 include $(TOPDIR)/make/common/SetupJavaCompilers.gmk
 
 # The main source directory.
-DDR_VM_SRC_ROOT := $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
+DDR_VM_SRC_ROOT := $(J9JCL_SOURCES_DIR)/openj9.dtfj/share/classes
 
 # The top-level directory for intermediate artifacts.
 DDR_SUPPORT_DIR := $(SUPPORT_OUTPUTDIR)/ddr
@@ -170,7 +170,7 @@ $(eval $(call SetupJavaCompilation,BUILD_J9DDR_TEST_CLASSES, \
 		--system none, \
 	BIN := $(DDR_TEST_BIN), \
 	CLASSPATH := $(DDR_CLASSES_BIN), \
-	SRC := $(J9JCL_SOURCES_DIR)/openj9.dtfj/share/classes \
+	SRC := $(DDR_VM_SRC_ROOT) \
 	))
 
 .PHONY : compile_check
