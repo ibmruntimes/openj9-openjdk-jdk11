@@ -28,13 +28,31 @@
  * ===========================================================================
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "jni.h"
 #include "jni_util.h"
 #include "jvm.h"
 
+#if !defined(WIN32)
+#include "j9access.h"
+/* tracehelp.c defines getTraceInterfaceFromVM(), used by J9_UTINTERFACE_FROM_VM(). */
+#include "tracehelp.c"
+#include "ut_jcl_java.c"
+#endif /* !defined(WIN32) */
+
 JNIEXPORT jint JNICALL
 DEF_JNI_OnLoad(JavaVM *vm, void *reserved)
 {
+#if !defined(WIN32)
+    /* Windows doesn't call JNI_OnLoad for libjava.dll, initialize the tracepoint elsewhere. */
+    UT_JCL_JAVA_MODULE_LOADED(J9_UTINTERFACE_FROM_VM((J9JavaVM *)vm));
+#endif /* !defined(WIN32) */
+
     jint vm_version = JVM_GetInterfaceVersion();
     if (vm_version != JVM_INTERFACE_VERSION) {
         JNIEnv *env;

@@ -23,9 +23,20 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "jni.h"
 #include "jvm.h"
 #include "jni_util.h"
+
+#include "j9access.h"
+/* tracehelp.c defines getTraceInterfaceFromVM(), used by J9_UTINTERFACE_FROM_VM(). */
+#include "tracehelp.c"
+#include "ut_jcl_nio.c"
 
 JNIEXPORT jint JNICALL
 DEF_JNI_OnLoad(JavaVM *vm, void *reserved)
@@ -35,6 +46,8 @@ DEF_JNI_OnLoad(JavaVM *vm, void *reserved)
     if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_2) != JNI_OK) {
         return JNI_EVERSION; /* JNI version not supported */
     }
+
+    UT_JCL_NIO_MODULE_LOADED(J9_UTINTERFACE_FROM_VM((J9JavaVM *)vm));
 
     return JNI_VERSION_1_2;
 }

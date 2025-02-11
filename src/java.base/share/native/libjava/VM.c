@@ -23,12 +23,25 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include "jni.h"
 #include "jni_util.h"
 #include "jvm.h"
 #include "jdk_util.h"
 
 #include "jdk_internal_misc_VM.h"
+
+#if defined(WIN32)
+#include "j9access.h"
+/* tracehelp.c defines getTraceInterfaceFromVM(), used by J9_UTINTERFACE_FROM_VM(). */
+#include "tracehelp.c"
+#include "ut_jcl_java.c"
+#endif /* defined(WIN32) */
 
 /* Only register the performance-critical methods */
 static JNINativeMethod methods[] = {
@@ -42,6 +55,11 @@ Java_jdk_internal_misc_VM_latestUserDefinedLoader0(JNIEnv *env, jclass cls) {
 
 JNIEXPORT void JNICALL
 Java_jdk_internal_misc_VM_initialize(JNIEnv *env, jclass cls) {
+#if defined(WIN32)
+    /* Other platforms do this in check_version.c JNI_OnLoad. */
+    UT_JCL_JAVA_MODULE_LOADED(J9_UTINTERFACE_FROM_VM(((J9VMThread *) env)->javaVM));
+#endif /* defined(WIN32) */
+
     if (!JDK_InitJvmHandle()) {
         JNU_ThrowInternalError(env, "Handle for JVM not found for symbol lookup");
         return;

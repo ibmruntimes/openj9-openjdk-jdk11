@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <windows.h>
 #include <winsock2.h>
 #include "jni.h"
@@ -36,6 +42,8 @@
 
 #include "sun_nio_ch_Net.h"
 #include "sun_nio_ch_PollArrayWrapper.h"
+
+#include "ut_jcl_nio.h"
 
 /**
  * Definitions to allow for building with older SDK include files.
@@ -211,6 +219,14 @@ Java_sun_nio_ch_Net_connect0(JNIEnv *env, jclass clazz, jboolean preferIPv6, job
      */
     if (so_rv == 0 && type == SOCK_STREAM && IS_LOOPBACK_ADDRESS(&sa)) {
         NET_EnableFastTcpLoopbackConnect((jint)s);
+    }
+
+    if (AF_INET == sa.sa4.sin_family) {
+        char buf[INET_ADDRSTRLEN];
+        Trc_nio_ch_Net_connect4((jlong)s, inet_ntop(AF_INET, &sa.sa4.sin_addr, buf, sizeof(buf)), port, sa_len);
+    } else if (AF_INET6 == sa.sa6.sin6_family) {
+        char buf[INET6_ADDRSTRLEN];
+        Trc_nio_ch_Net_connect6((jlong)s, inet_ntop(AF_INET6, &sa.sa6.sin6_addr, buf, sizeof(buf)), port, ntohl(sa.sa6.sin6_scope_id), sa_len);
     }
 
     rv = connect(s, &sa.sa, sa_len);
