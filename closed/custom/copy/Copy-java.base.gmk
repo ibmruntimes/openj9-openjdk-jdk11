@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -51,6 +51,10 @@ $(call openj9_copy_files,, \
 	$(INCLUDE31_SOURCE_DIR)/jniport.h \
 	$(INCLUDE31_TARGET_DIR)/jniport.h)
 endif # zos
+
+$(call openj9_copy_files,, \
+	$(OPENJ9OMR_TOPDIR)/gc/verbose/schema.xsd \
+	$(LIB_DST_DIR)/schema.xsd)
 
 # jitserver
 
