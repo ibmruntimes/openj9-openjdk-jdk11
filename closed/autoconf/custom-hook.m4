@@ -417,15 +417,8 @@ AC_DEFUN([OPENJ9_CONFIGURE_JFR],
   elif test "x$enable_jfr" = xno ; then
     AC_MSG_RESULT([no (explicitly disabled)])
   elif test "x$enable_jfr" = x ; then
-    case "$OPENJ9_PLATFORM_CODE" in
-      xa64|xr64)
-        AC_MSG_RESULT([yes (default)])
-        OPENJ9_ENABLE_JFR=true
-        ;;
-      *)
-        AC_MSG_RESULT([no (default)])
-        ;;
-    esac
+    AC_MSG_RESULT([yes (default)])
+    OPENJ9_ENABLE_JFR=true
   else
     AC_MSG_ERROR([--enable-jfr accepts no argument])
   fi
