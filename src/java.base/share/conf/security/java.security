@@ -188,7 +188,7 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:aa9bcacda5854c46ad358f819ed4567d49aafd898b3ef03ffc8c4ecf53ba4d21
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:032495c286ebdb2e851e0bc49da2ce426d11706487c0351522ae77dd22409a82
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -270,6 +270,8 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plu
     {Mac, HmacSHA3-512, *}, \
     {Mac, HmacSHA384, *}, \
     {Mac, HmacSHA512, *}, \
+    {MessageDigest, MD5, *, ModuleAndFullClassName:java.base/java.util.UUID}, \
+    {MessageDigest, SHA-1, *, ModuleAndFullClassName:java.base/java.io.ObjectStreamClass}, \
     {MessageDigest, SHA-224, *}, \
     {MessageDigest, SHA-256, *}, \
     {MessageDigest, SHA-384, *}, \
