@@ -188,7 +188,7 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:032495c286ebdb2e851e0bc49da2ce426d11706487c0351522ae77dd22409a82
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:a4d3c23ad19a71ef85f5f706727cedc8899979f1b5a1cafbc23b59a14b4c6d92
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -281,6 +281,10 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plu
     {MessageDigest, SHA3-384, *}, \
     {MessageDigest, SHA3-512, *}, \
     {SecretKeyFactory, AES, *}, \
+    {SecretKeyFactory, PBKDF2WithHmacSHA224, *}, \
+    {SecretKeyFactory, PBKDF2WithHmacSHA256, *}, \
+    {SecretKeyFactory, PBKDF2WithHmacSHA384, *}, \
+    {SecretKeyFactory, PBKDF2WithHmacSHA512, *}, \
     {SecureRandom, SHA256DRBG, *}, \
     {SecureRandom, SHA512DRBG, *}, \
     {Signature, NONEwithECDSA, *}, \
