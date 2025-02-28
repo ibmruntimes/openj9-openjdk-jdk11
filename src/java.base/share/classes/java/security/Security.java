@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -347,14 +347,26 @@ public final class Security {
      */
     public static synchronized int insertProviderAt(Provider provider,
             int position) {
-
-        /*[IF CRIU_SUPPORT]*/
-        CRIUConfigurator.invalidateAlgorithmCache();
-        /*[ENDIF] CRIU_SUPPORT */
-
         String providerName = provider.getName();
         checkInsertProvider(providerName);
         ProviderList list = Providers.getFullProviderList();
+
+        /*[IF CRIU_SUPPORT]*/
+        if (InternalCRIUSupport.enableCRIUSecProvider()) {
+            for (Provider existingProvider : list.providers()) {
+                if ("CRIUSEC".equals(existingProvider.getName())) {
+                    if (criuDebug) {
+                        System.out.println("Trying to insert + " + providerName
+                                + " during the pre-checkpoint which is not allowed.");
+                    }
+                    throw new RuntimeException("Inserting " + providerName
+                            + " during the pre-checkpoint is not allowed");
+                }
+            }
+        }
+        CRIUConfigurator.invalidateAlgorithmCache();
+        /*[ENDIF] CRIU_SUPPORT */
+
         ProviderList newList = ProviderList.insertAt(list, provider, position - 1);
         if (list == newList) {
             return -1;
