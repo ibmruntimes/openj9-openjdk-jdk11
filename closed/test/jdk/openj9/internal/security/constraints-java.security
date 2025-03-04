@@ -21,7 +21,7 @@
 RestrictedSecurity.TestConstraints.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestConstraints.Version.desc.default = false
 RestrictedSecurity.TestConstraints.Version.desc.fips = false
-RestrictedSecurity.TestConstraints.Version.desc.hash = SHA256:235727d782ff9e04d875627c694d509b758ed7c037eaf5aed8dcd014f2602af2
+RestrictedSecurity.TestConstraints.Version.desc.hash = SHA256:ee4d544adefe3f0ed4afe061f43648fd616ba802694bd6cb1918d0a4dd2e7716
 RestrictedSecurity.TestConstraints.Version.desc.number = Certificate #XXX
 RestrictedSecurity.TestConstraints.Version.desc.policy =
 RestrictedSecurity.TestConstraints.Version.fips.mode = test
@@ -65,7 +65,7 @@ RestrictedSecurity.TestConstraints.Version.jce.provider.3 = com.sun.crypto.provi
     {SecretKeyFactory, PBEWithMD5AndDES, *, ModuleAndFullClassName:java.base/sun.security.pkcs12.PKCS12KeyStore}, \
     {Cipher, PBEWithHmacSHA256AndAES_256, *, ModuleAndFullClassName:java.base/sun.security.pkcs12.PKCS12KeyStore}, \
     {Mac, HmacPBESHA256, *, ModuleAndFullClassName:java.base/sun.security.pkcs12.PKCS12KeyStore}]
-RestrictedSecurity.TestConstraints.Version.jce.provider.4 = sun.security.ssl.SunJSSE [ \
+RestrictedSecurity.TestConstraints.Version.jce.provider.4 = com.sun.net.ssl.internal.ssl.Provider [ \
     {KeyManagerFactory, SunX509, *, FullClassName:TestConstraintsSuccess}, \
     {TrustManagerFactory, SunX509, *, FullClassName:TestConstraintsSuccess}, \
     {SSLContext, TLSv1.3, *, FullClassName:TestConstraintsSuccess}]
