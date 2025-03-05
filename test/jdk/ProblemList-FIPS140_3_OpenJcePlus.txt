@@ -731,6 +731,7 @@ sun/security/pkcs11/tls/TestLeadingZeroesP11.java https://github.com/eclipse-ope
 sun/security/pkcs11/tls/TestMasterSecret.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/tls/TestPRF.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/tls/TestPremaster.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
+sun/security/pkcs11/tls/tls12/FipsModeTLS12.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/pkcs12/Bug6415637.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/pkcs12/EmptyPassword.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/pkcs12/KeytoolOpensslInteropTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -756,6 +757,8 @@ sun/security/provider/KeyStore/WrongPassword.java https://github.com/eclipse-ope
 sun/security/provider/MessageDigest/DigestKAT.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/MessageDigest/Offsets.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/MessageDigest/TestSHAClone.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/provider/NamedEdDSA.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/provider/NamedKeyFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/NSASuiteB/TestDSAGenParameterSpec.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/NSASuiteB/TestDSAGenParameterSpecLongKey.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/NSASuiteB/TestSHAOids.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -813,6 +816,8 @@ sun/security/ssl/CipherSuite/RestrictNamedGroup.java https://github.com/eclipse-
 sun/security/ssl/CipherSuite/RestrictSignatureScheme.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/SSL_NULL.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/SupportedGroups.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
+sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingDisablePartsOfCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingIllegalArgument.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/ClientHandshaker/CipherSuiteOrder.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/ClientHandshaker/LengthCheckTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/ClientHandshaker/RSAExport.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
