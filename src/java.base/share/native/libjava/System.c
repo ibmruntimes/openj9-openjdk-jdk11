@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 #include <string.h>
 
 #include "jni.h"
@@ -354,7 +360,9 @@ Java_java_lang_System_initProperties(JNIEnv *env, jclass cla, jobject props)
         PUTPROP(props, "sun.desktop", sprops->desktop);
     }
 
+#if 0 /* Exclude, unused. OpenJ9 implements it to assert. */
     ret = JVM_InitProperties(env, props);
+#endif /* Exclude, unused. OpenJ9 implements it to assert. */
 
     /* reconstruct i18n related properties */
     fillI18nProps(env, props, "user.language", sprops->display_language,
@@ -422,6 +430,7 @@ Java_java_lang_System_setErr0(JNIEnv *env, jclass cla, jobject stream)
     (*env)->SetStaticObjectField(env,cla,fid,stream);
 }
 
+#if 0 /* Exclude mapLibraryName so it doesn't conflict with the OpenJ9 native. */
 static void cpchars(jchar *dst, char *src, int n)
 {
     int i;
@@ -455,3 +464,4 @@ Java_java_lang_System_mapLibraryName(JNIEnv *env, jclass ign, jstring libname)
 
     return (*env)->NewString(env, chars, len);
 }
+#endif /* Exclude mapLibraryName so it doesn't conflict with the OpenJ9 native. */
