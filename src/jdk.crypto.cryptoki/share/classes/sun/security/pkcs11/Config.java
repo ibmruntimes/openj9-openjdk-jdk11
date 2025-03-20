@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
+ * (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -39,6 +39,7 @@ import java.util.*;
 
 import java.security.*;
 
+import sun.security.util.Debug;
 import sun.security.util.PropertyExpander;
 
 import sun.security.pkcs11.wrapper.*;
@@ -1056,11 +1057,23 @@ final class Config {
 
 class ConfigurationException extends IOException {
     private static final long serialVersionUID = 254492758807673194L;
+
+    private static final Debug configDebug = Debug.getInstance("sunpkcs11");
+
+    private static void debug(String msg) {
+         // If debugging is enabled, use the Debug class for additional sunpkcs11 logging.
+         if (configDebug != null) {
+             configDebug.println(msg);
+         }
+     }
+
     ConfigurationException(String msg) {
         super(msg);
+        debug(msg);
     }
 
     ConfigurationException(String msg, Throwable e) {
         super(msg, e);
+        debug(msg);
     }
 }
