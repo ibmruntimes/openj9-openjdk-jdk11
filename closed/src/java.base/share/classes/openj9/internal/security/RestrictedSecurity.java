@@ -172,6 +172,18 @@ public final class RestrictedSecurity {
         super();
     }
 
+    private static boolean isJarVerifierInStackTrace() {
+        java.util.function.Predicate<Class<?>> isJarVerifier =
+                clazz -> "java.util.jar.JarVerifier".equals(clazz.getName())
+                      && "java.base".equals(clazz.getModule().getName());
+
+        java.util.function.Function<Stream<StackWalker.StackFrame>, Boolean> matcher =
+                stream -> stream.map(StackWalker.StackFrame::getDeclaringClass)
+                                .anyMatch(isJarVerifier);
+
+        return StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).walk(matcher);
+    }
+
     /**
      * Check loaded profiles' hash values.
      *
@@ -179,10 +191,11 @@ public final class RestrictedSecurity {
      * extending profiles, instead of altering them, a digest of the profile
      * is calculated and compared to the expected value.
      */
-    public static void checkHashValues() {
-        if (profileParser != null) {
-            profileParser.checkHashValues();
+    private static void checkHashValues() {
+        ProfileParser parser = profileParser;
+        if ((parser != null) && !isJarVerifierInStackTrace()) {
             profileParser = null;
+            parser.checkHashValues();
         }
     }
 
@@ -255,6 +268,7 @@ public final class RestrictedSecurity {
      */
     public static boolean isServiceAllowed(Service service) {
         if (securityEnabled) {
+            checkHashValues();
             return restricts.isRestrictedServiceAllowed(service, true);
         }
         return true;
@@ -268,6 +282,7 @@ public final class RestrictedSecurity {
      */
     public static boolean canServiceBeRegistered(Service service) {
         if (securityEnabled) {
+            checkHashValues();
             return restricts.isRestrictedServiceAllowed(service, false);
         }
         return true;
@@ -281,6 +296,7 @@ public final class RestrictedSecurity {
      */
     public static boolean isProviderAllowed(String providerName) {
         if (securityEnabled) {
+            checkHashValues();
             // Remove argument, e.g. -NSS-FIPS, if present.
             int pos = providerName.indexOf('-');
             if (pos >= 0) {
@@ -300,6 +316,7 @@ public final class RestrictedSecurity {
      */
     public static boolean isProviderAllowed(Class<?> providerClazz) {
         if (securityEnabled) {
+            checkHashValues();
             String providerClassName = providerClazz.getName();
 
             // Check if the specified class extends java.security.Provider.
