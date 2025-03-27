@@ -203,6 +203,7 @@ java/security/Provider/NewInstance.java https://github.com/eclipse-openj9/openj9
 java/security/Provider/ProviderInfoCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/Provider/SecurityProviderModularTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/Provider/SupportsParameter.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/Provider/Turkish.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureClassLoader/DefineClass.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/ApiTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/DefaultAlgo.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -242,6 +243,7 @@ java/security/cert/CertPathBuilder/selfIssued/DisableRevocation.java https://git
 java/security/cert/CertPathBuilder/selfIssued/KeyUsageMatters.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathBuilder/selfIssued/StatusLoopDependency.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathBuilder/targetConstraints/BuildEEBasicConstraints.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/cert/CertPathBuilder/zeroLengthPath/ZeroLengthPath.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/OCSP/AIACheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/OCSP/FailoverToCRL.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/indirectCRL/CircularCRLOneLevel.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -256,8 +258,10 @@ java/security/cert/CertPathValidatorException/Serial.java https://github.com/ecl
 java/security/cert/CertificateRevokedException/Basic.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/GetInstance.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/PKIXRevocationChecker/OcspUnauthorized.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/cert/PKIXRevocationChecker/UnitTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/PolicyNode/GetPolicyQualifiers.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/X509CRL/VerifyDefault.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/cert/X509Certificate/GetSigAlgParams.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/pkix/policyChanges/TestPolicy.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/misc/TestDefaultRandom.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/spec/PKCS8EncodedKeySpec/Algorithm.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
