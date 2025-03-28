@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2024, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -979,3 +979,55 @@ sun/security/x509/X509CRLImpl/Verify.java https://github.com/eclipse-openj9/open
 sun/security/x509/X509CertImpl/ECSigParamsVerifyWithCert.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/x509/X509CertImpl/V3Certificate.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/x509/X509CertImpl/Verify.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+#
+# Exclude the below tests from sanity.openjdk according to the issues:
+# https://github.ibm.com/runtimes/backlog/issues/1089
+#
+java/security/SignedJar/spi-calendar-provider/TestSPISigned.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/krb5/auto/LoginModuleDebug.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+#
+# Exclude the below tests from extended.openjdk according to the issues:
+# https://github.ibm.com/runtimes/backlog/issues/1089
+# https://github.com/eclipse-openj9/openj9/issues/21369
+# https://github.ibm.com/runtimes/backlog/issues/1619
+#
+com/sun/crypto/provider/KDF/HKDFBasicFunctionsTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/crypto/provider/KDF/HKDFDelayedPRK.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/crypto/provider/KDF/HKDFExhaustiveTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/crypto/provider/KDF/HKDFKnownAnswerTests.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/crypto/provider/KDF/HKDFSaltIKMTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/jndi/ldap/DeadSSLLdapTimeoutTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/jndi/rmi/registry/objects/ObjectFactoryBuilderCodebaseTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/crypto/KDF/KDFDelayedProviderSyncTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/crypto/KDF/KDFDelayedProviderTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/crypto/KDF/KDFDelayedProviderThreadingTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/net/ssl/SSLEngine/AcceptLargeFragments.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/net/ssl/SSLEngine/IllegalHandshakeMessage.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/net/ssl/TLS/TLSClientPropertyTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/net/ssl/sanity/CacertsExplorer.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/net/ssl/sanity/ciphersuites/CipherSuitesInOrder.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+javax/rmi/ssl/SocketFactoryTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/jca/NullPreferredList.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/lib/CheckBlockedCerts.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/pkcs11/tls/tls12/FipsModeTLS12.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/pkcs12/EmptyAlias.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/pkcs12/MixedcaseAlias.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/CipherSuite/SSL_NULL.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingDisablePartsOfCipherSuite.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingIllegalArgument.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/rsa/BrokenRSAPrivateCrtKey.java https://github.ibm.com/runtimes/backlog/issues/1619 generic-all
+sun/security/ssl/SSLCipher/SSLEngineNoServerHelloClientShutdown.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLCipher/SSLSocketNoServerHelloClientShutdown.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLContextImpl/DefaultCipherSuitePreference.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLContextImpl/SSLContextDefault.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLEngineImpl/SSLEngineDecodeBadPoint.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLSessionContextImpl/DefautlCacheSize.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLSessionContextImpl/Timeout.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/SSLSocketImpl/SSLSocketImplThrowsWrongExceptions.java https://github.com/eclipse-openj9/openj9/issues/21369 generic-all
+sun/security/ssl/SSLSocketImpl/SSLSocketLeak.java https://github.com/eclipse-openj9/openj9/issues/21369 generic-all
+sun/security/ssl/SSLSocketImpl/SSLSocketReset.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/X509TrustManagerImpl/CacertsLimit.java https://github.com/eclipse-openj9/openj9/issues/21369 generic-all
+sun/security/ssl/X509TrustManagerImpl/distrust/Camerfirma.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/ssl/X509TrustManagerImpl/distrust/Entrust.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/tools/keytool/CacertsOption.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/x509/X509CRLImpl/UnexpectedCCE.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
