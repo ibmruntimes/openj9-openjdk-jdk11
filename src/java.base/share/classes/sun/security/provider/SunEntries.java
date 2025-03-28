@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
  * ===========================================================================
  */
 
@@ -92,6 +92,8 @@ public final class SunEntries {
     private static final boolean useNativeSHA256;
     private static final boolean useNativeSHA384;
     private static final boolean useNativeSHA512;
+    private static final boolean useNativeSHA512_224;
+    private static final boolean useNativeSHA512_256;
 
     static {
         /* The property 'jdk.nativeDigest' is used to control enablement of all native
@@ -128,6 +130,16 @@ public final class SunEntries {
          * SHA-512 implementation.
          */
         useNativeSHA512 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512", "SHA-512");
+
+        /* The property 'jdk.nativeSHA512_224' is used to control enablement of the native
+         * SHA-512-224 implementation.
+         */
+        useNativeSHA512_224 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512_224", "SHA-512-224");
+
+        /* The property 'jdk.nativeSHA512_256' is used to control enablement of the native
+         * SHA-512-256 implementation.
+         */
+        useNativeSHA512_256 = useNativeDigest && NativeCrypto.isAlgorithmEnabled("jdk.nativeSHA512_256", "SHA-512-256");
     }
 
     // Flag indicating whether the operating system is AIX.
@@ -238,6 +250,8 @@ public final class SunEntries {
         String providerSHA256;
         String providerSHA384;
         String providerSHA512;
+        String providerSHA512_224;
+        String providerSHA512_256;
         /*
          * Set the digest provider based on whether native crypto is
          * enabled or not.
@@ -282,6 +296,18 @@ public final class SunEntries {
             providerSHA512 = "sun.security.provider.SHA5$SHA512";
         }
 
+        if (useNativeSHA512_224 && NativeCrypto.isAllowedAndLoaded()) {
+            providerSHA512_224 = "sun.security.provider.NativeSHA5$SHA512_224";
+        } else {
+            providerSHA512_224 = "sun.security.provider.SHA5$SHA512_224";
+        }
+
+        if (useNativeSHA512_256 && NativeCrypto.isAllowedAndLoaded()) {
+            providerSHA512_256 = "sun.security.provider.NativeSHA5$SHA512_256";
+        } else {
+            providerSHA512_256 = "sun.security.provider.SHA5$SHA512_256";
+        }
+
         add(p, "MessageDigest", "MD2", "sun.security.provider.MD2", attrs);
         add(p, "MessageDigest", "MD5", providerMD5, attrs);
         addWithAlias(p, "MessageDigest", "SHA-1", providerSHA,
@@ -292,9 +318,9 @@ public final class SunEntries {
         addWithAlias(p, "MessageDigest", "SHA-384", providerSHA384, attrs);
         addWithAlias(p, "MessageDigest", "SHA-512", providerSHA512, attrs);
         addWithAlias(p, "MessageDigest", "SHA-512/224",
-                "sun.security.provider.SHA5$SHA512_224", attrs);
+                providerSHA512_224, attrs);
         addWithAlias(p, "MessageDigest", "SHA-512/256",
-                "sun.security.provider.SHA5$SHA512_256", attrs);
+                providerSHA512_256, attrs);
         addWithAlias(p, "MessageDigest", "SHA3-224",
                 "sun.security.provider.SHA3$SHA224", attrs);
         addWithAlias(p, "MessageDigest", "SHA3-256",
