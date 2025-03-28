@@ -1342,6 +1342,12 @@ JNIEXPORT jlong JNICALL Java_jdk_crypto_jniprovider_NativeCrypto_DigestCreateCon
         case jdk_crypto_jniprovider_NativeCrypto_SHA5_512:
             digestAlg = (*OSSL_sha512)();
             break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA5_512_224:
+            digestAlg = (*OSSL_sha512_224)();
+            break;
+        case jdk_crypto_jniprovider_NativeCrypto_SHA5_512_256:
+            digestAlg = (*OSSL_sha512_256)();
+            break;
         default:
             return -1;
     }
