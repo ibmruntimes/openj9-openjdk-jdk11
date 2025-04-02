@@ -614,7 +614,6 @@ javax/net/ssl/templates/SSLEngineTemplate.java https://github.com/eclipse-openj9
 javax/net/ssl/templates/SSLSocketSSLEngineTemplate.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/net/ssl/templates/SSLSocketTemplate.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/rmi/ssl/SocketFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
-javax/security/auth/Destroyable/KeyDestructionTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/security/auth/PrivateCredentialPermission/MoreThenOnePrincipals.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/security/auth/login/Configuration/GetInstance.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/security/sasl/Sasl/ClientServerTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
