@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 6263419
  * @summary No way to clean the memory for a java.security.Key
@@ -41,9 +47,21 @@ public class KeyDestructionTest {
         testKeyDestruction(new MyDestroyableSecretKey());
         testKeyDestruction(new MyDestroyablePrivateKey());
 
-        // Check keys that support but have not implemented key destruction
-        testNoKeyDestruction(generateSecretKey("AES", 128));
-        testNoKeyDestruction(keypair.getPrivate());
+        // AES key implementations, from providers OpenJCEPlus and OpenJCEPlusFIPS,
+        // do implement destroyable for AES keys, other providers do not.
+        if (KeyGenerator.getInstance("AES").getProvider().getName().startsWith("OpenJCEPlus")) {
+            testKeyDestruction(generateSecretKey("AES", 128));
+        } else {
+            testNoKeyDestruction(generateSecretKey("AES", 128));
+        }
+
+        // RSA key implementations, from providers OpenJCEPlus and OpenJCEPlusFIPS,
+        // do implement destroyable for RSA keys, other providers do not.
+        if (KeyPairGenerator.getInstance(kpgAlgorithm).getProvider().getName().startsWith("OpenJCEPlus")) {
+            testKeyDestruction(keypair.getPrivate());
+        } else {
+            testNoKeyDestruction(keypair.getPrivate());
+        }
 
         // Check keys that do not support key destruction
         try {
