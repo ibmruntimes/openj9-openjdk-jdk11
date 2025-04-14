@@ -128,6 +128,7 @@ com/sun/crypto/provider/KeyFactory/PBKDF2HmacSHA1FactoryTest.java https://github
 com/sun/crypto/provider/KeyFactory/TestProviderLeak.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/crypto/provider/KeyGenerator/Test4628062.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/crypto/provider/KeyGenerator/TestExplicitKeyLength.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+com/sun/crypto/provider/KeyProtector/IterationCount.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/crypto/provider/Mac/DigestCloneabilityTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/crypto/provider/Mac/EmptyByteBufferTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/crypto/provider/Mac/HmacMD5.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -759,6 +760,7 @@ sun/security/provider/DSA/TestKeyPairGenerator.java https://github.com/eclipse-o
 sun/security/provider/DSA/TestLegacyDSAKeyPairGenerator.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/KeyStore/CaseSensitiveAliases.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/provider/KeyStore/DKSTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/KeyStore/TestJKSWithSecretKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/KeyStore/WrongPassword.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/MessageDigest/DigestKAT.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
