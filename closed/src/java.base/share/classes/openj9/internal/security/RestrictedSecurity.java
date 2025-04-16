@@ -191,11 +191,20 @@ public final class RestrictedSecurity {
      * extending profiles, instead of altering them, a digest of the profile
      * is calculated and compared to the expected value.
      */
+    @SuppressWarnings("removal")
     private static void checkHashValues() {
         ProfileParser parser = profileParser;
-        if ((parser != null) && !isJarVerifierInStackTrace()) {
-            profileParser = null;
-            parser.checkHashValues();
+        if (parser != null) {
+            boolean isVerifying;
+            if (System.getSecurityManager() == null) {
+                isVerifying = isJarVerifierInStackTrace();
+            } else {
+                isVerifying = AccessController.doPrivileged((PrivilegedAction<Boolean>)(() -> isJarVerifierInStackTrace()));
+            }
+            if (!isVerifying) {
+                profileParser = null;
+                parser.checkHashValues();
+            }
         }
     }
 
