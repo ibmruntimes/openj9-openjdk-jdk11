@@ -315,12 +315,8 @@ AC_DEFUN([OPENJ9_CONFIGURE_CRAC_AND_CRIU_SUPPORT],
 
   # Compute platform-specific defaults.
   case "$OPENJ9_PLATFORM_CODE" in
-    xa64)
+    xa64|xl64|xr64|xz64)
       default_crac=yes
-      default_criu=yes
-      ;;
-    xl64|xr64|xz64)
-      default_crac=no
       default_criu=yes
       ;;
     *)
