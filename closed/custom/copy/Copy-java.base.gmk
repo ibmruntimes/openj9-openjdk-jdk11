@@ -221,7 +221,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
     $(error Cannot bundle OpenSSL - none of $(LIBCRYPTO_NAMES) are present in $(OPENSSL_BUNDLE_LIB_PATH))
   endif
 
-  LIBCRYPTO_TARGET_LIB := $(LIB_DST_DIR)/$(notdir $(LIBCRYPTO_PATH))
+  LIBCRYPTO_TARGET_LIB := $(LIB_DST_DIR)/$(LIBRARY_PREFIX)crypto-semeru$(SHARED_LIBRARY_SUFFIX)
   TARGETS += $(LIBCRYPTO_TARGET_LIB)
   $(LIBCRYPTO_TARGET_LIB) : $(LIBCRYPTO_PATH)
 	$(call install-file)
@@ -239,7 +239,7 @@ ifneq ($(OPENSSL_BUNDLE_LIB_PATH), )
       LIBSSL_PATH := $(firstword $(wildcard $(addprefix $(OPENSSL_BUNDLE_LIB_PATH)/, $(LIBSSL_NAMES))))
 
       ifneq ($(LIBSSL_PATH), )
-        LIBSSL_TARGET_LIB = $(LIB_DST_DIR)/$(notdir $(LIBSSL_PATH))
+        LIBSSL_TARGET_LIB = $(LIB_DST_DIR)/$(LIBRARY_PREFIX)ssl-semeru$(SHARED_LIBRARY_SUFFIX)
         TARGETS += $(LIBSSL_TARGET_LIB)
         $(LIBSSL_TARGET_LIB) : $(LIBSSL_PATH)
 			$(call install-file)
