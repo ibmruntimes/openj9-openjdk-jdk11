@@ -17,3 +17,12 @@
 # You should have received a copy of the GNU General Public License version
 # 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
 # ===========================================================================
+#
+# Exclude tests list from jdk_security tests
+#
+java/security/SecureRandom/DefaultAlgo.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+java/security/SecureRandom/DefaultProvider.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+java/security/Signature/SignatureGetInstance.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+sun/security/ec/ed/TestEdDSA.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+sun/security/jca/PreferredProviderNegativeTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+sun/security/provider/all/Deterministic.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
