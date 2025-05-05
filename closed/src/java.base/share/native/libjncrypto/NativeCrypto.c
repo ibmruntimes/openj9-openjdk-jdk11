@@ -79,7 +79,7 @@
 
 /* Header for NativeCrypto loading methods. */
 static void * find_crypto_symbol(void *handle, const char *symname);
-static void * find_crypto_library(jboolean traceEnabled, const char *chomepath);
+static void * find_crypto_library(jboolean traceEnabled, jboolean skipBundled, const char *chomepath);
 static void unload_crypto_library(void *handle);
 
 /* Header for RSA algorithm using 1.0.2 OpenSSL. */
@@ -611,11 +611,12 @@ load_crypto_library(jboolean traceEnabled, const char *libName)
 }
 
 /* Look for a crypto library in java.home or the system.
+ * Skip looking in java.home when skipBundled is true.
  * NULL is returned when an appropriate crypto library
  * cannot be found.
  */
 static void *
-find_crypto_library(jboolean traceEnabled, const char *chomepath)
+find_crypto_library(jboolean traceEnabled, jboolean skipBundled, const char *chomepath)
 {
     /* Library names for OpenSSL 3.x, 1.1.1, 1.1.0 and symbolic links:
      * It is important to preserve the order!!!
@@ -662,77 +663,76 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
 #endif /* defined(_AIX) */
     };
 
+    /** OpenSSL library names associated with bundled library. */
+#if defined(_AIX)
+    static const char bundledLibName[] = "libcrypto-semeru.so";
+#elif defined(__APPLE__) /* defined(_AIX) */
+    static const char bundledLibName[] = "libcrypto-semeru.dylib";
+#elif defined(_WIN32) /* defined(__APPLE__) */
+    static const char bundledLibName[] = "crypto-semeru.dll";
+#else /* defined(_WIN32) */
+    static const char bundledLibName[] = "libcrypto-semeru.so";
+#endif /* defined(_AIX) */
+
     const size_t numOfLibs = sizeof(libNames) / sizeof(libNames[0]);
     void *result = NULL;
     size_t i = 0;
     long tempVersion = 0;
 
-    /* If JAVA_HOME is not null or empty and no library has been loaded yet, try there. */
-    if ((NULL != chomepath) && ('\0' != *chomepath) && (NULL == crypto_library)) {
+    if (skipBundled) {
+        if (traceEnabled) {
+            fprintf(stdout, "Skipping trying to load a library bundled with the JDK\n");
+        }
+    } else {
+        /* If JAVA_HOME is not null or empty and no library has been loaded yet, try there. */
+        if ((NULL != chomepath) && ('\0' != *chomepath) && (NULL == crypto_library)) {
 #if defined(_WIN32)
-        static const char pathSuffix[] = "\\bin\\";
+            static const char pathSuffix[] = "\\bin\\";
 #else /* defined(_WIN32) */
-        static const char pathSuffix[] = "/lib/";
+            static const char pathSuffix[] = "/lib/";
 #endif /* defined(_WIN32) */
 
-        size_t path_len = strlen(chomepath) + sizeof(pathSuffix) - 1;
-        char *libPath = malloc(path_len + 1);
+            size_t path_len = strlen(chomepath) + sizeof(pathSuffix) - 1 + sizeof(bundledLibName) - 1;
+            char *libPath = malloc(path_len + 1);
 
-        if (NULL == libPath) {
-            if (traceEnabled) {
-                fprintf(stderr, "\tFailed to allocate memory for path.\n");
-            }
-            return NULL;
-        }
-        strcpy(libPath, chomepath);
-
-        /* Append the proper directory using a slash or backslash, depending on the operating system. */
-        strcat(libPath, pathSuffix);
-
-        if (traceEnabled) {
-            fprintf(stdout, "Attempting to load library bundled with JDK from: %s\n", libPath);
-        }
-
-        for (i = 0; i < numOfLibs; i++) {
-            size_t file_len = strlen(libNames[i]);
-            /* Allocate memory for the new file name with the path. */
-            char *libNameWithPath = (char *)malloc(path_len + file_len + 1);
-
-            if (NULL == libNameWithPath) {
+            if (NULL == libPath) {
                 if (traceEnabled) {
-                    fprintf(stderr, "\tFailed to allocate memory for file name with path.\n");
+                    fprintf(stderr, "\tFailed to allocate memory for path.\n");
                 }
-                continue;
+                return NULL;
+            }
+            strcpy(libPath, chomepath);
+
+            /* Append the proper directory using a slash or backslash, depending on the operating system. */
+            strcat(libPath, pathSuffix);
+
+            if (traceEnabled) {
+                fprintf(stdout, "Attempting to load library bundled with JDK from: %s\n", libPath);
             }
 
-            strcpy(libNameWithPath, libPath);
-            strcat(libNameWithPath, libNames[i]);
+            strcat(libPath, bundledLibName);
 
             /* Load OpenSSL Crypto library bundled with JDK. */
             if (traceEnabled) {
-                fprintf(stdout, "\tAttempting to load: %s\n", libNames[i]);
+                fprintf(stdout, "\tAttempting to load: %s\n", bundledLibName);
             }
-            result = load_crypto_library(traceEnabled, libNameWithPath);
+            result = load_crypto_library(traceEnabled, libPath);
 
-            free(libNameWithPath);
+            free(libPath);
 
-            if (NULL == result) {
-                continue;
-            }
-
-            /* Identify and load the latest version from the potential libraries.
-             * This logic depends upon the order in which libnames are defined.
-             * Libraries are listed in descending order w.r.t version.
-             * Since only one library is bundled with the JDK, once any library is
-             * loaded, this is the only available and we can stop.
-             */
-            tempVersion = get_crypto_library_version(traceEnabled, result, "\t\tLoaded OpenSSL version");
-            if (tempVersion > 0) {
-                free(libPath);
-                return result;
+            if (NULL != result) {
+                /* Identify and load the latest version from the potential libraries.
+                * This logic depends upon the order in which libnames are defined.
+                * Libraries are listed in descending order w.r.t version.
+                * Since only one library is bundled with the JDK, once any library is
+                * loaded, this is the only available and we can stop.
+                */
+                tempVersion = get_crypto_library_version(traceEnabled, result, "\t\tLoaded OpenSSL version");
+                if (tempVersion > 0) {
+                    return result;
+                }
             }
         }
-        free(libPath);
     }
 
     /* The attempt to load from property and OpenSSL bundled with JDK failed.
@@ -767,41 +767,43 @@ find_crypto_library(jboolean traceEnabled, const char *chomepath)
 /*
  * Class:     jdk_crypto_jniprovider_NativeCrypto
  * Method:    loadCrypto
- * Signature: (ZLjava/lang/String;Ljava/lang/String;)J
+ * Signature: (ZZLjava/lang/String;Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
 Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
-  (JNIEnv * env, jclass clazz, jboolean traceEnabled, jstring jlibname, jstring jhomepath)
+  (JNIEnv * env, jclass clazz, jboolean traceEnabled, jboolean skipBundled, jstring jlibname, jstring jhomepath)
 {
     const char *chomepath = "";
     jlong ossl_ver = 0;
 
-    if (NULL != jlibname) {
-        const char *clibname = (*env)->GetStringUTFChars(env, jlibname, NULL);
-        if (NULL == clibname) {
-            if (traceEnabled) {
-                fprintf(stderr, "Failed to get jdk.native.openssl.lib value.\n");
-                fflush(stderr);
-            }
-            return -1;
-        }
-        if ('\0' == clibname[0]) {
-            if (traceEnabled) {
-                fprintf(stderr, "The jdk.native.openssl.lib property is not set.\n");
-                fflush(stderr);
-            }
-        } else {
-            crypto_library = load_crypto_library(traceEnabled, clibname);
-            if (NULL == crypto_library) {
+    if (JNI_FALSE == skipBundled) {
+        if (NULL != jlibname) {
+            const char *clibname = (*env)->GetStringUTFChars(env, jlibname, NULL);
+            if (NULL == clibname) {
                 if (traceEnabled) {
-                    fprintf(stderr, "OpenSSL library specified in jdk.openssl.lib couldn't be loaded.\n");
+                    fprintf(stderr, "Failed to get jdk.native.openssl.lib value.\n");
                     fflush(stderr);
                 }
-                (*env)->ReleaseStringUTFChars(env, jlibname, clibname);
                 return -1;
             }
+            if ('\0' == clibname[0]) {
+                if (traceEnabled) {
+                    fprintf(stderr, "The jdk.native.openssl.lib property is not set.\n");
+                    fflush(stderr);
+                }
+            } else {
+                crypto_library = load_crypto_library(traceEnabled, clibname);
+                if (NULL == crypto_library) {
+                    if (traceEnabled) {
+                        fprintf(stderr, "OpenSSL library specified in jdk.openssl.lib couldn't be loaded.\n");
+                        fflush(stderr);
+                    }
+                    (*env)->ReleaseStringUTFChars(env, jlibname, clibname);
+                    return -1;
+                }
+            }
+            (*env)->ReleaseStringUTFChars(env, jlibname, clibname);
         }
-        (*env)->ReleaseStringUTFChars(env, jlibname, clibname);
     }
 
     if (NULL != jhomepath) {
@@ -819,7 +821,7 @@ Java_jdk_crypto_jniprovider_NativeCrypto_loadCrypto
      * to find an OpenSSL library from java.home or OS Library path.
      */
     if (NULL == crypto_library) {
-        crypto_library = find_crypto_library(traceEnabled, chomepath);
+        crypto_library = find_crypto_library(traceEnabled, skipBundled, chomepath);
     }
 
     if (NULL != jhomepath) {
