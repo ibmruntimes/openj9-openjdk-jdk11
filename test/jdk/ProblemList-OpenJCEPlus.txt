@@ -20,9 +20,16 @@
 #
 # Exclude tests list from jdk_security tests
 #
+com/sun/crypto/provider/DHKEM/Compliance.java https://github.ibm.com/runtimes/jit-crypto/issues/773 generic-all
 java/security/SecureRandom/DefaultAlgo.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 java/security/SecureRandom/DefaultProvider.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+java/security/SecureRandom/NoSync.java https://github.ibm.com/runtimes/jit-crypto/issues/776 generic-all
+java/security/Security/ProviderFiltering.java https://github.ibm.com/runtimes/jit-crypto/issues/777 generic-all
 java/security/Signature/SignatureGetInstance.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+java/security/Signature/SignatureLength.java https://github.ibm.com/runtimes/jit-crypto/issues/778 generic-all
+java/security/Signature/SignWithOutputBuffer.java https://github.ibm.com/runtimes/jit-crypto/issues/761 generic-all
+javax/crypto/KeyGenerator/CompareKeys.java https://github.ibm.com/runtimes/jit-crypto/issues/779 generic-all
 sun/security/ec/ed/TestEdDSA.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/jca/PreferredProviderNegativeTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/provider/all/Deterministic.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
+sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/ https://github.ibm.com/runtimes/jit-crypto/issues/780 generic-all
