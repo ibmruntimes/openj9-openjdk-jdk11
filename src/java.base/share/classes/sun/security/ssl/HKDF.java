@@ -23,15 +23,33 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.ssl;
 
+/*[IF OPENJCEPLUS_SUPPORT]*/
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.security.InvalidAlgorithmParameterException;
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
+/*[IF OPENJCEPLUS_SUPPORT]*/
+import java.security.spec.AlgorithmParameterSpec;
+import javax.crypto.KeyGenerator;
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Objects;
+/*[IF OPENJCEPLUS_SUPPORT]*/
+import openj9.internal.security.RestrictedSecurity;
+/*[ENDIF] OPENJCEPLUS_SUPPORT */
 
 /**
  * An implementation of the HKDF key derivation algorithm outlined in RFC 5869,
@@ -48,6 +66,28 @@ final class HKDF {
     private final Mac hmacObj;
     private final int hmacLen;
 
+    /*[IF OPENJCEPLUS_SUPPORT]*/
+    private final KeyGenerator hkdfGenerator;
+    private static final Constructor<?> expandCtor;
+    private static final Constructor<?> extractCtor;
+
+    static {
+        try {
+            if (RestrictedSecurity.isFIPSEnabled()) {
+                Class<?> hkdfExpandSpec = Class.forName("ibm.security.internal.spec.HKDFExpandParameterSpec", true, ClassLoader.getSystemClassLoader());
+                expandCtor = hkdfExpandSpec.getDeclaredConstructor(SecretKey.class, byte[].class, long.class, String.class);
+                Class<?> hkdfExtractSpec = Class.forName("ibm.security.internal.spec.HKDFExtractParameterSpec", true, ClassLoader.getSystemClassLoader());
+                extractCtor = hkdfExtractSpec.getDeclaredConstructor(SecretKey.class, byte[].class, String.class);
+            } else {
+                expandCtor = null;
+                extractCtor = null;
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException exc) {
+            throw new SecurityException(exc);
+        }
+    }
+    /*[ENDIF] OPENJCEPLUS_SUPPORT */
+
     /**
      * Create an HDKF object, specifying the underlying message digest
      * algorithm.
@@ -61,6 +101,14 @@ final class HKDF {
     HKDF(String hashAlg) throws NoSuchAlgorithmException {
         Objects.requireNonNull(hashAlg,
                 "Must provide underlying HKDF Digest algorithm.");
+        /*[IF OPENJCEPLUS_SUPPORT]*/
+        if (RestrictedSecurity.isFIPSEnabled()) {
+            String hkdfAlg = "kda-hkdf-with-" + hashAlg.replace("-", "").toLowerCase();
+            hkdfGenerator = KeyGenerator.getInstance(hkdfAlg);
+        } else {
+            hkdfGenerator = null;
+        }
+        /*[ENDIF] OPENJCEPLUS_SUPPORT */
         hmacAlg = "Hmac" + hashAlg.replace("-", "");
         hmacObj = JsseJce.getMac(hmacAlg);
         hmacLen = hmacObj.getMacLength();
@@ -88,6 +136,21 @@ final class HKDF {
         if (salt == null) {
             salt = new SecretKeySpec(new byte[hmacLen], "HKDF-Salt");
         }
+        /*[IF OPENJCEPLUS_SUPPORT]*/
+        if (hkdfGenerator != null) {
+            if (SSLLogger.isOn && SSLLogger.isOn("ssl")) {
+                SSLLogger.info("HKDF extract in FIPS mode: Using OpenJCEPlusFIPS");
+            }
+            try {
+                AlgorithmParameterSpec hkdfParams = (AlgorithmParameterSpec) extractCtor.newInstance(inputKey, salt.getEncoded(), keyAlg);
+                hkdfGenerator.init(hkdfParams);
+                return hkdfGenerator.generateKey();
+            } catch (ClassCastException | IllegalAccessException | InstantiationException
+                    | InvalidAlgorithmParameterException | InvocationTargetException exc) {
+                throw new SecurityException(exc);
+            }
+        }
+        /*[ENDIF] OPENJCEPLUS_SUPPORT */
         hmacObj.init(salt);
 
         return new SecretKeySpec(hmacObj.doFinal(inputKey.getEncoded()),
@@ -147,6 +210,23 @@ final class HKDF {
             throw new IllegalArgumentException("Requested output length " +
                     "exceeds maximum length allowed for HKDF expansion");
         }
+
+        /*[IF OPENJCEPLUS_SUPPORT]*/
+        if (hkdfGenerator != null) {
+            if (SSLLogger.isOn && SSLLogger.isOn("ssl")) {
+                SSLLogger.info("HKDF expand in FIPS mode: Using OpenJCEPlusFIPS");
+            }
+            try {
+                AlgorithmParameterSpec hkdfParams = (AlgorithmParameterSpec) expandCtor.newInstance(pseudoRandKey, info, outLen, keyAlg);
+                hkdfGenerator.init(hkdfParams);
+                return hkdfGenerator.generateKey();
+            } catch (ClassCastException | IllegalAccessException | InstantiationException
+                    | InvalidAlgorithmParameterException | InvocationTargetException exc) {
+                throw new SecurityException(exc);
+            }
+        }
+        /*[ENDIF] OPENJCEPLUS_SUPPORT */
+
         hmacObj.init(pseudoRandKey);
         if (info == null) {
             info = new byte[0];
