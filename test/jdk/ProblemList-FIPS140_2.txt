@@ -933,6 +933,7 @@ sun/security/provider/SecureRandom/AutoReseed.java	https://github.com/ibmruntime
 # javax.net.ssl.SSLHandshakeException: Received fatal alert: handshake_failure.
 # All the below hard coded static String keyStoreFile = "keystore"; in the test codes. In FIPS mode, keystore must be NONE.
 
+javax/rmi/ssl/SocketFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/21756 linux-x64,linux-ppc64le,linux-s390x
 sun/security/util/HostnameMatcher/NullHostnameCheck.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/ssl/spi/ProviderInit.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/ssl/SocketCreation/SocketCreation.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
