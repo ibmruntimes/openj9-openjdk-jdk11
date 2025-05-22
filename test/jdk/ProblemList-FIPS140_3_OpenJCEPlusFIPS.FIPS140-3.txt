@@ -428,7 +428,7 @@ java/rmi/MarshalledObject/MOFilterTest.java https://github.com/eclipse-openj9/op
 java/rmi/MarshalledObject/compare/Compare.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/MarshalledObject/compare/HashCode.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/Naming/DefaultRegistryPort.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/Naming/LookupIPv6.java https://github.com/eclipse-openj9/openj9/issues/20343 aix-all,linux-s390x,linux-x64,windows-all
+java/rmi/Naming/LookupIPv6.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/Naming/LookupNameWithColon.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/Naming/RmiIsNoScheme.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/Naming/UnderscoreHost.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -974,7 +974,7 @@ sun/security/validator/EndEntityExtensionCheck.java https://github.com/eclipse-o
 sun/security/validator/certreplace.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/samedn.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/x509/AlgorithmId/ExtensibleAlgorithmId.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-sun/security/x509/AlgorithmId/NonStandardNames.java https://github.com/eclipse-openj9/openj9/issues/21615
+sun/security/x509/AlgorithmId/NonStandardNames.java https://github.com/eclipse-openj9/openj9/issues/21615  generic-all
 sun/security/x509/URICertStore/ExtensionsWithLDAP.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/x509/X509CRLImpl/OrderAndDup.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/x509/X509CRLImpl/Verify.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all

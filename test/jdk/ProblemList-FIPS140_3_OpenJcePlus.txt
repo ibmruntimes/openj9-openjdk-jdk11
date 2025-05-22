@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -394,6 +394,7 @@ sun/security/krb5/runNameEquals.sh https://github.com/eclipse-openj9/openj9/issu
 #
 # Exclude tests list from extended.openjdk
 #
+com/sun/crypto/provider/KDF/HKDFDelayedPRK.java https://github.com/eclipse-openj9/openj9/issues/21754 generic-all
 com/sun/jndi/ldap/DeadSSLLdapTimeoutTest.java https://github.com/eclipse-openj9/openj9/issues/20978 aix-all,linux-ppc64le,linux-s390x,linux-x64
 com/sun/jndi/ldap/LdapCBPropertiesTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 com/sun/jndi/ldap/LdapSSLHandshakeFailureTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -458,6 +459,7 @@ java/rmi/server/RMISocketFactory/useSocketFactory/unicast/UseCustomSocketFactory
 java/rmi/server/clientStackTrace/ClientStackTrace.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/rmi/server/useCustomRef/UseCustomRef.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/rmi/transport/dgcDeadLock/DGCDeadLock.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+javax/crypto/KDF/KDFDelayedProviderTest.java https://github.com/eclipse-openj9/openj9/issues/21754 generic-all
 javax/imageio/CachePremissionsTest/CachePermissionsTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/imageio/plugins/png/ReadPngGrayImageWithTRNSChunk.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-s390x
 javax/imageio/plugins/wbmp/ValidWbmpTest.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-s390x
