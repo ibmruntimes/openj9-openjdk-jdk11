@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -23,4 +23,8 @@ SOURCE_REVISION += OpenJ9:$(shell $(GIT) -C $(OPENJ9_TOPDIR) rev-parse --short H
 SOURCE_REVISION += OMR:$(shell $(GIT) -C $(OPENJ9OMR_TOPDIR) rev-parse --short HEAD)
 ifeq (true,$(BUILD_OPENJCEPLUS))
   SOURCE_REVISION += OpenJCEPlus:$(shell $(GIT) -C $(OPENJCEPLUS_TOPDIR) rev-parse --short HEAD)
+endif
+
+ifneq (,$(wildcard $(CLOSEDJ9_TOPDIR)))
+  SOURCE_REVISION += IBM:$(shell $(GIT) -C $(CLOSEDJ9_TOPDIR) rev-parse --short HEAD)
 endif
