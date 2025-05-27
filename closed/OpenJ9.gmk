@@ -386,7 +386,7 @@ endif # OPENJ9_ENABLE_DDR
 build-j9 : run-preprocessors-j9
 	@$(ECHO) "Compiling OpenJ9 in $(OUTPUTDIR)/vm"
 	$(call ShowVersions)
-	+OPENJ9_BUILD=true $(EXPORT_COMPILER_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
+	+$(EXPORT_COMPILER_ENV_VARS) $(CUSTOM_COMPILER_ENV_VARS) \
 		$(MAKE) $(MAKE_ARGS) -C $(OUTPUTDIR)/vm all
 	@$(ECHO) OpenJ9 compile complete
 	+$(DDR_COMMAND)
