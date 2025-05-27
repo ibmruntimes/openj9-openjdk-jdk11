@@ -42,7 +42,7 @@ import javax.security.auth.DestroyFailedException;
 public class KeyDestructionTest {
     public static void main(String[] args) throws Exception {
         String kpgAlgorithm = "RSA";
-        KeyPair keypair = generateKeyPair(kpgAlgorithm, 1024);
+        KeyPair keypair = generateKeyPair(kpgAlgorithm, 2048);
 
         // Check keys that support and have implemented key destruction
         testKeyDestruction(new MyDestroyableSecretKey());
