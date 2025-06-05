@@ -25,6 +25,6 @@ ifeq (true,$(BUILD_OPENJCEPLUS))
   SOURCE_REVISION += OpenJCEPlus:$(shell $(GIT) -C $(OPENJCEPLUS_TOPDIR) rev-parse --short HEAD)
 endif
 
-ifneq (,$(wildcard $(CLOSEDJ9_TOPDIR)))
-  SOURCE_REVISION += IBM:$(shell $(GIT) -C $(CLOSEDJ9_TOPDIR) rev-parse --short HEAD)
+ifneq (,$(VENDOR_TOPDIR))
+  SOURCE_REVISION += IBM:$(shell $(GIT) -C $(VENDOR_TOPDIR) rev-parse --short HEAD)
 endif

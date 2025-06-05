@@ -32,9 +32,9 @@ define IncludeCustomExtension
   endif
 endef
 
-CLOSEDJ9_TOPDIR         := @CLOSEDJ9_TOPDIR@
 OPENJ9_TOPDIR           := @OPENJ9_TOPDIR@
 OPENJ9OMR_TOPDIR        := @OPENJ9OMR_TOPDIR@
+VENDOR_TOPDIR           := @VENDOR_TOPDIR@
 
 # compiler overrides
 OPENJ9_CC               := @OPENJ9_CC@
