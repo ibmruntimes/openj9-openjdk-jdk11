@@ -730,6 +730,7 @@ sun/security/mscapi/KeytoolChangeAlias.java https://github.com/eclipse-openj9/op
 sun/security/mscapi/NullKey.java https://github.com/eclipse-openj9/openj9/issues/20343 windows-all
 sun/security/mscapi/PrngSerialize.java https://github.com/eclipse-openj9/openj9/issues/20343 windows-all
 sun/security/mscapi/PrngSlow.java https://github.com/eclipse-openj9/openj9/issues/20343 windows-all
+sun/security/mscapi/nonUniqueAliases/NonUniqueAliases.java https://github.com/eclipse-openj9/openj9/issues/20343 windows-all
 sun/security/pkcs/pkcs10/PKCS10AttrEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs/pkcs7/PKCS7VerifyTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs/pkcs7/SignerOrder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
