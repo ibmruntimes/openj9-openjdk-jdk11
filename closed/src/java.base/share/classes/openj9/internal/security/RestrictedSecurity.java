@@ -1573,7 +1573,7 @@ public final class RestrictedSecurity {
 
             // Check whether constraints are properly specified.
             final String typeRE = "\\w+";
-            final String algoRE = "[A-Za-z0-9./_-]+";
+            final String algoRE = "[A-Za-z0-9./_:#-]+";
             final String attrRE = "[A-Za-z0-9=*|.:]+";
             final String usesRE = "[A-Za-z0-9._:/$]+";
             final String consRE = "\\{(" + typeRE + "),(" + algoRE + "),(" + attrRE + ")(," + usesRE + ")?\\}";
@@ -1920,7 +1920,7 @@ public final class RestrictedSecurity {
                 + "(\\["                                // constraints [optional]
                     + "\\s*"
                     + "([+-])?"                         // action [optional]
-                    + "[A-Za-z0-9{}.=*|:$,/_\\s-]+"     // constraint definition
+                    + "[A-Za-z0-9{}.=*|:$#,/_\\s-]+"    // constraint definition
                 + "\\])?"
                 + "\\s*"
                 + "$");
