@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 8161571 8178370
  * @summary Reject signatures presented for verification that contain extra
@@ -54,10 +60,11 @@ public class SignatureLength {
                     if (p0.getName().equals("SunMSCAPI")
                             && !p1.getName().equals("SunMSCAPI")) continue;
 
-                    // SunMSCAPI and SunPKCS11 verifiers may return false
+                    // SunMSCAPI, SunPKCS11, and OpenJCEPlus verifiers may return false
                     // instead of throwing SignatureException
                     boolean mayNotThrow = p2.getName().equals("SunMSCAPI")
-                            || p2.getName().startsWith("SunPKCS11");
+                            || p2.getName().startsWith("SunPKCS11")
+                            || p2.getName().startsWith("OpenJCEPlus");
 
                     main0("EC", 256, "SHA256withECDSA", p0, p1, p2, mayNotThrow);
                     main0("RSA", 2048, "SHA256withRSA", p0, p1, p2, mayNotThrow);
