@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -33,7 +33,7 @@ ifeq (true,$(BUILD_OPENJCEPLUS))
   # Copy OpenJCEPlus native libraries.
   $(eval $(call SetupCopyFiles, OPENJCEPLUS_JGSKIT_LIBS_COPY, \
       SRC := $(OPENJCEPLUS_TOPDIR)/target, \
-      FILES := $(filter %.dll %.dylib %.so %.x, $(call FindFiles, $(OPENJCEPLUS_TOPDIR)/target)), \
+      FILES := $(filter %$(SHARED_LIBRARY_SUFFIX), $(call FindFiles, $(OPENJCEPLUS_TOPDIR)/target)), \
       FLATTEN := true, \
       DEST := $(LIB_DST_DIR), \
   ))
@@ -51,7 +51,7 @@ ifeq (true,$(BUILD_OPENJCEPLUS))
   $(eval $(call SetupCopyFiles, OPENJCEPLUS_OCK_COPY, \
       SRC := $(OPENJCEPLUS_OCK_DIR), \
       DEST := $(SUPPORT_OUTPUTDIR)/$(OPENJCEPLUS_OCK_SUB_DIR)/$(MODULE), \
-      FILES := $(call FindFiles, $(OPENJCEPLUS_OCK_DIR)), \
+      FILES := $(filter %$(SHARED_LIBRARY_SUFFIX) %.txt, $(call FindFiles, $(OPENJCEPLUS_OCK_DIR))), \
   ))
 
   TARGETS += $(OPENJCEPLUS_OCK_COPY)
