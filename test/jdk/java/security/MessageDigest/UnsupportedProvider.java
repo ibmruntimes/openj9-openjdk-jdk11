@@ -21,6 +21,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 import java.security.Provider;
 import java.security.Security;
 import java.security.MessageDigest;
@@ -64,7 +70,7 @@ public class UnsupportedProvider {
 
     // Check if specific provider supports SHA-3 hash algorithms
     static boolean isSHA3Supported(String provName) {
-        if ("SUN".equals(provName)) {
+        if ("SUN".equals(provName) || provName.startsWith("OpenJCEPlus")) {
             return true;
         }
         if ("OracleUcrypto".equals(provName)
