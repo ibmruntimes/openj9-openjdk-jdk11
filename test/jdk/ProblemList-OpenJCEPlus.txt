@@ -21,6 +21,7 @@
 # Exclude tests list from jdk_security tests
 #
 com/sun/crypto/provider/DHKEM/Compliance.java https://github.ibm.com/runtimes/jit-crypto/issues/773 generic-all
+java/security/Provider/SecurityProviderModularTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 java/security/SecureRandom/DefaultAlgo.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 java/security/SecureRandom/DefaultProvider.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 java/security/SecureRandom/NoSync.java https://github.ibm.com/runtimes/jit-crypto/issues/776 generic-all
@@ -32,4 +33,6 @@ javax/crypto/KeyGenerator/CompareKeys.java https://github.ibm.com/runtimes/jit-c
 sun/security/ec/ed/TestEdDSA.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/jca/PreferredProviderNegativeTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/provider/all/Deterministic.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
-sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/ https://github.ibm.com/runtimes/jit-crypto/issues/780 generic-all
+sun/security/krb5/auto/principalProperty/PrincipalSystemPropTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
+sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
+sun/security/util/Debug/DebugOptions.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all

@@ -247,6 +247,7 @@ java/security/cert/CertPathBuilder/targetConstraints/BuildEEBasicConstraints.jav
 java/security/cert/CertPathBuilder/zeroLengthPath/ZeroLengthPath.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/OCSP/AIACheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/OCSP/FailoverToCRL.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/cert/CertPathValidator/crlDP/CheckAllCRLs.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/indirectCRL/CircularCRLOneLevel.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/indirectCRL/CircularCRLOneLevelRevoked.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathValidator/indirectCRL/CircularCRLTwoLevel.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -740,8 +741,11 @@ sun/security/pkcs/pkcs9/UnstructuredName.java https://github.com/eclipse-openj9/
 sun/security/pkcs11/KeyStore/ClientAuth.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/Signature/TestDSAKeyLength.java https://github.com/eclipse-openj9/openj9/issues/20343 linux-s390x
 sun/security/pkcs11/fips/SunJSSEFIPSInit.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/pkcs12/AttributesCorrectness.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/pkcs12/AttributesMultiThread.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/Bug6415637.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/EmptyPassword.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/pkcs12/GetSetEntryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/KeytoolOpensslInteropTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/P12SecretKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PBES2Encoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
