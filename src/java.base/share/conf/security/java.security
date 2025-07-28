@@ -160,7 +160,6 @@ RestrictedSecurity.NSS.140-2.securerandom.provider = SunPKCS11-NSS-FIPS
 RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 #endif
 
-#if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
 #
 # Strict Restricted Security mode profile for FIPS 140-3. This policy represents only allowable
 # approved cryptography in the OpenJCEPlusFIPS provider along with other non-cryptographic algorithms
@@ -350,7 +349,6 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.9 = or
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.10 = sun.security.smartcardio.SunPCSC
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.11 = sun.security.provider.certpath.ldap.JdkLDAP
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3-Weakly-Enforced.jce.provider.12 = com.sun.security.sasl.gsskerb.JdkSASL
-#endif
 
 #
 # A list of preferred providers for specific algorithms. These providers will
