@@ -750,7 +750,6 @@ sun/security/pkcs12/AttributesMultiThread.java https://github.com/eclipse-openj9
 sun/security/pkcs12/Bug6415637.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/EmptyPassword.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/GetSetEntryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-sun/security/pkcs12/KeytoolOpensslInteropTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/P12SecretKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PBES2Encoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PKCS12SameKeyId.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
