@@ -291,6 +291,7 @@ javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException2.java https://github.co
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecInvalidEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/JceSecurity/SunJCE_BC_LoadOrdering.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/KeyGenerator/TestGetInstance.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/crypto/KeyGenerator/TestKGParity.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/Mac/ByteBuffers.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/Mac/TestGetInstance.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/SealedObject/NullKeySealedObject.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
