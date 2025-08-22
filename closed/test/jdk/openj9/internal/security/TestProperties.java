@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2024, 2025 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -160,7 +160,7 @@ public class TestProperties {
                 // 25 - Test constraint - constraint changed 3.
                 Arguments.of("Test-Profile-ConstraintChanged_3.Base",
                         System.getProperty("test.src") + "/property-java.security",
-                        "You cannot add or remove to provider (.*?). This is the base profile.")
+                        "Constraints of provider not previously specified cannot be modified")
         );
     }
 
