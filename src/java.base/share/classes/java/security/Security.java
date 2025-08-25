@@ -113,13 +113,19 @@ public final class Security {
         if ("true".equalsIgnoreCase(props.getProperty
                 ("security.overridePropertiesFile"))) {
 
-            String extraPropFile = System.getProperty
-                    ("java.security.properties");
-            if (extraPropFile != null && extraPropFile.startsWith("=")) {
-                overrideAll = true;
-                extraPropFile = extraPropFile.substring(1);
+            String extraPropList = System.getProperty
+                    ("java.security.propertiesList");
+            if ((extraPropList != null) && !extraPropList.isBlank()) {
+                loadPropsList(extraPropList);
+            } else {
+                String extraPropFile = System.getProperty
+                        ("java.security.properties");
+                if (extraPropFile != null && extraPropFile.startsWith("=")) {
+                    overrideAll = true;
+                    extraPropFile = extraPropFile.substring(1);
+                }
+                loadProps(null, extraPropFile, overrideAll);
             }
-            loadProps(null, extraPropFile, overrideAll);
         }
 
         /*[IF CRIU_SUPPORT]*/
@@ -135,6 +141,47 @@ public final class Security {
         if (sdebug != null) {
             sdebug.println(restrictedSecurityEnabled ? "Restricted security mode enabled."
                     : "Restricted security mode disabled.");
+        }
+    }
+
+    private static void loadPropsList(String extraPropList) {
+        for (String file : extraPropList.split(File.pathSeparator)) {
+            InputStream is = null;
+            try {
+                if (file.startsWith("=")) {
+                    throw new IllegalArgumentException(
+                            "java.security.propertiesList does not support '=' prefix: " + file);
+                }
+                file = PropertyExpander.expand(file);
+                File propFile = new File(file);
+                URL propURL;
+                if (propFile.exists()) {
+                    propURL = new URL("file:" + propFile.getCanonicalPath());
+                } else {
+                    propURL = new URL(file);
+                }
+                is = propURL.openStream();
+                props.load(is);
+                if (sdebug != null) {
+                    sdebug.println("reading security properties file: " + file);
+                }
+            } catch (IOException | PropertyExpander.ExpandException e) {
+                if (sdebug != null) {
+                    sdebug.println("unable to load security properties from " + file);
+                    e.printStackTrace();
+                }
+                break;
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException ioe) {
+                        if (sdebug != null) {
+                            sdebug.println("unable to close input stream");
+                        }
+                    }
+                }
+            }
         }
     }
 
