@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2023, 2023 All Rights Reserved
  * ===========================================================================
  */
 
@@ -61,19 +61,17 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
     private XECOperations ops;
     private final XECParameters lockedParams;
 
-    private final XDHKeyPairGenerator javaImplementation;
+    private XDHKeyPairGenerator javaImplementation;
     private boolean useJavaImpl;
 
     public NativeXDHKeyPairGenerator() {
         tryInitialize(NamedParameterSpec.X25519);
         lockedParams = null;
-        javaImplementation = initializeJavaImplementation();
     }
 
     private NativeXDHKeyPairGenerator(NamedParameterSpec paramSpec) {
         tryInitialize(paramSpec);
         lockedParams = ops.getParameters();
-        javaImplementation = initializeJavaImplementation();
     }
 
     private void tryInitialize(NamedParameterSpec paramSpec) {
@@ -144,7 +142,7 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
          * to generate the keypair.
          */
         if (useJavaImpl) {
-            return javaImplementation.generateKeyPair();
+            return javaImplGenerateKeyPair();
         }
 
         /* If library isn't loaded, use Java implementation. */
@@ -152,7 +150,7 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
             if (nativeCryptTrace) {
                 System.err.println("OpenSSL library not loaded. Using Java crypto implementation to generate KeyPair.");
             }
-            return javaImplementation.generateKeyPair();
+            return javaImplGenerateKeyPair();
         }
 
         XECParameters params;
@@ -186,7 +184,7 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
             if (nativeCryptTrace) {
                 System.err.println("KeyPair generation by OpenSSL failed, using Java crypto implementation.");
             }
-            return javaImplementation.generateKeyPair();
+            return javaImplGenerateKeyPair();
         }
         try {
             reverse(publicKey);
@@ -213,18 +211,26 @@ public class NativeXDHKeyPairGenerator extends KeyPairGeneratorSpi {
      * Initializes the java implementation.
      * Already set parameters are used to specify the curve type.
      */
-    private XDHKeyPairGenerator initializeJavaImplementation() {
-        XDHKeyPairGenerator kpg;
-        if (lockedParams == null) {
-            kpg = new XDHKeyPairGenerator();
-        } else if (isX25519(lockedParams)) {
-            kpg = new XDHKeyPairGenerator.X25519();
-        } else {
-            kpg = new XDHKeyPairGenerator.X448();
+    private void initializeJavaImplementation() {
+        if (javaImplementation == null) {
+            if (lockedParams == null) {
+                javaImplementation = new XDHKeyPairGenerator();
+            } else if (isX25519(lockedParams)) {
+                javaImplementation = new XDHKeyPairGenerator.X25519();
+            } else {
+                javaImplementation = new XDHKeyPairGenerator.X448();
+            }
         }
 
-        kpg.initialize(ops.getParameters().getBits(), random);
-        return kpg;
+        javaImplementation.initialize(ops.getParameters().getBits(), random);
+    }
+
+    /*
+     * Uses the java implementation to generate a KeyPair.
+     */
+    private KeyPair javaImplGenerateKeyPair() {
+        initializeJavaImplementation();
+        return javaImplementation.generateKeyPair();
     }
 
     private static void swap(byte[] arr, int i, int j) {
