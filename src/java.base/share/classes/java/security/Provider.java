@@ -1161,7 +1161,7 @@ public abstract class Provider extends Properties {
         for (Iterator<Map.Entry<ServiceKey, Service>> t =
                 map.entrySet().iterator(); t.hasNext(); ) {
             Service s = t.next().getValue();
-            if (s.isValid() == false) {
+            if ((s.isValid() == false) || !RestrictedSecurity.canServiceBeRegistered(s)) {
                 t.remove();
             }
         }
@@ -1301,6 +1301,10 @@ public abstract class Provider extends Properties {
             }
         }
 
+        if ((s != null) && !RestrictedSecurity.isServiceAllowed(s)) {
+            return null;
+        }
+
         if (s != null && SecurityProviderServiceEvent.isTurnedOn()) {
             var e  = new SecurityProviderServiceEvent();
             e.provider = getName();
@@ -1339,13 +1343,23 @@ public abstract class Provider extends Properties {
             ensureLegacyParsed();
             Set<Service> set = new LinkedHashSet<>();
             if (!serviceMap.isEmpty()) {
-                set.addAll(serviceMap.values());
+                serviceMap.values().forEach(service -> {
+                    if (RestrictedSecurity.isServiceAllowed(service)) {
+                        // If allowed by RestrictedSecurity, add it to set.
+                        set.add(service);
+                    }
+                });
             }
             if (legacyMap != null && !legacyMap.isEmpty()) {
-                set.addAll(legacyMap.values());
+                legacyMap.values().forEach(service -> {
+                    if (RestrictedSecurity.isServiceAllowed(service)) {
+                        // If allowed by RestrictedSecurity, add it to set.
+                        set.add(service);
+                    }
+                });
             }
             serviceSet = Collections.unmodifiableSet(set);
-            servicesChanged = false;
+            servicesChanged = RestrictedSecurity.isEnabled();
         }
         return serviceSet;
     }
