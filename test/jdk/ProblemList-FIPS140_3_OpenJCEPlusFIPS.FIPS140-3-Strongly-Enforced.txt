@@ -915,6 +915,7 @@ sun/security/ssl/SSLSocketImpl/SSLSocketSSLEngineCloseInbound.java https://githu
 sun/security/ssl/SSLSocketImpl/SSLSocketShouldThrowSocketException.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/ServerRenegoWithTwoVersions.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/ServerTimeout.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SSLSocketImpl/SetClientMode.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/SetSoTimeout.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/SocketExceptionForSocketIssues.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/UnconnectedSocketWrongExceptions.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
