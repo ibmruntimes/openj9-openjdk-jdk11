@@ -170,6 +170,7 @@ java/security/KeyRep/Serial.java https://github.com/eclipse-openj9/openj9/issues
 java/security/KeyRep/SerialDSAPubKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyRep/SerialOld.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/CheckInputStream.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/KeyStore/CheckMacOSKeyChainTrust.java https://github.com/eclipse-openj9/openj9/issues/20343 mac-aarch64, mac-x64
 java/security/KeyStore/EntryMethods.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/KeyStoreBuilder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/PBETest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -212,6 +213,7 @@ java/security/SecureRandom/DefaultProvider.java https://github.com/eclipse-openj
 java/security/SecureRandom/EnoughSeedTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/GetAlgorithm.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/GetInstanceTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/SecureRandom/MacNativePRNGSetSeed.java https://github.com/eclipse-openj9/openj9/issues/20343 mac-aarch64, mac-x64
 java/security/SecureRandom/MultiThreadTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/NoSync.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/Serialize.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -313,6 +315,7 @@ javax/xml/crypto/dsig/keyinfo/KeyInfo/Marshal.java https://github.com/eclipse-op
 sun/security/jgss/GssMemoryIssues.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/jgss/spnego/MSOID.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/jgss/spnego/NotPreferredMech.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/krb5/Krb5NameEquals.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/KrbCredSubKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/RFC396xTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/ServiceCredsCombination.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -977,6 +980,7 @@ sun/security/tools/keytool/fakegen/DefaultSignatureAlgorithm.java https://github
 sun/security/tools/keytool/fakegen/PSS.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/HostnameMatcher/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/Oid/S11N.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/util/Pem/PemEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/EndEntityExtensionCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/certreplace.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/samedn.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -1000,16 +1004,8 @@ sun/security/krb5/auto/LoginModuleDebug.java https://github.ibm.com/runtimes/bac
 # https://github.com/eclipse-openj9/openj9/issues/21369
 # https://github.ibm.com/runtimes/backlog/issues/1619
 #
-com/sun/crypto/provider/KDF/HKDFBasicFunctionsTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-com/sun/crypto/provider/KDF/HKDFDelayedPRK.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-com/sun/crypto/provider/KDF/HKDFExhaustiveTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-com/sun/crypto/provider/KDF/HKDFKnownAnswerTests.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-com/sun/crypto/provider/KDF/HKDFSaltIKMTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 com/sun/jndi/ldap/DeadSSLLdapTimeoutTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 com/sun/jndi/rmi/registry/objects/ObjectFactoryBuilderCodebaseTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-javax/crypto/KDF/KDFDelayedProviderSyncTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-javax/crypto/KDF/KDFDelayedProviderTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
-javax/crypto/KDF/KDFDelayedProviderThreadingTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 javax/net/ssl/SSLEngine/AcceptLargeFragments.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 javax/net/ssl/SSLEngine/IllegalHandshakeMessage.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 javax/net/ssl/TLS/TLSClientPropertyTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all

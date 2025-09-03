@@ -52,6 +52,7 @@ java/security/Signature/Offsets.java	https://github.com/ibmruntimes/openj9-openj
 
 # SunJGSS and krb5 related
 
+sun/security/krb5/Krb5NameEquals.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/KrbCredSubKey.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/525	linux-x64,linux-ppc64le,linux-s390x
 sun/security/krb5/RFC396xTest.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/525	linux-x64,linux-ppc64le,linux-s390x
 sun/security/krb5/ServiceCredsCombination.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/525	linux-x64,linux-ppc64le,linux-s390x
