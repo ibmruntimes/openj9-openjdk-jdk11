@@ -24,11 +24,9 @@
 # arguments:
 # $1 the name of the makefile
 define IncludeCustomExtension
-  ifndef OPENJDK
-    custom_include_file := $(TOPDIR)/closed/custom/$(strip $1)
-    ifneq ($$(wildcard $$(custom_include_file)), )
-      include $$(custom_include_file)
-    endif
+  custom_include_file := $(TOPDIR)/closed/custom/$(strip $1)
+  ifneq ($$(wildcard $$(custom_include_file)), )
+    include $$(custom_include_file)
   endif
 endef
 
