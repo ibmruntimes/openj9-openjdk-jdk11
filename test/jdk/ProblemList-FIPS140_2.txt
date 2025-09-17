@@ -868,7 +868,6 @@ sun/security/pkcs12/ProbeLargeKeystore.java	https://github.com/ibmruntimes/openj
 sun/security/pkcs12/PKCS12SameKeyId.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/pkcs12/PBES2Encoding.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/pkcs12/P12SecretKey.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
-sun/security/pkcs12/KeytoolOpensslInteropTest.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/pkcs12/EmptyPassword.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/pkcs12/Bug6415637.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
 sun/security/pkcs/pkcs8/TestLeadingZeros.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/547	linux-x64,linux-ppc64le,linux-s390x
