@@ -167,7 +167,7 @@ java/security/KeyRep/Serial.java https://github.com/eclipse-openj9/openj9/issues
 java/security/KeyRep/SerialDSAPubKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyRep/SerialOld.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/CheckInputStream.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/security/KeyStore/CheckMacOSKeyChainTrust.java https://github.com/eclipse-openj9/openj9/issues/20343 mac-aarch64, mac-x64
+java/security/KeyStore/CheckMacOSKeyChainTrust.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/EntryMethods.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/KeyStoreBuilder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/PBETest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -205,7 +205,7 @@ java/security/SecureRandom/DefaultProvider.java https://github.com/eclipse-openj
 java/security/SecureRandom/EnoughSeedTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/GetAlgorithm.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/GetInstanceTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/security/SecureRandom/MacNativePRNGSetSeed.java https://github.com/eclipse-openj9/openj9/issues/20343 mac-aarch64, mac-x64
+java/security/SecureRandom/MacNativePRNGSetSeed.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/MultiThreadTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/NoSync.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/SecureRandom/Serialize.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -613,6 +613,7 @@ sun/security/pkcs/pkcs7/SignerOrder.java https://github.com/eclipse-openj9/openj
 sun/security/pkcs/pkcs8/TestLeadingZeros.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs/pkcs9/UnstructuredName.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/KeyStore/ClientAuth.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/pkcs11/sslecc/ClientJSSEServerJSSE.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PBES2Encoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PKCS12SameKeyId.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/StorePasswordTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -756,6 +757,7 @@ sun/security/ssl/SSLSocketImpl/InvalidateServerSessionRenegotiate.java https://g
 sun/security/ssl/SSLSocketImpl/LargePacketAfterHandshakeTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/NewSocketMethods.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/NoImpactServerRenego.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SSLSocketImpl/NonAutoClose.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/NotifyHandshakeTest.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/RejectClientRenego.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSocketImpl/ReuseAddr.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
