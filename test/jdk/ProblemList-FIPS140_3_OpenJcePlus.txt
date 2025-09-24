@@ -339,6 +339,7 @@ javax/crypto/CryptoPermission/RC2PermCheck.java https://github.com/eclipse-openj
 javax/crypto/CryptoPermission/RC4AliasPermCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/CryptoPermission/RSANoLimit.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetAlgName.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+javax/crypto/EncryptedPrivateKeyInfo/GetEncoded.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpec.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException2.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -841,6 +842,7 @@ sun/security/ssl/ServerHandshaker/GetPeerHost.java https://github.com/eclipse-op
 sun/security/ssl/ServerHandshaker/HelloExtensionsTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/CustomizedClientSchemes.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/CustomizedServerSchemes.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/SignatureScheme/MD5NotAllowedInTLS13CertificateSignature.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/Tls13NamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SocketCreation/SocketCreation.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/spi/ProviderInit.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
