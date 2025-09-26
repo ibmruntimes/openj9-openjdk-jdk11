@@ -152,6 +152,7 @@ com/sun/jndi/ldap/DeadSSLLdapTimeoutTest.java https://github.ibm.com/runtimes/ba
 com/sun/jndi/ldap/LdapCBPropertiesTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/jndi/ldap/LdapSSLHandshakeFailureTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/jndi/rmi/registry/objects/ObjectFactoryBuilderCodebaseTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+com/sun/jndi/rmi/registry/objects/RmiFactoriesFilterTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/jndi/rmi/registry/RegistryContext/ContextWithNullProperties.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/jndi/rmi/registry/RegistryContext/UnbindIdempotent.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/net/ssl/SSLSecurity/ProviderTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -406,6 +407,7 @@ javax/crypto/CryptoPermission/RC2PermCheck.java https://github.com/eclipse-openj
 javax/crypto/CryptoPermission/RC4AliasPermCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/CryptoPermission/RSANoLimit.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetAlgName.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/crypto/EncryptedPrivateKeyInfo/GetEncoded.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpec.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/crypto/EncryptedPrivateKeyInfo/GetKeySpecException2.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -490,7 +492,7 @@ javax/net/ssl/ServerName/EndingDotHostname.java https://github.com/eclipse-openj
 javax/net/ssl/ServerName/SSLEngineExplorer.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerMatchedSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerUnmatchedSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-javax/net/ssl/ServerName/SSLEngineExplorerWithCli.java https://github.com/eclipse-openj9/openj9/issues/20343 aix-all,windows-all
+javax/net/ssl/ServerName/SSLEngineExplorerWithCli.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerWithSrv.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLSocketConsistentSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLSocketExplorer.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -879,6 +881,7 @@ sun/security/ssl/ServerHandshaker/GetPeerHost.java https://github.com/eclipse-op
 sun/security/ssl/ServerHandshaker/HelloExtensionsTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SignatureScheme/CustomizedClientSchemes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SignatureScheme/CustomizedServerSchemes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SignatureScheme/MD5NotAllowedInTLS13CertificateSignature.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SignatureScheme/Tls13NamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SocketCreation/SocketCreation.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/spi/ProviderInit.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -913,6 +916,8 @@ sun/security/ssl/SSLEngineImpl/SSLEngineDeadlock.java https://github.com/eclipse
 sun/security/ssl/SSLEngineImpl/SSLEngineDecodeBadPoint.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/ssl/SSLEngineImpl/SSLEngineFailedALPN.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLEngineImpl/SSLEngineKeyLimit.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SSLEngineImpl/TestBadDNForPeerCA.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SSLEngineImpl/TestBadDNForPeerCA12.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLEngineImpl/TLS13BeginHandshake.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLLogger/LoggingFormatConsistency.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLSessionContextImpl/DefautlCacheSize.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
