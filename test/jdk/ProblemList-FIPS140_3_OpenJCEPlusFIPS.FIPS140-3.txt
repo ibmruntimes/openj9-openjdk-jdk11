@@ -490,7 +490,7 @@ javax/net/ssl/ServerName/EndingDotHostname.java https://github.com/eclipse-openj
 javax/net/ssl/ServerName/SSLEngineExplorer.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerMatchedSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerUnmatchedSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-javax/net/ssl/ServerName/SSLEngineExplorerWithCli.java https://github.com/eclipse-openj9/openj9/issues/20343 aix-all,windows-all
+javax/net/ssl/ServerName/SSLEngineExplorerWithCli.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerWithSrv.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLSocketConsistentSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLSocketExplorer.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
