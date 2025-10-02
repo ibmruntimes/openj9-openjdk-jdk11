@@ -247,11 +247,14 @@ run-preprocessors-j9 : \
 	$(OPENJ9_VM_BUILD_DIR)/compiler/jit.version \
 	$(OPENJ9_VM_BUILD_DIR)/include/openj9_version_info.h
 
+# Note that $(OUTPUTDIR) is different when building bootcycle-images,
+# so refer to toolchain.cmake in the same directory as $(SPEC).
+
 CMAKE_ARGS := \
 	-C $(OPENJ9_TOPDIR)/runtime/cmake/caches/$(patsubst %_cross,%,$(OPENJ9_BUILDSPEC)).cmake \
 	-DBOOT_JDK="$(BOOT_JDK)" \
 	-DBUILD_ID=$(BUILD_ID) \
-	-DCMAKE_TOOLCHAIN_FILE="$(OUTPUTDIR)/toolchain.cmake" \
+	-DCMAKE_TOOLCHAIN_FILE="$(dir $(SPEC))toolchain.cmake" \
 	-DJ9VM_OMR_DIR="$(OPENJ9OMR_TOPDIR)" \
 	-DJAVA_SPEC_VERSION=$(VERSION_FEATURE) \
 	-DOMR_DDR=$(OPENJ9_ENABLE_DDR) \
