@@ -1018,6 +1018,8 @@ sun/security/tools/keytool/WeakAlg.java https://github.com/eclipse-openj9/openj9
 sun/security/util/HostnameMatcher/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/Oid/S11N.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/Pem/PemEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/validator/CertReplace.java#certreplace https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/validator/CertReplace.java#samedn https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/validator/certreplace.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/EndEntityExtensionCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/samedn.sh https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
