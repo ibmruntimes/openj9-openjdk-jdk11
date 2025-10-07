@@ -580,6 +580,7 @@ sun/security/krb5/auto/RefreshKrb5Config.java https://github.com/eclipse-openj9/
 sun/security/krb5/auto/Renew.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/Renewal.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/ReplayCacheTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/krb5/auto/ReplayCacheTestProc.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/ReplayCacheTestProcWithMD5.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/RRC.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/S4U2proxy.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
