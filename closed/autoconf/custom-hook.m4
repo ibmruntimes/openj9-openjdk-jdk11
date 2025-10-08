@@ -560,11 +560,6 @@ AC_DEFUN([OPENJ9_PLATFORM_SETUP],
     OPENJ9_PLATFORM_CODE=xz64
   elif test "x$OPENJ9_CPU" = xppc-64 ; then
     OPENJ9_PLATFORM_CODE=ap64
-  elif test "x$OPENJ9_CPU" = xarm ; then
-    OPENJ9_PLATFORM_CODE=xr32
-    OPENJ9_BUILD_OS=linux
-    OPENJ9_BUILD_MODE_ARCH=arm_linaro
-    OPENJ9_LIBS_SUBDIR=default
   elif test "x$OPENJ9_CPU" = xaarch64 ; then
     if test "x$OPENJDK_BUILD_OS" = xlinux ; then
       OPENJ9_PLATFORM_CODE=xr64
