@@ -29,6 +29,8 @@ java/security/Security/ProviderFiltering.java https://github.ibm.com/runtimes/ji
 java/security/Signature/SignatureGetInstance.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 java/security/Signature/SignatureLength.java https://github.ibm.com/runtimes/jit-crypto/issues/778 generic-all
 java/security/Signature/SignWithOutputBuffer.java https://github.ibm.com/runtimes/jit-crypto/issues/761 generic-all
+javax/crypto/KDF/KDFDelayedProviderException.java https://github.ibm.com/runtimes/jit-crypto/issues/779 generic-all
+javax/crypto/KDF/KDFDelayedProviderTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 javax/crypto/KeyGenerator/CompareKeys.java https://github.ibm.com/runtimes/jit-crypto/issues/779 generic-all
 sun/security/ec/ed/TestEdDSA.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/jca/PreferredProviderNegativeTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
