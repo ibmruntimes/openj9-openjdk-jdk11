@@ -612,6 +612,7 @@ sun/security/krb5/ktab/BufferBoundary.java https://github.com/eclipse-openj9/ope
 sun/security/krb5/ktab/FileKeyTab.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/ktab/KeyTabIndex.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/RFC396xTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/mscapi/AccessKeyStore.java https://github.com/eclipse-openj9/openj9/issues/22796 generic-all
 sun/security/mscapi/AllTypes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/mscapi/DupAlias.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/mscapi/EncodingMutability.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
