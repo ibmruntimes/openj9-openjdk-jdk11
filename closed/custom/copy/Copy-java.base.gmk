@@ -188,7 +188,7 @@ endif # OPENJ9_ENABLE_DDR
 ifeq (true,$(OPENJ9_ENABLE_JFR))
 
 $(call openj9_copy_files,, \
-	$(OPENJ9_TOPDIR)/runtime/metadata.blob \
+	$(TOPDIR)/closed/jfr-metadata.blob \
 	$(LIB_DST_DIR)/metadata.blob)
 
 endif # OPENJ9_ENABLE_JFR
