@@ -527,6 +527,8 @@ javax/xml/crypto/dsig/keyinfo/KeyInfo/Marshal.java https://github.com/eclipse-op
 javax/xml/crypto/dsig/SecurityManager/XMLDSigWithSecMgr.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/xml/crypto/dsig/TransformService/NullParent.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/xml/crypto/dsig/ValidationTests.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+jdk/dynalink/TrustedDynamicLinkerFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+jdk/dynalink/UntrustedDynamicLinkerFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 jdk/nio/zipfs/DirectoryStreamTests.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 jdk/nio/zipfs/InvalidZipHeaderTests.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 jdk/nio/zipfs/ZFSTests.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
