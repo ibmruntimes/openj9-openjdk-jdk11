@@ -619,6 +619,8 @@ javax/xml/crypto/dsig/SecurityManager/XMLDSigWithSecMgr.java https://github.com/
 javax/xml/crypto/dsig/TransformService/NullParent.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/xml/crypto/dsig/ValidationTests.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/xml/jaxp/XPath/8009579/XPathExceptionInitCause.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+jdk/dynalink/TrustedDynamicLinkerFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+jdk/dynalink/UntrustedDynamicLinkerFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 jdk/security/jarsigner/Function.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 jdk/security/jarsigner/JarWithOneNonDisabledDigestAlg.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 jdk/security/jarsigner/Spec.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
