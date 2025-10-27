@@ -21,6 +21,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 import static java.lang.System.out;
 
 import java.lang.Integer;
@@ -291,7 +297,7 @@ public class TestCipherKeyWrapperTest {
         Cipher wrapCI = Cipher.getInstance(wrapAlgo);
         if (isPBE && !isAESBlowfish) {
             wrapCI.init(Cipher.WRAP_MODE, initKey, pbeParams);
-        } else if (isAESBlowfish) {
+        } else if (isAESBlowfish && !wrapCI.getProvider().getName().startsWith("OpenJCEPlus")) {
             wrapCI.init(Cipher.WRAP_MODE, initKey);
             aps = wrapCI.getParameters();
         } else {
