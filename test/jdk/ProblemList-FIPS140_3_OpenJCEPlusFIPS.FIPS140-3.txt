@@ -516,6 +516,7 @@ javax/net/ssl/SSLEngine/LargeBufs.java https://github.com/eclipse-openj9/openj9/
 javax/net/ssl/SSLEngine/LargePacket.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLEngine/NoAuthClientAuth.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLParameters/UseCipherSuitesOrder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/net/ssl/SSLSession/CertMsgCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLSession/HttpsURLConnectionLocalCertificateChain.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLSession/JSSERenegotiate.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLSession/RenegotiateTLS13.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
