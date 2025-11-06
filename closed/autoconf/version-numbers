@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2021 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2025 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -23,6 +23,6 @@
 # Default settings unless overridden by configure
 
 COMPANY_NAME="Eclipse OpenJ9"
-VENDOR_URL="http://www.eclipse.org/openj9"
+VENDOR_URL="http://eclipse.dev/openj9"
 VENDOR_URL_BUG="https://github.com/eclipse-openj9/openj9/issues/new?labels=userRaised&template=user-problem.md"
 VENDOR_URL_VM_BUG="https://github.com/eclipse-openj9/openj9/issues/new?labels=userRaised&template=user-problem.md"
