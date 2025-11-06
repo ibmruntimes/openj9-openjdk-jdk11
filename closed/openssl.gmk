@@ -25,8 +25,9 @@ ifeq (,$(wildcard $(SPEC)))
 endif
 
 include $(SPEC)
+include MakeBase.gmk
 
-ifeq ($(OPENJDK_TARGET_OS), windows)
+ifeq ($(call isTargetOs, windows), true)
   # Configure normally demands that we use an implementation of perl that produces
   # paths with backslashes; CONFIGURE_INSIST bypasses that requirement.
   # PERL must be an absolute path that will be usable by nmake (i.e. start with
@@ -61,38 +62,17 @@ else # windows
 endif # windows
 
 # Identify the desired openssl target configuration.
-OPENSSL_TARGET :=
-ifeq ($(OPENJDK_TARGET_OS), aix)
-  ifeq ($(TOOLCHAIN_TYPE), clang)
-    OPENSSL_TARGET := aix64-clang
-  else ifeq ($(TOOLCHAIN_TYPE), xlc)
-    OPENSSL_TARGET := aix64-cc
-  endif
-else ifeq ($(OPENJDK_TARGET_OS), linux)
-  ifneq (,$(filter aarch64 ppc64le x86_64, $(OPENJDK_TARGET_CPU)))
-    OPENSSL_TARGET := linux-$(OPENJDK_TARGET_CPU)
-  else ifneq (,$(filter riscv64 s390x, $(OPENJDK_TARGET_CPU)))
-    OPENSSL_TARGET := linux64-$(OPENJDK_TARGET_CPU)
-  endif
-else ifeq ($(OPENJDK_TARGET_OS), macosx)
-  ifneq (,$(filter arm64 x86_64, $(OPENJDK_TARGET_CPU)))
-    OPENSSL_TARGET := darwin64-$(OPENJDK_TARGET_CPU)-cc
-  else ifeq ($(OPENJDK_TARGET_CPU), aarch64)
-    OPENSSL_TARGET := darwin64-arm64-cc
-  endif
-else ifeq ($(OPENJDK_TARGET_OS), windows)
-  ifeq ($(OPENJDK_TARGET_CPU), x86_64)
-    OPENSSL_TARGET := VC-WIN64A
-  else
-    OPENSSL_TARGET := VC-WIN32
-  endif
-endif # OPENJDK_TARGET_OS
+export OPENSSL_LOCAL_CONFIG_DIR := $(call MixedPath,$(TOPDIR)/closed/openssl-conf)
 
-ifeq (,$(OPENSSL_TARGET))
-  $(error Unsupported platform $(OPENJDK_TARGET_OS)-$(OPENJDK_TARGET_CPU))
-endif # OPENSSL_TARGET
+ifeq ($(call isTargetOs, aix)+$(call isCompiler, clang), true+true)
+  OPENSSL_TARGET := semeru-$(OPENJ9_PLATFORM_CODE)-clang
+else ifeq ($(call isTargetOs, windows), true)
+  OPENSSL_TARGET := VC-$(OPENJ9_PLATFORM_CODE)
+else
+  OPENSSL_TARGET := semeru-$(OPENJ9_PLATFORM_CODE)
+endif
 
-ifeq ($(OPENJDK_TARGET_CPU), s390x)
+ifeq ($(call isTargetCpu, s390x), true)
   OPENSSL_CONFIG_CFLAGS := -march=z10
 else
   OPENSSL_CONFIG_CFLAGS :=
@@ -108,7 +88,7 @@ endif # CCACHE
 
 build_openssl :
 	@$(ECHO) Compiling OpenSSL in $(OPENSSL_DIR) for $(OPENSSL_TARGET)$(if $(OPENSSL_CONFIG_CFLAGS), with additional CFLAGS $(OPENSSL_CONFIG_CFLAGS))
-	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) no-makedepend no-tests shared )
+	( $(OPENSSL_CONFIG_SETUP) $(CD) $(OPENSSL_DIR) && $(PERL) Configure $(OPENSSL_CONFIG_CFLAGS) $(OPENSSL_TARGET) no-makedepend no-tests no-winstore shared )
 	$(OPENSSL_PATCH)
 	+ ( $(OPENSSL_MAKE_SETUP) $(CD) $(OPENSSL_DIR) && $(OPENSSL_MAKE) )
 
