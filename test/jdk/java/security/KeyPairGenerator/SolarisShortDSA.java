@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 7081411
  * @summary DSA keypair generation affected by Solaris bug
@@ -31,7 +37,7 @@
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.Signature;
-import sun.security.provider.DSAPrivateKey;
+import java.security.interfaces.DSAPrivateKey;
 
 public class SolarisShortDSA {
     static byte[] data = new byte[0];
