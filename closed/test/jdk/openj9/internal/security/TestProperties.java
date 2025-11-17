@@ -33,6 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.security.Provider;
 import java.security.Security;
 
@@ -164,6 +165,38 @@ public class TestProperties {
         );
     }
 
+    private static Stream<Arguments> patternMatches_propertiesList() {
+        return Stream.of(
+                // 1 - The profile in propertyListA-java.security extends the profile
+                // in the main java.security file, which lists 4 providers.
+                Arguments.of("Test-Profile-Property-List.A",
+                        System.getProperty("test.src") + "/propertyListA-java.security",
+                        "(?s)(?=.*OpenJCEPlusFIPS)(?=.*Sun)(?=.*SunJSSE)(?=.*SunEC)",
+                        0),
+                // 2 - The profile in propertyListB-java.security extends the profile
+                // in propertyListA-java.security, which in turn extends the profile
+                // in the main java.security file, listing 5 providers.
+                Arguments.of("Test-Profile-Property-List.B",
+                        System.getProperty("test.src") + "/propertyListA-java.security" + File.pathSeparator
+                                + System.getProperty("test.src") + "/propertyListB-java.security",
+                        "(?s)(?=.*OpenJCEPlusFIPS)(?=.*Sun)(?=.*SunJSSE)(?=.*SunEC)(?=.*SunJCE)",
+                        0),
+                // 3 - The profile in propertyListB-java.security extends the profile
+                // in propertyListA-java.security, which in turn extends the main
+                // java.security profile, but propertyListB-java.security file is missing.
+                Arguments.of("Test-Profile-Property-List.B",
+                        System.getProperty("test.src") + "/propertyListB-java.security",
+                        "is not present in the java.security file or any appended files",
+                        1),
+                // 4 - The -Djava.security.propertiesList option does not support using
+                // a leading '=' prefix.
+                Arguments.of("Test-Profile-Property-List.A",
+                        "=" + System.getProperty("test.src") + "/propertyListA-java.security",
+                        "java.security.propertiesList does not support '=' prefix",
+                        1)
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("patternMatches_expectedExitValue0")
     public void shouldContain_expectedExitValue0(String customprofile, String securityPropertyFile, String expected) throws Exception {
@@ -188,6 +221,19 @@ public class TestProperties {
         );
         outputAnalyzer.reportDiagnosticSummary();
         outputAnalyzer.shouldHaveExitValue(1).shouldMatch(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("patternMatches_propertiesList")
+    public void shouldContain_propertiesList(String customprofile, String securityPropertyFileList,
+            String expected, int exitValue) throws Exception {
+        OutputAnalyzer outputAnalyzer = ProcessTools.executeTestJava(
+                "-Dsemeru.fips=true",
+                "-Dsemeru.customprofile=" + customprofile,
+                "-Djava.security.propertiesList=" + securityPropertyFileList,
+                "TestProperties");
+        outputAnalyzer.reportDiagnosticSummary();
+        outputAnalyzer.shouldHaveExitValue(exitValue).shouldMatch(expected);
     }
 
     public static void main(String[] args) {
