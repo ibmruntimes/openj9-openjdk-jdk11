@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2017, 2022 All Rights Reserved
+ * (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -72,7 +72,8 @@ final class ClassByNameCache {
 
     private void setCanonicalSystemLoaderRef(ClassLoader loader) {
         LoaderRef newKey = new LoaderRef(loader, staleLoaderRefs, true);
-        assert (canonicalLoaderRefs.put(newKey, newKey) == null);
+        LoaderRef oldRef = canonicalLoaderRefs.put(newKey, newKey);
+        assert oldRef == null;
     }
 
     /*
@@ -115,6 +116,7 @@ final class ClassByNameCache {
         Object resultLoaderObj =
             LoaderRef.getLoaderObj(result.getClassLoader());
         if (getCanonicalLoaderRef(resultLoaderObj).isSystem == false) {
+            cache.remove(key);
             return;
         }
 
@@ -156,8 +158,12 @@ final class ClassByNameCache {
         }
 
         if (value instanceof FutureValue) {
-
-            return ((FutureValue)value).get();
+            try {
+                return ((FutureValue)value).get();
+            } catch (ClassNotFoundException e) {
+                cache.remove(key);
+                throw e;
+            }
         }
 
         return (Class<?>)value;
