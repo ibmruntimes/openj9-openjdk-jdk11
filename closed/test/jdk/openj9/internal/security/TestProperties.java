@@ -120,7 +120,7 @@ public class TestProperties {
                 // 15 - Test property - policy sunset.
                 Arguments.of("Test-Profile-PolicySunset.Base",
                         System.getProperty("test.src") + "/property-java.security",
-                        "Restricted security policy expired"),
+                        "Use -Dsemeru.restrictedsecurity.ignoresunsetexpiration to allow Java to start while possibly using uncertified cryptography"),
                 // 16 - Test property - policy sunset format.
                 Arguments.of("Test-Profile-PolicySunsetFormat.Base",
                         System.getProperty("test.src") + "/property-java.security",
@@ -166,35 +166,40 @@ public class TestProperties {
     }
 
     private static Stream<Arguments> patternMatches_propertiesList() {
-        return Stream.of(
-                // 1 - The profile in propertyListA-java.security extends the profile
-                // in the main java.security file, which lists 4 providers.
-                Arguments.of("Test-Profile-Property-List.A",
-                        System.getProperty("test.src") + "/propertyListA-java.security",
-                        "(?s)(?=.*OpenJCEPlusFIPS)(?=.*Sun)(?=.*SunJSSE)(?=.*SunEC)",
-                        0),
-                // 2 - The profile in propertyListB-java.security extends the profile
-                // in propertyListA-java.security, which in turn extends the profile
-                // in the main java.security file, listing 5 providers.
-                Arguments.of("Test-Profile-Property-List.B",
-                        System.getProperty("test.src") + "/propertyListA-java.security" + File.pathSeparator
-                                + System.getProperty("test.src") + "/propertyListB-java.security",
-                        "(?s)(?=.*OpenJCEPlusFIPS)(?=.*Sun)(?=.*SunJSSE)(?=.*SunEC)(?=.*SunJCE)",
-                        0),
-                // 3 - The profile in propertyListB-java.security extends the profile
-                // in propertyListA-java.security, which in turn extends the main
-                // java.security profile, but propertyListB-java.security file is missing.
-                Arguments.of("Test-Profile-Property-List.B",
-                        System.getProperty("test.src") + "/propertyListB-java.security",
-                        "is not present in the java.security file or any appended files",
-                        1),
-                // 4 - The -Djava.security.propertiesList option does not support using
-                // a leading '=' prefix.
-                Arguments.of("Test-Profile-Property-List.A",
-                        "=" + System.getProperty("test.src") + "/propertyListA-java.security",
-                        "java.security.propertiesList does not support '=' prefix",
-                        1)
-        );
+        Stream.Builder<Arguments> tests = Stream.builder();
+
+        if (isProviderPresent("OpenJCEPlusFIPS")) {
+            // 1 - The profile in propertyListA-java.security extends the profile
+            // in the main java.security file, which lists 4 providers.
+            tests.add(Arguments.of("Test-Profile-Property-List.A",
+                    System.getProperty("test.src") + "/propertyListA-java.security",
+                    "(?s)(?=.*OpenJCEPlusFIPS)(?=.*Sun)(?=.*SunJSSE)(?=.*SunEC)",
+                    0));
+            // 2 - The profile in propertyListB-java.security extends the profile
+            // in propertyListA-java.security, which in turn extends the profile
+            // in the main java.security file, listing 5 providers.
+            tests.add(Arguments.of("Test-Profile-Property-List.B",
+                    System.getProperty("test.src") + "/propertyListA-java.security" + File.pathSeparator
+                            + System.getProperty("test.src") + "/propertyListB-java.security",
+                    "(?s)(?=.*OpenJCEPlusFIPS)(?=.*Sun)(?=.*SunJSSE)(?=.*SunEC)(?=.*SunJCE)",
+                    0));
+        }
+
+        // 3 - The profile in propertyListB-java.security extends the profile
+        // in propertyListA-java.security, which in turn extends the main
+        // java.security profile, but propertyListB-java.security file is missing.
+        tests.add(Arguments.of("Test-Profile-Property-List.B",
+                System.getProperty("test.src") + "/propertyListB-java.security",
+                "is not present in the java.security file or any appended files",
+                1));
+        // 4 - The -Djava.security.propertiesList option does not support using
+        // a leading '=' prefix.
+        tests.add(Arguments.of("Test-Profile-Property-List.A",
+                "=" + System.getProperty("test.src") + "/propertyListA-java.security",
+                "java.security.propertiesList does not support '=' prefix",
+                1));
+
+        return tests.build();
     }
 
     @ParameterizedTest
@@ -234,6 +239,15 @@ public class TestProperties {
                 "TestProperties");
         outputAnalyzer.reportDiagnosticSummary();
         outputAnalyzer.shouldHaveExitValue(exitValue).shouldMatch(expected);
+    }
+
+    private static boolean isProviderPresent(String providerName) {
+        for (Provider provider : Security.getProviders()) {
+            if (provider.getName().equalsIgnoreCase(providerName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) {
