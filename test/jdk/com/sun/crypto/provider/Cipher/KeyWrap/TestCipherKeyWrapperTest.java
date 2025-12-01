@@ -297,7 +297,7 @@ public class TestCipherKeyWrapperTest {
         Cipher wrapCI = Cipher.getInstance(wrapAlgo);
         if (isPBE && !isAESBlowfish) {
             wrapCI.init(Cipher.WRAP_MODE, initKey, pbeParams);
-        } else if (isAESBlowfish && !wrapCI.getProvider().getName().startsWith("OpenJCEPlus")) {
+        } else if (isAESBlowfish && (!wrapCI.getProvider().getName().startsWith("OpenJCEPlus") || isPBE)) {
             wrapCI.init(Cipher.WRAP_MODE, initKey);
             aps = wrapCI.getParameters();
         } else {
