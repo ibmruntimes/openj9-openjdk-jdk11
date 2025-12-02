@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.nio.ch;
 
 import java.io.IOException;
@@ -33,6 +39,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.nio.channels.spi.AbstractSelector;
 import java.nio.channels.spi.SelectorProvider;
+import java.net.SocketException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,6 +48,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import sun.nio.ch.PollsetSelectorFeature;
 
 /**
  * Base Selector implementation class.
@@ -50,10 +58,10 @@ abstract class SelectorImpl
     extends AbstractSelector
 {
     // The set of keys registered with this Selector
-    private final Set<SelectionKey> keys;
+    protected final Set<SelectionKey> keys;
 
     // The set of keys with data ready for an operation
-    private final Set<SelectionKey> selectedKeys;
+    protected Set<SelectionKey> selectedKeys;
 
     // Public views of the key sets
     private final Set<SelectionKey> publicKeys;             // Immutable
@@ -173,24 +181,42 @@ abstract class SelectorImpl
      */
     protected abstract void implClose() throws IOException;
 
+    // This method is added to support the pollset implementation
+    public void putEventOps(SelectionKeyImpl sk, int ops) { }
+
     @Override
     public final void implCloseSelector() throws IOException {
-        wakeup();
-        synchronized (this) {
-            implClose();
-            synchronized (publicSelectedKeys) {
-                // Deregister channels
-                Iterator<SelectionKey> i = keys.iterator();
-                while (i.hasNext()) {
-                    SelectionKeyImpl ski = (SelectionKeyImpl)i.next();
-                    deregister(ski);
-                    SelectableChannel selch = ski.channel();
-                    if (!selch.isOpen() && !selch.isRegistered())
-                        ((SelChImpl)selch).kill();
-                    selectedKeys.remove(ski);
-                    i.remove();
+        if (PollsetSelectorFeature.ENABLED) {
+            Iterator i = keys.iterator();
+            while ( i.hasNext() ) {
+                ((SelectionKey)i.next()).cancel();
+            }
+            wakeup(); 
+            synchronized (this) {
+                synchronized (publicKeys) {
+                    synchronized (publicSelectedKeys) {
+                       implClose();
+                    }
                 }
-                assert selectedKeys.isEmpty() && keys.isEmpty();
+            }
+        } else {
+            wakeup();
+            synchronized (this) {
+                implClose();
+                synchronized (publicSelectedKeys) {
+                    // Deregister channels
+                    Iterator<SelectionKey> i = keys.iterator();
+                    while (i.hasNext()) {
+                        SelectionKeyImpl ski = (SelectionKeyImpl)i.next();
+                        deregister(ski);
+                        SelectableChannel selch = ski.channel();
+                        if (!selch.isOpen() && !selch.isRegistered())
+                            ((SelChImpl)selch).kill();
+                        selectedKeys.remove(ski);
+                        i.remove();
+                    }
+                    assert selectedKeys.isEmpty() && keys.isEmpty();
+                }
             }
         }
     }
@@ -200,27 +226,39 @@ abstract class SelectorImpl
                                           int ops,
                                           Object attachment)
     {
-        if (!(ch instanceof SelChImpl))
-            throw new IllegalSelectorException();
-        SelectionKeyImpl k = new SelectionKeyImpl((SelChImpl)ch, this);
-        k.attach(attachment);
-
-        // register (if needed) before adding to key set
-        implRegister(k);
-
-        // add to the selector's key set, removing it immediately if the selector
-        // is closed. The key is not in the channel's key set at this point but
-        // it may be observed by a thread iterating over the selector's key set.
-        keys.add(k);
-        try {
+        if (PollsetSelectorFeature.ENABLED) {
+            if (!(ch instanceof SelChImpl))
+                throw new IllegalSelectorException();
+            SelectionKeyImpl k = new SelectionKeyImpl((SelChImpl)ch, this);
+            k.attach(attachment);
+            synchronized (publicKeys) {
+                implRegister(k);
+            }
             k.interestOps(ops);
-        } catch (ClosedSelectorException e) {
-            assert ch.keyFor(this) == null;
-            keys.remove(k);
-            k.cancel();
-            throw e;
+            return k;
+        } else {
+            if (!(ch instanceof SelChImpl))
+                throw new IllegalSelectorException();
+            SelectionKeyImpl k = new SelectionKeyImpl((SelChImpl)ch, this);
+            k.attach(attachment);
+
+            // register (if needed) before adding to key set
+            implRegister(k);
+
+            // add to the selector's key set, removing it immediately if the selector
+            // is closed. The key is not in the channel's key set at this point but
+            // it may be observed by a thread iterating over the selector's key set.
+            keys.add(k);
+            try {
+                k.interestOps(ops);
+            } catch (ClosedSelectorException e) {
+                assert ch.keyFor(this) == null;
+                keys.remove(k);
+                k.cancel();
+                throw e;
+            }
+            return k;
         }
-        return k;
     }
 
     /**
@@ -242,34 +280,65 @@ abstract class SelectorImpl
      * Invoked by selection operations to process the cancelled-key set
      */
     protected final void processDeregisterQueue() throws IOException {
-        assert Thread.holdsLock(this);
-        assert Thread.holdsLock(publicSelectedKeys);
+        // Precondition: Synchronized on this, keys, and selectedKeys
+        if (PollsetSelectorFeature.ENABLED) {
+            Set<SelectionKey> cks = cancelledKeys();
+            synchronized (cks) {
+                if (!cks.isEmpty()) {
+                    Iterator<SelectionKey> i = cks.iterator();
+                    while (i.hasNext()) {
+                        SelectionKeyImpl ski = (SelectionKeyImpl)i.next();
+                        try {
+                            implDereg(ski);
+                        } catch (SocketException se) {
+                            throw new IOException("Error deregistering key", se);
+                        } finally {
+                            i.remove();
+                        }
+                    }
+                }
+            }
+        } else {
+            assert Thread.holdsLock(this);
+            assert Thread.holdsLock(publicSelectedKeys);
 
-        Set<SelectionKey> cks = cancelledKeys();
-        synchronized (cks) {
-            if (!cks.isEmpty()) {
-                Iterator<SelectionKey> i = cks.iterator();
-                while (i.hasNext()) {
-                    SelectionKeyImpl ski = (SelectionKeyImpl)i.next();
-                    i.remove();
+            Set<SelectionKey> cks = cancelledKeys();
+            synchronized (cks) {
+                if (!cks.isEmpty()) {
+                    Iterator<SelectionKey> i = cks.iterator();
+                    while (i.hasNext()) {
+                        SelectionKeyImpl ski = (SelectionKeyImpl)i.next();
+                        i.remove();
 
-                    // remove the key from the selector
-                    implDereg(ski);
+                        // remove the key from the selector
+                        implDereg(ski);
 
-                    selectedKeys.remove(ski);
-                    keys.remove(ski);
+                        selectedKeys.remove(ski);
+                        keys.remove(ski);
 
-                    // remove from channel's key set
-                    deregister(ski);
+                        // remove from channel's key set
+                        deregister(ski);
 
-                    SelectableChannel ch = ski.channel();
-                    if (!ch.isOpen() && !ch.isRegistered())
-                        ((SelChImpl)ch).kill();
+                        SelectableChannel ch = ski.channel();
+                        if (!ch.isOpen() && !ch.isRegistered())
+                            ((SelChImpl)ch).kill();
+                    }
                 }
             }
         }
     }
 
+    /**
+     * This method is added to support the pollset implementation
+     * Indicates whether the underlying SelectorImpl tries to re-organise the 
+     * channelArray and pollWrapper arrays to keep interesting channels at the
+     * start of the arrays. By default this method returns false. Derived class should overwrite
+     * this method if it re-organizes. 
+     */
+    protected boolean isUpdateChannelsReq() {
+            return false;
+    }           
+ 
     /**
      * Invoked by selection operations to handle ready events. If an action
      * is specified then it is invoked to handle the key, otherwise the key
