@@ -1523,7 +1523,8 @@ jdk.xml.dsig.secureValidationPolicy=\
 # pattern allows java.lang.Enum, java.security.KeyRep, java.security.KeyRep$Type,
 # and javax.crypto.spec.SecretKeySpec and rejects all the others.
 jceks.key.serialFilter = java.base/java.lang.Enum;java.base/java.security.KeyRep;\
-  java.base/java.security.KeyRep$Type;java.base/javax.crypto.spec.SecretKeySpec;!*
+  java.base/java.security.KeyRep$Type;java.base/javax.crypto.spec.SecretKeySpec;\
+  com.ibm.crypto.plus.provider.JCEPlusKeyRep;com.ibm.crypto.plus.provider.JCEPlusKeyRep$Type;!*
 
 #
 # PKCS12 KeyStore properties
