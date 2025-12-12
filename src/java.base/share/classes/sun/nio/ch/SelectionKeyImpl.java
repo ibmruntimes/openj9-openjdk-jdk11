@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.nio.ch;
 
 import java.lang.invoke.ConstantBootstraps;
@@ -34,6 +40,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.AbstractSelectionKey;
 
+import sun.nio.ch.PollsetSelectorFeature;
 
 /**
  * An implementation of SelectionKey.
@@ -94,13 +101,17 @@ public final class SelectionKeyImpl
     @Override
     public SelectionKey interestOps(int ops) {
         ensureValid();
-        if ((ops & ~channel().validOps()) != 0)
-            throw new IllegalArgumentException();
-        int oldOps = (int) INTERESTOPS.getAndSet(this, ops);
-        if (ops != oldOps) {
-            selector.setEventOps(this);
+        if (PollsetSelectorFeature.ENABLED) {
+            return nioInterestOps(ops);
+        } else {
+            if ((ops & ~channel().validOps()) != 0)
+                throw new IllegalArgumentException();
+            int oldOps = (int) INTERESTOPS.getAndSet(this, ops);
+            if (ops != oldOps) {
+                selector.setEventOps(this);
+            }
+            return this;
         }
-        return this;
     }
 
     @Override
@@ -143,10 +154,31 @@ public final class SelectionKeyImpl
     }
 
     public SelectionKey nioInterestOps(int ops) {
-        if ((ops & ~channel().validOps()) != 0)
-            throw new IllegalArgumentException();
-        interestOps = ops;
-        selector.setEventOps(this);
+        if (PollsetSelectorFeature.ENABLED) {
+            boolean bUpdateRequired = false;
+            if(selector instanceof SelectorImpl) {
+                bUpdateRequired = ((SelectorImpl)selector).isUpdateChannelsReq();
+            }
+            // the channel array.
+            if(bUpdateRequired) {
+                synchronized ( selector.keys() ) {
+                    interestOps = ops;
+                    if ((ops & ~channel().validOps()) != 0)
+                        throw new IllegalArgumentException();
+                    channel.translateAndSetInterestOps(ops, this);
+                }
+            } else {
+                interestOps = ops;
+                if ((ops & ~channel().validOps()) != 0)
+                    throw new IllegalArgumentException();
+                channel.translateAndSetInterestOps(ops, this);
+            }
+        } else {
+            if ((ops & ~channel().validOps()) != 0)
+                throw new IllegalArgumentException();
+            interestOps = ops;
+            selector.setEventOps(this);
+        }
         return this;
     }
 

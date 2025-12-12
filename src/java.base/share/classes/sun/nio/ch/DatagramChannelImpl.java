@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.nio.ch;
 
 import java.io.FileDescriptor;
@@ -1228,6 +1234,22 @@ class DatagramChannelImpl
         // fd is null if constructor threw exception
         if (fd != null)
             close();
+    }
+
+    /**
+     * This method is added to support the pollset implementation.
+     * Translates an interest operation set into a native poll event set.
+     */
+    public void translateAndSetInterestOps(int ops, SelectionKeyImpl sk) {
+        int newOps = 0;
+
+        if ((ops & SelectionKey.OP_READ) != 0)
+            newOps |= Net.POLLIN;
+        if ((ops & SelectionKey.OP_WRITE) != 0)
+            newOps |= Net.POLLOUT;
+        if ((ops & SelectionKey.OP_CONNECT) != 0)
+            newOps |= Net.POLLIN;
+        ((SelectorImpl) sk.selector()).putEventOps(sk, newOps);
     }
 
     /**
