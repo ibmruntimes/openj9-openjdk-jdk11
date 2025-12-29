@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2023, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -41,6 +41,7 @@ import java.security.interfaces.XECPrivateKey;
 import java.security.interfaces.XECPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.NamedParameterSpec;
+import java.util.Arrays;
 
 import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
@@ -55,8 +56,7 @@ public class NativeXDHKeyAgreement extends KeyAgreementSpi {
     private static NativeCrypto nativeCrypto;
     private static final boolean nativeCryptTrace = NativeCrypto.isTraceEnabled();
 
-    private XECPrivateKey xecPrivateKey;
-    private byte[] privateKey;
+    private XECPrivateKey privateKey;
     private byte[] secret;
     private XECOperations ops;
     private final XECParameters lockedParams;
@@ -100,17 +100,18 @@ public class NativeXDHKeyAgreement extends KeyAgreementSpi {
         if (!(key instanceof XECPrivateKey)) {
             throw new InvalidKeyException("Unsupported key type");
         }
-        xecPrivateKey = (XECPrivateKey) key;
+        privateKey = (XECPrivateKey) key;
         XECParameters xecParams = XECParameters.get(
-            InvalidKeyException::new, xecPrivateKey.getParams());
+            InvalidKeyException::new, privateKey.getParams());
 
         if ((lockedParams != null) && (lockedParams != xecParams)) {
             throw new InvalidKeyException("Parameters must be " + lockedParams.getName());
         }
 
         ops = new XECOperations(xecParams);
-        privateKey = xecPrivateKey.getScalar()
+        byte[] tmp = privateKey.getScalar()
                 .orElseThrow(() -> new InvalidKeyException("No private key value"));
+        Arrays.fill(tmp, (byte)0);
         secret = null;
 
         if (!NativeCrypto.isAllowedAndLoaded()) {
@@ -191,17 +192,22 @@ public class NativeXDHKeyAgreement extends KeyAgreementSpi {
                 curveType = NativeCrypto.X448;
             }
 
-            byte[] publicKeyArray = publicKey.getKeyAsByteArray();
-            computedSecret = new byte[ops.getParameters().getBytes()];
+            int result;
+            byte[] scalar = this.privateKey.getScalar().get();
+            try {
+                byte[] publicKeyArray = publicKey.getKeyAsByteArray();
+                computedSecret = new byte[ops.getParameters().getBytes()];
 
-            if (nativeCrypto == null) {
-                nativeCrypto = NativeCrypto.getNativeCrypto();
-            }
-            int result = nativeCrypto.XDHGenerateSecret(privateKey, privateKey.length,
+                if (nativeCrypto == null) {
+                    nativeCrypto = NativeCrypto.getNativeCrypto();
+                }
+                result = nativeCrypto.XDHGenerateSecret(scalar, scalar.length,
                                                         publicKeyArray, publicKeyArray.length,
                                                         computedSecret, computedSecret.length,
                                                         curveType);
-
+            } finally {
+                Arrays.fill(scalar, (byte)0);
+            }
             if (result == -1) {
                 if (nativeCryptTrace) {
                     System.err.println("Shared secret generation by OpenSSL failed," +
@@ -216,7 +222,8 @@ public class NativeXDHKeyAgreement extends KeyAgreementSpi {
             throw new InvalidKeyException("Point has small order");
         }
 
-        secret = computedSecret;
+        this.secret = computedSecret;
+
         return null;
     }
 
@@ -273,7 +280,12 @@ public class NativeXDHKeyAgreement extends KeyAgreementSpi {
         if (!(algorithm.equals("TlsPremasterSecret"))) {
             throw new NoSuchAlgorithmException("Only supported for algorithm TlsPremasterSecret");
         }
-        return new SecretKeySpec(engineGenerateSecret(), algorithm);
+        byte[] bytes = engineGenerateSecret();
+        try {
+            return new SecretKeySpec(bytes, algorithm);
+        } finally {
+            Arrays.fill(bytes, (byte)0);
+        }
     }
 
     /*
@@ -294,7 +306,7 @@ public class NativeXDHKeyAgreement extends KeyAgreementSpi {
                     javaImplementation = new XDHKeyAgreement.X448();
                 }
             }
-            javaImplementation.engineInit(xecPrivateKey, null);
+            javaImplementation.engineInit(privateKey, null);
         }
     }
 
