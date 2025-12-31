@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -810,6 +810,7 @@ sun/security/pkcs11/ec/TestECDSA.java https://github.com/eclipse-openj9/openj9/i
 sun/security/pkcs11/ec/TestECDSA2.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/ec/TestECGenSpec.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/fips/SunJSSEFIPSInit.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-x64
+sun/security/pkcs11/fips/TestTLS12.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/KeyAgreement/IllegalPackageAccess.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/KeyAgreement/SupportedDHKeys.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/KeyAgreement/TestDH.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64

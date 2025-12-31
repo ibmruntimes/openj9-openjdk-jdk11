@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -746,6 +746,7 @@ sun/security/pkcs/pkcs9/PKCS9AttrTypeTests.java https://github.ibm.com/runtimes/
 sun/security/pkcs/pkcs9/UnstructuredName.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/Cipher/TestCipherTextStealingMultipart.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/Config/ReadConfInUTF16Env.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
+sun/security/pkcs11/fips/TestTLS12.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/KeyStore/ClientAuth.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/Provider/Absolute.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs11/sslecc/ClientJSSEServerJSSE.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
