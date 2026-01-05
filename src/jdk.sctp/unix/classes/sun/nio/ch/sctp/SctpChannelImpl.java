@@ -22,13 +22,6 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
- * ===========================================================================
- */
-
 package sun.nio.ch.sctp;
 
 import java.net.InetAddress;
@@ -647,15 +640,6 @@ public class SctpChannelImpl extends SctpChannel
     @SuppressWarnings("all")
     public boolean translateAndSetReadyOps(int ops, SelectionKeyImpl sk) {
         return translateReadyOps(ops, 0, sk);
-    }
-
-    /**
-     * Translates an interest operation set into a native poll event set.
-     */
-    @Override
-    public void translateAndSetInterestOps(int ops, SelectionKeyImpl sk) {
-        // Added because the parent class declares this method; no custom
-        // implementation is required here.
     }
 
     @Override

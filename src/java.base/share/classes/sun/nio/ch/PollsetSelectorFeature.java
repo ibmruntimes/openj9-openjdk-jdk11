@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,7 +33,6 @@ import java.security.PrivilegedAction;
  *   - System property java.nio.channels.spi.SelectorProvider equals
  *     "sun.nio.ch.PollsetSelectorProvider"
  *   - AND the OS is AIX.
- *
  */
 
 public final class PollsetSelectorFeature {
@@ -44,14 +43,12 @@ public final class PollsetSelectorFeature {
     }
 
     private static boolean pollsetEnabled() {
-        String sp = AccessController.doPrivileged(
-            (PrivilegedAction<String>) () ->
-            System.getProperty("java.nio.channels.spi.SelectorProvider")
-        );
+        PrivilegedAction<Boolean> test = () ->
+            "AIX".equalsIgnoreCase(
+                    System.getProperty("os.name"))
+            && "sun.nio.ch.PollsetSelectorProvider".equals(
+                    System.getProperty("java.nio.channels.spi.SelectorProvider"));
 
-        if (!"sun.nio.ch.PollsetSelectorProvider".equals(sp))
-            return false;
-
-        return "AIX".equalsIgnoreCase(System.getProperty("os.name", ""));
+        return AccessController.doPrivileged(test).booleanValue();
     }
 }

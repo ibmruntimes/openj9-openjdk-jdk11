@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -174,10 +174,10 @@ class SinkChannelImpl
      * This method is added to support the pollset implementation.
      * Translates an interest operation set into a native poll event set.
      */
+    @Override
     public void translateAndSetInterestOps(int ops, SelectionKeyImpl sk) {
-        if (ops == SelectionKey.OP_WRITE)
-            ops = Net.POLLOUT;
-        ((SelectorImpl) sk.selector()).putEventOps(sk, ops);
+        int newOps = ((ops & SelectionKey.OP_WRITE) != 0) ? Net.POLLOUT : 0;
+        ((SelectorImpl) sk.selector()).putEventOps(sk, newOps);
     }
 
     public boolean translateReadyOps(int ops, int initialOps, SelectionKeyImpl ski) {

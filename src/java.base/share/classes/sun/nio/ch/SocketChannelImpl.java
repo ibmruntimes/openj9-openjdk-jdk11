@@ -117,7 +117,7 @@ class SocketChannelImpl
     private InetSocketAddress remoteAddress;
 
     // This variable is added to support the pollset implementation.
-    private boolean readyToConnect = false;
+    private boolean readyToConnect;
 
     // Socket adaptor, created on demand
     private Socket socket;
@@ -547,21 +547,21 @@ class SocketChannelImpl
     protected void implConfigureBlocking(boolean block) throws IOException {
         if (PollsetSelectorFeature.ENABLED) {
             IOUtil.configureBlocking(fd, block);
-        } else {
-            readLock.lock();
+            return;
+        }
+        readLock.lock();
+        try {
+            writeLock.lock();
             try {
-                writeLock.lock();
-                try {
-                    synchronized (stateLock) {
-                        ensureOpen();
-                        IOUtil.configureBlocking(fd, block);
-                    }
-                } finally {
-                    writeLock.unlock();
+                synchronized (stateLock) {
+                    ensureOpen();
+                    IOUtil.configureBlocking(fd, block);
                 }
             } finally {
-                readLock.unlock();
+                writeLock.unlock();
             }
+        } finally {
+            readLock.unlock();
         }
     }
 
@@ -683,7 +683,6 @@ class SocketChannelImpl
         }
     }
 
-
     // This method is added to support the pollset implementation.
     private void readerCleanup() throws IOException {
         synchronized (stateLock) {
@@ -705,6 +704,7 @@ class SocketChannelImpl
         }
     }
 
+    @Override
     public boolean connect(SocketAddress sa) throws IOException {
         if (PollsetSelectorFeature.ENABLED) {
             int localPort = 0;
@@ -729,8 +729,8 @@ class SocketChannelImpl
                                     // notify hook only if unbound
                                     if (localAddress == null) {
                                         NetHooks.beforeTcpConnect(fd,
-                                                               isa.getAddress(),
-                                                               isa.getPort());
+                                                                  isa.getAddress(),
+                                                                  isa.getPort());
                                     }
                                     readerThread = NativeThread.current();
                                 }
@@ -740,13 +740,12 @@ class SocketChannelImpl
                                         ia = InetAddress.getLocalHost();
                                     n = Net.connect(fd,
                                                     ia,
-                                                   isa.getPort());
-                                    if (  (n == IOStatus.INTERRUPTED)
+                                                    isa.getPort());
+                                    if ((n == IOStatus.INTERRUPTED)
                                           && isOpen())
                                         continue;
                                     break;
                                 }
-
                             } finally {
                                 readerCleanup();
                                 end((n > 0) || (n == IOStatus.UNAVAILABLE));
@@ -762,7 +761,6 @@ class SocketChannelImpl
                         synchronized (stateLock) {
                             remoteAddress = isa;
                             if (n > 0) {
-
                                 // Connection succeeded; disallow further
                                 // invocation
                                 state = ST_CONNECTED;
@@ -781,47 +779,46 @@ class SocketChannelImpl
                     return false;
                 }
             }
-        } else {
-            InetSocketAddress isa = Net.checkAddress(sa);
-            SecurityManager sm = System.getSecurityManager();
-            if (sm != null)
-                sm.checkConnect(isa.getAddress().getHostAddress(), isa.getPort());
+        }
 
-            InetAddress ia = isa.getAddress();
-            if (ia.isAnyLocalAddress())
-                ia = InetAddress.getLocalHost();
+        InetSocketAddress isa = Net.checkAddress(sa);
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null)
+            sm.checkConnect(isa.getAddress().getHostAddress(), isa.getPort());
 
+        InetAddress ia = isa.getAddress();
+        if (ia.isAnyLocalAddress())
+            ia = InetAddress.getLocalHost();
+
+        try {
+            readLock.lock();
             try {
-                readLock.lock();
+                writeLock.lock();
                 try {
-                    writeLock.lock();
+                    int n = 0;
+                    boolean blocking = isBlocking();
                     try {
-                        int n = 0;
-                        boolean blocking = isBlocking();
-                        try {
-                            beginConnect(blocking, isa);
-                            do {
-                                n = Net.connect(fd, ia, isa.getPort());
-                            } while (n == IOStatus.INTERRUPTED && isOpen());
-                        } finally {
-                            endConnect(blocking, (n > 0));
-                        }
-                        assert IOStatus.check(n);
-                        return n > 0;
+                        beginConnect(blocking, isa);
+                        do {
+                            n = Net.connect(fd, ia, isa.getPort());
+                        } while (n == IOStatus.INTERRUPTED && isOpen());
                     } finally {
-                        writeLock.unlock();
+                        endConnect(blocking, (n > 0));
                     }
+                    assert IOStatus.check(n);
+                    return n > 0;
                 } finally {
-                    readLock.unlock();
+                    writeLock.unlock();
                 }
-            } catch (IOException ioe) {
-                // connect failed, close the channel
-                close();
-                throw SocketExceptions.of(ioe, isa);
+            } finally {
+                readLock.unlock();
             }
+        } catch (IOException ioe) {
+            // connect failed, close the channel
+            close();
+            throw SocketExceptions.of(ioe, isa);
         }
     }
-
 
     /**
      * Marks the beginning of a finishConnect operation that might block.
@@ -895,7 +892,7 @@ class SocketChannelImpl
                                     for (;;) {
                                         n = checkConnectPollset(fd, false,
                                                      readyToConnect);
-                                        if (  (n == IOStatus.INTERRUPTED)
+                                        if ((n == IOStatus.INTERRUPTED)
                                               && isOpen())
                                             continue;
                                         break;
@@ -909,7 +906,7 @@ class SocketChannelImpl
                                             // spurious notifications
                                             continue;
                                         }
-                                        if (  (n == IOStatus.INTERRUPTED)
+                                        if ((n == IOStatus.INTERRUPTED)
                                               && isOpen())
                                             continue;
                                         break;
@@ -917,7 +914,7 @@ class SocketChannelImpl
                                 }
                             }
                         } finally {
-		            synchronized (stateLock) {
+                            synchronized (stateLock) {
                                 readerThread = 0;
                                 if (state == ST_KILLPENDING) {
                                     kill();
@@ -950,45 +947,45 @@ class SocketChannelImpl
                     return false;
                 }
             }
-        } else {
-            try {
-                readLock.lock();
-                try {
-                    writeLock.lock();
-                    try {
-                        // no-op if already connected
-                        if (isConnected())
-                            return true;
+        }
 
-                        boolean blocking = isBlocking();
-                        boolean connected = false;
-                        try {
-                            beginFinishConnect(blocking);
-                            int n = 0;
-                            if (blocking) {
-                                do {
-                                    n = checkConnect(fd, true);
-                                } while ((n == 0 || n == IOStatus.INTERRUPTED) && isOpen());
-                            } else {
-                                n = checkConnect(fd, false);
-                            }
-                            connected = (n > 0);
-                        } finally {
-                            endFinishConnect(blocking, connected);
+        try {
+            readLock.lock();
+            try {
+                writeLock.lock();
+                try {
+                    // no-op if already connected
+                    if (isConnected())
+                        return true;
+
+                    boolean blocking = isBlocking();
+                    boolean connected = false;
+                    try {
+                        beginFinishConnect(blocking);
+                        int n = 0;
+                        if (blocking) {
+                            do {
+                                n = checkConnect(fd, true);
+                            } while ((n == 0 || n == IOStatus.INTERRUPTED) && isOpen());
+                        } else {
+                            n = checkConnect(fd, false);
                         }
-                        assert (blocking && connected) ^ !blocking;
-                        return connected;
+                        connected = (n > 0);
                     } finally {
-                        writeLock.unlock();
+                        endFinishConnect(blocking, connected);
                     }
+                    assert (blocking && connected) ^ !blocking;
+                    return connected;
                 } finally {
-                    readLock.unlock();
+                    writeLock.unlock();
                 }
-            } catch (IOException ioe) {
-                // connect failed, close the channel
-                close();
-                throw SocketExceptions.of(ioe, remoteAddress);
+            } finally {
+                readLock.unlock();
             }
+        } catch (IOException ioe) {
+            // connect failed, close the channel
+            close();
+            throw SocketExceptions.of(ioe, remoteAddress);
         }
     }
 
@@ -1229,8 +1226,9 @@ class SocketChannelImpl
 
             if (((ops & Net.POLLIN) != 0) &&
                 ((intOps & SelectionKey.OP_READ) != 0) &&
-                (state == ST_CONNECTED))
+                (state == ST_CONNECTED)) {
                 newOps |= SelectionKey.OP_READ;
+            }
 
             if (((ops & Net.POLLCONN) != 0) &&
                 ((intOps & SelectionKey.OP_CONNECT) != 0)) {
@@ -1240,45 +1238,46 @@ class SocketChannelImpl
 
             if (((ops & Net.POLLOUT) != 0) &&
                 ((intOps & SelectionKey.OP_WRITE) != 0) &&
-                (state == ST_CONNECTED))
+                (state == ST_CONNECTED)) {
                 newOps |= SelectionKey.OP_WRITE;
+            }
 
             ski.nioReadyOps(newOps);
             return (newOps & ~oldOps) != 0;
-        } else {
-            int intOps = ski.nioInterestOps();
-            int oldOps = ski.nioReadyOps();
-            int newOps = initialOps;
+        }
 
-            if ((ops & Net.POLLNVAL) != 0) {
-                // This should only happen if this channel is pre-closed while a
-                // selection operation is in progress
-                // ## Throw an error if this channel has not been pre-closed
-                return false;
-            }
+        int intOps = ski.nioInterestOps();
+        int oldOps = ski.nioReadyOps();
+        int newOps = initialOps;
 
-            if ((ops & (Net.POLLERR | Net.POLLHUP)) != 0) {
-                newOps = intOps;
-                ski.nioReadyOps(newOps);
-                return (newOps & ~oldOps) != 0;
-            }
+        if ((ops & Net.POLLNVAL) != 0) {
+            // This should only happen if this channel is pre-closed while a
+            // selection operation is in progress
+            // ## Throw an error if this channel has not been pre-closed
+            return false;
+        }
 
-            boolean connected = isConnected();
-            if (((ops & Net.POLLIN) != 0) &&
-                ((intOps & SelectionKey.OP_READ) != 0) && connected)
-                newOps |= SelectionKey.OP_READ;
-
-            if (((ops & Net.POLLCONN) != 0) &&
-                ((intOps & SelectionKey.OP_CONNECT) != 0) && isConnectionPending())
-                newOps |= SelectionKey.OP_CONNECT;
-
-            if (((ops & Net.POLLOUT) != 0) &&
-                ((intOps & SelectionKey.OP_WRITE) != 0) && connected)
-                newOps |= SelectionKey.OP_WRITE;
-
+        if ((ops & (Net.POLLERR | Net.POLLHUP)) != 0) {
+            newOps = intOps;
             ski.nioReadyOps(newOps);
             return (newOps & ~oldOps) != 0;
-       }
+        }
+
+        boolean connected = isConnected();
+        if (((ops & Net.POLLIN) != 0) &&
+            ((intOps & SelectionKey.OP_READ) != 0) && connected)
+            newOps |= SelectionKey.OP_READ;
+
+        if (((ops & Net.POLLCONN) != 0) &&
+            ((intOps & SelectionKey.OP_CONNECT) != 0) && isConnectionPending())
+            newOps |= SelectionKey.OP_CONNECT;
+
+        if (((ops & Net.POLLOUT) != 0) &&
+            ((intOps & SelectionKey.OP_WRITE) != 0) && connected)
+            newOps |= SelectionKey.OP_WRITE;
+
+        ski.nioReadyOps(newOps);
+        return (newOps & ~oldOps) != 0;
     }
 
     public boolean translateAndUpdateReadyOps(int ops, SelectionKeyImpl ski) {
@@ -1354,6 +1353,7 @@ class SocketChannelImpl
      * This method is added to support the pollset implementation.
      * Translates an interest operation set into a native poll event set.
      */
+    @Override
     public void translateAndSetInterestOps(int ops, SelectionKeyImpl sk) {
         int newOps = 0;
         if ((ops & SelectionKey.OP_READ) != 0)
