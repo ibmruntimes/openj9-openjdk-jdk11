@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -424,6 +424,7 @@ javax/net/ssl/DTLS/DTLSSequenceNumberTest.java https://github.com/eclipse-openj9
 javax/net/ssl/DTLS/DTLSSignatureSchemes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/DTLSUnsupportedCiphersTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/DTLSWontNegotiateV10.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/net/ssl/DTLS/FragmentedFinished.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/InvalidCookie.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/InvalidRecords.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/NoMacInitialClientHello.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
