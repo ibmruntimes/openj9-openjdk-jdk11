@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.lang.invoke;
 
 import jdk.internal.org.objectweb.asm.*;
@@ -163,7 +169,29 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         implMethodName = implInfo.getName();
         implMethodDesc = implInfo.getMethodType().toMethodDescriptorString();
         constructorType = invokedType.changeReturnType(Void.TYPE);
-        lambdaClassName = targetClass.getName().replace('.', '/') + "$$Lambda$" + counter.incrementAndGet();
+        String rawUniqueID = targetClass.getName()
+                        + invokedType.toString()
+                        + samMethodName
+                        + samMethodType.toString()
+                        + instantiatedMethodType.toString()
+                        + implMethodClassName
+                        + implMethodName
+                        + implMethodDesc;
+        StringBuilder encodedUniqueID = new StringBuilder();
+        String parentheses = "(){}[]<>";
+        for (int i = 0; i < rawUniqueID.length(); i++) {
+            char currentChar = rawUniqueID.charAt(i);
+            if (Character.isLetterOrDigit(currentChar)) {
+                encodedUniqueID.append(currentChar);
+            } else {
+                if (parentheses.indexOf(currentChar) != -1) {
+                    encodedUniqueID.append("__");
+                } else {
+                    encodedUniqueID.append('_');
+                }
+            }
+        }
+        lambdaClassName = targetClass.getName().replace('.', '/') + "$$Lambda$" + encodedUniqueID.toString();
         cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         int parameterCount = invokedType.parameterCount();
         if (parameterCount > 0) {
@@ -252,6 +280,10 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * is not found
      */
     private Class<?> spinInnerClass() throws LambdaConversionException {
+        Class<?> innerClass = MethodHandleNatives.findLambdaInSCC(lambdaClassName, targetClass);
+        if (innerClass != null) {
+            return innerClass;
+        }
         String[] interfaces;
         String samIntf = samBase.getName().replace('.', '/');
         boolean accidentallySerializable = !isSerializable && Serializable.class.isAssignableFrom(samBase);
