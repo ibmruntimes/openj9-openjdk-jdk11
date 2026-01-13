@@ -23,12 +23,6 @@
  * questions.
  */
 
-/*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
- * ===========================================================================
- */
-
 package jdk.nio;
 
 import java.io.FileDescriptor;
@@ -204,14 +198,6 @@ public final class Channels {
         @Override
         public int validOps() {
             return (SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-        }
-
-        /**
-         * Translates an interest operation set into a native poll event set.
-         */
-        public void translateAndSetInterestOps(int ops, SelectionKeyImpl sk) {
-            // Added because the parent class declares this method; no custom
-            // implementation is required here.
         }
 
         private boolean translateReadyOps(int ops,

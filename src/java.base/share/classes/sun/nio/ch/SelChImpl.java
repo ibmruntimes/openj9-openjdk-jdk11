@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -68,7 +68,9 @@ public interface SelChImpl extends Channel {
     boolean translateAndSetReadyOps(int ops, SelectionKeyImpl ski);
 
     // This method is added to support the pollset implementation.
-    void translateAndSetInterestOps(int ops, SelectionKeyImpl sk);
+    default void translateAndSetInterestOps(int ops, SelectionKeyImpl sk) {
+        // Do nothing by default.
+    }
 
     /**
      * Translates an interest operation set into a native event set

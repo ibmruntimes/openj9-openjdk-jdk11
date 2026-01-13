@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -103,15 +103,14 @@ public final class SelectionKeyImpl
         ensureValid();
         if (PollsetSelectorFeature.ENABLED) {
             return nioInterestOps(ops);
-        } else {
-            if ((ops & ~channel().validOps()) != 0)
-                throw new IllegalArgumentException();
-            int oldOps = (int) INTERESTOPS.getAndSet(this, ops);
-            if (ops != oldOps) {
-                selector.setEventOps(this);
-            }
-            return this;
         }
+        if ((ops & ~channel().validOps()) != 0)
+            throw new IllegalArgumentException();
+        int oldOps = (int) INTERESTOPS.getAndSet(this, ops);
+        if (ops != oldOps) {
+            selector.setEventOps(this);
+        }
+        return this;
     }
 
     @Override
@@ -155,13 +154,13 @@ public final class SelectionKeyImpl
 
     public SelectionKey nioInterestOps(int ops) {
         if (PollsetSelectorFeature.ENABLED) {
-            boolean bUpdateRequired = false;
-            if(selector instanceof SelectorImpl) {
-                bUpdateRequired = ((SelectorImpl)selector).isUpdateChannelsReq();
+            boolean updateRequired = false;
+            if (selector instanceof SelectorImpl) {
+                updateRequired = ((SelectorImpl)selector).isUpdateChannelsReq();
             }
-            // the channel array.
-            if(bUpdateRequired) {
-                synchronized ( selector.keys() ) {
+            // the channel array
+            if (updateRequired) {
+                synchronized (selector.keys()) {
                     interestOps = ops;
                     if ((ops & ~channel().validOps()) != 0)
                         throw new IllegalArgumentException();
