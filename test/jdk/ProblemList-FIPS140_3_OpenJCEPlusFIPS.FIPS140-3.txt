@@ -511,6 +511,7 @@ javax/net/ssl/DTLS/DTLSSequenceNumberTest.java https://github.com/eclipse-openj9
 javax/net/ssl/DTLS/DTLSSignatureSchemes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/DTLSUnsupportedCiphersTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/DTLSWontNegotiateV10.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/net/ssl/DTLS/FragmentedFinished.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/InvalidCookie.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/InvalidRecords.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/DTLS/NoMacInitialClientHello.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
