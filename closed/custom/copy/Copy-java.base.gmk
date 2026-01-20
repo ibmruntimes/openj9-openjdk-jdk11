@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -175,6 +175,9 @@ $(call openj9_copy_files,, \
 $(call openj9_copy_files,, \
 	$(TOPDIR)/openj9-openjdk-notices \
 	$(LEGAL_DST_DIR)/openj9-openjdk-notices)
+$(call openj9_copy_files,, \
+	$(TOPDIR)/closed/jfr-metadata_blob-notices \
+	$(LEGAL_DST_DIR)/metadata_blob-notices)
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
 

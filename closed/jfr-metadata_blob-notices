@@ -1,0 +1,4 @@
+The jfr-metadata.blob file, which is included in the runtime as lib/metadata.blob,
+is derived from https://github.com/openjdk/jdk/blob/master/src/hotspot/share/jfr/metadata/metadata.xml.
+It is subject to the terms of license mentioned in the header of the file
+https://github.com/openjdk/jdk/blob/master/src/hotspot/share/jfr/metadata/metadata.xml.

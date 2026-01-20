@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2018, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2018, 2026 All Rights Reserved
 # ===========================================================================
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -31,13 +31,13 @@
 # 8. *job* # all things at contains characters in between stars
 # ===========================================================================
 
+/closed/jfr-metadata_blob-notices
 /src/bsd/doc/
 /src/hotspot/share/jfr/metadata/metadata.xml
 /src/hotspot/share/jfr/metadata/metadata.xsd
 /src/jdk.crypto.ec/share/native/libsunec/impl/
 /src/linux/doc/
 /src/solaris/doc/
-/test/
 
 .copyrightignore
 /LICENSE
