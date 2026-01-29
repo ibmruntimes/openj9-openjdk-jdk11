@@ -187,7 +187,7 @@ RestrictedSecurity.NSS.140-2.securerandom.algorithm = PKCS11
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.name = OpenJCEPlusFIPS Cryptographic Module FIPS 140-3
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.default = false
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.fips = true
-RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:f00f97e255b35c1575fd3322a93e8214c2bb8121883a290900a90a8a2b67bbae
+RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.hash = SHA256:de4290722cafa14df845426a4454d3bb62b9e4b3c6792e5c15f63f9d9d9b60d0
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.number = Certificate #XXX
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.desc.sunsetDate = 2026-09-21
@@ -262,10 +262,6 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.1 = com.ibm.crypto.plu
     {KeyGenerator, SunTls12MasterSecret, *}, \
     {KeyGenerator, SunTls12Prf, *}, \
     {KeyGenerator, SunTls12RsaPremasterSecret, *}, \
-    {KeyGenerator, SunTlsKeyMaterial, *}, \
-    {KeyGenerator, SunTlsMasterSecret, *}, \
-    {KeyGenerator, SunTlsPrf, *}, \
-    {KeyGenerator, SunTlsRsaPremasterSecret, *}, \
     {KeyPairGenerator, EC, *}, \
     {KeyPairGenerator, RSA, *}, \
     {KeyPairGenerator, RSAPSS, *}, \
@@ -313,6 +309,10 @@ RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.2 = sun.security.provi
     {CertStore, Collection, ImplementedIn=Software}, \
     {CertStore, com.sun.security.IndexedCollection, ImplementedIn=Software}, \
     {Configuration, JavaLoginConfig, *}, \
+    {KeyGenerator, SunTlsKeyMaterial, *}, \
+    {KeyGenerator, SunTlsMasterSecret, *}, \
+    {KeyGenerator, SunTlsPrf, *}, \
+    {KeyGenerator, SunTlsRsaPremasterSecret, *}, \
     {Policy, JavaPolicy, *}]
 RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider [ \
     {KeyManagerFactory, NewSunX509, *}, \
