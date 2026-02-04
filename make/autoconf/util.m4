@@ -23,6 +23,10 @@
 # questions.
 #
 
+# ===========================================================================
+# (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+# ===========================================================================
+
 m4_include([util_paths.m4])
 
 ###############################################################################
@@ -277,7 +281,7 @@ AC_DEFUN([UTIL_ADD_JVM_ARG_IF_OK],
   $ECHO "Check if jvm arg is ok: $1" >&AS_MESSAGE_LOG_FD
   $ECHO "Command: $3 $1 -version" >&AS_MESSAGE_LOG_FD
   OUTPUT=`$3 $1 $USER_BOOT_JDK_OPTIONS -version 2>&1`
-  FOUND_WARN=`$ECHO "$OUTPUT" | $GREP -i warn`
+  FOUND_WARN=`$ECHO "$OUTPUT" | $GREP -i "warn\|unrecognised"`
   FOUND_VERSION=`$ECHO $OUTPUT | $GREP " version \""`
   if test "x$FOUND_VERSION" != x && test "x$FOUND_WARN" = x; then
     $2="[$]$2 $1"
