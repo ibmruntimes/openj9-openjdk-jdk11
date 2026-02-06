@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2018, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2018, 2026 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -607,6 +607,35 @@ load_crypto_library(jboolean traceEnabled, const char *libName)
         result = dlopen(libName, RTLD_NOW);
 #endif /* defined(_AIX) */
     }
+
+    if ((NULL == result) && traceEnabled) {
+#if defined(_WIN32)
+        DWORD error = GetLastError();
+        LPTSTR msg = NULL;
+
+        FormatMessage(
+                FORMAT_MESSAGE_ALLOCATE_BUFFER
+                    | FORMAT_MESSAGE_FROM_SYSTEM
+                    | FORMAT_MESSAGE_IGNORE_INSERTS,
+                NULL,
+                error,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)&msg, /* it's an output parameter when allocate buffer is used */
+                0,
+                NULL);
+
+        fprintf(stderr, "Failed to load %s due to %s\n",
+                libName, (NULL != msg) ? msg : "(unknown reason)");
+        if (msg != NULL) {
+            LocalFree(msg);
+        }
+#else /* defined(_WIN32) */
+        char *error = dlerror();
+        fprintf(stderr, "Failed to load %s due to %s\n",
+                libName, (NULL != error) ? error : "(unknown reason)");
+#endif /* defined(_WIN32) */
+    }
+
     return result;
 }
 
