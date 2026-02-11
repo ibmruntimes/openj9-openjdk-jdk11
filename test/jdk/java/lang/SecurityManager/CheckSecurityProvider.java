@@ -22,6 +22,12 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
+/*
  * @test
  * @bug 6997010 7191662
  * @summary Consolidate java.security files into one file with modifications
@@ -93,6 +99,8 @@ public class CheckSecurityProvider {
             layer.findModule("jdk.crypto.cryptoki")
                 .ifPresent(m -> expected.add("sun.security.pkcs11.SunPKCS11"));
         }
+        layer.findModule("openjceplus")
+            .ifPresent(m -> expected.add("com.ibm.crypto.plus.provider.OpenJCEPlus"));
 
         List<String> actual = Stream.of(Security.getProviders())
             .map(p -> p.getClass().getName())
