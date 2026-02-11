@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2024 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -442,7 +442,7 @@ public final class SunPKCS11 extends AuthProvider {
 
             // When FIPS mode is enabled, configure p11 object to FIPS mode
             // and pass the parent object so it can callback.
-            if (RestrictedSecurity.isFIPSEnabled()) {
+            if (RestrictedSecurity.isFIPS1402Enabled()) {
                 if (debug != null) {
                     debug.println("FIPS mode in SunPKCS11");
                 }

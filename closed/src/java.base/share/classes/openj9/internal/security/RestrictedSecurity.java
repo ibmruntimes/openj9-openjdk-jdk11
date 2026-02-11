@@ -1,6 +1,6 @@
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2026 All Rights Reserved
  * ===========================================================================
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -258,18 +258,29 @@ public final class RestrictedSecurity {
     }
 
     /**
-     * Check if the FIPS mode is enabled.
+     * Check if a FIPS mode is enabled.
      *
-     * FIPS mode will be enabled when the semeru.fips system property is
-     * true, and the RestrictedSecurity mode has been successfully initialized.
+     * FIPS mode will be enabled when the semeru.fips system property
+     * is true, and a FIPS profile is successfully initialized in
+     * RestrictedSecurity mode.
      *
      * @return true if FIPS is enabled
      */
     public static boolean isFIPSEnabled() {
-        if (securityEnabled) {
-            return isFIPSEnabled;
-        }
-        return false;
+        return securityEnabled && isFIPSEnabled;
+    }
+
+    /**
+     * Check if the FIPS 140-2 mode is enabled.
+     *
+     * FIPS 140-2 mode will be enabled when the semeru.fips system property
+     * is true, and a FIPS 140-2 profile is successfully initialized in
+     * RestrictedSecurity mode.
+     *
+     * @return true if FIPS 140-2 is enabled
+     */
+    public static boolean isFIPS1402Enabled() {
+        return securityEnabled && isFIPSEnabled && "140-2".equals(restricts.jdkFipsMode);
     }
 
     /**
