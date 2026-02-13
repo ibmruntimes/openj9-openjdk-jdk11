@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2023, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2023, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -28,7 +28,7 @@ OPENJCEPLUS_GSKIT_HOME := $(OPENJCEPLUS_TOPDIR)/ock/jgsk_sdk
 OPENJCEPLUS_HEADER_FILES := $(SUPPORT_OUTPUTDIR)/headers/openjceplus
 OPENJCEPLUS_JCE_CLASSPATH := $(JDK_OUTPUTDIR)/modules/openjceplus:$(JDK_OUTPUTDIR)/modules/java.base
 OPENJCEPLUS_JGSKIT_MAKE := jgskit.mak
-OPENJCEPLUS_JGSKIT_MAKE_PATH := $(OPENJCEPLUS_TOPDIR)/src/main/native
+OPENJCEPLUS_JGSKIT_MAKE_PATH := $(OPENJCEPLUS_TOPDIR)/src/main/native/ock
 OPENJCEPLUS_JGSKIT_PLATFORM :=
 
 ifeq ($(call isTargetOs, aix), true)
