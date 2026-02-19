@@ -87,6 +87,7 @@ security.provider.tbd=Apple
 #ifndef solaris
 security.provider.tbd=SunPKCS11
 #endif
+security.provider.tbd=OpenJCEPlus
 
 #if defined aix-ppc || defined linux-ppc || defined linux-s390 || defined linux-x86 || defined windows
 #
