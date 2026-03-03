@@ -350,6 +350,7 @@ java/security/Security/ClassLoaderDeadlock/Deadlock.sh https://github.com/eclips
 java/security/Security/ConfigFileTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Security/ProviderFiltering.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Security/removing/RemoveProviderByIdentity.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+java/security/Security/SecurityPropFile/ExtraFileAndIncludes.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 java/security/Security/signedfirst/DynStatic.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Signature/ByteBuffers.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Signature/NONEwithRSA.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -478,7 +479,8 @@ javax/net/ssl/FixingJavadocs/ImplicitHandshake.java https://github.com/eclipse-o
 javax/net/ssl/FixingJavadocs/KMTMGetNothing.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/net/ssl/FixingJavadocs/SSLSessionNulls.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/net/ssl/FixingJavadocs/SSLSocketInherit.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
-javax/net/ssl/HttpsURLConnection/CriticalSubjectAltName.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+javax/net/ssl/HttpsURLConnection/CriticalSubjectAltName.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
+javax/net/ssl/HttpsURLConnection/CriticalSubjectAltName.java#tls12 https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 javax/net/ssl/HttpsURLConnection/DummyCacheResponse.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/net/ssl/HttpsURLConnection/Equals.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/net/ssl/HttpsURLConnection/GetResponseCode.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -801,6 +803,7 @@ sun/security/pkcs11/Cipher/TestRSACipher.java https://github.com/eclipse-openj9/
 sun/security/pkcs11/Cipher/TestRSACipherWrap.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/Cipher/TestSymmCiphers.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/Cipher/TestSymmCiphersNoPad.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
+sun/security/pkcs11/Config/ReadConfInUTF16Env.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/pkcs11/ec/ReadCertificates.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/ec/ReadPKCS12.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
 sun/security/pkcs11/ec/TestCurves.java https://github.com/eclipse-openj9/openj9/issues/20978 linux-ppc64le,linux-s390x,linux-x64
@@ -987,12 +990,16 @@ sun/security/ssl/ServerHandshaker/GetPeerHost.java https://github.com/eclipse-op
 sun/security/ssl/ServerHandshaker/HelloExtensionsTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/CustomizedClientSchemes.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/CustomizedServerSchemes.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/SignatureScheme/DefaultSSLConfigSignatureSchemes.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
+sun/security/ssl/SignatureScheme/DisableCertSignAlgsExtForClientTLS12.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
+sun/security/ssl/SignatureScheme/DisableCertSignAlgsExtForClientTLS13.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/ssl/SignatureScheme/DisableSHA1inHandshakeSignatureTLS13.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/DisableSignatureSchemePerScopeDTLS12.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/DisableSignatureSchemePerScopeTLS12.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/DisableSignatureSchemePerScopeTLS13.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/MD5NotAllowedInTLS13CertificateSignature.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/MixingTLSUsageConstraintsWithNonTLS.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/SignatureScheme/RsaSsaPssConstraints.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/ssl/SignatureScheme/SigAlgosExtTestWithTLS12.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/SigAlgosExtTestWithTLS13.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SignatureScheme/SigSchemePropOrdering.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -1079,13 +1086,16 @@ sun/security/ssl/SSLSocketImpl/SSLSocketShouldThrowSocketException.java https://
 sun/security/ssl/SSLSocketImpl/SSLSocketSSLEngineCloseInbound.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SSLSocketImpl/UnconnectedSocketWrongExceptions.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/Stapling/StatusResponseManager.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/X509KeyManager/AlgorithmConstraintsCheck.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/ssl/X509KeyManager/CertificateAuthorities.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509KeyManager/NoGoodKey.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509KeyManager/PreferredKey.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509KeyManager/SelectOneKeyOutOfMany.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/X509KeyManager/X509KeyManagerNegativeTests.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/ssl/X509TrustManagerImpl/BasicConstraints.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509TrustManagerImpl/BasicConstraints12.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509TrustManagerImpl/CacertsLimit.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/X509TrustManagerImpl/CertChainAlgorithmConstraints.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/ssl/X509TrustManagerImpl/CertRequestOverflow.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509TrustManagerImpl/CheckNullEntity.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/X509TrustManagerImpl/ComodoHacker.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -1136,6 +1146,7 @@ sun/security/util/Debug/DebugOptions.java https://github.com/eclipse-openj9/open
 sun/security/util/HostnameChecker/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/util/HostnameMatcher/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/util/InternalPrivateKey/Correctness.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/util/SliceableSecretKey/SoftSliceable.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/validator/certreplace.sh https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/validator/EndEntityExtensionCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/validator/samedn.sh https://github.com/eclipse-openj9/openj9/issues/20978 generic-all

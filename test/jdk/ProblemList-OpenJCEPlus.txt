@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -20,7 +20,12 @@
 #
 # Exclude tests list from jdk_security tests
 #
+com/sun/crypto/provider/Cipher/ChaCha20/UpdateAADTest.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
+com/sun/crypto/provider/Cipher/KeyWrap/TestCipherKeyWrapperTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 com/sun/crypto/provider/DHKEM/Compliance.java https://github.ibm.com/runtimes/jit-crypto/issues/773 generic-all
+com/sun/crypto/provider/KDF/HKDFExhaustiveTest.java https://github.ibm.com/runtimes/jit-crypto/issues/773 generic-all
+java/security/PEM/PEMDecoderTest.java https://github.ibm.com/runtimes/jit-crypto/issues/773 generic-all
+java/security/PEM/PEMEncoderTest.java https://github.ibm.com/runtimes/jit-crypto/issues/773 generic-all
 java/security/Provider/SecurityProviderModularTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 java/security/SecureRandom/DefaultAlgo.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 java/security/SecureRandom/DefaultProvider.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
@@ -29,6 +34,7 @@ java/security/Security/ProviderFiltering.java https://github.ibm.com/runtimes/ji
 java/security/Signature/SignatureGetInstance.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 java/security/Signature/SignatureLength.java https://github.ibm.com/runtimes/jit-crypto/issues/778 generic-all
 java/security/Signature/SignWithOutputBuffer.java https://github.ibm.com/runtimes/jit-crypto/issues/761 generic-all
+javax/crypto/Cipher/TestGetInstance.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 javax/crypto/KDF/KDFDelayedProviderException.java https://github.ibm.com/runtimes/jit-crypto/issues/779 generic-all
 javax/crypto/KDF/KDFDelayedProviderTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 javax/crypto/KeyGenerator/CompareKeys.java https://github.ibm.com/runtimes/jit-crypto/issues/779 generic-all
@@ -36,5 +42,7 @@ jdk/security/jarsigner/Spec.java https://github.ibm.com/runtimes/jit-crypto/issu
 sun/security/ec/ed/TestEdDSA.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/jca/PreferredProviderNegativeTest.java https://github.com/ibmruntimes/openj9-openjdk-jdk/issues/994 generic-all
 sun/security/krb5/auto/principalProperty/PrincipalSystemPropTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
+sun/security/mscapi/EncodingMutability.java https://github.com/eclipse-openj9/openj9/issues/22242 windows-all
+sun/security/provider/all/Deterministic.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 sun/security/util/Debug/DebugOptions.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
