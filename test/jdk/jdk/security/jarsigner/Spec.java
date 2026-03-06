@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -198,7 +198,7 @@ public class Spec {
         assertTrue(JarSigner.Builder
                 .getDefaultSignatureAlgorithm(kpg.generateKeyPair().getPrivate())
                 .equals("SHA384withECDSA"));
-        kpg.initialize(571);
+        kpg.initialize(521);
         assertTrue(JarSigner.Builder
                 .getDefaultSignatureAlgorithm(kpg.generateKeyPair().getPrivate())
                 .equals("SHA512withECDSA"));
