@@ -899,7 +899,6 @@ sun/security/provider/DSA/TestDSA.java https://github.com/eclipse-openj9/openj9/
 sun/security/provider/DSA/TestDSA2.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/DSA/TestKeyPairGenerator.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/DSA/TestLegacyDSAKeyPairGenerator.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
-sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/hss/TestHSS.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/KeyStore/CaseSensitiveAliases.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/provider/KeyStore/DksWithEmptyKeystore.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
