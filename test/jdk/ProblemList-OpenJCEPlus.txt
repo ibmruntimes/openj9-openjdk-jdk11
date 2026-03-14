@@ -43,5 +43,4 @@ sun/security/jca/PreferredProviderNegativeTest.java https://github.com/ibmruntim
 sun/security/krb5/auto/principalProperty/PrincipalSystemPropTest.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 sun/security/mscapi/EncodingMutability.java https://github.com/eclipse-openj9/openj9/issues/22242 windows-all
 sun/security/provider/all/Deterministic.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
-sun/security/provider/DSA/TestMaxLengthDER.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
 sun/security/util/Debug/DebugOptions.java https://github.com/eclipse-openj9/openj9/issues/22242 generic-all
