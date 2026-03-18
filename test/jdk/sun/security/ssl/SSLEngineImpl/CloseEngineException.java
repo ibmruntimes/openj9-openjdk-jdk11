@@ -27,11 +27,16 @@
 //
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * @test
  * @bug 4969799
  * @summary javax.net.ssl.SSLSocket.SSLSocket(InetAddress,int) shouldn't
  *              throw exception
- * @library /javax/net/ssl/templates
+ * @library /javax/net/ssl/templates /test/lib
  * @run main/othervm CloseEngineException
  */
 

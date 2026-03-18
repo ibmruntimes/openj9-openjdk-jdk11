@@ -27,10 +27,15 @@
 //
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * @test
  * @bug 4980882 8207250 8237474
  * @summary SSLEngine should enforce setUseClientMode
- * @library /javax/net/ssl/templates
+ * @library /javax/net/ssl/templates /test/lib
  * @run main/othervm EngineEnforceUseClientMode
  * @author Brad R. Wetmore
  */
