@@ -25,11 +25,16 @@
 // system properties in samevm/agentvm mode.
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * @test
  * @bug 8207317
  * @summary SSLEngine negotiation fail Exception behavior changed from
  *          fail-fast to fail-lazy
- * @library /javax/net/ssl/templates
+ * @library /javax/net/ssl/templates /test/lib
  * @run main/othervm SSLEngineFailedALPN
  */
 /**

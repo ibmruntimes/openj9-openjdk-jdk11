@@ -22,10 +22,15 @@
  */
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * @test
  * @summary Test SSLEngine.begineHandshake() triggers a KeyUpdate handshake
  * in TLSv1.3
- * @library /javax/net/ssl/templates
+ * @library /javax/net/ssl/templates /test/lib
  * @run main/othervm TLS13BeginHandshake
  */
 
