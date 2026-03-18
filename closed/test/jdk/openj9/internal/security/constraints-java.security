@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -21,9 +21,7 @@
 RestrictedSecurity.TestConstraints.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestConstraints.Version.desc.default = false
 RestrictedSecurity.TestConstraints.Version.desc.fips = false
-RestrictedSecurity.TestConstraints.Version.desc.hash = SHA256:ee4d544adefe3f0ed4afe061f43648fd616ba802694bd6cb1918d0a4dd2e7716
-RestrictedSecurity.TestConstraints.Version.desc.number = Certificate #XXX
-RestrictedSecurity.TestConstraints.Version.desc.policy =
+RestrictedSecurity.TestConstraints.Version.desc.hash = SHA256:01b7758f3ee283949a866ee9400c7f00ab49395914036c2f8251e83d40c93682
 RestrictedSecurity.TestConstraints.Version.fips.mode = test
 
 RestrictedSecurity.TestConstraints.Version.jce.provider.1 = sun.security.provider.Sun [ \
