@@ -806,6 +806,8 @@ sun/security/provider/MessageDigest/Offsets.java https://github.com/eclipse-open
 sun/security/provider/MessageDigest/SHA512.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/MessageDigest/SHAKEhash.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/MessageDigest/TestSHAClone.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/provider/named/NamedEdDSA.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/provider/named/NamedKeyFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/NamedEdDSA.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/NamedKeyFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/NSASuiteB/TestDSAGenParameterSpec.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -859,6 +861,7 @@ sun/security/ssl/AppInputStream/ReadZeroBytes.java https://github.com/eclipse-op
 sun/security/ssl/AppInputStream/RemoveMarkReset.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/AppOutputStream/NoExceptionOnClose.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CertPathRestrictions/TLSRestrictions.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/CipherSuite/DefaultNamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/DisabledCurve.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/LegacyConstraints.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -1001,6 +1004,7 @@ sun/security/ssl/X509KeyManager/NonExtendedSSLSessionAlgorithmConstraints.java h
 sun/security/ssl/X509KeyManager/PeerConstraintsCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/X509KeyManager/PreferredKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/X509KeyManager/SelectOneKeyOutOfMany.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/X509KeyManager/SelfSignedCertKeyType.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/X509KeyManager/X509KeyManagerNegativeTests.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/ssl/X509TrustManagerImpl/BasicConstraints.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/X509TrustManagerImpl/CertChainAlgorithmConstraints.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
