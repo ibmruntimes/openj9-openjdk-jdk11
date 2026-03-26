@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2017, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2017, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -78,7 +78,7 @@ else
   endif
   # Map characters in the branch name other than [A-Za-z0-9.] to '-' so the resulting
   # version string is acceptable to Runtime.Version.parse().
-  OPENJ9_BRANCH := $(shell $(PRINTF) '%s' '$(OPENJ9_BRANCH)' | $(TR) -c 'A-Za-z0-9.' '-')
+  OPENJ9_BRANCH := $(shell $(PRINTF) '%s' '$(OPENJ9_BRANCH)' | $(SED) -e 's/[^A-Za-z0-9.]/-/g')
   OPENJ9_VERSION_STRING := $(OPENJ9_BRANCH)-$(OPENJ9_SHA)
 endif
 
