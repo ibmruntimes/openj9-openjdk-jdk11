@@ -959,6 +959,7 @@ sun/security/ssl/AppInputStream/ReadZeroBytes.java https://github.com/eclipse-op
 sun/security/ssl/AppInputStream/RemoveMarkReset.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/AppOutputStream/NoExceptionOnClose.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CertPathRestrictions/TLSRestrictions.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/CipherSuite/DefaultNamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/DisabledCurve.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/LegacyConstraints.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
