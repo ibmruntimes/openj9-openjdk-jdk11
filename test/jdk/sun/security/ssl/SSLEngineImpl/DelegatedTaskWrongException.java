@@ -27,15 +27,12 @@
 //
 
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
- * ===========================================================================
- */
-/*
  * @test
  * @bug 4969459
  * @summary Delegated tasks are not reflecting the subclasses of SSLException
- * @library /javax/net/ssl/templates /test/lib
+ * @library /javax/net/ssl/templates
+ * @library /test/lib
+ * @build jdk.test.lib.Utils
  * @run main/othervm DelegatedTaskWrongException
  */
 

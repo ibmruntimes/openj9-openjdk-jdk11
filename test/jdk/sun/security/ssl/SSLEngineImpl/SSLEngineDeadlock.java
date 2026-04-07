@@ -25,15 +25,12 @@
 // system properties in samevm/agentvm mode.
 
 /*
- * ===========================================================================
- * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
- * ===========================================================================
- */
-/*
  * @test
  * @bug 6492872
  * @summary Deadlock in SSLEngine
- * @library /javax/net/ssl/templates /test/lib
+ * @library /javax/net/ssl/templates
+ * @library /test/lib
+ * @build jdk.test.lib.Utils
  * @run main/othervm SSLEngineDeadlock
  * @author Brad R. Wetmore
  */
