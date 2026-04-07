@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2024, 2024 All Rights Reserved
+# (c) Copyright IBM Corp. 2024, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -21,10 +21,7 @@
 RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestBase.Version.desc.default = false
 RestrictedSecurity.TestBase.Version.desc.fips = true
-RestrictedSecurity.TestBase.Version.desc.hash = SHA256:24859dcd916c3d301c0a8d0a58f96f7c3a493cadad48ff1c91a5151f2cdd2d49
-RestrictedSecurity.TestBase.Version.desc.number = Certificate #XXX
-RestrictedSecurity.TestBase.Version.desc.policy = https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/
-RestrictedSecurity.TestBase.Version.desc.sunsetDate = 2026-09-21
+RestrictedSecurity.TestBase.Version.desc.hash = SHA256:5694e96a9990cae706ea0c712e19924dcab88ebf8aa303e1aac99c1b07f6c8ab
 RestrictedSecurity.TestBase.Version.fips.mode = 140-3
 
 RestrictedSecurity.TestBase.Version.tls.disabledNamedCurves =

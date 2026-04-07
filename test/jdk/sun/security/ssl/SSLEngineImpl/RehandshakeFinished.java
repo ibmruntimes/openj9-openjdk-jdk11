@@ -27,11 +27,16 @@
 //
 
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * @test
  * @bug 6207322
  * @summary SSLEngine is returning a premature FINISHED message when doing
  *     an abbreviated handshake.
- * @library /javax/net/ssl/templates
+ * @library /javax/net/ssl/templates /test/lib
  * @run main/othervm RehandshakeFinished
  * @author Brad Wetmore
  */
