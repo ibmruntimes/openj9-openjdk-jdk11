@@ -316,6 +316,7 @@ java/security/KeyStore/TestKeyStoreEntry.java https://github.com/eclipse-openj9/
 java/security/MessageDigest/ByteBuffers.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/MessageDigest/TestCloneable.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/MessageDigest/TestDigestIOStream.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+java/security/MessageDigest/TestDisabledAlgorithms.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 java/security/MessageDigest/UnsupportedProvider.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/misc/TestDefaultRandom.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/PEM/PEMDecoderTest.java https://github.ibm.com/runtimes/jit-crypto/issues/921 generic-all
@@ -361,6 +362,7 @@ java/security/Signature/SignatureGetInstance.java https://github.com/eclipse-ope
 java/security/Signature/SignatureLength.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Signature/SignWithOutputBuffer.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Signature/TestCloneable.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+java/security/Signature/TestDisabledAlgorithms.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 java/security/Signature/TestInitSignWithMyOwnRandom.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/Signature/VerifyRangeCheckOverflow.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 java/security/SignedObject/Chain.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -388,6 +390,7 @@ javax/crypto/Cipher/CipherInputStreamExceptions.java https://github.com/eclipse-
 javax/crypto/Cipher/GetMaxAllowed.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/Cipher/InOutBuffers.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/Cipher/TestCipherMode.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+javax/crypto/Cipher/TestDisabledWithOids.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 javax/crypto/Cipher/TestGetInstance.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/Cipher/Turkish.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/crypto/CipherSpi/DirectBBRemaining.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -601,6 +604,7 @@ javax/net/ssl/TLSv13/ClientHelloKeyShares.java https://github.com/eclipse-openj9
 javax/net/ssl/TLSv13/EngineOutOfSeqCCS.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/net/ssl/TLSv13/HRRKeyShares.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/rmi/ssl/SocketFactoryTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+javax/rmi/ssl/SslRMIClientSocketFactoryPermissionTest.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 javax/rmi/ssl/SSLSocketParametersTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/security/auth/kerberos/StandardNames.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/security/auth/login/Configuration/GetInstance.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -616,6 +620,7 @@ javax/xml/crypto/dsig/GenerationTests.java https://github.com/eclipse-openj9/ope
 javax/xml/crypto/dsig/GetInstanceTests.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/xml/crypto/dsig/HereFunction.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/xml/crypto/dsig/keyinfo/KeyInfo/Marshal.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+javax/xml/crypto/dsig/Properties.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 javax/xml/crypto/dsig/PSS.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/xml/crypto/dsig/PSSSpec.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 javax/xml/crypto/dsig/ResolveReferenceURIs.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
