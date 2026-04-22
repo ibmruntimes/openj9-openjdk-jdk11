@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2022, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -32,6 +32,7 @@ security/infra/java/security/cert/CertPathValidator/certification/EntrustCA.java
 security/infra/java/security/cert/CertPathValidator/certification/DTrustCA.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/525	linux-x64,linux-ppc64le,linux-s390x
 security/infra/java/security/cert/CertPathValidator/certification/ComodoCA.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/525	linux-x64,linux-ppc64le,linux-s390x
 security/infra/java/security/cert/CertPathValidator/certification/AmazonCA.java	https://github.com/ibmruntimes/openj9-openjdk-jdk11/issues/525	linux-x64,linux-ppc64le,linux-s390x
+sun/rmi/runtime/Log/6409194/NoConsoleOutput.java https://github.com/eclipse-openj9/openj9/issues/23655 linux-ppc64le,linux-s390x,linux-x64
 
 # DSA related
 
