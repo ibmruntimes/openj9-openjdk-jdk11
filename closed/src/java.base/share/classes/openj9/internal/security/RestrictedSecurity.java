@@ -621,6 +621,7 @@ public final class RestrictedSecurity {
             String fipsMode = System.getProperty("com.ibm.fips.mode");
             if (fipsMode == null) {
                 System.setProperty("com.ibm.fips.mode", restricts.jdkFipsMode);
+                propsMapping.put("com.ibm.fips.mode", restricts.jdkFipsMode);
             } else if (!fipsMode.equals(restricts.jdkFipsMode)) {
                 printStackTraceAndExit("Property com.ibm.fips.mode is incompatible with semeru.customprofile and semeru.fips properties");
             }
