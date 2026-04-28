@@ -21,6 +21,11 @@
  * questions.
  */
 /*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+/*
  * @test
  * @bug 8343622
  * @summary KerberosKey created with null key bytes
@@ -35,8 +40,11 @@ import java.util.List;
 public class NullStringToKey {
     public static void main(String[] args) throws Exception {
 
+        Security.removeProvider("OpenJCEPlus");
+        Security.removeProvider("OpenJCEPlusFIPS");
         Security.removeProvider("SUN");
         Security.removeProvider("SunJCE");
+        Security.removeProvider("SunPKCS11-NSS-FIPS");
 
         var name = new KerberosPrincipal("me@ME.COM");
         var pass = "password".toCharArray();
