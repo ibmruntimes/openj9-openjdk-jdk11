@@ -733,6 +733,7 @@ sun/security/krb5/auto/TwoTab.java https://github.com/eclipse-openj9/openj9/issu
 sun/security/krb5/auto/Unavailable.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/UnboundService.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/auto/UseCacheAndStoreKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/krb5/auto/UserIterCount.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/krb5/auto/W83.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/etype/KerberosAesSha2.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/krb5/etype/WeakCrypto.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
