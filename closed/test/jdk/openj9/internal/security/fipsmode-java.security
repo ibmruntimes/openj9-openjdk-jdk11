@@ -1,0 +1,55 @@
+# ===========================================================================
+# (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+# ===========================================================================
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.
+#
+# IBM designates this particular file as subject to the "Classpath" exception
+# as provided by IBM in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, see <http://www.gnu.org/licenses/>.
+# ===========================================================================
+
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.desc.name = Test Base FIPS140-2 Enabled Profile
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.desc.fips = true
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.desc.default = true
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.fips.mode = 140-2
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-2.jce.provider.3 = sun.security.ssl.SunJSSE
+
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.desc.name = Test Base FIPS140-3 Enabled Profile
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.desc.fips = true
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.desc.default = true
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.fips.mode = 140-3
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.desc.hash = SHA256:8be0c0409198b58a3a8bbd155b2dd2c506f5b1edac749f94f3521ea9091053db
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestGetFIPSMode.FIPSEnabled140-3.jce.provider.3 = sun.security.ssl.SunJSSE
+
+RestrictedSecurity.TestGetFIPSMode.ExtendOpenJCEPlusFIPS.FIPS140-3.desc.name = Test Extending OpenJCEPlusFIPS.FIPS140-3 Profile
+RestrictedSecurity.TestGetFIPSMode.ExtendOpenJCEPlusFIPS.FIPS140-3.desc.default = true
+RestrictedSecurity.TestGetFIPSMode.ExtendOpenJCEPlusFIPS.FIPS140-3.extends = RestrictedSecurity.OpenJCEPlusFIPS.FIPS140-3
+RestrictedSecurity.TestGetFIPSMode.ExtendOpenJCEPlusFIPS.FIPS140-3.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.TestGetFIPSMode.ExtendOpenJCEPlusFIPS.FIPS140-3.jce.provider.4 = sun.security.ec.SunEC
+
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.desc.name = Test Base FIPS Disabled Profile
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.desc.fips = false
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.securerandom.provider = SUN
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.desc.hash = SHA256:008032444018e42f36cf0c3f0afa0f89c864433165aa1c16e59b406623428faa
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.TestGetFIPSMode.FIPSDisabled.jce.provider.3 = sun.security.ssl.SunJSSE
