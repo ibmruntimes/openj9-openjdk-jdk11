@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -138,6 +138,13 @@ public final class Security {
                 loadProps(null, extraPropFile, overrideAll);
             }
         }
+        initialSecurityProperties = (Properties) props.clone();
+        if (sdebug != null) {
+            for (String key : props.stringPropertyNames()) {
+                sdebug.println("Initial security property: " + key + "=" +
+                    props.getProperty(key));
+            }
+        }
 
         /*[IF CRIU_SUPPORT]*/
         // Check if CRIU checkpoint mode is enabled, if it is then reconfigure the security providers.
@@ -194,14 +201,6 @@ public final class Security {
                 }
             }
         }
-        initialSecurityProperties = (Properties) props.clone();
-        if (sdebug != null) {
-            for (String key : props.stringPropertyNames()) {
-                sdebug.println("Initial security property: " + key + "=" +
-                    props.getProperty(key));
-            }
-        }
-
     }
 
     private static boolean loadProps(File masterFile, String extraPropFile, boolean overrideAll) {
