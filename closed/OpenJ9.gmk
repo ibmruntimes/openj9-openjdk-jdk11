@@ -284,6 +284,12 @@ else
   endif
 endif # windows
 
+ifeq ($(call isTargetOs, macosx), true)
+  ifneq (,$(SDKROOT))
+    CMAKE_ARGS += -DCMAKE_OSX_SYSROOT="$(SDKROOT)"
+  endif
+endif # macosx
+
 ifneq (,$(CCACHE))
   # openjdk makefiles add a bunch of environemnt variables to the ccache command.
   # CMake will not parse this properly, so we wrap the whole thing in the env command.
