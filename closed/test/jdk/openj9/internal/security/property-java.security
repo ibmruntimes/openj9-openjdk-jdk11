@@ -21,13 +21,14 @@
 RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestBase.Version.desc.default = false
 RestrictedSecurity.TestBase.Version.desc.fips = true
-RestrictedSecurity.TestBase.Version.desc.hash = SHA256:5694e96a9990cae706ea0c712e19924dcab88ebf8aa303e1aac99c1b07f6c8ab
+RestrictedSecurity.TestBase.Version.desc.hash = SHA256:156d6520b0ed1eab55ad55d3e2a4fd4c3a335cf98e5e7fdaa21b1ca5d63e46d3
 RestrictedSecurity.TestBase.Version.fips.mode = 140-3
 
 RestrictedSecurity.TestBase.Version.tls.disabledNamedCurves =
 RestrictedSecurity.TestBase.Version.tls.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.tls.ephemeralDHKeySize =
 RestrictedSecurity.TestBase.Version.tls.legacyAlgorithms =
+RestrictedSecurity.TestBase.Version.tls.namedGroups = secp256r1
 
 RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
