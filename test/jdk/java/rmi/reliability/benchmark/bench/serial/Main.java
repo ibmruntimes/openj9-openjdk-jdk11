@@ -50,7 +50,7 @@
  * @build bench.serial.ReplaceTrees bench.serial.ShortArrays
  * @build bench.serial.Shorts bench.serial.SmallObjTrees
  * @build bench.serial.StreamBuffer bench.serial.Strings
- * @run main/othervm/timeout=1800 -Xmso512k -Xss2m bench.serial.Main -c jtreg-config
+ * @run main/othervm/timeout=1800 -Xmso1m -Xss2m bench.serial.Main -c jtreg-config
  * @author Mike Warres, Nigel Daley
  */
 
