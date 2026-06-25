@@ -23,10 +23,17 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
  #include <dlfcn.h>
  #include <unistd.h>
  #include <sys/types.h>
  #include <sys/epoll.h>
+ #include <time.h>
 
 #include "jni.h"
 #include "jni_util.h"
@@ -84,11 +91,41 @@ Java_sun_nio_ch_EPoll_wait(JNIEnv *env, jclass clazz, jint epfd,
                            jlong address, jint numfds, jint timeout)
 {
     struct epoll_event *events = jlong_to_ptr(address);
+    struct timespec starttime;
+    if (-1 != timeout) {
+        clock_gettime(CLOCK_MONOTONIC, &starttime);
+    }
     int res = epoll_wait(epfd, events, numfds, timeout);
     if (res < 0) {
         if (errno == EINTR) {
             return IOS_INTERRUPTED;
         } else {
+            if (EINVAL == errno) {
+                jint newtimeout = -1;
+                if (-1 != timeout) {
+                    time_t elapsedsec = 0;
+                    long elapsedmillis = 0;
+                    struct timespec endtime;
+                    clock_gettime(CLOCK_MONOTONIC, &endtime);
+                    elapsedsec = endtime.tv_sec - starttime.tv_sec - 1;
+                    elapsedmillis = (endtime.tv_nsec + 1000000000 - starttime.tv_nsec) / 1000000;
+                    newtimeout = timeout - (elapsedsec * 1000) - elapsedmillis;
+                    if (newtimeout < 0) {
+                        newtimeout = 0;
+                    }
+                }
+                res = epoll_wait(epfd, events, numfds, newtimeout);
+                if (res < 0) {
+                    if (errno == EINTR) {
+                        return IOS_INTERRUPTED;
+                    } else {
+                        JNU_ThrowIOExceptionWithLastError(env, "epoll_wait failed");
+                        return IOS_THROWN;
+                    }
+                } else {
+                    return res;
+                }
+            }
             JNU_ThrowIOExceptionWithLastError(env, "epoll_wait failed");
             return IOS_THROWN;
         }
