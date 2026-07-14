@@ -279,6 +279,7 @@ java/security/KeyRep/SerialDSAPubKey.java https://github.com/eclipse-openj9/open
 java/security/KeyRep/SerialOld.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/CheckInputStream.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/CheckMacOSKeyChainTrust.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+java/security/KeyStore/DisabledKnownType.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 java/security/KeyStore/EntryMethods.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/KeyStoreBuilder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/KeyStore/OneProbeOneNot.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -508,6 +509,7 @@ javax/net/ssl/SSLEngine/TestAllSuites.java https://github.com/eclipse-openj9/ope
 javax/net/ssl/SSLParameters/NamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLParameters/SignatureSchemes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLParameters/UseCipherSuitesOrder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/net/ssl/SSLSession/CertMsgCheck.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 javax/net/ssl/SSLSession/CheckSessionContext.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLSession/HttpsURLConnectionLocalCertificateChain.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/SSLSession/JSSERenegotiate.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
