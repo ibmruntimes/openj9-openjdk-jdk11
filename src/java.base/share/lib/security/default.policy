@@ -270,6 +270,16 @@ grant codeBase "jrt:/openj9.gpu" {
     permission java.util.PropertyPermission "com.ibm.gpu.disable", "read";
 };
 
+grant codeBase "jrt:/openjceplus" {
+    permission java.io.FilePermission "<<ALL FILES>>", "read";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.security.util";
+    permission java.lang.RuntimePermission "loadLibrary.*";
+    permission java.security.SecurityPermission "clearProviderProperties.*";
+    permission java.security.SecurityPermission "putProviderProperty.*";
+    permission java.security.SecurityPermission "removeProviderProperty.*";
+    permission java.util.PropertyPermission "*", "read";
+};
+
 // permissions needed by applications using java.desktop module
 grant {
     permission java.lang.RuntimePermission "accessClassInPackage.com.sun.beans";
