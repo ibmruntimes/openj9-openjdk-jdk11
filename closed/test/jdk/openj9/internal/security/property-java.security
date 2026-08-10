@@ -21,13 +21,14 @@
 RestrictedSecurity.TestBase.Version.desc.name = Test Base Profile
 RestrictedSecurity.TestBase.Version.desc.default = false
 RestrictedSecurity.TestBase.Version.desc.fips = true
-RestrictedSecurity.TestBase.Version.desc.hash = SHA256:5694e96a9990cae706ea0c712e19924dcab88ebf8aa303e1aac99c1b07f6c8ab
+RestrictedSecurity.TestBase.Version.desc.hash = SHA256:156d6520b0ed1eab55ad55d3e2a4fd4c3a335cf98e5e7fdaa21b1ca5d63e46d3
 RestrictedSecurity.TestBase.Version.fips.mode = 140-3
 
 RestrictedSecurity.TestBase.Version.tls.disabledNamedCurves =
 RestrictedSecurity.TestBase.Version.tls.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.tls.ephemeralDHKeySize =
 RestrictedSecurity.TestBase.Version.tls.legacyAlgorithms =
+RestrictedSecurity.TestBase.Version.tls.namedGroups = secp256r1
 
 RestrictedSecurity.TestBase.Version.jce.certpath.disabledAlgorithms =
 RestrictedSecurity.TestBase.Version.jce.legacyAlgorithms =
@@ -502,3 +503,149 @@ RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.jce.provider.3 = com
 
 RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-SameStartWithoutVersionPart.securerandom.algorithm = SHA512DRBG
+
+#
+# Test-Profile-strongAlgorithms.base
+# Test constraint - securerandom.strongAlgorithms property
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.desc.name = Test-Profile-strongAlgorithms.base
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.desc.hash = SHA256:0879968d76325b2de5f5e120d32b475b34db2745c04943340943ec4756849fd4
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.jce.provider.2 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.jce.provider.3 = com.sun.net.ssl.internal.ssl.Provider
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms.base.securerandom.strongAlgorithms = SHA512DRBG:OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-MultipleEntries
+# Test constraint - securerandom.strongAlgorithms with multiple comma-separated entries
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.desc.name = Test-Profile-strongAlgorithms-MultipleEntries
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.desc.hash = SHA256:35a311a475dbed6b798965144b62d02eeec0356253d13f7a6fb58d57fc22cced
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-MultipleEntries.securerandom.strongAlgorithms = SHA512DRBG:OpenJCEPlusFIPS, SHA256DRBG:OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-Extension_1
+# Test constraint - extension profile attempting to append to strongAlgorithms (should be appendable)
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_1.desc.name = Test-Profile-strongAlgorithms-Extension_1
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_1.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_1.extends = RestrictedSecurity.Test-Profile-strongAlgorithms.base
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_1.securerandom.strongAlgorithms = + SHA256DRBG:OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-Extension_2
+# Test constraint - extension profile attempting to remove algorithm from strongAlgorithms (should be removable)
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_2.desc.name = Test-Profile-strongAlgorithms-Extension_2
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_2.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_2.extends = RestrictedSecurity.Test-Profile-strongAlgorithms.base
+RestrictedSecurity.Test-Profile-strongAlgorithms-Extension_2.securerandom.strongAlgorithms = - SHA512DRBG:OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-InvalidFormat
+# Test constraint - securerandom.strongAlgorithms with invalid format (multiple colons)
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.desc.name = Test-Profile-strongAlgorithms-InvalidFormat
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.desc.hash = SHA256:978854ed93fb41febb23e9ccf1fbec95f0a5b6823c3a2dc9d2f09555ec95c71f
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidFormat.securerandom.strongAlgorithms = SHA512DRBG:OpenJCEPlusFIPS:InvalidFormat
+
+#
+# Test-Profile-strongAlgorithms-MissingAlgo
+# Test constraint - securerandom.strongAlgorithms with missing/empty algorithm
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.desc.name = Test-Profile-strongAlgorithms-MissingAlgo
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.desc.hash = SHA256:b107da504173da48a39bab3e178432b91459043b6f25d5c7611bd931c2b35feb
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingAlgo.securerandom.strongAlgorithms = :OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-MissingProvider
+# Test constraint - securerandom.strongAlgorithms with missing/empty provider
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.desc.name = Test-Profile-strongAlgorithms-MissingProvider
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.desc.hash = SHA256:547e9fdd282588118c8b0898dd81a6ef76d4a084b6ded610c75c7720ae658e45
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-MissingProvider.securerandom.strongAlgorithms = SHA512DRBG:
+
+#
+# Test-Profile-strongAlgorithms-InvalidProvider
+# Test constraint - securerandom.strongAlgorithms with invalid provider
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.desc.name = Test-Profile-strongAlgorithms-InvalidProvider
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.desc.hash = SHA256:d433db92909da445919d24f97a844d57b2c092ff26db6afd96e021daee065e19
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidProvider.securerandom.strongAlgorithms = SHA512DRBG:InvalidProvider
+
+#
+# Test-Profile-strongAlgorithms-Specify-Algo-Only
+# Test constraint - securerandom.strongAlgorithms specify algorithm only
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.desc.name = Test-Profile-strongAlgorithms-Specify-Algo-Only
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.desc.hash = SHA256:c4a9b128ad3e027c846fe7a7556820a494f6c27aa278478e257684fb6da4fac1
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-Specify-Algo-Only.securerandom.strongAlgorithms = SHA512DRBG
+
+#
+# Test-Profile-strongAlgorithms-InvalidAlgorithm
+# Test constraint - securerandom.strongAlgorithms with invalid algorithm
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.desc.name = Test-Profile-strongAlgorithms-InvalidAlgorithm
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.desc.hash = SHA256:1f42538f7a48ee287fa890420d3e47ecc6dcc5d7b4900acc1d4071c62ea566fb
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-InvalidAlgorithm.securerandom.strongAlgorithms = InvalidAlgorithm:OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-MisspelledPropertyName
+# Test constraint - securerandom.strongAlgorithms property name misspelled
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.desc.name = Test-Profile-strongAlgorithms-MisspelledPropertyName
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.desc.hash = SHA256:831e7e7aa5b81ab9e8f522d81ff95bff6833c9421d65bff7f8944e538b13e973
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.jce.provider.1 = com.ibm.crypto.plus.provider.OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.securerandom.provider = OpenJCEPlusFIPS
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.securerandom.algorithm = SHA512DRBG
+RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.securerandom.strongAlgorithmsWrong = SHA512DRBG:OpenJCEPlusFIPS

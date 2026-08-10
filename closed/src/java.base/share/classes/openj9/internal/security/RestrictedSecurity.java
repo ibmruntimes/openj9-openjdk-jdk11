@@ -613,6 +613,7 @@ public final class RestrictedSecurity {
         propsMapping.put("jdk.tls.legacyAlgorithms", restricts.jdkTlsLegacyAlgorithms);
         propsMapping.put("jdk.certpath.disabledAlgorithms", restricts.jdkCertpathDisabledAlgorithms);
         propsMapping.put("jdk.security.legacyAlgorithms", restricts.jdkSecurityLegacyAlgorithms);
+        propsMapping.put("securerandom.strongAlgorithms", restricts.jdkSecureRandomStrongAlgorithms);
 
         if (restricts.descIsFIPS) {
             if (restricts.jdkFipsMode == null) {
@@ -654,6 +655,17 @@ public final class RestrictedSecurity {
         if (!isNullOrBlank(keyStore)) {
             // SSL property "javax.net.ssl.keyStore" set at the JVM level via system properties.
             System.setProperty("javax.net.ssl.keyStore", keyStore);
+        }
+        String jdkTlsNamedGroups = restricts.jdkTlsNamedGroups;
+        if (!isNullOrBlank(jdkTlsNamedGroups)) {
+            String namedGroups = System.getProperty("jdk.tls.namedGroups");
+            if (namedGroups == null) {
+                // TLS property "jdk.tls.namedGroups" set at the JVM level via system properties.
+                System.setProperty("jdk.tls.namedGroups", jdkTlsNamedGroups);
+            } else {
+                printStackTraceAndExit("System property jdk.tls.namedGroups cannot be set"
+                        + " when defined in a RestrictedSecurity profile");
+            }
         }
     }
 
@@ -800,6 +812,7 @@ public final class RestrictedSecurity {
         private final String jdkTlsDisabledAlgorithms;
         private final String jdkTlsEphemeralDHKeySize;
         private final String jdkTlsLegacyAlgorithms;
+        private final String jdkTlsNamedGroups;
         private final String jdkCertpathDisabledAlgorithms;
         private final String jdkSecurityLegacyAlgorithms;
         private final String keyStoreType;
@@ -808,6 +821,7 @@ public final class RestrictedSecurity {
         // For SecureRandom.
         final String jdkSecureRandomProvider;
         final String jdkSecureRandomAlgorithm;
+        final String jdkSecureRandomStrongAlgorithms;
 
         final String jdkFipsMode;
 
@@ -834,6 +848,7 @@ public final class RestrictedSecurity {
             this.jdkTlsDisabledAlgorithms = parser.getProperty("jdkTlsDisabledAlgorithms");
             this.jdkTlsEphemeralDHKeySize = parser.getProperty("jdkTlsEphemeralDHKeySize");
             this.jdkTlsLegacyAlgorithms = parser.getProperty("jdkTlsLegacyAlgorithms");
+            this.jdkTlsNamedGroups = parser.getProperty("jdkTlsNamedGroups");
             this.jdkCertpathDisabledAlgorithms = parser.getProperty("jdkCertpathDisabledAlgorithms");
             this.jdkSecurityLegacyAlgorithms = parser.getProperty("jdkSecurityLegacyAlgorithms");
             this.keyStoreType = parser.getProperty("keyStoreType");
@@ -842,6 +857,7 @@ public final class RestrictedSecurity {
             // For SecureRandom.
             this.jdkSecureRandomProvider = parser.getProperty("jdkSecureRandomProvider");
             this.jdkSecureRandomAlgorithm = parser.getProperty("jdkSecureRandomAlgorithm");
+            this.jdkSecureRandomStrongAlgorithms = parser.getProperty("jdkSecureRandomStrongAlgorithms");
 
             this.jdkFipsMode = parser.getProperty("jdkFipsMode");
 
@@ -1128,6 +1144,7 @@ public final class RestrictedSecurity {
             printProperty(profileID + ".tls.disabledAlgorithms: ", jdkTlsDisabledAlgorithms);
             printProperty(profileID + ".tls.ephemeralDHKeySize: ", jdkTlsEphemeralDHKeySize);
             printProperty(profileID + ".tls.legacyAlgorithms: ", jdkTlsLegacyAlgorithms);
+            printProperty(profileID + ".tls.namedGroups: ", jdkTlsNamedGroups);
             printProperty(profileID + ".jce.certpath.disabledAlgorithms: ", jdkCertpathDisabledAlgorithms);
             printProperty(profileID + ".jce.legacyAlgorithms: ", jdkSecurityLegacyAlgorithms);
             System.out.println();
@@ -1136,6 +1153,7 @@ public final class RestrictedSecurity {
             printProperty(profileID + ".javax.net.ssl.keyStore: ", keyStore);
             printProperty(profileID + ".securerandom.provider: ", jdkSecureRandomProvider);
             printProperty(profileID + ".securerandom.algorithm: ", jdkSecureRandomAlgorithm);
+            printProperty(profileID + ".securerandom.strongAlgorithms: ", jdkSecureRandomStrongAlgorithms);
             System.out.println();
         }
 
@@ -1542,6 +1560,9 @@ public final class RestrictedSecurity {
                 case "jdkTlsLegacyAlgorithms":
                     propertyKey = "jdk.tls.legacyAlgorithms";
                     break;
+                case "jdkSecureRandomStrongAlgorithms":
+                    propertyKey = "securerandom.strongAlgorithms";
+                    break;
                 default:
                     return null;
                 }
@@ -1582,6 +1603,8 @@ public final class RestrictedSecurity {
                     profileID + ".tls.ephemeralDHKeySize", allInfo);
             setProperty("jdkTlsLegacyAlgorithms",
                     profileID + ".tls.legacyAlgorithms", allInfo);
+            setProperty("jdkTlsNamedGroups",
+                    profileID + ".tls.namedGroups", allInfo);
             setProperty("jdkCertpathDisabledAlgorithms",
                     profileID + ".jce.certpath.disabledAlgorithms", allInfo);
             setProperty("jdkSecurityLegacyAlgorithms",
@@ -1595,6 +1618,8 @@ public final class RestrictedSecurity {
                     profileID + ".securerandom.provider", allInfo);
             setProperty("jdkSecureRandomAlgorithm",
                     profileID + ".securerandom.algorithm", allInfo);
+            setProperty("jdkSecureRandomStrongAlgorithms",
+                    profileID + ".securerandom.strongAlgorithms", allInfo);
             setProperty("jdkFipsMode",
                     profileID + ".fips.mode", allInfo);
 
@@ -1941,6 +1966,7 @@ public final class RestrictedSecurity {
             case "jdkTlsDisabledAlgorithms":
             case "jdkTlsDisabledNamedCurves":
             case "jdkTlsLegacyAlgorithms":
+            case "jdkSecureRandomStrongAlgorithms":
                 return true;
             default:
                 return false;
