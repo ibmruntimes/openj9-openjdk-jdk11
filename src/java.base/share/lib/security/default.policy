@@ -272,7 +272,11 @@ grant codeBase "jrt:/openj9.gpu" {
 
 grant codeBase "jrt:/openjceplus" {
     permission java.io.FilePermission "<<ALL FILES>>", "read";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.security.internal.interfaces";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.security.internal.spec";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.security.pkcs";
     permission java.lang.RuntimePermission "accessClassInPackage.sun.security.util";
+    permission java.lang.RuntimePermission "accessClassInPackage.sun.security.x509";
     permission java.lang.RuntimePermission "loadLibrary.*";
     permission java.security.SecurityPermission "clearProviderProperties.*";
     permission java.security.SecurityPermission "putProviderProperty.*";
