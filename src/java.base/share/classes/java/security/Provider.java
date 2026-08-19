@@ -25,7 +25,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2022, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2022, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -1161,7 +1161,7 @@ public abstract class Provider extends Properties {
         for (Iterator<Map.Entry<ServiceKey, Service>> t =
                 map.entrySet().iterator(); t.hasNext(); ) {
             Service s = t.next().getValue();
-            if ((s.isValid() == false) || !RestrictedSecurity.canServiceBeRegistered(s)) {
+            if ((s.isValid() == false) || !RestrictedSecurity.canServiceBeRegistered(s, s.getAliases())) {
                 t.remove();
             }
         }
@@ -1405,7 +1405,7 @@ public abstract class Provider extends Properties {
             throw new IllegalArgumentException
                     ("service.getProvider() must match this Provider object");
         }
-        if (!RestrictedSecurity.canServiceBeRegistered(s)) {
+        if (!RestrictedSecurity.canServiceBeRegistered(s, s.getAliases())) {
             // We're in restricted security mode which does not allow this service,
             // return without registering.
             return;
