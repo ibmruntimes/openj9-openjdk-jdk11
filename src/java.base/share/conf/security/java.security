@@ -67,6 +67,7 @@
 security.provider.tbd=OracleUcrypto
 security.provider.tbd=SunPKCS11 ${java.home}/conf/security/sunpkcs11-solaris.cfg
 #endif
+security.provider.tbd=com.ibm.crypto.plus.provider.OpenJCEPlusSemeruDefaults
 security.provider.tbd=SUN
 security.provider.tbd=SunRsaSign
 security.provider.tbd=SunEC
