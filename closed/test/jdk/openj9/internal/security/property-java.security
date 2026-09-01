@@ -649,3 +649,18 @@ RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.jce.prov
 RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.securerandom.provider = OpenJCEPlusFIPS
 RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.securerandom.algorithm = SHA512DRBG
 RestrictedSecurity.Test-Profile-strongAlgorithms-MisspelledPropertyName.securerandom.strongAlgorithmsWrong = SHA512DRBG:OpenJCEPlusFIPS
+
+#
+# Test-Profile-strongAlgorithms-Default
+# Test constraint - default JDK value of securerandom.strongAlgorithms
+#
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.desc.name = Test-Profile-strongAlgorithms-Default
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.desc.default = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.desc.fips = true
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.desc.hash = SHA256:26f0026f0806b09495eafcffa37140cc11e8a5c087bfdf546227cc2e4d2f393c
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.fips.mode = 140-3
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.jce.provider.1 = sun.security.provider.Sun
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.jce.provider.2 = com.sun.crypto.provider.SunJCE
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.jce.provider.3 = sun.security.ssl.SunJSSE
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.securerandom.provider = SUN
+RestrictedSecurity.Test-Profile-strongAlgorithms-Default.securerandom.algorithm = DRBG
