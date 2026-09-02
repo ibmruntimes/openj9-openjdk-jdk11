@@ -825,6 +825,7 @@ sun/security/provider/PolicyFile/Alias.java https://github.com/eclipse-openj9/op
 sun/security/provider/PolicyFile/AliasExpansion.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/PolicyFile/TokenStore.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/PolicyFile/TrustedCert.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/provider/pqc/SeedOrExpanded.java https://github.com/eclipse-openj9/openj9/issues/24657 generic-all
 sun/security/provider/SecureRandom/AbstractDrbg/SpecTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/SecureRandom/AutoReseed.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/SecureRandom/CommonSeeder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
