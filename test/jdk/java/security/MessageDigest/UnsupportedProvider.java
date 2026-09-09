@@ -23,7 +23,7 @@
 
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2025, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2025, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -70,7 +70,10 @@ public class UnsupportedProvider {
 
     // Check if specific provider supports SHA-3 hash algorithms
     static boolean isSHA3Supported(String provName) {
-        if ("SUN".equals(provName) || provName.startsWith("OpenJCEPlus")) {
+        if ("SUN".equals(provName)
+                || (provName.startsWith("OpenJCEPlus")
+                        && !provName.startsWith("OpenJCEPlusSemeruDefaults"))
+        ) {
             return true;
         }
         if ("OracleUcrypto".equals(provName)
