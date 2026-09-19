@@ -171,6 +171,7 @@ com/sun/jndi/dns/ConfigTests/TcpTimeout.java https://github.ibm.com/runtimes/bac
 com/sun/jndi/ldap/LdapCBPropertiesTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/jndi/ldap/LdapPoolTimeoutTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 com/sun/jndi/ldap/LdapSSLHandshakeFailureTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+com/sun/jndi/ldap/LdapStartTlsTest.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 com/sun/jndi/ldap/LdapTimeoutTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 com/sun/net/ssl/SSLSecurity/ProviderTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 com/sun/org/apache/xml/internal/security/ShortECDSA.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -478,6 +479,7 @@ javax/net/ssl/sanity/ciphersuites/TLSCipherSuitesOrder.java https://github.com/e
 javax/net/ssl/sanity/interop/ClientJSSEServerJSSE.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/sanity/pluggability/CheckSSLContextExport.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/BestEffortOnLazyConnected.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/net/ssl/ServerName/SNIWildcardMatching.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorer.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerMatchedSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ServerName/SSLEngineExplorerUnmatchedSNI.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -808,6 +810,7 @@ sun/security/provider/KeyStore/DKSTest.java https://github.com/eclipse-openj9/op
 sun/security/provider/KeyStore/DksWithEmptyKeystore.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/KeyStore/TestJKSWithSecretKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/KeyStore/WrongPassword.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/provider/KeyStore/WrongStoreType.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/provider/MessageDigest/DigestKAT.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/MessageDigest/Offsets.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/provider/MessageDigest/SHA512.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -868,8 +871,13 @@ sun/security/ssl/AppInputStream/ReadHandshake.java https://github.com/eclipse-op
 sun/security/ssl/AppInputStream/ReadZeroBytes.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/AppInputStream/RemoveMarkReset.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/AppOutputStream/NoExceptionOnClose.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/CertificateCompression/BoundDecompressMemory.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
+sun/security/ssl/CertificateCompression/ClientCertCompressionExt.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
+sun/security/ssl/CertificateCompression/CompressedCertMsg.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
+sun/security/ssl/CertificateCompression/CompressedCertMsgCache.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/CertPathRestrictions/TLSRestrictions.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/DefaultNamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/CipherSuite/DisabledCipherSuitesNotNegotiated.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/CipherSuite/DisabledCurve.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/LegacyConstraints.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -888,6 +896,7 @@ sun/security/ssl/EngineArgs/DebugReportsOneExtraByte.java https://github.com/ecl
 sun/security/ssl/GenSSLConfigs/main.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/HandshakeHash/HandshakeHashCloneExhaustion.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/HandshakeOutStream/NullCerts.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/HybridKeyExchange/TestHybrid.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/InputRecord/ClientHelloRead.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/InputRecord/SSLSocketTimeoutNulls.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/internal/TestRun.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -917,6 +926,7 @@ sun/security/ssl/SignatureScheme/SigAlgosExtTestWithTLS12.java https://github.co
 sun/security/ssl/SignatureScheme/SigAlgosExtTestWithTLS13.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SignatureScheme/SigSchemePropOrdering.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SignatureScheme/Tls13NamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SignatureScheme/TLSCurveMismatch.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/SocketCreation/SocketCreation.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/spi/ProviderInit.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLCipher/ReadOnlyEngine.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -944,6 +954,7 @@ sun/security/ssl/SSLEngineImpl/CloseStart.java https://github.com/eclipse-openj9
 sun/security/ssl/SSLEngineImpl/DelegatedTaskWrongException.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLEngineImpl/EmptyExtensionData.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLEngineImpl/EngineEnforceUseClientMode.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SSLEngineImpl/KeyUpdateOnce.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/SSLEngineImpl/RehandshakeFinished.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLEngineImpl/SSLEngineBadBufferArrayAccess.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLEngineImpl/SSLEngineDeadlock.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -1068,6 +1079,7 @@ sun/security/util/HexDumpEncoderTests.java https://github.com/eclipse-openj9/ope
 sun/security/util/HostnameChecker/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/HostnameMatcher/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/InternalPrivateKey/Correctness.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/util/KeyUtilTests.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/util/Pem/PemEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/Resources/early/EarlyResources.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/util/SliceableSecretKey/SoftSliceable.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all

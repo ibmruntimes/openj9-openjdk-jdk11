@@ -963,6 +963,7 @@ sun/security/ssl/AppInputStream/RemoveMarkReset.java https://github.com/eclipse-
 sun/security/ssl/AppOutputStream/NoExceptionOnClose.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CertPathRestrictions/TLSRestrictions.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/DefaultNamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/CipherSuite/DisabledCipherSuitesNotNegotiated.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/CipherSuite/DisabledCurve.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/LegacyConstraints.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -982,6 +983,7 @@ sun/security/ssl/EngineArgs/DebugReportsOneExtraByte.java https://github.com/ecl
 sun/security/ssl/GenSSLConfigs/main.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/HandshakeHash/HandshakeHashCloneExhaustion.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/HandshakeOutStream/NullCerts.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/HybridKeyExchange/TestHybrid.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/InputRecord/ClientHelloRead.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/InputRecord/SSLSocketTimeoutNulls.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/internal/TestRun.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -1149,6 +1151,7 @@ sun/security/util/Debug/DebugOptions.java https://github.com/eclipse-openj9/open
 sun/security/util/HostnameChecker/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/util/HostnameMatcher/NullHostnameCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/util/InternalPrivateKey/Correctness.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/util/KeyUtilTests.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/util/SliceableSecretKey/SoftSliceable.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/validator/certreplace.sh https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/validator/EndEntityExtensionCheck.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
