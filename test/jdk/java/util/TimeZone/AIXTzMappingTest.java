@@ -21,6 +21,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
 /* @test
  * @bug 8380993
  * @library /test/lib
@@ -59,7 +65,7 @@ public class AIXTzMappingTest {
 
     private static void runWithTZ(String tz, String expectedId)
             throws Throwable {
-        ProcessBuilder pb = ProcessTools.createTestJavaProcessBuilder(
+        ProcessBuilder pb = ProcessTools.createTestJvm(
                 "AIXTzMappingTest", expectedId);
 
         pb.environment().put("TZ", tz);
