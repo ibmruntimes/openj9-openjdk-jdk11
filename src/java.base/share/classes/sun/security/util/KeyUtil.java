@@ -380,17 +380,10 @@ public final class KeyUtil {
     public static void destroySecretKeys(SecretKey... keys) {
         for (SecretKey k : keys) {
             if (k != null) {
-                if (k instanceof SecretKeySpec sk) {
-                    SharedSecrets.getJavaxCryptoSpecAccess()
-                            .clearSecretKeySpec(sk);
-                } else if (k instanceof PBKDF2KeyImpl p2k) {
-                    p2k.clear();
-                } else {
-                    try {
-                        k.destroy();
-                    } catch (DestroyFailedException e) {
-                        // swallow
-                    }
+                try {
+                    k.destroy();
+                } catch (DestroyFailedException e) {
+                    // swallow
                 }
             }
         }

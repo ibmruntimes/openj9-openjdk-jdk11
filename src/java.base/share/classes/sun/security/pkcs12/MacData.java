@@ -87,9 +87,7 @@ class MacData {
     /**
      * Parses a PKCS#12 MAC data.
      */
-    MacData(DerInputStream derin)
-        throws IOException, ParsingException
-    {
+    MacData(DerInputStream derin) throws IOException {
         DerValue[] macData = derin.getSequence(2);
         if (macData.length < 2 || macData.length > 3) {
             throw new ParsingException("Invalid length for MacData");
@@ -343,7 +341,7 @@ class MacData {
             final AlgorithmId digestAlgorithm = AlgorithmId.get(algName);
             DerOutputStream tmp2 = new DerOutputStream();
 
-            tmp2.write(digestAlgorithm);
+            digestAlgorithm.encode(tmp2);
             tmp2.putOctetString(digest);
 
             // wrap into a SEQUENCE

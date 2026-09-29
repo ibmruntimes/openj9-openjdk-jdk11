@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.pkcs12;
 
 import java.io.IOException;
@@ -86,9 +92,7 @@ final class PBMAC1Parameters {
                 !o.stdName().equals("HmacSHA224") &&
                 !o.stdName().equals("HmacSHA256") &&
                 !o.stdName().equals("HmacSHA384") &&
-                !o.stdName().equals("HmacSHA512") &&
-                !o.stdName().equals("HmacSHA512/224") &&
-                !o.stdName().equals("HmacSHA512/256"))) {
+                !o.stdName().equals("HmacSHA512"))) {
             throw new IOException("PBMAC1 parameter parsing error: "
                     + "expecting the object identifier for a HmacSHA key "
                     + "derivation function");
@@ -116,7 +120,7 @@ final class PBMAC1Parameters {
      * Encode PBMAC1 parameters from components.
      */
     static byte[] encode(byte[] salt, int iterationCount, int keyLength,
-            String kdfHmac, String hmac) throws NoSuchAlgorithmException {
+            String kdfHmac, String hmac) throws NoSuchAlgorithmException, IOException {
 
         DerOutputStream out = new DerOutputStream();
 
@@ -125,9 +129,10 @@ final class PBMAC1Parameters {
                 iterationCount, keyLength, kdfHmac));
 
         // messageAuthScheme AlgorithmIdentifier {{PBMAC1-MACs}}
-        out.write(AlgorithmId.get(hmac));
-        return new DerOutputStream().write(DerValue.tag_Sequence, out)
-                .toByteArray();
+        AlgorithmId.get(hmac).encode(out);
+        DerOutputStream tmp = new DerOutputStream();
+        tmp.write(DerValue.tag_Sequence, out);
+        return tmp.toByteArray();
     }
 
     PBKDF2Parameters getKdfParams() {

@@ -91,26 +91,6 @@ public class PBMAC1Test {
         DerUtils.checkInt(der, "2001011", 10000);
         DerUtils.checkInt(der, "2001012", 64);
 
-        System.setProperty("keystore.pkcs12.macAlgorithm", "PBEWiThHmAcSHA512/224");
-        der = emptyP12();
-        DerUtils.checkAlg(der, "2000", KnownOIDs.PBMAC1);
-        DerUtils.checkAlg(der, "200100", KnownOIDs.PBKDF2);
-        DerUtils.checkAlg(der, "20010130", KnownOIDs.HmacSHA512$224);
-        DerUtils.checkAlg(der, "200110", KnownOIDs.HmacSHA512$224);
-        DerUtils.checkInt(der, "2001011", 10000);
-        DerUtils.checkInt(der, "2001012", 28);
-
-        // As strange as I can...
-        System.setProperty("keystore.pkcs12.macAlgorithm",
-                "PBEWithHmacSHA512/224AndHmacSHA3-384");
-        der = emptyP12();
-        DerUtils.checkAlg(der, "2000", KnownOIDs.PBMAC1);
-        DerUtils.checkAlg(der, "200100", KnownOIDs.PBKDF2);
-        DerUtils.checkAlg(der, "20010130", KnownOIDs.HmacSHA512$224);
-        DerUtils.checkAlg(der, "200110", KnownOIDs.HmacSHA3_384);
-        DerUtils.checkInt(der, "2001011", 10000);
-        DerUtils.checkInt(der, "2001012", 48);
-
         // Bad alg names
         System.setProperty("keystore.pkcs12.macAlgorithm", "PBEWithHmacSHA456");
         var reason = Asserts.assertThrows(NoSuchAlgorithmException.class,
