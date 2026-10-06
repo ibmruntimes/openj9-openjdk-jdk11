@@ -26,7 +26,7 @@
  * @bug 5102804
  * @summary Tests memory leak
  * @author Sergey Malenkov
- * @run main/othervm -ms16m -mx16m Test5102804
+ * @run main/othervm -ms16m -mx16m -Xalwaysclassgc Test5102804
  */
 
 import java.beans.BeanInfo;
