@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,49 +26,35 @@
 package sun.security.pkcs12;
 
 import java.io.*;
-import java.security.AccessController;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyStore;
-import java.security.KeyStoreSpi;
-import java.security.KeyStoreException;
-import java.security.PKCS12Attribute;
-import java.security.PrivateKey;
-import java.security.PrivilegedAction;
-import java.security.UnrecoverableEntryException;
-import java.security.UnrecoverableKeyException;
-import java.security.SecureRandom;
-import java.security.Security;
+import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
-
-import java.security.AlgorithmParameters;
-import java.security.InvalidAlgorithmParameterException;
-import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.SecretKey;
 import javax.crypto.Cipher;
-import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.x500.X500Principal;
 
 import sun.security.action.GetPropertyAction;
-import sun.security.util.*;
 import sun.security.pkcs.ContentInfo;
-import sun.security.x509.AlgorithmId;
 import sun.security.pkcs.EncryptedPrivateKeyInfo;
 import sun.security.provider.JavaKeyStore.JKS;
+import sun.security.tools.KeyStoreUtil;
+import sun.security.util.*;
+import sun.security.x509.AlgorithmId;
+import sun.security.x509.AuthorityKeyIdentifierExtension;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -356,10 +342,14 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
 
             key = RetryWithZero.run(pass -> {
                 // Use JCE
-                SecretKey skey = getPBEKey(pass);
                 Cipher cipher = Cipher.getInstance(
                         mapPBEParamsToAlgorithm(algOid, algParams));
-                cipher.init(Cipher.DECRYPT_MODE, skey, algParams);
+                SecretKey skey = getPBEKey(pass);
+                try {
+                    cipher.init(Cipher.DECRYPT_MODE, skey, algParams);
+                } finally {
+                    KeyUtil.destroySecretKeys(skey);
+                }
                 byte[] keyInfo = cipher.doFinal(encryptedKey);
                 /*
                  * Parse the key algorithm and then use a JCA key factory
@@ -880,9 +870,13 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
             }
 
             // Use JCE
-            SecretKey skey = getPBEKey(passwordProtection.getPassword());
             Cipher cipher = Cipher.getInstance(algorithm);
-            cipher.init(Cipher.ENCRYPT_MODE, skey, algParams);
+            SecretKey skey = getPBEKey(passwordProtection.getPassword());
+            try {
+                cipher.init(Cipher.ENCRYPT_MODE, skey, algParams);
+            } finally {
+                KeyUtil.destroySecretKeys(skey);
+            }
             byte[] encryptedKey = cipher.doFinal(data);
             algid = new AlgorithmId(pbeOID, cipher.getParameters());
 
@@ -1234,8 +1228,9 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
         if (macIterationCount < 0) {
             macIterationCount = defaultMacIterationCount();
         }
-        if (!macAlgorithm.equalsIgnoreCase("NONE")) {
-            byte[] macData = calculateMac(password, authenticatedSafe);
+        if (password != null && !macAlgorithm.equalsIgnoreCase("NONE")) {
+            byte[] macData = MacData.generateMac(password, authenticatedSafe,
+                    macAlgorithm, macIterationCount, getSalt());
             pfx.write(macData);
         }
         // write PFX to output stream
@@ -1446,44 +1441,6 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
 
         return entry.attributes;
     }
-
-    /*
-     * Calculate MAC using HMAC algorithm (required for password integrity)
-     *
-     * Hash-based MAC algorithm combines secret key with message digest to
-     * create a message authentication code (MAC)
-     */
-    private byte[] calculateMac(char[] passwd, byte[] data)
-        throws IOException
-    {
-        byte[] mData = null;
-        String algName = macAlgorithm.substring(7);
-
-        try {
-            // Generate a random salt.
-            byte[] salt = getSalt();
-
-            // generate MAC (MAC key is generated within JCE)
-            Mac m = Mac.getInstance(macAlgorithm);
-            PBEParameterSpec params =
-                        new PBEParameterSpec(salt, macIterationCount);
-            SecretKey key = getPBEKey(passwd);
-            m.init(key, params);
-            m.update(data);
-            byte[] macResult = m.doFinal();
-
-            // encode as MacData
-            MacData macData = new MacData(algName, macResult, salt,
-                    macIterationCount);
-            DerOutputStream bytes = new DerOutputStream();
-            bytes.write(macData.getEncoded());
-            mData = bytes.toByteArray();
-        } catch (Exception e) {
-            throw new IOException("calculateMac failed: " + e, e);
-        }
-        return mData;
-    }
-
 
     /*
      * Validate Certificate Chain
@@ -1873,9 +1830,13 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
             DerOutputStream bytes = new DerOutputStream();
 
             // Use JCE
-            SecretKey skey = getPBEKey(password);
             Cipher cipher = Cipher.getInstance(certProtectionAlgorithm);
-            cipher.init(Cipher.ENCRYPT_MODE, skey, algParams);
+            SecretKey skey = getPBEKey(password);
+            try {
+                cipher.init(Cipher.ENCRYPT_MODE, skey, algParams);
+            } finally {
+                KeyUtil.destroySecretKeys(skey);
+            }
             encryptedData = cipher.doFinal(data);
 
             AlgorithmId algId = new AlgorithmId(
@@ -2081,10 +2042,14 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
                 try {
                     RetryWithZero.run(pass -> {
                         // Use JCE
-                        SecretKey skey = getPBEKey(pass);
                         Cipher cipher = Cipher.getInstance(
                                 mapPBEParamsToAlgorithm(algOid, algParams));
-                        cipher.init(Cipher.DECRYPT_MODE, skey, algParams);
+                        SecretKey skey = getPBEKey(pass);
+                        try {
+                            cipher.init(Cipher.DECRYPT_MODE, skey, algParams);
+                        } finally {
+                            KeyUtil.destroySecretKeys(skey);
+                        }
                         loadSafeContents(new DerInputStream(cipher.doFinal(rawData)));
                         return null;
                     }, password);
@@ -2118,35 +2083,11 @@ public final class PKCS12KeyStore extends KeyStoreSpi {
                                 "MAC iteration count too large: " + ic);
                     }
 
-                    String algName =
-                            macData.getDigestAlgName().toUpperCase(Locale.ENGLISH);
-
-                    // Change SHA-1 to SHA1
-                    algName = algName.replace("-", "");
-
-                    macAlgorithm = "HmacPBE" + algName;
+                    // Store MAC algorithm of keystore that was just loaded.
+                    macAlgorithm = macData.getMacAlgorithm();
                     macIterationCount = ic;
-
-                    // generate MAC (MAC key is created within JCE)
-                    Mac m = Mac.getInstance(macAlgorithm);
-                    PBEParameterSpec params =
-                            new PBEParameterSpec(macData.getSalt(), ic);
-
                     RetryWithZero.run(pass -> {
-                        SecretKey key = getPBEKey(pass);
-                        m.init(key, params);
-                        m.update(authSafeData);
-                        byte[] macResult = m.doFinal();
-
-                        if (debug != null) {
-                            debug.println("Checking keystore integrity " +
-                                    "(" + m.getAlgorithm() + " iterations: " + ic + ")");
-                        }
-
-                        if (!MessageDigest.isEqual(macData.getDigest(), macResult)) {
-                            throw new UnrecoverableKeyException("Failed PKCS12" +
-                                    " integrity checking");
-                        }
+                        macData.verifyMac(pass, authSafeData);
                         return (Void) null;
                     }, password);
                 } catch (Exception e) {

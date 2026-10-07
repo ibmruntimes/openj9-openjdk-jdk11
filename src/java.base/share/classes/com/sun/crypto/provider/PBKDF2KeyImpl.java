@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,7 +24,7 @@
  */
 /*
  * ===========================================================================
- * (c) Copyright IBM Corp. 2023, 2025 All Rights Reserved
+ * (c) Copyright IBM Corp. 2023, 2026 All Rights Reserved
  * ===========================================================================
  */
 
@@ -62,7 +62,7 @@ import sun.security.action.GetPropertyAction;
  * @author Valerie Peng
  *
  */
-final class PBKDF2KeyImpl implements javax.crypto.interfaces.PBEKey {
+public final class PBKDF2KeyImpl implements javax.crypto.interfaces.PBEKey {
 
     private static final long serialVersionUID = -2234868909660948157L;
 

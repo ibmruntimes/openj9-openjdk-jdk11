@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2020, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,7 +37,7 @@ import static sun.security.x509.AlgorithmId.*;
 
 /*
  * @test
- * @bug 8076190 8242151 8153005 8266293
+ * @bug 8076190 8242151 8153005 8266293 8343232
  * @library /test/lib
  * @modules java.base/sun.security.pkcs
  *          java.base/sun.security.x509
@@ -246,9 +246,9 @@ public class ParamsPreferences {
             checkAlg(data, "110c10", EncryptedData);
             checkAlg(data, "110c110110", certAlg);
             if (certAlg == PBES2) {
-                checkAlg(data, "110c11011100", PBKDF2WithHmacSHA1);
-                checkAlg(data, "110c1101110130", args[i++]);
-                checkAlg(data, "110c11011110", args[i++]);
+                checkAlg(data, "110c11011100", PBKDF2);
+                checkAlg(data, "110c1101110130", (KnownOIDs)args[i++]);
+                checkAlg(data, "110c11011110", (KnownOIDs)args[i++]);
                 checkInt(data, "110c110111011", (int) args[i++]);
             } else {
                 checkInt(data, "110c1101111", (int) args[i++]);
@@ -259,9 +259,9 @@ public class ParamsPreferences {
         KnownOIDs keyAlg = (KnownOIDs)args[i++];
         checkAlg(data, "110c010c01000", keyAlg);
         if (keyAlg == PBES2) {
-            checkAlg(data, "110c010c0100100", PBKDF2WithHmacSHA1);
-            checkAlg(data, "110c010c010010130", args[i++]);
-            checkAlg(data, "110c010c0100110", args[i++]);
+            checkAlg(data, "110c010c0100100", PBKDF2);
+            checkAlg(data, "110c010c010010130", (KnownOIDs)args[i++]);
+            checkAlg(data, "110c010c0100110", (KnownOIDs)args[i++]);
             checkInt(data, "110c010c01001011", (int) args[i++]);
         } else {
             checkInt(data, "110c010c010011", (int) args[i++]);
