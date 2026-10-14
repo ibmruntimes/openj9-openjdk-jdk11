@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,28 +23,35 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
 package sun.security.util;
 
+import java.math.BigInteger;
+import java.security.AccessController;
 import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.PrivilegedAction;
-import java.security.AccessController;
-import java.security.InvalidKeyException;
-import java.security.interfaces.ECKey;
-import java.security.interfaces.RSAKey;
-import java.security.interfaces.DSAKey;
-import java.security.interfaces.DSAParams;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.InvalidParameterSpecException;
+import java.security.interfaces.*;
+import java.security.spec.*;
+import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHKey;
 import javax.crypto.interfaces.DHPublicKey;
 import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPublicKeySpec;
-import java.math.BigInteger;
+import javax.crypto.spec.SecretKeySpec;
+import javax.security.auth.DestroyFailedException;
 
+import com.sun.crypto.provider.PBKDF2KeyImpl;
 import sun.security.jca.JCAUtil;
 
 /**
@@ -369,6 +376,19 @@ public final class KeyUtil {
         }
     }
 
+    // destroy secret keys in a best-effort way
+    public static void destroySecretKeys(SecretKey... keys) {
+        for (SecretKey k : keys) {
+            if (k != null) {
+                try {
+                    k.destroy();
+                } catch (DestroyFailedException e) {
+                    // swallow
+                }
+            }
+        }
+    }
+
     /**
      * Trim leading (most significant) zeroes from the result.
      *
@@ -386,6 +406,5 @@ public final class KeyUtil {
         System.arraycopy(b, i, t, 0, t.length);
         return t;
     }
-
 }
 
