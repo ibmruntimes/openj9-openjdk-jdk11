@@ -413,6 +413,7 @@ javax/naming/spi/providers/InitialContextTest.java https://github.com/eclipse-op
 javax/net/ssl/ALPN/SSLEngineAlpnTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ALPN/SSLServerSocketAlpnTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ALPN/SSLSocketAlpnTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+javax/net/ssl/ciphersuites/BulkCipherDisabledAlgorithms.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 javax/net/ssl/ciphersuites/DisabledAlgorithms.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ciphersuites/ECCurvesconstraints.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 javax/net/ssl/ciphersuites/TLSWontNegotiateDisabledCipherAlgos.java#Client https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -758,6 +759,8 @@ sun/security/mscapi/nonUniqueAliases/NonUniqueAliases.java https://github.com/ec
 sun/security/mscapi/NullKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/mscapi/PrngSerialize.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/mscapi/PrngSlow.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/mscapi/ShortRSAKeyWithinTLS.java#separate-client-thread https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
+sun/security/mscapi/ShortRSAKeyWithinTLS.java#separate-server-thread https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/pkcs/pkcs10/PKCS10AttrEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs/pkcs7/MLDSADigestConformance.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/pkcs/pkcs7/PKCS7VerifyTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -776,6 +779,7 @@ sun/security/pkcs11/tls/tls12/FipsModeTLS12.java https://github.ibm.com/runtimes
 sun/security/pkcs12/AttributesCorrectness.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/AttributesMultiThread.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/GetSetEntryTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/pkcs12/KeytoolOpensslInteropTest.java#UseExistingPKCS12 https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/pkcs12/P12SecretKey.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PBES2Encoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/pkcs12/PBMAC1Test.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
@@ -884,6 +888,7 @@ sun/security/ssl/CipherSuite/NamedGroupsWithCipherSuite.java https://github.com/
 sun/security/ssl/CipherSuite/RestrictNamedGroup.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/RestrictSignatureScheme.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/CipherSuite/SupportedGroups.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/CipherSuite/TLS13BulkCipherDisabledCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingDisablePartsOfCipherSuite.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingIllegalArgument.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/ssl/ClientHandshaker/CipherSuiteOrder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -929,6 +934,7 @@ sun/security/ssl/SignatureScheme/Tls13NamedGroups.java https://github.com/eclips
 sun/security/ssl/SignatureScheme/TLSCurveMismatch.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/SocketCreation/SocketCreation.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/spi/ProviderInit.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
+sun/security/ssl/SSLAlgorithmDecomposer/BulkCipherDecomposition.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/SSLCipher/ReadOnlyEngine.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ssl/SSLCipher/SSLEngineNoServerHelloClientShutdown.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/ssl/SSLCipher/SSLSocketNoServerHelloClientShutdown.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
