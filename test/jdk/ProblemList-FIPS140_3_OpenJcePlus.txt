@@ -780,6 +780,8 @@ sun/security/mscapi/nonUniqueAliases/NonUniqueAliases.java https://github.com/ec
 sun/security/mscapi/NullKey.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/mscapi/PrngSerialize.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/mscapi/PrngSlow.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/mscapi/ShortRSAKeyWithinTLS.java#separate-client-thread https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
+sun/security/mscapi/ShortRSAKeyWithinTLS.java#separate-server-thread https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/pkcs/pkcs10/PKCS10AttrEncoding.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/pkcs/pkcs7/PKCS7VerifyTest.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/pkcs/pkcs7/SignerOrder.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -971,6 +973,7 @@ sun/security/ssl/CipherSuite/RestrictNamedGroup.java https://github.com/eclipse-
 sun/security/ssl/CipherSuite/RestrictSignatureScheme.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/SSL_NULL.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/SupportedGroups.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/CipherSuite/TLS13BulkCipherDisabledCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingDisablePartsOfCipherSuite.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/CipherSuite/TLSCipherSuiteWildCardMatchingIllegalArgument.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/ClientHandshaker/CipherSuiteOrder.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
@@ -1011,6 +1014,7 @@ sun/security/ssl/SignatureScheme/SigSchemePropOrdering.java https://github.com/e
 sun/security/ssl/SignatureScheme/Tls13NamedGroups.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SocketCreation/SocketCreation.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/spi/ProviderInit.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
+sun/security/ssl/SSLAlgorithmDecomposer/BulkCipherDecomposition.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/ssl/SSLCipher/ReadOnlyEngine.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SSLContextImpl/BadKSProvider.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
 sun/security/ssl/SSLContextImpl/CustomizedCipherSuites.java https://github.com/eclipse-openj9/openj9/issues/20978 generic-all
