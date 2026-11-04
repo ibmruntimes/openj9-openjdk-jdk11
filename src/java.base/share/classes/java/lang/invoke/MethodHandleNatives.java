@@ -23,6 +23,12 @@
  * questions.
  */
 
+/*
+ * ===========================================================================
+ * (c) Copyright IBM Corp. 2026, 2026 All Rights Reserved
+ * ===========================================================================
+ */
+
 package java.lang.invoke;
 
 import jdk.internal.ref.CleanerFactory;
@@ -658,4 +664,9 @@ class MethodHandleNatives {
         return (definingClass.isAssignableFrom(symbolicRefClass) ||  // Msym overrides Mdef
                 symbolicRefClass.isInterface());                     // Mdef implements Msym
     }
+
+    /**
+     * Inform the VM that a MemberName belonging to class c has been collected.
+     */
+    static native void markClassForMemberNamePruning(Class<?> c);
 }
