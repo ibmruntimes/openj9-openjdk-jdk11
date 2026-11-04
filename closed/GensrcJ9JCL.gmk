@@ -1,5 +1,5 @@
 # ===========================================================================
-# (c) Copyright IBM Corp. 2020, 2025 All Rights Reserved
+# (c) Copyright IBM Corp. 2020, 2026 All Rights Reserved
 # ===========================================================================
 # This code is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 2 only, as
@@ -26,9 +26,17 @@ include $(SPEC)
 include $(TOPDIR)/make/common/MakeBase.gmk
 include $(TOPDIR)/closed/JPP.gmk
 
+ClosedSourceDir := $(TOPDIR)/closed/src
+
+ClosedSourceSubdirs := \
+	$(sort $(patsubst $(ClosedSourceDir)/%,%, \
+		$(wildcard $(patsubst %, $(ClosedSourceDir)/*/%/classes, \
+			$(OPENJDK_TARGET_OS) $(OPENJDK_TARGET_OS_TYPE) share))))
+
 RecursiveWildcard = $(foreach dir,$(wildcard $1/*),$(call RecursiveWildcard,$(dir),$2) $(filter $(subst *,%,$2),$(dir)))
+
 JppSourceDirs := $(OPENJ9_TOPDIR)/jcl/src
-JppSourceDirs += $(TOPDIR)/closed/src
+JppSourceDirs += $(ClosedSourceDir)
 
 ifeq (true,$(OPENJ9_ENABLE_DDR))
   JppSourceDirs += $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src
@@ -82,11 +90,14 @@ $(J9JCL_SOURCES_DONEFILE) : \
 		preprocessor
 	@$(ECHO) Generating J9JCL sources
 	$(call RunJPP, JAVA$(VERSION_FEATURE), $(SUPPORT_OUTPUTDIR)/overlay, /j9jcl, $(IncludeIfUnsure))
-	$(call RunJPP, JAVA$(VERSION_FEATURE), $(TOPDIR)/closed, /j9jcl, $(IncludeIfUnsure))
+	$(foreach subdir, $(ClosedSourceSubdirs), \
+		$(call RunJPP, GENERIC, $(ClosedSourceDir)/$(subdir), /j9jcl/$(subdir), \
+			$(IncludeIfUnsure) -macro:define JAVA_SPEC_VERSION=$(VERSION_FEATURE)) $(NEWLINE))
 	$(call RunJPP, JAVA$(VERSION_FEATURE), $(OPENJ9_TOPDIR)/jcl, /j9jcl)
   ifeq (true,$(OPENJ9_ENABLE_DDR))
 	@$(ECHO) Generating DDR_VM sources
-	$(call RunJPP, GENERIC, $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, /j9jcl/openj9.dtfj/share/classes, $(IncludeIfUnsure) -macro:define JAVA_SPEC_VERSION=$(VERSION_FEATURE))
+	$(call RunJPP, GENERIC, $(OPENJ9_TOPDIR)/debugtools/DDR_VM/src, /j9jcl/openj9.dtfj/share/classes, \
+		$(IncludeIfUnsure) -macro:define JAVA_SPEC_VERSION=$(VERSION_FEATURE))
   endif # OPENJ9_ENABLE_DDR
 	@$(MKDIR) -p $(@D)
 	@$(TOUCH) $@
