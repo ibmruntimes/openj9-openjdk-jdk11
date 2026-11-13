@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -201,7 +201,7 @@ final class MethodTypeForm {
         if (epts == bpts && bt == rt) {
             this.basicType = erasedType;
         } else {
-            this.basicType = MethodType.makeImpl(bt, bpts, true);
+            this.basicType = MethodType.methodType(bt, bpts, true);
             // fill in rest of data from the basic type:
             MethodTypeForm that = this.basicType.form();
             assert(this != that);
@@ -352,7 +352,7 @@ final class MethodTypeForm {
         // Find the erased version of the method type:
         if (rtc == null)  rtc = rtype;
         if (ptc == null)  ptc = ptypes;
-        return MethodType.makeImpl(rtc, ptc, true);
+        return MethodType.methodType(rtc, ptc, true);
     }
 
     /** Canonicalize the given return or param type.

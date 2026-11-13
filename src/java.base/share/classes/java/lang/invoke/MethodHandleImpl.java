@@ -48,6 +48,7 @@ import sun.invoke.util.Wrapper;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -263,14 +264,19 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
 
     private static int countNonNull(Object[] array) {
         int count = 0;
-        for (Object x : array) {
-            if (x != null)  ++count;
+        if (array != null) {
+            for (Object x : array) {
+                if (x != null) ++count;
+            }
         }
         return count;
     }
 
     static MethodHandle makePairwiseConvertByEditor(MethodHandle target, MethodType srcType,
                                                     boolean strict, boolean monobox) {
+        // In method types arguments start at index 0, while the LF
+        // editor have the MH receiver at position 0 - adjust appropriately.
+        final int MH_RECEIVER_OFFSET = 1;
         Object[] convSpecs = computeValueConversions(srcType, target.type(), strict, monobox);
         int convCount = countNonNull(convSpecs);
         if (convCount == 0)
@@ -278,27 +284,52 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         MethodType basicSrcType = srcType.basicType();
         MethodType midType = target.type().basicType();
         BoundMethodHandle mh = target.rebind();
-        // FIXME: Reduce number of bindings when there is more than one Class conversion.
-        // FIXME: Reduce number of bindings when there are repeated conversions.
-        for (int i = 0; i < convSpecs.length-1; i++) {
+
+        // Match each unique conversion to the positions at which it is to be applied
+        var convSpecMap = new HashMap<Object, int[]>(((4 * convCount) / 3) + 1);
+        for (int i = 0; i < convSpecs.length - MH_RECEIVER_OFFSET; i++) {
             Object convSpec = convSpecs[i];
-            if (convSpec == null)  continue;
+            if (convSpec == null) continue;
+            int[] positions = convSpecMap.get(convSpec);
+            if (positions == null) {
+                positions = new int[] { i + MH_RECEIVER_OFFSET };
+            } else {
+                positions = Arrays.copyOf(positions, positions.length + 1);
+                positions[positions.length - 1] = i + MH_RECEIVER_OFFSET;
+            }
+            convSpecMap.put(convSpec, positions);
+        }
+        for (var entry : convSpecMap.entrySet()) {
+            Object convSpec = entry.getKey();
+
             MethodHandle fn;
             if (convSpec instanceof Class) {
                 fn = getConstantHandle(MH_cast).bindTo(convSpec);
             } else {
                 fn = (MethodHandle) convSpec;
             }
-            Class<?> newType = basicSrcType.parameterType(i);
-            if (--convCount == 0)
+            int[] positions = entry.getValue();
+            Class<?> newType = basicSrcType.parameterType(positions[0] - MH_RECEIVER_OFFSET);
+            BasicType newBasicType = BasicType.basicType(newType);
+            convCount -= positions.length;
+            if (convCount == 0) {
                 midType = srcType;
-            else
-                midType = midType.changeParameterType(i, newType);
-            LambdaForm form2 = mh.editor().filterArgumentForm(1+i, BasicType.basicType(newType));
+            } else {
+                Class<?>[] ptypes = midType.ptypes().clone();
+                for (int pos : positions) {
+                    ptypes[pos - 1] = newType;
+                }
+                midType = MethodType.methodType(midType.rtype(), ptypes, true);
+            }
+            LambdaForm form2;
+            if (positions.length > 1) {
+                form2 = mh.editor().filterRepeatedArgumentForm(newBasicType, positions);
+            } else {
+                form2 = mh.editor().filterArgumentForm(positions[0], newBasicType);
+            }
             mh = mh.copyWithExtendL(midType, form2, fn);
-            mh = mh.rebind();
         }
-        Object convSpec = convSpecs[convSpecs.length-1];
+        Object convSpec = convSpecs[convSpecs.length - 1];
         if (convSpec != null) {
             MethodHandle fn;
             if (convSpec instanceof Class) {
@@ -326,98 +357,18 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         return mh;
     }
 
-    static MethodHandle makePairwiseConvertIndirect(MethodHandle target, MethodType srcType,
-                                                    boolean strict, boolean monobox) {
-        assert(target.type().parameterCount() == srcType.parameterCount());
-        // Calculate extra arguments (temporaries) required in the names array.
-        Object[] convSpecs = computeValueConversions(srcType, target.type(), strict, monobox);
-        final int INARG_COUNT = srcType.parameterCount();
-        int convCount = countNonNull(convSpecs);
-        boolean retConv = (convSpecs[INARG_COUNT] != null);
-        boolean retVoid = srcType.returnType() == void.class;
-        if (retConv && retVoid) {
-            convCount -= 1;
-            retConv = false;
-        }
-
-        final int IN_MH         = 0;
-        final int INARG_BASE    = 1;
-        final int INARG_LIMIT   = INARG_BASE + INARG_COUNT;
-        final int NAME_LIMIT    = INARG_LIMIT + convCount + 1;
-        final int RETURN_CONV   = (!retConv ? -1         : NAME_LIMIT - 1);
-        final int OUT_CALL      = (!retConv ? NAME_LIMIT : RETURN_CONV) - 1;
-        final int RESULT        = (retVoid ? -1 : NAME_LIMIT - 1);
-
-        // Now build a LambdaForm.
-        MethodType lambdaType = srcType.basicType().invokerType();
-        Name[] names = arguments(NAME_LIMIT - INARG_LIMIT, lambdaType);
-
-        // Collect the arguments to the outgoing call, maybe with conversions:
-        final int OUTARG_BASE = 0;  // target MH is Name.function, name Name.arguments[0]
-        Object[] outArgs = new Object[OUTARG_BASE + INARG_COUNT];
-
-        int nameCursor = INARG_LIMIT;
-        for (int i = 0; i < INARG_COUNT; i++) {
-            Object convSpec = convSpecs[i];
-            if (convSpec == null) {
-                // do nothing: difference is trivial
-                outArgs[OUTARG_BASE + i] = names[INARG_BASE + i];
-                continue;
-            }
-
-            Name conv;
-            if (convSpec instanceof Class) {
-                Class<?> convClass = (Class<?>) convSpec;
-                conv = new Name(getConstantHandle(MH_cast), convClass, names[INARG_BASE + i]);
-            } else {
-                MethodHandle fn = (MethodHandle) convSpec;
-                conv = new Name(fn, names[INARG_BASE + i]);
-            }
-            assert(names[nameCursor] == null);
-            names[nameCursor++] = conv;
-            assert(outArgs[OUTARG_BASE + i] == null);
-            outArgs[OUTARG_BASE + i] = conv;
-        }
-
-        // Build argument array for the call.
-        assert(nameCursor == OUT_CALL);
-        names[OUT_CALL] = new Name(target, outArgs);
-
-        Object convSpec = convSpecs[INARG_COUNT];
-        if (!retConv) {
-            assert(OUT_CALL == names.length-1);
-        } else {
-            Name conv;
-            if (convSpec == void.class) {
-                conv = new Name(LambdaForm.constantZero(BasicType.basicType(srcType.returnType())));
-            } else if (convSpec instanceof Class) {
-                Class<?> convClass = (Class<?>) convSpec;
-                conv = new Name(getConstantHandle(MH_cast), convClass, names[OUT_CALL]);
-            } else {
-                MethodHandle fn = (MethodHandle) convSpec;
-                if (fn.type().parameterCount() == 0)
-                    conv = new Name(fn);  // don't pass retval to void conversion
-                else
-                    conv = new Name(fn, names[OUT_CALL]);
-            }
-            assert(names[RETURN_CONV] == null);
-            names[RETURN_CONV] = conv;
-            assert(RETURN_CONV == names.length-1);
-        }
-
-        LambdaForm form = new LambdaForm(lambdaType.parameterCount(), names, RESULT, Kind.CONVERT);
-        return SimpleMethodHandle.make(srcType, form);
-    }
-
     static Object[] computeValueConversions(MethodType srcType, MethodType dstType,
                                             boolean strict, boolean monobox) {
         final int INARG_COUNT = srcType.parameterCount();
-        Object[] convSpecs = new Object[INARG_COUNT+1];
+        Object[] convSpecs = null;
         for (int i = 0; i <= INARG_COUNT; i++) {
             boolean isRet = (i == INARG_COUNT);
             Class<?> src = isRet ? dstType.returnType() : srcType.parameterType(i);
             Class<?> dst = isRet ? srcType.returnType() : dstType.parameterType(i);
             if (!VerifyType.isNullConversion(src, dst, /*keepInterfaces=*/ strict)) {
+                if (convSpecs == null) {
+                    convSpecs = new Object[INARG_COUNT + 1];
+                }
                 convSpecs[i] = valueConversion(src, dst, strict, monobox);
             }
         }
@@ -968,8 +919,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         final int CALL_TARGET  = nameCursor++;
         assert(CALL_TARGET == SELECT_ALT+1);  // must be true to trigger IBG.emitSelectAlternative
 
-        MethodType lambdaType = basicType.invokerType();
-        Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+        Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
         BoundMethodHandle.SpeciesData data =
                 (GET_COUNTERS != -1) ? BoundMethodHandle.speciesData_LLLL()
@@ -999,7 +949,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         invokeArgs[0] = names[SELECT_ALT];
         names[CALL_TARGET] = new Name(basicType, invokeArgs);
 
-        lform = new LambdaForm(lambdaType.parameterCount(), names, /*forceInline=*/true, Kind.GUARD);
+        lform = new LambdaForm(basicType.parameterCount() + 1, names, /*forceInline=*/true, Kind.GUARD);
 
         return basicType.form().setCachedLambdaForm(MethodTypeForm.LF_GWT, lform);
     }
@@ -1026,8 +976,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * among catchException combinators with the same basic type.
      */
     private static LambdaForm makeGuardWithCatchForm(MethodType basicType) {
-        MethodType lambdaType = basicType.invokerType();
-
         LambdaForm lform = basicType.form().cachedLambdaForm(MethodTypeForm.LF_GWC);
         if (lform != null) {
             return lform;
@@ -1046,7 +994,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         final int TRY_CATCH        = nameCursor++;
         final int UNBOX_RESULT     = nameCursor++;
 
-        Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+        Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
         BoundMethodHandle.SpeciesData data = BoundMethodHandle.speciesData_LLLLL();
         names[THIS_MH]          = names[THIS_MH].withConstraint(data);
@@ -1075,7 +1023,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         Object[] unboxArgs  = new Object[] {names[GET_UNBOX_RESULT], names[TRY_CATCH]};
         names[UNBOX_RESULT] = new Name(invokeBasicUnbox, unboxArgs);
 
-        lform = new LambdaForm(lambdaType.parameterCount(), names, Kind.GUARD_WITH_CATCH);
+        lform = new LambdaForm(basicType.parameterCount() + 1, names, Kind.GUARD_WITH_CATCH);
 
         return basicType.form().setCachedLambdaForm(MethodTypeForm.LF_GWC, lform);
     }
@@ -1942,8 +1890,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * bytecode generation}.
      */
     private static LambdaForm makeLoopForm(MethodType basicType, BasicType[] localVarTypes) {
-        MethodType lambdaType = basicType.invokerType();
-
         final int THIS_MH = 0;  // the BMH_LLL
         final int ARG_BASE = 1; // start of incoming arguments
         final int ARG_LIMIT = ARG_BASE + basicType.parameterCount();
@@ -1958,7 +1904,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
 
         LambdaForm lform = basicType.form().cachedLambdaForm(MethodTypeForm.LF_LOOP);
         if (lform == null) {
-            Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+            Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
             BoundMethodHandle.SpeciesData data = BoundMethodHandle.speciesData_LLL();
             names[THIS_MH] = names[THIS_MH].withConstraint(data);
@@ -1986,7 +1932,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
             names[UNBOX_RESULT] = new Name(invokeBasicUnbox, unboxArgs);
 
             lform = basicType.form().setCachedLambdaForm(MethodTypeForm.LF_LOOP,
-                    new LambdaForm(lambdaType.parameterCount(), names, Kind.LOOP));
+                    new LambdaForm(basicType.parameterCount() + 1, names, Kind.LOOP));
         }
 
         // BOXED_ARGS is the index into the names array where the loop idiom starts
@@ -2175,8 +2121,6 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
      * forms among tryFinally combinators with the same basic type.
      */
     private static LambdaForm makeTryFinallyForm(MethodType basicType) {
-        MethodType lambdaType = basicType.invokerType();
-
         LambdaForm lform = basicType.form().cachedLambdaForm(MethodTypeForm.LF_TF);
         if (lform != null) {
             return lform;
@@ -2194,7 +2138,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         final int TRY_FINALLY      = nameCursor++;
         final int UNBOX_RESULT     = nameCursor++;
 
-        Name[] names = arguments(nameCursor - ARG_LIMIT, lambdaType);
+        Name[] names = invokeArguments(nameCursor - ARG_LIMIT, basicType);
 
         BoundMethodHandle.SpeciesData data = BoundMethodHandle.speciesData_LLLL();
         names[THIS_MH]          = names[THIS_MH].withConstraint(data);
@@ -2220,7 +2164,7 @@ import static jdk.internal.org.objectweb.asm.Opcodes.*;
         Object[] unboxArgs  = new Object[] {names[GET_UNBOX_RESULT], names[TRY_FINALLY]};
         names[UNBOX_RESULT] = new Name(invokeBasicUnbox, unboxArgs);
 
-        lform = new LambdaForm(lambdaType.parameterCount(), names, Kind.TRY_FINALLY);
+        lform = new LambdaForm(basicType.parameterCount() + 1, names, Kind.TRY_FINALLY);
 
         return basicType.form().setCachedLambdaForm(MethodTypeForm.LF_TF, lform);
     }

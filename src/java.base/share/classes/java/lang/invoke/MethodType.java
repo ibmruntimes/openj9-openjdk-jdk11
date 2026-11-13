@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2017, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -196,9 +196,8 @@ class MethodType implements java.io.Serializable {
      * @throws NullPointerException if {@code rtype} or {@code ptypes} or any element of {@code ptypes} is null
      * @throws IllegalArgumentException if any element of {@code ptypes} is {@code void.class}
      */
-    public static
-    MethodType methodType(Class<?> rtype, Class<?>[] ptypes) {
-        return makeImpl(rtype, ptypes, false);
+    public static MethodType methodType(Class<?> rtype, Class<?>[] ptypes) {
+        return methodType(rtype, ptypes, false);
     }
 
     /**
@@ -210,10 +209,9 @@ class MethodType implements java.io.Serializable {
      * @throws NullPointerException if {@code rtype} or {@code ptypes} or any element of {@code ptypes} is null
      * @throws IllegalArgumentException if any element of {@code ptypes} is {@code void.class}
      */
-    public static
-    MethodType methodType(Class<?> rtype, List<Class<?>> ptypes) {
+    public static MethodType methodType(Class<?> rtype, List<Class<?>> ptypes) {
         boolean notrust = false;  // random List impl. could return evil ptypes array
-        return makeImpl(rtype, listToArray(ptypes), notrust);
+        return methodType(rtype, listToArray(ptypes), notrust);
     }
 
     private static Class<?>[] listToArray(List<Class<?>> ptypes) {
@@ -233,11 +231,24 @@ class MethodType implements java.io.Serializable {
      * @throws NullPointerException if {@code rtype} or {@code ptype0} or {@code ptypes} or any element of {@code ptypes} is null
      * @throws IllegalArgumentException if {@code ptype0} or {@code ptypes} or any element of {@code ptypes} is {@code void.class}
      */
-    public static
-    MethodType methodType(Class<?> rtype, Class<?> ptype0, Class<?>... ptypes) {
-        Class<?>[] ptypes1 = new Class<?>[1+ptypes.length];
+    public static MethodType methodType(Class<?> rtype, Class<?> ptype0, Class<?>... ptypes) {
+        int len = ptypes.length;
+        if (rtype == Object.class && ptype0 == Object.class) {
+            if (len == 0) {
+                return genericMethodType(1, false);
+            }
+            if (isAllObject(ptypes, len - 1)) {
+                Class<?> lastParam = ptypes[len - 1];
+                if (lastParam == Object.class) {
+                    return genericMethodType(len + 1, false);
+                } else if (lastParam == Object[].class) {
+                    return genericMethodType(len, true);
+                }
+            }
+        }
+        Class<?>[] ptypes1 = new Class<?>[1 + len];
         ptypes1[0] = ptype0;
-        System.arraycopy(ptypes, 0, ptypes1, 1, ptypes.length);
+        System.arraycopy(ptypes, 0, ptypes1, 1, len);
         return makeImpl(rtype, ptypes1, true);
     }
 
@@ -249,8 +260,10 @@ class MethodType implements java.io.Serializable {
      * @return a method type with the given return value
      * @throws NullPointerException if {@code rtype} is null
      */
-    public static
-    MethodType methodType(Class<?> rtype) {
+    public static MethodType methodType(Class<?> rtype) {
+        if (rtype == Object.class) {
+            return genericMethodType(0, false);
+        }
         return makeImpl(rtype, NO_PTYPES, true);
     }
 
@@ -264,8 +277,14 @@ class MethodType implements java.io.Serializable {
      * @throws NullPointerException if {@code rtype} or {@code ptype0} is null
      * @throws IllegalArgumentException if {@code ptype0} is {@code void.class}
      */
-    public static
-    MethodType methodType(Class<?> rtype, Class<?> ptype0) {
+    public static MethodType methodType(Class<?> rtype, Class<?> ptype0) {
+        if (rtype == Object.class) {
+            if (ptype0 == Object.class) {
+                return genericMethodType(1, false);
+            } else if (ptype0 == Object[].class) {
+                return genericMethodType(0, true);
+            }
+        }
         return makeImpl(rtype, new Class<?>[]{ ptype0 }, true);
     }
 
@@ -279,9 +298,36 @@ class MethodType implements java.io.Serializable {
      * @return a method type with the given components
      * @throws NullPointerException if {@code rtype} or {@code ptypes} is null
      */
-    public static
-    MethodType methodType(Class<?> rtype, MethodType ptypes) {
-        return makeImpl(rtype, ptypes.ptypes, true);
+    public static MethodType methodType(Class<?> rtype, MethodType ptypes) {
+        return methodType(rtype, ptypes.ptypes, true);
+    }
+
+    private static boolean isAllObject(Class<?>[] ptypes, int to) {
+        for (int i = 0; i < to; i++) {
+            if (ptypes[i] != Object.class) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*trusted*/
+    static MethodType methodType(Class<?> rtype, Class<?>[] ptypes, boolean trusted) {
+        if (rtype == Object.class) {
+            int last = ptypes.length - 1;
+            if (last < 0) {
+                return genericMethodType(0, false);
+            }
+            if (isAllObject(ptypes, last)) {
+                Class<?> lastParam = ptypes[last];
+                if (lastParam == Object.class) {
+                    return genericMethodType(last + 1, false);
+                } else if (lastParam == Object[].class) {
+                    return genericMethodType(last, true);
+                }
+            }
+        }
+        return makeImpl(rtype, ptypes, trusted);
     }
 
     /**
@@ -290,9 +336,10 @@ class MethodType implements java.io.Serializable {
      * @param ptypes desired parameter types
      * @param trusted whether the ptypes can be used without cloning
      * @return the unique method type of the desired structure
+     * @throws NullPointerException if {@code rtype} or {@code ptypes} or any element of {@code ptypes} is null
+     * @throws IllegalArgumentException if any element of {@code ptypes} is {@code void.class}
      */
-    /*trusted*/ static
-    MethodType makeImpl(Class<?> rtype, Class<?>[] ptypes, boolean trusted) {
+    private static MethodType makeImpl(Class<?> rtype, Class<?>[] ptypes, boolean trusted) {
         if (ptypes.length == 0) {
             ptypes = NO_PTYPES; trusted = true;
         }
@@ -587,7 +634,7 @@ class MethodType implements java.io.Serializable {
                 System.arraycopy(ptypes, end, nptypes, start, tail);
             }
         }
-        return makeImpl(rtype, nptypes, true);
+        return methodType(rtype, nptypes, true);
     }
 
     /**
@@ -599,7 +646,7 @@ class MethodType implements java.io.Serializable {
      */
     public MethodType changeReturnType(Class<?> nrtype) {
         if (returnType() == nrtype)  return this;
-        return makeImpl(nrtype, ptypes, true);
+        return methodType(nrtype, ptypes, true);
     }
 
     /**
@@ -787,9 +834,25 @@ class MethodType implements java.io.Serializable {
      * @param x object to compare
      * @see Object#equals(Object)
      */
+    // This implementation may also return true if x is a WeakEntry containing
+    // a method type that is equal to this. This is an internal implementation
+    // detail to allow for faster method type lookups.
+    // See ConcurrentWeakInternSet.WeakEntry#equals(Object)
     @Override
     public boolean equals(Object x) {
-        return this == x || x instanceof MethodType && equals((MethodType)x);
+        if (this == x) {
+            return true;
+        }
+        if (x instanceof MethodType) {
+            return equals((MethodType)x);
+        }
+        if (x instanceof ConcurrentWeakInternSet.WeakEntry) {
+            Object o = ((ConcurrentWeakInternSet.WeakEntry)x).get();
+            if (o instanceof MethodType) {
+                return equals((MethodType)o);
+            }
+        }
+        return false;
     }
 
     private boolean equals(MethodType that) {
@@ -809,10 +872,10 @@ class MethodType implements java.io.Serializable {
      */
     @Override
     public int hashCode() {
-      int hashCode = 31 + rtype.hashCode();
-      for (Class<?> ptype : ptypes)
-          hashCode = 31*hashCode + ptype.hashCode();
-      return hashCode;
+        int hashCode = 31 + rtype.hashCode();
+        for (Class<?> ptype : ptypes)
+            hashCode = 31 * hashCode + ptype.hashCode();
+        return hashCode;
     }
 
     /**
@@ -1135,7 +1198,7 @@ class MethodType implements java.io.Serializable {
         List<Class<?>> types = BytecodeDescriptor.parseMethod(descriptor, loader);
         Class<?> rtype = types.remove(types.size() - 1);
         Class<?>[] ptypes = listToArray(types);
-        return makeImpl(rtype, ptypes, true);
+        return methodType(rtype, ptypes, true);
     }
 
     /**
@@ -1276,7 +1339,7 @@ s.writeObject(this.parameterArray());
             if (elem == null) throw new NullPointerException();
             expungeStaleElements();
 
-            WeakEntry<T> value = map.get(new WeakEntry<>(elem));
+            WeakEntry<T> value = map.get(elem);
             if (value != null) {
                 T res = value.get();
                 if (res != null) {
@@ -1328,19 +1391,25 @@ s.writeObject(this.parameterArray());
                 hashcode = key.hashCode();
             }
 
-            public WeakEntry(T key) {
-                super(key);
-                hashcode = key.hashCode();
-            }
-
+            /**
+             * This implementation returns {@code true} if {@code obj} is another
+             * {@code WeakEntry} whose referent is equals to this referent, or
+             * if {@code obj} is equals to the referent of this. This allows
+             * lookups to be made without wrapping in a {@code WeakEntry}.
+             *
+             * @param obj the object to compare
+             * @return true if {@code obj} is equals to this or the referent of this
+             * @see MethodType#equals(Object)
+             * @see Object#equals(Object)
+             */
             @Override
             public boolean equals(Object obj) {
+                Object mine = get();
                 if (obj instanceof WeakEntry) {
                     Object that = ((WeakEntry) obj).get();
-                    Object mine = get();
                     return (that == null || mine == null) ? (this == obj) : mine.equals(that);
                 }
-                return false;
+                return (mine == null) ? (obj == null) : mine.equals(obj);
             }
 
             @Override

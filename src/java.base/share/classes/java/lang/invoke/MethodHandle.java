@@ -1564,12 +1564,9 @@ assertEquals("[three, thee, tee]", asListFix.invoke((Object)argv).toString());
     /*non-public*/
     MethodHandle viewAsType(MethodType newType, boolean strict) {
         // No actual conversions, just a new view of the same method.
-        // Note that this operation must not produce a DirectMethodHandle,
-        // because retyped DMHs, like any transformed MHs,
-        // cannot be cracked into MethodHandleInfo.
-        assert viewAsTypeChecks(newType, strict);
-        BoundMethodHandle mh = rebind();
-        return mh.copyWith(newType, mh.form);
+        // Overridden in DMH, which has special rules
+        assert(viewAsTypeChecks(newType, strict));
+        return copyWith(newType, form);
     }
 
     /*non-public*/
@@ -1617,7 +1614,7 @@ assertEquals("[three, thee, tee]", asListFix.invoke((Object)argv).toString());
         } else {
             // The following case is rare. Mask the internalMemberName by wrapping the MH in a BMH.
             MethodHandle result = rebind();
-            assert (result.internalMemberName() == null);
+            assert(result.internalMemberName() == null);
             return result;
         }
     }
@@ -1625,6 +1622,11 @@ assertEquals("[three, thee, tee]", asListFix.invoke((Object)argv).toString());
     /*non-public*/
     boolean isInvokeSpecial() {
         return false;  // DMH.Special returns true
+    }
+
+    /*non-public*/
+    boolean isCrackable() {
+        return false;
     }
 
     /*non-public*/
