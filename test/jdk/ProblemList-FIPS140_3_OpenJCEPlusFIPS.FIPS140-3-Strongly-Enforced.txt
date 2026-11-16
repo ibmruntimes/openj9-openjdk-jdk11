@@ -218,22 +218,8 @@ java/rmi/activation/ActivationSystem/modifyDescriptor/ModifyDescriptor.java http
 java/rmi/activation/ActivationSystem/stubClassesPermitted/StubClassesPermitted.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/activation/ActivationSystem/unregisterGroup/UnregisterGroup.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/activation/CommandEnvironment/SetChildEnv.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/dgc/dgcImplInsulation/DGCImplInsulation.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/dgc/VMID/CheckVMID.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/module/ModuleTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/registry/altSecurityManager/AltSecurityManager.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/registry/classPathCodebase/ClassPathCodebase.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/reliability/benchmark/bench/rmi/Main.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/clientStackTrace/ClientStackTrace.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/RMIClassLoader/downloadArrayClass/DownloadArrayClass.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/RMIClassLoader/loadProxyClasses/LoadProxyClasses.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/RMIClassLoader/useCodebaseOnly/UseCodebaseOnly.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/rmi/server/RMISocketFactory/useSocketFactory/activatable/UseCustomSocketFactory.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/RMISocketFactory/useSocketFactory/registry/UseCustomSocketFactory.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/RMISocketFactory/useSocketFactory/unicast/UseCustomSocketFactory.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/server/useCustomRef/UseCustomRef.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/rmi/transport/dgcDeadLock/DGCDeadLock.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/security/AccessController/DoPrivAccompliceTest.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 java/security/AsymmetricKey/GetParams.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathBuilder/akiExt/AKISerialNumber.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/cert/CertPathBuilder/GetInstance.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -306,7 +292,6 @@ java/security/misc/TestDefaultRandom.java https://github.com/eclipse-openj9/open
 java/security/PEM/PEMDecoderTest.java https://github.ibm.com/runtimes/jit-crypto/issues/921 generic-all
 java/security/PEM/PEMEncoderTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/Policy/ExtensiblePolicy/ExtensiblePolicyTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-java/security/Policy/ExtensiblePolicy/ExtensiblePolicyWithJarTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/Policy/GetInstance/GetInstance.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/Policy/GetInstance/GetInstanceSecurity.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 java/security/Policy/SignedJar/SignedJarTest.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -628,8 +613,6 @@ jdk/security/logging/TestTLSHandshakeLog.java https://github.com/eclipse-openj9/
 jdk/security/logging/TestX509CertificateLog.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 jdk/security/logging/TestX509ValidationLog.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/rmi/runtime/Log/6409194/NoConsoleOutput.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-sun/rmi/server/MarshalOutputStream/marshalForeignStub/MarshalForeignStub.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-sun/rmi/transport/tcp/disableMultiplexing/DisableMultiplexing.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ec/ECDSAPrimitive.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ec/ECDSAPrvGreaterThanOrder.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/ec/ed/EdCRLSign.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
@@ -1087,7 +1070,6 @@ sun/security/util/HostnameMatcher/NullHostnameCheck.java https://github.com/ecli
 sun/security/util/InternalPrivateKey/Correctness.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/util/KeyUtilTests.java https://github.com/eclipse-openj9/openj9/issues/23655 generic-all
 sun/security/util/Pem/PemEncoding.java https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
-sun/security/util/Resources/early/EarlyResources.java https://github.ibm.com/runtimes/backlog/issues/1089 generic-all
 sun/security/util/SliceableSecretKey/SoftSliceable.java https://github.com/eclipse-openj9/openj9/issues/23424 generic-all
 sun/security/validator/CertReplace.java#certreplace https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
 sun/security/validator/CertReplace.java#samedn https://github.com/eclipse-openj9/openj9/issues/20343 generic-all
